@@ -1,4 +1,4 @@
-#example1.fud
+#example1.dawg
 
 # An Ape Tree
 # branch lengths are the expected number of substitutions along that branch
@@ -21,7 +21,7 @@ Freqs  = {0.20, 0.30, 0.30, 0.20}
 Reps = 10
 
 #Output information
-File = "example1.poo.nex"
+File = "example1.nexus"
 Format = "Nexus"
 NexusCode = <<EOF
 Begin Paup;

@@ -1,8 +1,9 @@
 COMMAND LINE USAGE
-  dawg -[scvh?] file1 [file2...]
-  -s: process files serially
+  dawg -[scubvh?] file1 [file2...]
+  -s: process files serially [default]
   -c: process files combined together
   -u: unbuffered output
+  -b: buffered output [default]
   -v: display version information
   -h: display help information
   -?: same as -h
@@ -10,9 +11,10 @@ COMMAND LINE USAGE
   Dawg will read stdin if filename is "-".
 
 FILE FORMAT
-  The file format takes a series of statements in the form of
-  "name = value," where "name" is alphanumeric and value can
-  be a string, number, boolean, tree, or vector of values.
+  The file format takes a series of statements in the form of "name = value,"
+  where "name" is alphanumeric and value can be a string, number, boolean,
+  tree, or vector of values.  A single variable is equivalent to a vector of
+  a single entry.
 
   string:  "[char-sequence]"
            <<EOF [several lines] EOF
@@ -39,12 +41,14 @@ OPTIONS
   Iota           VN  proportions of invariant sites
   GapModel       VS  models of indel formation: NB|PL|US
   Lambda         VN  rates of indel formation
-  GapParams      VN  parameter for the indel model
+  GapParams      VVN parameter for the indel model
   Reps           N   number of data sets to output
   File           S   output file 
-  Format         S   output format: Fasta|Nexus|Phylip
+  Format         S   output format: Fasta|Nexus|Phylip|Clustal
   GapSingleChar  B   output gaps as a single character
   GapPlus        B   distinguish insertions from deletions in alignment
   LowerCase      B   output sequences in lowercase
+  Translate      B   translate outputed sequences to amino acids
   NexusCode      S   text or file to include between datasets in Nexus format
   Seed           VN  PRNG seed (integers)
+

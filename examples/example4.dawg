@@ -1,4 +1,4 @@
-#example4.fud
+#example4.dawg
 
 # Construct a tree where B is the result of a recombination.
 # Nodes _C and _E are not outputed because they begin with

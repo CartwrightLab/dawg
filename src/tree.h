@@ -7,6 +7,8 @@
 #include "indel.h"
 #include "matrix.h"
 
+
+// A class used to represent a node in a Newick tree
 class NewickNode {
 public:
 	NewickNode(NewickNode* p, const char *cs, double d);
@@ -19,7 +21,7 @@ protected:
 	void MakeName();
 };
 
-
+// A class to represent nucleotides
 class Nucleotide
 {
 public:
@@ -55,6 +57,7 @@ public:
 
 };
 
+// A class that represent a sequence of nucleotides
 class Sequence : public std::vector<Nucleotide>
 {
 public:
@@ -65,7 +68,8 @@ public:
 		m_uLength = uSize;
 	}
 	unsigned long SeqLength() const { return m_uLength; }
-
+	
+	// find the uPos-th true nucleotide (skips gaps)
 	const_iterator SeqPos(unsigned long uPos) const;
 	iterator SeqPos(unsigned long uPos);
 
@@ -80,53 +84,72 @@ private:
 	unsigned long m_uLength;
 };
 
+
+// The recombinant tree data structure
 class Tree
 {
 public:
+
+	// A node in the tree
 	class Node
 	{
 	public:
 		typedef std::map<std::string, Tree::Node> Map;
 		typedef Map::iterator Handle;
+		
 		std::vector<Sequence> m_vSections;
 		std::vector<Handle> m_vAncestors;
 		std::map<Handle, double> m_mBranchLens;
 		std::string m_ssName;
 		bool m_bTouched;
+
 		Node() : m_bTouched(false) { }
 		void Flatten(Sequence& seq) const;
 		unsigned long SeqLength() const;
 
 		typedef std::pair<std::vector<Sequence>::iterator, Sequence::iterator> iterator;
 		typedef std::pair<std::vector<Sequence>::const_iterator, Sequence::const_iterator> const_iterator;
-
+	
+		// find the uPos-th nucleotide in the node
+		// skips gaps and recognizes different sections
 		iterator SeqPos(unsigned long uPos);
 		const_iterator SeqPos(unsigned long uPos) const;
 	};
 
 	typedef std::map<std::string, std::string> Alignment;
 	
+	// Setup the model of evolution
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		unsigned long uWidth, const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
+	
+	// Setup the root node
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vData,
 		const std::vector<std::vector<double> > &vRates);
-
+	
+	// Draw a random relative rate of substitution from the evolutionary parameters
 	double RandomRate(unsigned long uPos) const;
+	// Draw a random base from the evolutionary parameters
 	unsigned char RandomBase() const;
+	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide(unsigned long uPos) const
 		{ return Nucleotide(RandomBase(), RandomRate(uPos)); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
 	
+	// Trim a length to be compatible with the block width
 	inline unsigned long BlockTrim(unsigned long u) { return u - u%m_uWidth; }
-
+	
+	// Evolve the tree
 	void Evolve();
+
+	// Add a recombination section to the tree
 	void ProcessTree(NewickNode* pNode);
 	
 	const Node::Map& GetMap() const { return m_map; }
-
+	
+	// Align sequences from the tree
 	void Align(Alignment &aln) const;
 
 protected:

@@ -1,4 +1,4 @@
-#example2.fud
+#example2.dawg
 
 Tree   = ((A:0.1,B:0.1)C:0.1, (D:0.1)E:0.1);
 Length = 300

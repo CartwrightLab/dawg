@@ -299,6 +299,7 @@ bool Execute()
 	{
 		if(vdParams.size() < 3)
 			return DawgError("K3P model requires at least 3 numerical parameters.");
+		dNucFreq[3] = dNucFreq[2] = dNucFreq[1] = dNucFreq[0] = 0.25;
 		dRevParams[4] = dRevParams[1] = vdParams[0];
 		dRevParams[2] = dRevParams[3] = vdParams[1];
 		dRevParams[0] = dRevParams[5] = vdParams[2];

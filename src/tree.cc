@@ -9,15 +9,17 @@ using namespace std;
 ////////////////////////////////////////////////////////////
 //  class NewickNode
 ////////////////////////////////////////////////////////////
+
+// Construct a NewickNode from the parser
 NewickNode::NewickNode(NewickNode* p, const char *cs, double d) : m_dLen(d), m_pSub(p)
 {
 	if(cs)
 		m_ssLabel = cs;
 	else
 		MakeName();
-	//printf("%s - %.15f\n", m_ssLabel.c_str(), d);
 }
 
+// Construct a name from the descendents of a node
 void NewickNode::MakeName()
 {
 	vector<const std::string*> v;
@@ -59,17 +61,18 @@ Sequence::const_iterator Sequence::SeqPos(unsigned long uPos) const
 Sequence::iterator Sequence::SeqPos(unsigned long uPos)
 {
 	iterator it = begin();
-	// Skip deletions in the history
+	// Skip deletions
 	while(it->IsDeletion()) {++it;}
 	while(uPos--)
 	{
 		++it;
-		// Skip deletions in the history
+		// Skip deletions
 		while(it->IsDeletion()) {++it;}
 	}
 	return it;
 }
 
+// Insert itBegin to itEnd at itPos
 unsigned long Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
 {
 	if(itPos > end() || itPos < begin())
@@ -81,20 +84,22 @@ unsigned long Sequence::Insertion(iterator itPos, const_iterator itBegin, const_
 	return uRet;
 }
 
+// Delete uSize nucleotides at itBegin
 unsigned long Sequence::Deletion(iterator itBegin, unsigned long uSize)
 {
 	unsigned long uRet = 0;
 	for(;uRet < uSize && itBegin != end(); ++itBegin)
 	{
+		// Skip Gaps
 		if(itBegin->IsDeletion())
 			continue;
+		// Mark as Deleted-Root or Deleted-Insertion
 		itBegin->SetType(itBegin->GetType()|Nucleotide::TypeDel);
-		uRet++;
+		 ++uRet;
 	}
 	m_uLength -= uRet;
 	return uRet;
 }
-
 
 void Sequence::Append(const Sequence &seq)
 {
@@ -140,6 +145,7 @@ char Nucleotide::ToChar() const
 //  class Tree::Node
 ////////////////////////////////////////////////////////////
 
+// Get the total sequence length of the node
 unsigned long Tree::Node::SeqLength() const
 {
 	unsigned long uRet = 0;
@@ -148,6 +154,7 @@ unsigned long Tree::Node::SeqLength() const
 	return uRet;
 }
 
+// Flatten sections into one sequence
 void Tree::Node::Flatten(Sequence& seq) const
 {
 	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
@@ -158,12 +165,14 @@ void Tree::Node::Flatten(Sequence& seq) const
 Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
 {
 	vector<Sequence>::iterator itA;
+	// Find section containing uPos
 	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
 	{
 		if(uPos < itA->SeqLength())
 			break;
 		uPos -= itA->SeqLength();
 	}
+	// Find actual iterator of uPos
 	Sequence::iterator itB;
 	if(itA != m_vSections.end())
 		itB = itA->SeqPos(uPos);
@@ -173,12 +182,14 @@ Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
 Tree::Node::const_iterator Tree::Node::SeqPos(unsigned long uPos) const
 {
 	vector<Sequence>::const_iterator itA;
+	// Find section containing uPos
 	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
 	{
 		if(uPos < itA->SeqLength())
 			break;
 		uPos -= itA->SeqLength();
 	}
+	// Find actual iterator of uPos
 	Sequence::const_iterator itB;
 	if(itA != m_vSections.end())
 		itB = itA->SeqPos(uPos);
@@ -192,33 +203,42 @@ Tree::Node::const_iterator Tree::Node::SeqPos(unsigned long uPos) const
 
 void Tree::ProcessTree(NewickNode* pNode)
 {
+	// Construct the ur-root node if it doesn't exist
 	m_map["_R()()T"];
+	// process the newick tree beginning at its root
 	ProcessNewickNode(pNode, m_map.find("_R()()T"));
+	// increase number of sections
 	m_nSec++;
 }
 
 void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 {
+	// Process all sibs of the Newick Node
 	if(pNode->m_pSib.get())
 		ProcessNewickNode(pNode->m_pSib.get(), hAnc);
-
+	
+	// Get a reference to this node and set up parameters
 	Node& node = m_map[pNode->m_ssLabel];
 	node.m_mBranchLens[hAnc] = pNode->m_dLen;
 	node.m_vAncestors.resize(m_nSec+1, m_map.end());
 	node.m_vAncestors[m_nSec] = hAnc;
-
+	
+	// add node to tips if it is a tip and hasn't been accessed yet
 	if(node.m_ssName.empty() && !pNode->m_pSub.get())
 		m_vTips.push_back(pNode->m_ssLabel);
-
+	
+	// Give the node its name if it doesn't have one yet
 	if(node.m_ssName.empty())
 		node.m_ssName = pNode->m_ssLabel;
-
+	
+	// Process children
 	if(pNode->m_pSub.get())
 		ProcessNewickNode(pNode->m_pSub.get(), m_map.find(node.m_ssName));
 	
 
 }
 
+// Evolve the sequences in the tree
 void Tree::Evolve()
 {
 	// Reset Sequences
@@ -231,7 +251,9 @@ void Tree::Evolve()
 	Node& rNode = m_map["_R()()T"];
 	rNode.m_ssName = "_R()()T";
 	rNode.m_bTouched = true;
+	// Load sectiosn from template
 	rNode.m_vSections = m_vDNASeqs;
+	// Process Template
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
 		it != rNode.m_vSections.end(); ++it)
 	{
@@ -243,16 +265,21 @@ void Tree::Evolve()
 				(*it)[u].m_ucNuc = RandomBase();
 		}
 	}
+	// Evolve each tip
 	for(vector<string>::const_iterator cit = m_vTips.begin(); cit != m_vTips.end(); ++cit)
 		Evolve(m_map[*cit]);
 }
 
+// Evolve node rNode
 void Tree::Evolve(Node &rNode)
 {
+	// do nothing if it has already been touched
 	if(rNode.m_bTouched)
 		return;
 	rNode.m_bTouched = true;
+	// Temporary Sequences
 	map<Node::Handle, Node> mapSeqs;
+	// Evolve ancestors and assemble
 	for(unsigned long a = 0; a < rNode.m_vAncestors.size(); ++a)
 	{
 		if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
@@ -262,10 +289,6 @@ void Tree::Evolve(Node &rNode)
 			// Copy ancestor to temporary location
 			mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
 			// Evolve temporary location
-			//printf("Evolving '%s' -> '%s' %.15f\n",
-			//	mapSeqs[rNode.m_vAncestors[a]].m_ssName.c_str(),
-			//	rNode.m_ssName.c_str(),
-			//	m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 			Evolve(mapSeqs[rNode.m_vAncestors[a]], m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 		}
 		// Assemble final sequence
@@ -273,6 +296,7 @@ void Tree::Evolve(Node &rNode)
 	}
 }
 
+// Evolve rNode a specific time 
 void Tree::Evolve(Node &rNode, double dTime)
 {
 	dTime = fabs(dTime);
@@ -292,6 +316,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			double dTemp = dTime*jt->m_dRate*m_vdScale[uNuc%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
+			// if dTemp is different from the previous one, recalculate probability matrix
 			if(dTemp != m_dOldTime)
 			{
 				m_dOldTime = dTemp;
@@ -309,6 +334,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 					//m_matSubst(i,3) = 1.0;
 				}
 			}
+			// get the base of the current nucleotide and pick new base
 			unsigned int uBase = jt->GetBase();
 			dTemp = rand_real();
 			if(dTemp <= m_matSubst(uBase, 0))
@@ -319,71 +345,78 @@ void Tree::Evolve(Node &rNode, double dTime)
 				jt->SetBase(2);
 			else
 				jt->SetBase(3);
-			//if(jt->GetBase() != uBase)
-			//	printf("Sub %u -> %u @ %lu\n", uBase, jt->GetBase(), uNuc);
 
 			++uNuc; // Increase position
 		}
 	}
-	// Indels
-	if(m_funcRateSum(0.0) < DBL_EPSILON)
+	// Indel formation via Gillespie Algorithm
+
+	// Check whether Indels are off
+	if(m_dLambdaDel+m_dLambdaIns < DBL_EPSILON)
 		return;
 
+	// Get current length
 	unsigned long uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
+	// Do indels
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
 	{
+		// insertion or deletion
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
-			//Insertion
+			//Insertion 
 			unsigned long ul = m_pInsertionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength); // pos is in [0,L]
-			//printf("Ins of %lu @ %lu : ", ul, uPos);
-
+			// Construct sequence to be inserted
 			Sequence seq;
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
 				nuc.SetType(Nucleotide::TypeIns);
-				//printf("%u", nuc.GetBase());
 				seq.push_back(nuc);
 			}
-			//printf("\n");
+			// Find Position of Insertion
 			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
 			if(itPos.first == rNode.m_vSections.end())
 			{
+				// Insert at end of sequence
 				uLength += rNode.m_vSections.back().Insertion(
 					rNode.m_vSections.back().end(), seq.begin(), seq.end())/m_uWidth;
 			}
 			else
 			{
+				// Insert inside sequence
 				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end())/m_uWidth;
 			}
 		}
 		else
 		{
-			//Deletion
+			// Deletion
+			// Draw random size and random pos and rearrange
 			unsigned long ul = m_pDeletionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength+ul-1)+1;
-			//printf("Del of %lu @ %lu\n", ul, uPos);
 			unsigned long uB = (ul >= uPos) ? 0 : uPos - ul;
 			unsigned long uSize = (uPos > uLength) ? uLength : uPos;
 			uSize -= uB;
 			uSize *= m_uWidth;
 			uB *= m_uWidth;
-
+			// Find deletion point
 			Node::iterator itPos = rNode.SeqPos(uB);
 			uSize -= itPos.first->Deletion(itPos.second, uSize);
+			// Delete uSize nucleotides begin sensitive to gaps that overlap sections
 			for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
 				uSize -= itPos.first->Deletion(itPos.first->begin(), uSize);
 			uLength -= (ul*m_uWidth - uSize)/m_uWidth;
 		}
+		// update length
 		dLength = (double)uLength;
+		// new waiting time parameter
 		dW = 1.0/m_funcRateSum(dLength);
 	}
 }
 
+// Setup Evolutionary parameters
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns,
 		const IndelModel::Params& rDel,
@@ -501,8 +534,11 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_matV.Scale(vecE, m_matV);
 	m_matU.Transpose();
 	m_matU.Scale(m_matU, vecD);
-
+	
+	// Setup Indel formation model
+	// Insertion Rate
 	m_dLambdaIns = rIns.dLambda;
+	// Length Model
 	if(m_dLambdaIns < DBL_EPSILON)
 		m_pInsertionModel.release();
 	else if(rIns.ssModel == "NB")
@@ -523,8 +559,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	else
 		return DawgError("Unknown insertion model: \"%s\".", rDel.ssModel.c_str());
 
-
+	// Deletion Rate
 	m_dLambdaDel = rDel.dLambda;
+	// Length model
 	if(m_dLambdaDel < DBL_EPSILON)
 		m_pDeletionModel.release();
 	else if(rDel.ssModel == "NB")
@@ -544,7 +581,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	}
 	else
 		return DawgError("Unknown deletion model: \"%s\".", rDel.ssModel.c_str());
-
+	
+	// Linear Functions for the Gillespie algorithm
 	m_funcRateIns.m = m_dLambdaIns;
 	m_funcRateIns.b = m_dLambdaIns;
 	m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
@@ -552,12 +590,17 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	return true;
 }
 
+// Setup Root Template
 bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vLens,
 					   const std::vector<std::vector<double> > &vRates)
 {
+	// Clear Template
 	m_vDNASeqs.clear();
+	
+	// Check to see if sequence is specified
 	if(vSeqs.size())
 	{	
+		// Read sequence of each section
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
 			Sequence seq(BlockTrim((unsigned long)cit->size()));
@@ -569,11 +612,14 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	}
 	else
 	{
+		// Create random sequences
 		for(vector<unsigned long>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
 			m_vDNASeqs.push_back(Sequence(*cit*m_uWidth));
 	}
+	// Check to see if rates are specified
 	if(vRates.size())
 	{
+		// Read rates of each section
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
 		{
 			double dTemp = 0.0;
@@ -631,24 +677,30 @@ void Tree::Align(Alignment &aln) const
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 	
+	// States: Quit (0), Del/Root (1), Ins (2)
 	unsigned char uState = 1;
+	// Go through each column, adding gaps where neccessary
 	for(unsigned int uCol = 0; uState; uCol++)
 	{
+		// Set to quit
 		uState = 0;
 		for(vector<Sequence>::const_iterator cit = vTable.begin();
 			cit != vTable.end(); ++cit)
 		{
 			if(uCol >= cit->size())
 				continue;
+			// Nucleotide exists clear quit
 			uState = 1;
 			if((*cit)[uCol].IsInsertion())
 			{
+				// Gaps need to be added mark and break
 				uState = 2;
 				break;
 			}
 		}
 		if(uState == 2)
 		{
+			// Add gaps where neccessary
 			for(vector<Sequence>::iterator it = vTable.begin();
 				it != vTable.end(); ++it)
 			{
@@ -667,12 +719,14 @@ void Tree::Align(Alignment &aln) const
 					}
 				}
 				else
+					// Add gap to end of sequence
 					it->resize(uCol+1, Nucleotide(Nucleotide::TypeIns, 1.0));
 
 			}
 		}
 	}
 
+	// Add aligned sequences to alingment set
 	for(unsigned int u = 0; u < vNames.size(); ++u)
 	{
 		// Skip any sequence that begin with one of the two special characters
