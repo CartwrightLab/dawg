@@ -1,0 +1,7 @@
+Length = 300
+Tree = (A:0.25,B:0.25,C:0.25);
+Width = 3
+Lambda = 0.2
+GapModel = "US"
+GapParams = {0.5, 0.25, 0.25}
+Translate = True

@@ -673,7 +673,7 @@ void Tree::Align(Alignment &aln, unsigned long uFlags) const
 					else
 						nGapState = 0;
 				}
-				if(!(uFlags & FlagOutGapPlus) && (ss[v] == '+' || ss[v] == '='))
+				if((uFlags & FlagOutGapPlus) == 0 && (ss[v] == '+' || ss[v] == '='))
 					ss[v] = '-';
 			}
 		}
