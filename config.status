@@ -517,7 +517,7 @@ s,@AMTAR@,${SHELL} /home/reed/dawg-unix/config/missing --run tar,;t t
 s,@am__tar@,${AMTAR} chof - "$$tardir",;t t
 s,@am__untar@,${AMTAR} xf -,;t t
 s,@CXX@,g++,;t t
-s,@CXXFLAGS@,-g -O2 -mmmx,;t t
+s,@CXXFLAGS@,-g -O2,;t t
 s,@LDFLAGS@,,;t t
 s,@CPPFLAGS@,,;t t
 s,@ac_ct_CXX@,g++,;t t
@@ -533,7 +533,7 @@ s,@CXXDEPMODE@,depmode=gcc3,;t t
 s,@am__fastdepCXX_TRUE@,,;t t
 s,@am__fastdepCXX_FALSE@,#,;t t
 s,@CC@,gcc,;t t
-s,@CFLAGS@,-g -O2 -mmmx,;t t
+s,@CFLAGS@,-g -O2,;t t
 s,@ac_ct_CC@,gcc,;t t
 s,@CCDEPMODE@,depmode=gcc3,;t t
 s,@am__fastdepCC_TRUE@,,;t t
@@ -883,6 +883,8 @@ ${ac_dA}HAVE_STDARG_H${ac_dB}HAVE_STDARG_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STDDEF_H${ac_dB}HAVE_STDDEF_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE__BOOL${ac_dB}HAVE__BOOL${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STDBOOL_H${ac_dB}HAVE_STDBOOL_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS${ac_dB}HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS${ac_dC}${ac_dD}
+${ac_dA}HAVE_MEMBER_TEMPLATES${ac_dB}HAVE_MEMBER_TEMPLATES${ac_dC}${ac_dD}
 ${ac_dA}HAVE_STDLIB_H${ac_dB}HAVE_STDLIB_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_MALLOC${ac_dB}HAVE_MALLOC${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STDLIB_H${ac_dB}HAVE_STDLIB_H${ac_dC}1${ac_dD}
@@ -891,8 +893,6 @@ ${ac_dA}PROTOTYPES${ac_dB}PROTOTYPES${ac_dC}1${ac_dD}
 ${ac_dA}__PROTOTYPES${ac_dB}__PROTOTYPES${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_VPRINTF${ac_dB}HAVE_VPRINTF${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_GETPID${ac_dB}HAVE_GETPID${ac_dC}1${ac_dD}
-${ac_dA}HAVE__GETPID${ac_dB}HAVE__GETPID${ac_dC}1${ac_dD}
-${ac_dA}USE_MMX${ac_dB}USE_MMX${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -902,7 +902,7 @@ CEOF
 /^[	 ]*#[	 ]*define/!b
 t clr
 : clr
-${ac_dA}HAVE_MMINTRIN_H${ac_dB}HAVE_MMINTRIN_H${ac_dC}1${ac_dD}
+${ac_dA}HAVE__GETPID${ac_dB}HAVE__GETPID${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -943,6 +943,8 @@ ${ac_uA}HAVE_STDARG_H${ac_uB}HAVE_STDARG_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STDDEF_H${ac_uB}HAVE_STDDEF_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE__BOOL${ac_uB}HAVE__BOOL${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STDBOOL_H${ac_uB}HAVE_STDBOOL_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS${ac_uB}HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS${ac_uC}${ac_uD}
+${ac_uA}HAVE_MEMBER_TEMPLATES${ac_uB}HAVE_MEMBER_TEMPLATES${ac_uC}${ac_uD}
 ${ac_uA}HAVE_STDLIB_H${ac_uB}HAVE_STDLIB_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_MALLOC${ac_uB}HAVE_MALLOC${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STDLIB_H${ac_uB}HAVE_STDLIB_H${ac_uC}1${ac_uD}
@@ -951,8 +953,6 @@ ${ac_uA}PROTOTYPES${ac_uB}PROTOTYPES${ac_uC}1${ac_uD}
 ${ac_uA}__PROTOTYPES${ac_uB}__PROTOTYPES${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_VPRINTF${ac_uB}HAVE_VPRINTF${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_GETPID${ac_uB}HAVE_GETPID${ac_uC}1${ac_uD}
-${ac_uA}HAVE__GETPID${ac_uB}HAVE__GETPID${ac_uC}1${ac_uD}
-${ac_uA}USE_MMX${ac_uB}USE_MMX${ac_uC}1${ac_uD}
 CEOF
   sed -f $tmp/undefs.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -962,7 +962,7 @@ CEOF
 /^[	 ]*#[	 ]*undef/!b
 t clr
 : clr
-${ac_uA}HAVE_MMINTRIN_H${ac_uB}HAVE_MMINTRIN_H${ac_uC}1${ac_uD}
+${ac_uA}HAVE__GETPID${ac_uB}HAVE__GETPID${ac_uC}1${ac_uD}
 s,^[	 ]*#[	 ]*undef[	 ][	 ]*[a-zA-Z_][a-zA-Z_0-9]*,/* & */,
 CEOF
   sed -f $tmp/undefs.sed $tmp/in >$tmp/out

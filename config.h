@@ -23,11 +23,15 @@
 /* Define to 1 if you have the <math.h> header file. */
 #define HAVE_MATH_H 1
 
+/* define if the compiler supports member templates */
+#define HAVE_MEMBER_TEMPLATES 
+
+/* define if the compiler supports member templates outside the class
+   declaration */
+#define HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS 
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the <mmintrin.h> header file. */
-#define HAVE_MMINTRIN_H 1
 
 /* Define to 1 if you have the <process.h> header file. */
 /* #undef HAVE_PROCESS_H */
@@ -109,9 +113,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Define to 1 if MMX assembly is available. */
-#define USE_MMX 1
 
 /* Version number of package */
 #define VERSION "1.0.0-rc1"

@@ -36,22 +36,5 @@ AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getpid _getpid])
 
-dn1 AC_ARG_ENABLE(mmx, AC_HELP_STRING([--enable-mmx], [use mmx if available (default=yes)]), [enable_mmx=$enableval], [enable_mmx=yes])
-
-dn1 if test x$enable_mmx = xyes; then
-dn1 AX_CFLAGS_GCC_OPTION([-mmmx])
-dn1 AX_CXXFLAGS_GCC_OPTION([-mmmx])
-
-dn1 AC_MSG_CHECKING(for mmintrin.h)
-dn1 AC_LANG_PUSH(C++)
-dn1 AC_COMPILE_IFELSE(AC_LANG_PROGRAM([#include <mmintrin.h>],[_mm_empty()]),
-dn1 [AC_MSG_RESULT(yes)
-dn1  AC_DEFINE(USE_MMX, 1, [Define to 1 to use MMX optimizations.])
-dn1 AC_DEFINE(HAVE_MMINTRIN_H, 1, [Define to 1 if you have the <mmintrin.h> header file.])],
-dn1 [AC_MSG_RESULT(no)
-dn1  enable_mmx=no])
-dn1 AC_LANG_POP(C++)
-dn1 fi
-
 AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile tests/Makefile doc/Makefile])
 AC_OUTPUT
