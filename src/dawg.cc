@@ -145,7 +145,7 @@ bool Execute()
 
 
 	string ssFile = "-";
-	FileFormat fmt = FASTA;
+	unsigned long uFmt = FormatFasta;
 	string ssFormat = "Fasta";
 	string ssNexusCode;
 
@@ -330,17 +330,17 @@ bool Execute()
 			getline(iFile, ssNexusCode, '\0');
 	}
 	if(ssFormat == "Fasta")
-		fmt = FASTA;
+		uFmt = FormatFasta;
 	else if(ssFormat == "Nexus")
-		fmt = NEXUS;
+		uFmt = FormatNexus;
 	else if(ssFormat == "Phylip")
-		fmt = PHYLIP;
+		uFmt = FormatPhylip;
 	else if(ssFormat == "Clustal")
-		fmt = CLUSTAL;
+		uFmt = FormatClustal;
 	else
 		return DawgError("Unknown file format, \"%s\".");
 	
-	SetFormat(fmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
+	SetFormat(uFmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
 	
 	if(bTranslate && uWidth != 3)
 		return DawgError("Translate requires a Width of 3.");

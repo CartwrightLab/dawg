@@ -50,39 +50,30 @@ public:
 	inline bool IsDeletion() const { return ((m_ucNuc & MaskDel) == MaskDel); }
 	inline bool IsInsertion() const { return ((m_ucNuc & MaskIns) == MaskIns); }
 
-	inline bool FromChar(char ch)
+	bool FromChar(char ch)
 	{
-		unsigned long u = Nucleotide::Letter2Number(ch);
-		if(u == (unsigned long)(-1))
-			return false;
-		m_ucNuc = (unsigned char)u;
-		return true;
+		switch(ch&0xDF)
+		{
+		case 'A':
+			m_ucNuc = NumAdenine;
+			return true;
+		case 'C':
+			m_ucNuc = NumCytosine;
+			return true;
+		case 'G':
+			m_ucNuc = NumGuanine;
+			return true;
+		case 'T':
+			m_ucNuc = NumThymine;
+			return true;
+		}
+		return false;
 	}
 	inline char ToChar() const
 	{
-		char csNuc[]	= "ACGT";
-		char csType[]	= " +-=";
+		static const char csNuc[]	= "ACGT";
+		static const char csType[]	= " +-=";
 		return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
-	}
-	static unsigned long Letter2Number(char ch)
-	{
-		switch(ch)
-		{
-		case 'A':
-		case 'a':
-			return 0;
-		case 'C':
-		case 'c':
-			return 1;
-		case 'G':
-		case 'g':
-			return 2;
-		case 'T':
-		case 't':
-			return 3;
-		default:
-			return (unsigned long)(-1);
-		}
 	}
 };
 

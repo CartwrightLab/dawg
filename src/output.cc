@@ -11,13 +11,13 @@ void PrintSequencesNexus(  ostream &os, const Tree::Alignment& aln, unsigned lon
 void PrintSequencesPhylip( ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
 void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
 
-FileFormat g_fileFormat = FASTA;
+unsigned long g_fileFormat = FormatFasta;
 const char *g_csBlock = NULL;
 int			g_nDataSet = 0;
 int			g_nDataSetNum = 1;
 
 // Reset Format
-bool SetFormat(FileFormat fmt, int nNum, const char* csBlock)
+bool SetFormat(unsigned long fmt, int nNum, const char* csBlock)
 {
 	g_fileFormat = fmt;
 	g_csBlock = csBlock;
@@ -31,16 +31,12 @@ void DawgIniOutput(ostream& os)
 {
 	switch(g_fileFormat)
 	{
-	case NEXUS:
+	case FormatNexus:
 		os << "#NEXUS" << endl << "[Created by DAWG Version " << VERSION << ']' << endl;
 		break;
-	case CLUSTAL:
+	case FormatClustal:
 		os << "CLUSTAL multiple sequence alignment (Created by DAWG Version "
 			<< VERSION << ")" << endl << endl << endl;
-		break;
-	case FASTA:
-	case PHYLIP:
-	default:
 		break;
 	}
 }
@@ -61,16 +57,16 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned long uFl
 	// Could be an array if flexibility is needed
 	switch(g_fileFormat)
 	{
-		case NEXUS:
+		case FormatNexus:
 			PrintSequencesNexus(rFile, alnLocal, uFlags);
 			break;
-		case PHYLIP:
+		case FormatPhylip:
 			PrintSequencesPhylip(rFile, alnLocal, uFlags);
 			break;
-		case CLUSTAL:
+		case FormatClustal:
 			PrintSequencesClustal(rFile, alnLocal, uFlags);
 			break;
-		case FASTA:
+		case FormatFasta:
 		default:
 			PrintSequencesFasta(rFile, alnLocal, uFlags);
 	};
@@ -112,7 +108,7 @@ void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned long 
 		os << "PROTEIN";
 	else
 		os << "DNA";
-	os << " MISSING=? GAP=- MATCHCHAR=. EQUATE=\"+=-\";" << endl;
+	os << " MISSING=? GAP=- MATCHCHAR=. EQUATE=\"+=- ==-\";" << endl;
 	os << "\tMATRIX" << endl;
 	
 	// Write sequences in non-interleaved format
@@ -207,31 +203,65 @@ char g_csAminoAcid[] = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS
 
 void FilterTranslate(string& ss)
 {
-	// Setup a temporary string for the protein
-	string ss2;
-	ss2.reserve(ss.size()/3);
-	
-	// foreach codon
-	for(string::iterator it = ss.begin(); it!= ss.end();)
+	string::iterator it = ss.begin();
+
+	for(string::const_iterator cit = ss.begin(); *cit;)
 	{
-		// put a gap in the protein sequence if there is one in the nucleotide sequence
-		if(*it == '-' || *it == '+' || *it == '=' || *it == '?')
+		
+		int i = 0;
+		switch(*cit++)
 		{
-			ss2.push_back(*it);
-			it += 3;
+		case 'A':
+			break;
+		case 'C':
+			i |= 0x10;
+			break;
+		case 'G':
+			i |= 0x20;
+			break;
+		case 'T':
+			i |= 0x30;
+			break;
+		case '-':
+			*it++ = '-';
+			cit+=2;
+			continue;
+		case '+':
+			*it++ = '+';
+			cit+=2;
+			continue;
+		case '=':
+			*it++ = '=';
+			cit+=2;
+			continue;
 		}
-		else
+		switch(*cit++)
+		{ 
+		case 'C':
+			i |= 0x4;
+			break;
+		case 'G':
+			i |= 0x8;
+			break;
+		case 'T':
+			i |= 0xC;
+			break;
+		}
+		switch(*cit++)
 		{
-			// determine the codon in [0,63]
-			unsigned long uCodon = (Nucleotide::Letter2Number(*it++) << 4)
-				| (Nucleotide::Letter2Number(*it++) << 2)
-				| (Nucleotide::Letter2Number(*it++));
-			// add the character that represents the codon to the temp string
-			ss2.push_back( ((uCodon < 64) ? g_csAminoAcid[up] : '?'));
+		case 'C':
+			i |= 0x1;
+			break;
+		case 'G':
+			i |= 0x2;
+			break;
+		case 'T':
+			i |= 0x3;
+			break;
 		}
+		*it++ = g_csAminoAcid[i];
 	}
-	// Set string to temp string
-	ss = ss2;
+	ss.resize(ss.size()/3);
 }
 
 // Filter the sequence based on the flags
