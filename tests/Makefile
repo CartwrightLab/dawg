@@ -127,7 +127,8 @@ sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
 TESTS = test0
-EXTRA_DIST = ${TESTS} *.poo
+TESTFILES = example0.poo
+EXTRA_DIST = ${TESTS} ${TESTFILES}
 TESTS_ENVIRONMENT = top_srcdir=${top_srcdir} PATH=.:../src:$$PATH \
 	${SHELL}
 

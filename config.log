@@ -669,7 +669,7 @@ configure:5643: $? = 0
 configure:5655: result: yes
 configure:5662: checking for _doprnt
 configure:5719: gcc -o conftest -g -O2   conftest.c  >&5
-/var/tmp//cccEdQyK.o: In function `main':
+/var/tmp//cclIPpwG.o: In function `main':
 /home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
 /home/reed/dawg-unix/conftest.c:80: undefined reference to `_doprnt'
 configure:5725: $? = 1
@@ -762,7 +762,7 @@ configure:5750: result: no
 configure:5768: checking for sqrt
 configure:5825: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:65: warning: conflicting types for built-in function `sqrt'
-/var/tmp//ccd1WfCR.o: In function `main':
+/var/tmp//ccXnKXjj.o: In function `main':
 /home/reed/dawg-unix/conftest.c:81: undefined reference to `sqrt'
 /home/reed/dawg-unix/conftest.c:80: undefined reference to `sqrt'
 configure:5831: $? = 1
@@ -875,6 +875,7 @@ config.status:703: creating examples/Makefile
 config.status:703: creating tests/Makefile
 config.status:703: creating doc/Makefile
 config.status:807: creating config.h
+config.status:947: config.h is unchanged
 config.status:1127: executing depfiles commands
 
 ## ---------------- ##

@@ -1,1 +1,2 @@
-EXTRA_DIST = *.fud
+EXTRA_DIST = example0.fud example1.fud
+
