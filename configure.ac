@@ -1,7 +1,5 @@
-m4_define([svn_rev], [$Rev$])
-m4_define([rev], [m4_translit(svn_rev, [:R$ev ])]) 
-
-AC_INIT([dawg], [1.0.rev-rc3], [rac@uga.edu])
+m4_include(config/rev.m4)
+AC_INIT([dawg], [1.0.dawg_rev()-rc4], [http://scit.us/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.59)

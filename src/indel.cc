@@ -100,3 +100,4 @@ double PowerModel::MeanSize() const
 {
 	return m_dMean;
 }
+

@@ -39,7 +39,7 @@ subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/config/rev.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -88,16 +88,16 @@ LTLIBOBJS =
 MAKEINFO = ${SHELL} /home/reed/dawg/config/missing --run makeinfo
 OBJEXT = o
 PACKAGE = dawg
-PACKAGE_BUGREPORT = rac@uga.edu
+PACKAGE_BUGREPORT = http://scit.us/dawg/
 PACKAGE_NAME = dawg
-PACKAGE_STRING = dawg 1.0.183-rc3
+PACKAGE_STRING = dawg 1.0.185M-rc4
 PACKAGE_TARNAME = dawg
-PACKAGE_VERSION = 1.0.183-rc3
+PACKAGE_VERSION = 1.0.185M-rc4
 PATH_SEPARATOR = :
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = 
-VERSION = 1.0.183-rc3
+VERSION = 1.0.185M-rc4
 YACC = bison -y
 ac_ct_CC = gcc
 ac_ct_CXX = g++
