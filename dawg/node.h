@@ -28,18 +28,34 @@ public:
 	typedef std::map<std::string, node> Map;
 	struct Section
 	{
-		Section() { }
-		Section(double d, Map::iterator it) : dBranchLen(d), itAncestor(it) { }
+		Section() : bTouched(false) { }
+		Section(double d, Map::iterator it) : dBranchLen(d), itAncestor(it), bTouched(false) { }
 		double dBranchLen;
 		Map::iterator itAncestor;
+		Seq dnaSeq;
+		bool bTouched;
 	};
+
+	IndelProcessor s_procIndel;
+	SubstProcessor s_procSubst;
 	
 	Tree() : m_nSec(0) {}
-
-	Map m_map;
-	int m_nSec;
+	
+	void Evolve();
 	void Process(Node* pNode);
+	
+	const Map& GetMap() const { return m_map; }
+
+protected:
 	void ProcessNode(Node* pNode);
+	void Touch(node* pNode);
+	void Evolve(node& nodeD, double dTime);
+
+private:
+	int m_nSec;
+	Map m_map;
+	std::vector<unsigned int> m_vuSecLength;
+	double m_dScale;
 };
 
 

@@ -61,7 +61,7 @@ bool SubstProcessor::Setup(double pFreqs[], double pSubs[])
 	return true;
 }
 
-void SubstProcessor::Process(Node *pNode)
+void SubstProcessor::Process()
 {
 	double dLen = pNode->ScaledLength();
 	double dTemp;

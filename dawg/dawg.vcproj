@@ -204,6 +204,9 @@ move /Y $(InputName).hpp $(InputName).h
 				RelativePath=".\subst.cpp">
 			</File>
 			<File
+				RelativePath=".\tree.cpp">
+			</File>
+			<File
 				RelativePath="var.cpp">
 			</File>
 		</Filter>
@@ -233,6 +236,9 @@ move /Y $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\subst.h">
+			</File>
+			<File
+				RelativePath=".\tree.h">
 			</File>
 			<File
 				RelativePath=".\var.h">

@@ -79,6 +79,30 @@ void Tree::ProcessNode(Node* pNode)
 	}
 }
 
+void Tree::Evolve()
+{
+
+}
+
+void Tree::Touch(node *pNode)
+{
+	Map mapAncestors;
+	for(node::iterator it = pNode->begin(); it != pNode->end(); ++it)
+	{
+		node* p = it->itAncestor->second;
+		if(!p->begin()->bTouched)
+			Touch(p);
+		Evolve((mapAncestors[it->itAncestor->first] = *p), it->dBranchLen*m_dScale);
+
+
+	}
+}
+
+void Tree::Evolve(node& nodeD, double dTime)
+{
+
+}
+
 ////////////////////////////////////////////////////////////
 //  class Node
 ////////////////////////////////////////////////////////////
