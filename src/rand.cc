@@ -1,5 +1,9 @@
 #include "rand.h"
 /* 
+   rand.cc - Copyright (C) 2003-2004, Reed A. Cartwright
+   All right reserved.
+
+   ======================================================================  
    MT19937-2002 Algorithm
 
    Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
@@ -36,6 +40,20 @@
    Any feedback is very welcome.
    http://www.math.keio.ac.jp/matumoto/emt.html
    email: matumoto@math.keio.ac.jp
+
+   ======================================================================  
+   MMX Implementation
+   Copyright (C) 2000  Matthew Bellew
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+ 
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
 */
 
 /* Period parameters */  
@@ -96,14 +114,112 @@ void mt_srand(unsigned long uKeys[], unsigned long uLen)
 
 inline void mt_next_state()
 {
- 	left = N;
+	left = N;
     next = state;
+#if !defined(USE_MMX)
 	unsigned long *p=state;
     for (int j=N-M+1; --j; p++) 
         *p = p[M] ^ TWIST(p[0], p[1]);
     for (int j=M; --j; p++) 
         *p = p[M-N] ^ TWIST(p[0], p[1]);
     *p = p[M-N] ^ TWIST(p[0], state[0]);
+#else
+	static __int64 doubleZero = 0x0000000000000000;
+	static __int64 doubleOne  = 0x0000000100000001;
+	static __int64 doubleMagic= 0x9908b0df9908b0df;
+	static __int64 doubleLow  = 0x7fffffff7fffffff;
+_asm
+	{
+	mov edi, ecx
+	mov	esi, ecx			// p = state
+
+;   for (int j=N-M+1; --j; p++) 
+;       *p = p[M] ^ TWIST(p[0], p[1]);
+
+	// NOTE
+	// You can actually do three DWORDs at a time
+	// by using the regular integer registers
+	// However, it only helps performance about 10%
+	// Careful coding of randInt() is more important
+	// at that point.
+
+	mov	ecx, 113
+$LOOP1:
+	movq	mm1, QWORD PTR [esi]
+	movq	mm2, QWORD PTR [esi+4]
+	movq	mm0, mm1
+	pxor	mm0, mm2
+	pand	mm2, [doubleOne]
+	pand	mm0, [doubleLow]
+	pxor	mm0, mm1
+	pcmpeqd	mm2, [doubleOne]
+	psrld	mm0, 1
+	pand	mm2, [doubleMagic]
+	pxor	mm0, mm2
+	pxor	mm0, QWORD PTR [esi+(397*4)]
+	add		esi, 8
+	dec		ecx
+	movq	QWORD PTR [esi-8], mm0
+	jne SHORT $LOOP1
+
+	// left over
+	mov	ebx, DWORD PTR [esi]
+	mov	edx, DWORD PTR [esi+4]
+	mov	eax, ebx
+	xor	eax, edx
+	and	dl, 1
+	and	eax, 7ffffffeH
+	xor	eax, ebx
+	shr	eax, 1
+	neg	dl
+	sbb	edx, edx
+	and	edx, 9908b0dfH
+	xor	eax, edx
+	xor	eax, DWORD PTR [esi+(397*4)]
+	mov	DWORD PTR [esi], eax
+	add	esi, 4
+
+;   for (int j=M; --j; p++) 
+;		*p = p[M-N] ^ TWIST(p[0], p[1]);
+
+	mov	ecx, 198
+$LOOP2:
+	movq	mm1, QWORD PTR [esi]
+	movq	mm2, QWORD PTR [esi+4]
+	movq	mm0, mm1
+	pxor	mm0, mm2
+	pand	mm2, [doubleOne]
+	pand	mm0, [doubleLow]
+	pxor	mm0, mm1
+	pcmpeqd	mm2, [doubleOne]
+	psrld	mm0, 1
+	pand	mm2, [doubleMagic]
+	pxor	mm0, mm2
+	pxor	mm0, QWORD PTR [esi+(397-624)*4]
+	add		esi, 8
+	dec		ecx
+	movq	QWORD PTR [esi-8], mm0
+	jne SHORT $LOOP2
+
+;	*p = p[M-N] ^ TWIST(p[0], state[0]);
+	mov	ebx, DWORD PTR [esi]
+	mov	edx, DWORD PTR [edi]
+	mov	eax, ebx
+	xor	eax, edx
+	and	dl, 1
+	and	eax, 7ffffffeH
+	xor	eax, ebx
+	shr	eax, 1
+	neg	dl
+	sbb	edx, edx
+	and	edx, 9908b0dfH
+	xor	eax, edx
+	xor	eax, DWORD PTR [esi+(397-624)*4]
+	mov	DWORD PTR [esi], eax
+
+	emms
+	}
+#endif
 }
 
 /* generates a random number on [0,0xffffffff]-interval */

@@ -42,6 +42,7 @@ AC_COMPILE_IFELSE([asm ("movq 0, %mm0");],
   [AC_MSG_RESULT(yes)
   AC_DEFINE(USE_MMX, 1, [Define to 1 if MMX assembly is available.])
   AX_CFLAGS_GCC_OPTION([-mmmx])
+  AX_CXXFLAGS_GCC_OPTION([-mmmx])
   AC_MSG_CHECKING(for mmintrin.h)
   AC_COMPILE_IFELSE(AC_LANG_PROGRAM([#include <mmintrin.h>],[_mm_empty()]),
     [AC_MSG_RESULT(yes)
