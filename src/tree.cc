@@ -45,22 +45,52 @@ Sequence::Sequence()
 
 }
 
-Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), '.')
+Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), 'R')
 {
 
+}
+
+inline bool IsDel(char ch)
+{
+	switch(ch)
+	{
+	case 'D': //start of deletion
+	case 'd': //deletion
+	case 'J': //start of deletion on an insertion
+	case 'j': //deletion on an insertion
+		return true;
+	default:
+		return false;
+	}
+	return false;
+}
+
+inline bool IsIns(char ch)
+{
+	switch(ch)
+	{
+	case 'I': //start of insertion
+	case 'i': //insertion
+	case 'J': //start of deletion on an insertion
+	case 'j': //deletion on an insertion
+		return true;
+	default:
+		return false;
+	}
+	return false;
 }
 
 unsigned long Sequence::GapPos(unsigned long uPos) const
 {
 	vector<char>::const_iterator it=m_vHistory.begin();
 	unsigned long v=0;
-	//skip leading 'gapspace'
-	for(;(*it == '-' || *it == '=') && it != m_vHistory.end(); ++it)
+	//skip leading 'deletions'
+	for(;IsDel(*it) && it != m_vHistory.end(); ++it)
 		v++;
 	for(; uPos && it != m_vHistory.end(); ++it)
 	{
 		v++;
-		if(*it != '-' && *it != '=')
+		if(!IsDel())
 			uPos--;
 	}
 	return v;
@@ -71,8 +101,11 @@ unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegi
 	unsigned long uSize = (unsigned long)(itEnd-itBegin);
 	if(uSize == 0 || uPos > m_vDNA.size())
 		return 0;
-	m_vHistory.insert(m_vHistory.begin()+GapPos(uPos), uSize, '+');
 	m_vDNA.insert(m_vDNA.begin()+uPos, itBegin, itEnd);
+	uPos = GapPos(uPos);
+	if(uSize > 1)
+		m_vHistory.insert(m_vHistory.begin()+uPos, uSize-1, 'i');
+	m_vHistory.insert(m_vHistory.begin()+uPos, 1, 'I');
 	return uSize;
 }
 
@@ -88,22 +121,16 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 
 	unsigned long uTemp = uSize = uEnd-uStart;
 	uPos = GapPos(uStart);
+	
+	//delete uTemp nucleotides in the history starting at uPos
+	m_vHistory[uPos++] = (m_vHistory[uPos] == '.') ? 'D' : 'J';
 	while(uTemp)
 	{
-		switch(m_vHistory[uPos])
+		if(!IsDel(m_vHistory[uPos]))
 		{
-		case '=':
-		case '-':
-			break;
-		case '+':
-			m_vHistory[uPos] = '=';
-			uTemp--;
-			break;
-		default:
-			m_vHistory[uPos] = '-';
-			uTemp--;
-			break;
-		};
+			m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';;
+			uTemp++;
+		}
 		uPos++;
 	}
 	return uSize;
@@ -511,7 +538,7 @@ double Tree::RandomRate() const
 // Deleted Insertion: =
 // Root Nuc: .
 
-void Tree::Align(Alignment &aln, bool bGapSingleChar) const
+void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 {
 	// construct a table of flattened sequences
 	vector<Sequence::HistoryVec> vHisTable;
@@ -542,15 +569,17 @@ void Tree::Align(Alignment &aln, bool bGapSingleChar) const
 			if(uCol >= cit->size())
 				continue;
 			bGo = true;
-			if((*cit)[uCol] == '+' || (*cit)[uCol] == '=')
+			if(IsIns((*cit)[uCol]))
 			{
 				for(vector<Sequence::HistoryVec>::iterator it = vHisTable.begin();
 					it != vHisTable.end(); ++it)
 				{
 					if(uCol >= it->size())
-						it->resize(uCol+1, '-');
-					else if( (*it)[uCol] != '+' && (*it)[uCol] != '=')
-						it->insert(it->begin()+uCol, 1, '-');
+						it->resize(uCol+1, (*cit)[uCol]);
+					else if(!IsIns((*it)[uCol]))
+						it->insert(it->begin()+uCol, 1, (*cit)[uCol]);
+					else if((*it)[uCol] == 'I' || (*it)[uCol] == 'i')
+						(*it)[uCol] = '.';
 				}
 				cit = vHisTable.end()-1;
 			}
@@ -566,11 +595,27 @@ void Tree::Align(Alignment &aln, bool bGapSingleChar) const
 		ss.resize(his.size(), '-');
 		for(unsigned int uh = 0, ud=0; uh < his.size(); ++uh)
 		{
-			if(his[uh] == '.' || his[uh] == '+')
+			switch(his[uh])
+			{
+			case '.':
 				ss[uh] = NucToChar(dna[ud++].m_nuc);
-			if(bGapSingleChar && uh > 0 && his[uh] == '-' 
-				&& his[uh-1] != '.' && his[uh-1] != '+')
-				ss[uh] = '?';
+				break;
+			case 'D':
+				break;
+			case 'd':
+				if(bGapSingleChar) 
+					ss[uh] = '?';
+				break;
+			case 'J':
+			case 'I':
+				ss[uh] = (bGapPlus) ? '+' : '-';
+				break;
+			case 'j':
+			case 'i':
+				ss[uh] = (bGapSingleChar) ? '?' :
+							(bGapPlus) ? '+' : '-';
+				break;
+			};
 		}
 	}
 

@@ -145,7 +145,7 @@ bool Execute()
 	string ssBlockFile;
 	string ssBlock;
 
-	bool bGapSingle = false;
+	bool bGapSingle = false, bGapPlus = false;
 	int nFrame = 1;
 
 	// Ready Variables
@@ -223,6 +223,7 @@ bool Execute()
 		return DawgError("\"Freqs\" specified incorrectly.");
 	
 	DawgVar::Get("GapSingleChar", bGapSingle);
+	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("Frame", nFrame);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
@@ -383,7 +384,7 @@ bool Execute()
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln, bGapSingle);
+		myTree.Align(aln, bGapPlus, bGapSingle);
 		if(!SaveAlignment(*pOut, aln))
 			return DawgError("Error saving alignment.");
 	}
