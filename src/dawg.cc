@@ -174,7 +174,8 @@ bool Execute()
 	else
 		vSeqLen.resize(vtTrees.size(), 100);
 	
-	DawgVar::Get<int>("Frame", uFrame);
+	DawgVar::Get("Frame", nRes);
+	uFrame = nRes;
 
 	vdGamma.resize(uFrame, 0.0);
 	vdIota.resize(uFrame, 0.0);
@@ -319,7 +320,7 @@ bool Execute()
 	paramsDel.vdModel = vdGapModel[1];
 	
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		nFrame, vdGamma, vdIota, vdScale, dTreeScale ))
+		uFrame, vdGamma, vdIota, vdScale, dTreeScale ))
 		return DawgError("Bad evolution parameters");
 	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
