@@ -69,7 +69,6 @@ my $lambda = $numgaps/$avgL/$totlen;
 my %gapsizes = ();
 my $maxgap = 0;
 my $suml = 0;
-my $sumll = 0;
 foreach(keys(%gaps))
 {
 	my ($f, $l) = split(/$;/);
@@ -78,30 +77,48 @@ foreach(keys(%gaps))
 	$gapsizes{$l}++;
 	$maxgap = $l if($l > $maxgap);
 	$suml += $l;
-	$sumll += $l**2;
 }
+
+#use liklihood to estimate p and q
 my $avgG = $suml/$numgaps-1;
 my %qhat = ();
 my $rlog = 0;
-foreach my $r(1..2)
+foreach my $r(1..$maxgap)
 {	
+	#estimate q | r
 	my $q = $avgG/($avgG+$r);
+	#calculate LL(q,r)
 	my $LL = $numgaps*($r*log(1-$q)-$rlog-log($q));
-	while(my($g,$n) = each(%gaps))
+	while(my($g,$n) = each(%gapsizes))
 	{
 		$LL += $n*$g*log($q);
 		$LL += $n*log($_) foreach($g..$g+$r-2);
 	}
-	$qhat{$r} = [$q, $LL];
+	#calculate BIC to test whether r=1 is a better explaination
+	my $bic = -2*$LL+log($numgaps)*($r==1 ? 1 : 2);
+	#store data
+	$qhat{$r} = [$q, $LL, $bic];
 	$rlog += log($r);
+}
+#find maximimum liklihood and minimium BIC
+my $r_bic = 1;
+my $r_ll = 1;
+foreach my $r(1..$maxgap)
+{
+	$r_bic = $r if($qhat{$r}->[2] < $qhat{$r_bic}->[2]);
+	$r_ll = $r if($qhat{$r}->[1] > $qhat{$r_ll}->[1]);
 }
 
 #output
 print "Total Len is $totlen.\n";
 print "Number of gaps is $numgaps.\n";
 print "Average Length is $avgL.\n";
-print "Lambda Estimate is $lambda.\n";
-print "Gap Size Distribution:\n";
+print "\nLambda Estimate is $lambda.\n";
+print "\nGap Size Distribution:\n";
 print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
-print "Estimates of q\n";
-print join("\t", $_, $qhat{$_}->[0], $qhat{$_}->[1]), "\n" foreach(1..$maxgap);
+print "\nEstimates of r and q based on Maximum Liklihood\n";
+print "\tr Estimate is $r_ll.  (BIC $qhat{$r_ll}->[2])\n";
+print "\tq Estimate is ${qhat{$r_ll}->[0]}.  (LH ${qhat{$r_ll}->[2]})\n";
+print "\nEstimates of r and q based on Minimum BIC\n";
+print "\tr Estimate is $r_bic.  (BIC $qhat{$r_bic}->[2])\n";
+print "\tq Estimate is $qhat{$r_bic}->[0].  (LH $qhat{$r_bic}->[2])\n";
