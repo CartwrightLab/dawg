@@ -579,10 +579,8 @@ double Tree::RandomRate(unsigned long uPos) const
 		return 1.0;
 }
 
-void Tree::Align(Alignment &aln, unsigned long uFlags) const
+void Tree::Align(Alignment &aln) const
 {
-	
-	
 	// construct a table of flattened sequences
 	vector<Sequence> vTable;
 	vector<string> vNames;
@@ -641,71 +639,13 @@ void Tree::Align(Alignment &aln, unsigned long uFlags) const
 
 	for(unsigned int u = 0; u < vNames.size(); ++u)
 	{
-		char csAminoAcid[] = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
-		
 		// Skip any sequence that begin with one of the two special characters
 		if(vNames[u][0] == '(' || vNames[u][0] == '_')
 			continue;
+		// Add Sequence to alignment
 		string& ss = aln[vNames[u]];
 		vTable[u].ToString(ss);
-		//GapPlus and GappSingleChar
-		int nGapState = 0;
-		if(uFlags & (FlagOutGapSingleChar|FlagOutGapPlus))
-		{
-			for(unsigned int v = 0; v < ss.length(); ++v)
-			{
-				if(uFlags & FlagOutGapSingleChar)
-				{
-					if(ss[v] == '-' || ss[v] == '=')
-					{	
-						if(nGapState == 1)
-							ss[v] = '?';
-						else
-							nGapState = 1;
-					}
-					else if(ss[v] == '+')
-					{
-						if(nGapState == 2)
-							ss[v] = '?';
-						else
-							nGapState = 2;
-					}
-					else
-						nGapState = 0;
-				}
-				if((uFlags & FlagOutGapPlus) == 0 && (ss[v] == '+' || ss[v] == '='))
-					ss[v] = '-';
-			}
-		}
-		if(uFlags & FlagOutTranslate)
-		{
-			string ss2;
-			for(unsigned int v = 0; v < ss.length()-2; v+=3)
-			{
-				if(ss[v] == '-' || ss[v] == '+' || ss[v] == '?')
-					ss2.push_back(ss[v]);
-				else
-				{
-					unsigned long up = (Nucleotide::Letter2Number(ss[v]) << 4)
-						| (Nucleotide::Letter2Number(ss[v+1]) << 2)
-						| (Nucleotide::Letter2Number(ss[v+2]));
-
-					ss2.push_back( ((up < 64) ? csAminoAcid[up] : '?'));
-				}
-			}
-			ss = ss2;
-		}
-		// Lower Case
-		if(uFlags & FlagOutLowerCase)
-		{
-			for(unsigned int v = 0; v < ss.length(); ++v)
-			{
-				if(0x41 <= ss[v] && ss[v] <= 0x5A)
-					ss[v] |= 0x20;
-			}
-		}
 	}
-
 }
 
 

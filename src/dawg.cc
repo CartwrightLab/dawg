@@ -347,13 +347,13 @@ bool Execute()
 
 	unsigned long uOutFlags = 0u;
 	if(bGapSingle)
-		uOutFlags |= Tree::FlagOutGapSingleChar;
+		uOutFlags |= FlagOutGapSingleChar;
 	if(bGapPlus)
-		uOutFlags |= Tree::FlagOutGapPlus;
+		uOutFlags |= FlagOutGapPlus;
 	if(bLowerCase)
-		uOutFlags |= Tree::FlagOutLowerCase;
+		uOutFlags |= FlagOutLowerCase;
 	if(bTranslate)
-		uOutFlags |= Tree::FlagOutTranslate;
+		uOutFlags |= FlagOutTranslate;
 
 	ostream* pOut;
 	ofstream ofOut;
@@ -375,7 +375,7 @@ bool Execute()
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln, uOutFlags);
+		myTree.Align(aln);
 		if(!SaveAlignment(*pOut, aln, uOutFlags))
 			return DawgError("Error saving alignment.");
 	}

@@ -51,6 +51,11 @@ enum FileFormat { FASTA, NEXUS, PHYLIP, CLUSTAL };
 bool SetFormat(FileFormat fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);
 
+const unsigned long FlagOutLowerCase = 1;
+const unsigned long FlagOutGapPlus = 2;
+const unsigned long FlagOutGapSingleChar = 4;
+const unsigned long FlagOutTranslate = 8;
+
 template <class Type> class SumValue
 {
 private:

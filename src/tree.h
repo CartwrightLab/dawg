@@ -158,13 +158,7 @@ public:
 	
 	const Node::Map& GetMap() const { return m_map; }
 
-	void Align(Alignment &aln, unsigned long uFlags) const;
-
-	static const unsigned long FlagOutLowerCase = 1;
-	static const unsigned long FlagOutGapPlus = 2;
-	static const unsigned long FlagOutGapSingleChar = 4;
-	static const unsigned long FlagOutTranslate = 8;
-
+	void Align(Alignment &aln) const;
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);
