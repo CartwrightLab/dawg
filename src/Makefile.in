@@ -56,7 +56,7 @@ am_dawg_OBJECTS = dawg.$(OBJEXT) eigen.$(OBJEXT) indel.$(OBJEXT) \
 dawg_OBJECTS = $(am_dawg_OBJECTS)
 dawg_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)

@@ -1,8 +1,9 @@
 AC_PREREQ(2.53)
 AC_INIT(src/dawg.cpp)
-AM_INIT_AUTOMAKE(dawg, 1.0.0)
-AC_CONFIG_SRCDIR([config.h.in])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_SRCDIR([src/dawg.cc])
 AC_CONFIG_HEADER([config.h])
+AM_INIT_AUTOMAKE(dawg, 1.0.0)
 
 # Checks for programs.
 AC_PROG_CXX
