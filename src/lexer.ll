@@ -84,7 +84,7 @@ SPACE [ \t\r\v\f]
 	return STRING;
 }
 
-"<<"{IDWORD}{SPACE}+"\n" {
+"<<"{IDWORD}{SPACE}*"\n" {
 	yytext += 2;
 	int s=0;
 	while(!isspace(yytext[s]))
