@@ -346,7 +346,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		{
 			//Deletion
 			unsigned long ul = m_nFrame*m_pDeletionModel->RandSize();
-			unsigned long uPos = m_nFrame*rand_ulong((uLength+ul-1)/m_nFrame);
+			unsigned long uPos = m_nFrame*rand_ulong((uLength+ul)/m_nFrame-1)+m_nFrame-1;
 			uLength -= rNode.Delete(uPos, ul);
 		}
 		dLength = (double)uLength;
