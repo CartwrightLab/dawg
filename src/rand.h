@@ -21,6 +21,10 @@
 #	include <float.h>
 #endif
 
+#ifdef HAVE_MMINTRIN_H
+#	include <mmintrin.h>
+#endif
+
 #define RDBL32_MIN  2.3283064365386963e-010
 #define RDBL_MIN	RDBL32_MIN
 
