@@ -58,6 +58,9 @@ public:
 	
 	static void Scale(double d) { s_dScale = d; }
 	static double Scale() { return s_dScale; }
+	
+	static IndelProcessor s_procIndel;
+	static SubstProcessor s_procSubst
 
 protected:
 	std::auto_ptr<Node> m_pSib;

@@ -42,14 +42,8 @@ void Node::EvolveSeq()
 {
 	if(fabs(ScaledLength())< DBL_EPSILON)
 		return; // Nothing to evolve
-	s_modSubst.Process(this);
-	s_modIndel.Process(this);
-	//indel formation
-	if(g_dLambda < DBL_EPSILON)
-		return; // No Indels
-	for(double tau = rand_exp(1.0/(g_dLambda*m_seq.size())); tau < dLen;
-			tau += rand_exp(1.0/(g_dLambda*m_seq.size())))
-		MakeIndel();
+	s_procSubst.Process(this);
+	s_procIndel.Process(this);
 }
 
 void Node::Evolve()
