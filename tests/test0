@@ -1,0 +1,10 @@
+#! /bin/sh
+
+: ${DAWG=dawg}
+: ${DIFF=diff}
+
+${DAWG} ${top_srcdir}/examples/example0.fud | ${DIFF} - \
+	${top_srcdir}/tests/example0.poo
+result=$?
+
+exit $result

@@ -158,11 +158,12 @@ target_alias = @target_alias@
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)
 AM_YFLAGS = -d
 AM_LFLAGS = -CF
-EXTRA_DIST = $(top_builddir)/examples/*.fud
+BUILT_SOURCES = parser.h
 dawg_SOURCES = dawg.cc eigen.cc  indel.cc matrix.cc output.cc rand.cc tree.cc var.cc dawg.h indel.h tree.h rand.h var.h matrix.h parser.yy lexer.ll
 dawg_LDADD = -lstdc++ @LEXLIB@
-CLEANFILES = parser.cc parser.h lexer.c
-all: all-am
+CLEANFILES = parser.cc parser.h lexer.cc
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .cc .ll .o .obj .yy
@@ -334,7 +335,6 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/$(top_builddir)/examples
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -362,13 +362,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -396,6 +398,7 @@ maintainer-clean-generic:
 	-rm -f lexer.cc
 	-rm -f parser.cc
 	-rm -f parser.h
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
@@ -456,8 +459,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS uninstall-info-am
 
-
-lexer.ll: parser.cc
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
