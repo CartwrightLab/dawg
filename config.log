@@ -385,7 +385,7 @@ configure:4098: $? = 0
 configure:4101: test -s conftest.o
 configure:4104: $? = 0
 configure:4115: result: yes
-configure:4147: checking math.h usability
+configure:4147: checking time.h usability
 configure:4159: gcc -c -g -O2  conftest.c >&5
 configure:4165: $? = 0
 configure:4169: test -z 
@@ -394,11 +394,11 @@ configure:4172: $? = 0
 configure:4175: test -s conftest.o
 configure:4178: $? = 0
 configure:4188: result: yes
-configure:4192: checking math.h presence
+configure:4192: checking time.h presence
 configure:4202: gcc -E  conftest.c
 configure:4208: $? = 0
 configure:4228: result: yes
-configure:4263: checking for math.h
+configure:4263: checking for time.h
 configure:4270: result: yes
 configure:4147: checking float.h usability
 configure:4159: gcc -c -g -O2  conftest.c >&5
@@ -415,9 +415,7 @@ configure:4208: $? = 0
 configure:4228: result: yes
 configure:4263: checking for float.h
 configure:4270: result: yes
-configure:4138: checking for memory.h
-configure:4143: result: yes
-configure:4147: checking stddef.h usability
+configure:4147: checking stdio.h usability
 configure:4159: gcc -c -g -O2  conftest.c >&5
 configure:4165: $? = 0
 configure:4169: test -z 
@@ -426,16 +424,44 @@ configure:4172: $? = 0
 configure:4175: test -s conftest.o
 configure:4178: $? = 0
 configure:4188: result: yes
-configure:4192: checking stddef.h presence
+configure:4192: checking stdio.h presence
 configure:4202: gcc -E  conftest.c
 configure:4208: $? = 0
 configure:4228: result: yes
-configure:4263: checking for stddef.h
+configure:4263: checking for stdio.h
 configure:4270: result: yes
-configure:4138: checking for stdlib.h
-configure:4143: result: yes
 configure:4138: checking for unistd.h
 configure:4143: result: yes
+configure:4147: checking math.h usability
+configure:4159: gcc -c -g -O2  conftest.c >&5
+configure:4165: $? = 0
+configure:4169: test -z 
+			 || test ! -s conftest.err
+configure:4172: $? = 0
+configure:4175: test -s conftest.o
+configure:4178: $? = 0
+configure:4188: result: yes
+configure:4192: checking math.h presence
+configure:4202: gcc -E  conftest.c
+configure:4208: $? = 0
+configure:4228: result: yes
+configure:4263: checking for math.h
+configure:4270: result: yes
+configure:4147: checking assert.h usability
+configure:4159: gcc -c -g -O2  conftest.c >&5
+configure:4165: $? = 0
+configure:4169: test -z 
+			 || test ! -s conftest.err
+configure:4172: $? = 0
+configure:4175: test -s conftest.o
+configure:4178: $? = 0
+configure:4188: result: yes
+configure:4192: checking assert.h presence
+configure:4202: gcc -E  conftest.c
+configure:4208: $? = 0
+configure:4228: result: yes
+configure:4263: checking for assert.h
+configure:4270: result: yes
 configure:4147: checking stdarg.h usability
 configure:4159: gcc -c -g -O2  conftest.c >&5
 configure:4165: $? = 0
@@ -532,12 +558,12 @@ configure: failed program was:
 | #define HAVE_INTTYPES_H 1
 | #define HAVE_STDINT_H 1
 | #define HAVE_UNISTD_H 1
-| #define HAVE_MATH_H 1
+| #define HAVE_TIME_H 1
 | #define HAVE_FLOAT_H 1
-| #define HAVE_MEMORY_H 1
-| #define HAVE_STDDEF_H 1
-| #define HAVE_STDLIB_H 1
+| #define HAVE_STDIO_H 1
 | #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
 | #define HAVE_STDARG_H 1
 | #define HAVE__BOOL 1
 | #define HAVE_STDBOOL_H 1
@@ -603,12 +629,12 @@ configure: failed program was:
 | #define HAVE_INTTYPES_H 1
 | #define HAVE_STDINT_H 1
 | #define HAVE_UNISTD_H 1
-| #define HAVE_MATH_H 1
+| #define HAVE_TIME_H 1
 | #define HAVE_FLOAT_H 1
-| #define HAVE_MEMORY_H 1
-| #define HAVE_STDDEF_H 1
-| #define HAVE_STDLIB_H 1
+| #define HAVE_STDIO_H 1
 | #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
 | #define HAVE_STDARG_H 1
 | #define HAVE__BOOL 1
 | #define HAVE_STDBOOL_H 1
@@ -643,7 +669,7 @@ configure:5643: $? = 0
 configure:5655: result: yes
 configure:5662: checking for _doprnt
 configure:5719: gcc -o conftest -g -O2   conftest.c  >&5
-/var/tmp//ccZRmiok.o: In function `main':
+/var/tmp//ccp6fYin.o: In function `main':
 /home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
 /home/reed/dawg-unix/conftest.c:80: undefined reference to `_doprnt'
 configure:5725: $? = 1
@@ -671,12 +697,12 @@ configure: failed program was:
 | #define HAVE_INTTYPES_H 1
 | #define HAVE_STDINT_H 1
 | #define HAVE_UNISTD_H 1
-| #define HAVE_MATH_H 1
+| #define HAVE_TIME_H 1
 | #define HAVE_FLOAT_H 1
-| #define HAVE_MEMORY_H 1
-| #define HAVE_STDDEF_H 1
-| #define HAVE_STDLIB_H 1
+| #define HAVE_STDIO_H 1
 | #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
 | #define HAVE_STDARG_H 1
 | #define HAVE__BOOL 1
 | #define HAVE_STDBOOL_H 1
@@ -736,7 +762,7 @@ configure:5750: result: no
 configure:5768: checking for sqrt
 configure:5825: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:65: warning: conflicting types for built-in function `sqrt'
-/var/tmp//ccRHSvIl.o: In function `main':
+/var/tmp//ccodJNVC.o: In function `main':
 /home/reed/dawg-unix/conftest.c:81: undefined reference to `sqrt'
 /home/reed/dawg-unix/conftest.c:80: undefined reference to `sqrt'
 configure:5831: $? = 1
@@ -764,12 +790,12 @@ configure: failed program was:
 | #define HAVE_INTTYPES_H 1
 | #define HAVE_STDINT_H 1
 | #define HAVE_UNISTD_H 1
-| #define HAVE_MATH_H 1
+| #define HAVE_TIME_H 1
 | #define HAVE_FLOAT_H 1
-| #define HAVE_MEMORY_H 1
-| #define HAVE_STDDEF_H 1
-| #define HAVE_STDLIB_H 1
+| #define HAVE_STDIO_H 1
 | #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
 | #define HAVE_STDARG_H 1
 | #define HAVE__BOOL 1
 | #define HAVE_STDBOOL_H 1
@@ -846,7 +872,6 @@ on asums8.genetics.uga.edu
 config.status:700: creating Makefile
 config.status:700: creating src/Makefile
 config.status:804: creating config.h
-config.status:944: config.h is unchanged
 config.status:1124: executing depfiles commands
 
 ## ---------------- ##
@@ -885,6 +910,7 @@ ac_cv_func_realloc_0_nonnull=yes
 ac_cv_func_setvbuf_reversed=no
 ac_cv_func_sqrt=no
 ac_cv_func_vprintf=yes
+ac_cv_header_assert_h=yes
 ac_cv_header_float_h=yes
 ac_cv_header_inttypes_h=yes
 ac_cv_header_math_h=yes
@@ -892,13 +918,14 @@ ac_cv_header_memory_h=yes
 ac_cv_header_stdarg_h=yes
 ac_cv_header_stdbool_h=yes
 ac_cv_header_stdc=yes
-ac_cv_header_stddef_h=yes
 ac_cv_header_stdint_h=yes
+ac_cv_header_stdio_h=yes
 ac_cv_header_stdlib_h=yes
 ac_cv_header_string_h=yes
 ac_cv_header_strings_h=yes
 ac_cv_header_sys_stat_h=yes
 ac_cv_header_sys_types_h=yes
+ac_cv_header_time_h=yes
 ac_cv_header_unistd_h=yes
 ac_cv_lib_fl_yywrap=yes
 ac_cv_objext=o
@@ -1012,18 +1039,17 @@ target_alias=''
 ## confdefs.h. ##
 ## ----------- ##
 
+#define HAVE_ASSERT_H 1
 #define HAVE_FLOAT_H 1
 #define HAVE_INTTYPES_H 1
 #define HAVE_MALLOC 1
 #define HAVE_MATH_H 1
 #define HAVE_MEMORY_H 1
-#define HAVE_MEMORY_H 1
 #define HAVE_REALLOC 1
 #define HAVE_STDARG_H 1
 #define HAVE_STDBOOL_H 1
-#define HAVE_STDDEF_H 1
 #define HAVE_STDINT_H 1
-#define HAVE_STDLIB_H 1
+#define HAVE_STDIO_H 1
 #define HAVE_STDLIB_H 1
 #define HAVE_STDLIB_H 1
 #define HAVE_STDLIB_H 1
@@ -1031,6 +1057,7 @@ target_alias=''
 #define HAVE_STRING_H 1
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
+#define HAVE_TIME_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_VPRINTF 1
@@ -1051,3 +1078,20 @@ target_alias=''
 extern "C" void std::exit (int) throw (); using std::exit;
 
 configure: exit 0
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by config.status, which was
+generated by GNU Autoconf 2.59.  Invocation command line was
+
+  CONFIG_FILES    = 
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status config.h
+
+on asums8.genetics.uga.edu
+
+config.status:804: creating config.h

@@ -532,14 +532,14 @@ void Tree::Align(Alignment &aln) const
 			if(uCol >= cit->size())
 				continue;
 			bGo = true;
-			if(cit->at(uCol) == '+' || cit->at(uCol) == '=')
+			if((*cit)[uCol] == '+' || (*cit)[uCol] == '=')
 			{
 				for(vector<Sequence::HistoryVec>::iterator it = vHisTable.begin();
 					it != vHisTable.end(); ++it)
 				{
 					if(uCol >= it->size())
 						it->resize(uCol+1, '-');
-					else if( it->at(uCol) != '+' && it->at(uCol) != '=')
+					else if( (*it)[uCol] != '+' && (*it)[uCol] != '=')
 						it->insert(it->begin()+uCol, 1, '-');
 				}
 				cit = vHisTable.end()-1;

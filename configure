@@ -4134,7 +4134,7 @@ done
 
 
 
-for ac_header in math.h float.h memory.h stddef.h stdlib.h unistd.h stdarg.h
+for ac_header in time.h float.h stdio.h unistd.h math.h assert.h stdarg.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
