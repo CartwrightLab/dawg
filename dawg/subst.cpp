@@ -1,10 +1,6 @@
-#include "subst.h"
-#include "node.h"
 #include "dawg.h"
+#include "node.h"
 #include "rand.h"
-
-#include <math.h>
-#include <float.h>
 
 bool SubstProcessor::Setup(double pFreqs[], double pSubs[])
 {

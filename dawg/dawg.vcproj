@@ -18,7 +18,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="HAVE_CONFIG_H"
 				MinimalRebuild="TRUE"
 				RuntimeLibrary="5"
 				UsePrecompiledHeader="0"
@@ -74,7 +74,7 @@
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="HAVE_CONFIG_H"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="4"
@@ -132,9 +132,6 @@
 			</File>
 			<File
 				RelativePath="eigen.cpp">
-			</File>
-			<File
-				RelativePath="error.cpp">
 			</File>
 			<File
 				RelativePath="evolve.cpp">
@@ -214,6 +211,9 @@ move /Y $(InputName).hpp $(InputName).h
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
+				RelativePath=".\config.h">
+			</File>
+			<File
 				RelativePath="dawg.h">
 			</File>
 			<File
@@ -233,6 +233,9 @@ move /Y $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\subst.h">
+			</File>
+			<File
+				RelativePath=".\var.h">
 			</File>
 		</Filter>
 		<Filter

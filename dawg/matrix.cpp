@@ -1,6 +1,14 @@
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif
+
 #include "matrix.h"
-#include <memory.h>
+
 #include <algorithm>
+
+#ifdef HAVE_MEMORY_H
+#	include <memory.h>
+#endif
 
 using namespace std;
 

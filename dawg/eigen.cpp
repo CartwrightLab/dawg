@@ -1,7 +1,17 @@
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif
+
 #include "matrix.h"
+
 #include <iostream>
-#include <math.h>
-#include <float.h>
+
+#ifdef HAVE_FLOAT_H
+#	include <float.h>
+#endif
+#ifdef HAVE_MATH_H
+#	include <math.h>
+#endif
 
 #ifdef _WIN32
 #define copysign _copysign

@@ -1,20 +1,17 @@
 %{
-// cmd: bison -d parser.b -o parser.c
-
+#pragma warning(disable: 4244 4065 4255 4127 4102)
 #include "dawg.h"
-#include <vector>
-#include <stdio.h>
+#include "var.h"
 
-#pragma warning(disable: 4244 4702)
 
 #define YYERROR_VERBOSE 1
-
-using namespace std;
 
 extern char yytext[];
 extern FILE *yyin;
 int yylex(void);
 void yyerror (char *s);
+
+using namespace std;
 %}
 
 %union {

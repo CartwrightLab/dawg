@@ -90,22 +90,19 @@
 /* Copy the first part of user declarations.  */
 #line 1 "parser.b"
 
-// cmd: bison -d parser.b -o parser.c
-
+#pragma warning(disable: 4244 4065 4255 4127 4102)
 #include "dawg.h"
-#include <vector>
-#include <stdio.h>
+#include "var.h"
 
-#pragma warning(disable: 4244 4702)
 
 #define YYERROR_VERBOSE 1
-
-using namespace std;
 
 extern char yytext[];
 extern FILE *yyin;
 int yylex(void);
 void yyerror (char *s);
+
+using namespace std;
 
 
 /* Enabling traces.  */
@@ -122,7 +119,7 @@ void yyerror (char *s);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 20 "parser.b"
+#line 17 "parser.b"
 typedef union YYSTYPE {
 	double d;	/* number values */
 	char*  cs;  /* string values */
@@ -133,7 +130,7 @@ typedef union YYSTYPE {
 	Node	*pnode; /*Tree*/
 } YYSTYPE;
 /* Line 191 of yacc.c.  */
-#line 136 "parser.cpp"
+#line 133 "parser.cpp"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -145,7 +142,7 @@ typedef union YYSTYPE {
 
 
 /* Line 214 of yacc.c.  */
-#line 148 "parser.cpp"
+#line 145 "parser.cpp"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -321,9 +318,9 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    59,    59,    61,    66,    71,    79,    88,    93,    97,
-      98,    99,   104,   107,   110,   115,   122,   124,   127,   134,
-     140,   146,   151,   158,   165,   170
+       0,    56,    56,    58,    63,    68,    76,    85,    90,    94,
+      95,    96,   101,   104,   107,   112,   119,   121,   124,   131,
+     137,   143,   148,   155,   162,   167
 };
 #endif
 
@@ -1039,14 +1036,14 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 67 "parser.b"
+#line 64 "parser.b"
     {
 
 ;}
     break;
 
   case 5:
-#line 72 "parser.b"
+#line 69 "parser.b"
     {
 	DawgVar::SetVar(string(yyvsp[-2].cs), yyvsp[0].pvar);
 	delete[] yyvsp[-2].cs;
@@ -1054,7 +1051,7 @@ yyreduce:
     break;
 
   case 6:
-#line 79 "parser.b"
+#line 76 "parser.b"
     {
 	size_t t1 = strlen(yyvsp[-2].cs);
 	size_t t2 = strlen(yyvsp[0].cs);
@@ -1067,29 +1064,29 @@ yyreduce:
     break;
 
   case 7:
-#line 88 "parser.b"
+#line 85 "parser.b"
     { yyval.cs = yyvsp[0].cs; ;}
     break;
 
   case 8:
-#line 94 "parser.b"
+#line 91 "parser.b"
     {
 	yyval.pvar = new DawgVar(yyvsp[0].pvec);
 ;}
     break;
 
   case 9:
-#line 97 "parser.b"
+#line 94 "parser.b"
     { yyval.pvar= new DawgVar(yyvsp[0].d); ;}
     break;
 
   case 10:
-#line 98 "parser.b"
+#line 95 "parser.b"
     { yyval.pvar= new DawgVar(yyvsp[0].b); ;}
     break;
 
   case 11:
-#line 100 "parser.b"
+#line 97 "parser.b"
     {
 	yyval.pvar= new DawgVar(string(yyvsp[0].cs));
 	delete[] yyvsp[0].cs;
@@ -1097,24 +1094,24 @@ yyreduce:
     break;
 
   case 12:
-#line 104 "parser.b"
+#line 101 "parser.b"
     { yyval.pvar = new DawgVar(yyvsp[0].pnode); ;}
     break;
 
   case 13:
-#line 107 "parser.b"
+#line 104 "parser.b"
     { yyval.pvec = yyvsp[-1].pvec; ;}
     break;
 
   case 14:
-#line 111 "parser.b"
+#line 108 "parser.b"
     {
 	yyval.pvec->push_back(yyvsp[0].pvar);
 ;}
     break;
 
   case 15:
-#line 116 "parser.b"
+#line 113 "parser.b"
     {
 	yyval.pvec = new DawgVar::Vec;
 	yyval.pvec->push_back(yyvsp[0].pvar);
@@ -1122,17 +1119,17 @@ yyreduce:
     break;
 
   case 16:
-#line 122 "parser.b"
+#line 119 "parser.b"
     { yyval.cs = yyvsp[0].cs; ;}
     break;
 
   case 17:
-#line 124 "parser.b"
+#line 121 "parser.b"
     { yyval.pnode = yyvsp[0].pnode; ;}
     break;
 
   case 18:
-#line 128 "parser.b"
+#line 125 "parser.b"
     {
 	yyval.pnode = new Node(yyvsp[-2].cs, yyvsp[-4].pnode);
 	yyval.pnode->BranchLength(yyvsp[0].d);
@@ -1141,7 +1138,7 @@ yyreduce:
     break;
 
   case 19:
-#line 135 "parser.b"
+#line 132 "parser.b"
     {
 	yyval.pnode = new Node(yyvsp[0].cs, yyvsp[-2].pnode);
 	delete[] yyvsp[0].cs;	
@@ -1149,7 +1146,7 @@ yyreduce:
     break;
 
   case 20:
-#line 141 "parser.b"
+#line 138 "parser.b"
     {
 	yyval.pnode = new Node("", yyvsp[-3].pnode);
 	yyval.pnode->BranchLength(yyvsp[0].d);
@@ -1157,14 +1154,14 @@ yyreduce:
     break;
 
   case 21:
-#line 147 "parser.b"
+#line 144 "parser.b"
     {
 	yyval.pnode = new Node("", yyvsp[-1].pnode);
 ;}
     break;
 
   case 22:
-#line 152 "parser.b"
+#line 149 "parser.b"
     {
 	yyval.pnode = new Node(yyvsp[-2].cs);
 	yyval.pnode->BranchLength(yyvsp[0].d);
@@ -1173,7 +1170,7 @@ yyreduce:
     break;
 
   case 23:
-#line 159 "parser.b"
+#line 156 "parser.b"
     {
 	yyval.pnode = new Node(yyvsp[0].cs);
 	delete[] yyvsp[0].cs;		
@@ -1181,14 +1178,14 @@ yyreduce:
     break;
 
   case 24:
-#line 166 "parser.b"
+#line 163 "parser.b"
     {
 	yyvsp[-1].pnode->AddSib(yyvsp[0].pnode);
 ;}
     break;
 
   case 25:
-#line 171 "parser.b"
+#line 168 "parser.b"
     {
 	yyval.pnode = yyvsp[0].pnode;
 ;}
@@ -1198,7 +1195,7 @@ yyreduce:
     }
 
 /* Line 991 of yacc.c.  */
-#line 1201 "parser.cpp"
+#line 1198 "parser.cpp"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1407,7 +1404,7 @@ yyreturn:
 }
 
 
-#line 175 "parser.b"
+#line 172 "parser.b"
 
 
 

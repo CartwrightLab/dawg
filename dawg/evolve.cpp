@@ -1,13 +1,4 @@
 #include "dawg.h"
-#include <math.h>
-#include <float.h>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <functional>
-#include "rand.h"
-#include "matrix.h"
 
 #ifdef _WIN32
 #	define finite _finite

@@ -1,41 +1,18 @@
 // dawg.cpp
 
 #include "dawg.h"
-#include "node.h"
-
-#include <time.h>
-#include <float.h>
-#include <stdio.h>
-#ifdef _WIN32
-#	include <process.h>
-#else
-#	include <unistd.h>
-#endif
-
-
-#include <iostream>
-#include <algorithm>
-#include <iomanip>
-#include <memory>
+#include "rand.h"
+#include "var.h"
 
 using namespace std;
 
 bool Parse(const char* cs);
 bool Execute();
 
-// So we don't have to include "rand.h"
-void mt_srand(unsigned long uKeys[], unsigned long uLen);
-bool check_endian();
-
 char csBuffer[32];
 
 int main(int argc, char* argv[])
 {
-	if(!check_endian())
-	{
-		DawgError("Dawg compiled with the wrong endian settings.  See rand.h.");
-		return 1;
-	}
 	bool bSerial = true; // Process files in serial fashion
 	bool bUsage = (argc==1);
 	bool bFullUsage = false;
@@ -89,7 +66,7 @@ int main(int argc, char* argv[])
 		{
 			cout << "DAWG - DNA Assembly With Gaps" << endl;
 			cout << "Copyright (c) 2003-2004 Reed A. Cartwright (all rights reserved)" << endl;
-			cout << "Version " << DawgVersion() << endl << endl;
+			cout << "Version " << VERSION << endl << endl;
 		}
 		if(bUsage)
 			cout << "Usage: dawg -[scvh?] file1 [file2 ...]" << endl;
@@ -150,7 +127,7 @@ bool Execute()
 	vector<double> vdInsModel;
 	vector<double> vdDelModel;
 
-	vector<Tree*> vtTrees;
+	vector<Node*> vtTrees;
 	double		  dScale = 1.0;
 	vector<int>   vnSeed;
 
@@ -360,7 +337,7 @@ bool Execute()
 		vector<double>::iterator dit = vdRates.begin();
 		for(unsigned int uTree = 0; uTree < vtTrees.size(); ++uTree)
 		{
-			Tree *pTree = vtTrees[uTree];
+			Node *pTree = vtTrees[uTree];
 			Seq &rSeq = pTree->Sequence();
 			int nSeqLen = (vSeqLen.size() == 1) ? vSeqLen[0]/vtTrees.size() : vSeqLen[uTree];
 
@@ -385,4 +362,15 @@ bool Execute()
 		SaveSequences(*pOut, (const Node**)&(vtTrees[0]), vtTrees.size());
 	}
 	return true;
+}
+
+bool DawgError(const char* csErr, ...)
+{
+	fprintf(stderr, "Error: ");
+	va_list args;
+	va_start(args, csErr);
+	vfprintf(stderr, csErr, args);
+	va_end(args);
+	fprintf(stderr, "\n");
+	return false;
 }

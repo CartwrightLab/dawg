@@ -1,15 +1,4 @@
 #include "rand.h"
-
-bool check_endian()
-{
-	union probe{ 
-      unsigned int num;
-      unsigned char bytes[sizeof(unsigned int)];
-	};
-    probe p = { 1U }; 
-    return (p.bytes[0] == RR_1);
-};
-
 /* 
    MT19937-2002 Algorithm
 

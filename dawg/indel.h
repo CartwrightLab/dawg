@@ -1,10 +1,7 @@
 #ifndef DAWG_INDEL_H
 #define DAWG_INDEL_H
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <functional>
+#include "dawg.h"
 
 class Node;
 

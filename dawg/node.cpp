@@ -1,11 +1,6 @@
-#include "node.h"
 #include "dawg.h"
+#include "node.h"
 #include "rand.h"
-
-#include <float.h>
-#include <math.h>
-
-#include <algorithm>
 
 using namespace std;
 
@@ -103,8 +98,9 @@ void Node::Insert(unsigned int uPos, unsigned int uSize)
 void Node::Delete(unsigned int uPos, unsigned int uSize)
 {
 	//assert(uPos <= m_seq.size());
-	unsigned int uStart = (uSize < uPos+1u)? 1u+uPos-uSize : 0u;
-	unsigned int uEnd = (m_seq.size() > uPos+1u) ? uPos+1u : m_seq.size();
+	uPos++;
+	unsigned int uStart = (uSize < uPos)? uPos-uSize : 0u;
+	unsigned int uEnd = (m_seq.size() > uPos) ? uPos : m_seq.size();
 
 	m_seq.erase(m_seq.begin()+uStart, m_seq.begin()+uEnd);
 

@@ -1,15 +1,21 @@
 #ifndef DAWG_RAND_H
 #define DAWG_RAND_H
 
-// LITTLE ENDIAN
-#define RR_0 0
-#define RR_1 1
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif
 
-// BIG ENDIAN
-//#define RR_0 1
-//#define RR_1 0
+#ifdef WORDS_BIGENDIAN 
+#	define RR_0 1
+#	define RR_1 0
+#else
+#	define RR_0 0
+#	define RR_1 1
+#endif
 
-#include <math.h>
+#ifdef HAVE_MATH_H
+#	include <math.h>
+#endif
 
 #define RDBL32_MIN  2.3283064365386963e-010
 #define RDBL_MIN	RDBL32_MIN
@@ -18,6 +24,7 @@
 #	define M_E        2.71828182845904523536
 #endif
 
+bool check_endian();
 
 
 /************************************************

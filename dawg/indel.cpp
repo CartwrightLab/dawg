@@ -1,9 +1,7 @@
-#include "indel.h"
 #include "dawg.h"
+#include "indel.h"
+#include "node.h"
 #include "rand.h"
-
-#include <float.h>
-#include <math.h>
 
 using namespace std;
 

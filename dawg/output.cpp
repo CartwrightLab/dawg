@@ -1,15 +1,12 @@
 #include "dawg.h"
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <map>
-#include <assert.h>
+#include "node.h"
+#include "var.h"
 
 using namespace std;
 
 void PrintVar(const DawgVar* var);
 void PrintSeq(const Seq& rSeq);
-void PrintTreeSeq(Tree* pTree);
+void PrintTreeSeq(Node* pTree);
 void PrintTree(const Node* pNode);
 
 string SeqToString(const Seq& rSeq);
@@ -17,9 +14,9 @@ string SeqToString(const Seq& rSeq);
 typedef map<string, string> MapLabelToAln;
 typedef map<const Node*, string> MapNodeToSs;
 
-void   FillSequences(MapNodeToSs& rMap, const Tree* pTree);
+void   FillSequences(MapNodeToSs& rMap, const Node* pTree);
 void   MapSequences(MapNodeToSs& rMap, const Node* pNode);
-void   MapAlignment(MapLabelToAln& rMap, const Tree* pTree);
+void   MapAlignment(MapLabelToAln& rMap, const Node* pTree);
 void   Align(MapNodeToSs &rMap);
 void   PrintSequencesFasta(ostream &os, const MapLabelToAln& rMap);
 void   PrintSequencesNexus(ostream &os, const MapLabelToAln& rMap);
@@ -53,12 +50,12 @@ void DawgIniOutput(ostream& os)
 {
 	if(g_fileFormat == NEXUS)
 	{
-		os << "#NEXUS" << endl << "[Created by DAWG Version " << DawgVersion() << endl << endl;
+		os << "#NEXUS" << endl << "[Created by DAWG Version " << VERSION << endl << endl;
 		os << EvoDescription() << ']' << endl;
 	}
 }
 
-bool SaveSequences(ostream &rFile, const Tree* arTrees[], unsigned int uSize)
+bool SaveSequences(ostream &rFile, const Node* arTrees[], unsigned int uSize)
 {
 	++g_nDataSet;
 	MapLabelToAln m;
@@ -91,7 +88,7 @@ string SeqToString(const Seq& rSeq)
 }
 
 // Appends aligned sequeces from pTree to the map
-void MapAlignment(MapLabelToAln& rMap, const Tree* pTree)
+void MapAlignment(MapLabelToAln& rMap, const Node* pTree)
 {
 	//Construct map of template strings
 	MapNodeToSs ssMap;
@@ -158,7 +155,7 @@ void Align(MapNodeToSs &rMap)
 }
 
 // Convert sequences to human format and store in map under node.
-void FillSequences(MapNodeToSs& rMap, const Tree* pTree)
+void FillSequences(MapNodeToSs& rMap, const Node* pTree)
 {
 	string ssTemp = SeqToString(pTree->Sequence());
 	string& rss = rMap[pTree];

@@ -1266,14 +1266,8 @@ char *yytext;
 // Error Warning: Does not check for circular includes.
 
 #include "dawg.h"
+#include "var.h"
 #include "parser.h"
-
-#include <math.h>
-#include <float.h>
-
-#include <vector>
-#include <iostream>
-
 
 #pragma warning(disable: 4127 4244)
 

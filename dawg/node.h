@@ -1,10 +1,7 @@
 #ifndef DAWG_NODE_H
 #define DAWG_NODE_H
 
-#include <string>
-#include <vector>
-#include <memory>
-
+#include "dawg.h"
 #include "indel.h"
 #include "subst.h"
 
@@ -127,5 +124,7 @@ inline char NucToChar(Nucleotide::Nuc n)
 	static char cs[] = "ACGT-?";
 	return (n > 4) ? '?' : cs[n];
 }
+
+bool SaveSequences(std::ostream &rFile, const Node *arTrees[], unsigned int uSize);
 
 #endif //DAWG_NODE_H

@@ -1,9 +1,6 @@
+
 #include "dawg.h"
-
-#include <float.h>
-#include <stdio.h>
-
-#include <map>
+#include "var.h"
 
 using namespace std;
 
@@ -11,17 +8,6 @@ DawgVar::~DawgVar()
 {
 	Unset();
 }
-
-class MapSsToVar : public std::map<std::string, DawgVar*>
-{
-public:	
-	virtual ~MapSsToVar()
-	{
-		for(iterator it = begin(); it != end(); ++it)
-			delete it->second;
-		clear();
-	}
-};
 
 void DawgVar::ClearMap()
 {
@@ -166,24 +152,19 @@ void DawgVar::Set(const Vec *pVec)
 	m_pvData = pVec;
 }
 
-bool DawgVar::Get(Tree *&rTree) const
+bool DawgVar::Get(Node *&rTree) const
 {
 	if(!IsType(tyTree))
 		return false;
 	rTree = GetTree();
 	return true;
 }
-void DawgVar::Set(Tree *pTree)
+void DawgVar::Set(Node *pTree)
 {
 	Unset();
 	m_tyType = tyTree;
 	m_ptrData = pTree;
 }
-//bool DawgVar::Get(const string & ssKey, Tree *&rTree)
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rTree));
-//}
 
 unsigned int DawgVar::Size()
 {

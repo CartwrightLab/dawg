@@ -1,6 +1,7 @@
 #ifndef DAWG_SUBST_H
 #define DAWG_SUBST_H
 
+#include "dawg.h"
 #include "matrix.h"
 
 class Node;
