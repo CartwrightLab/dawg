@@ -7,49 +7,6 @@
 #include "indel.h"
 #include "matrix.h"
 
-class Nucleotide
-{
-public:
-	typedef unsigned char Nuc;
-
-	Nucleotide() : m_nuc(5), m_dRate(1.0) { }
-	Nucleotide(Nuc nuc, double rate) : m_nuc(nuc), m_dRate(rate) { }
-
-	double m_dRate; // 0.0 means invarant
-	Nuc    m_nuc;
-};
-
-class Sequence
-{
-public:
-	typedef std::vector<Nucleotide> DNAVec;
-	typedef std::vector<char> HistoryVec;
-
-	Sequence();
-	Sequence(const DNAVec &dna);
-	unsigned long HisPos(unsigned long uPos) const;
-	
-	unsigned long Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd);
-	unsigned long Delete(unsigned long uPos, unsigned long uSize);
-
-	// Access the dna sequence
-	Nucleotide& operator [](unsigned long uPos) { return m_vDNA[uPos]; }
-	const Nucleotide& operator [](unsigned long uPos) const { return m_vDNA[uPos]; }
-
-	unsigned long Length() const { return m_vDNA.size(); }
-	
-	const DNAVec& DNA() const { return m_vDNA; }
-	const HistoryVec& History() const {return m_vHistory; } 
-	
-	void Append(const Sequence& seq);
-
-	void ResetHistory();
-
-private:
-	DNAVec		m_vDNA;
-	HistoryVec	m_vHistory;
-};
-
 class NewickNode {
 public:
 	NewickNode(NewickNode* p, const char *cs, double d);
@@ -60,6 +17,93 @@ public:
 
 protected:
 	void MakeName();
+};
+
+class Nucleotide
+{
+public:
+	// First two bits specify base
+	// Second two bits specify type
+	unsigned char    m_ucNuc;
+	double m_dRate; // 0.0 means invarant
+
+	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
+	Nucleotide(unsigned char nuc, double rate) : m_ucNuc(nuc), m_dRate(rate) { }
+
+	static const unsigned char MaskBase		= 0x3; // 0011
+	static const unsigned char MaskType		= 0xC; // 1100
+	static const unsigned char MaskDel		= 0x8; // 1000
+	static const unsigned char MaskIns		= 0x4; // 0100
+	static const unsigned char TypeRoot		= 0x0; // 0000
+	static const unsigned char TypeIns		= 0x4; // 0100
+	static const unsigned char TypeDel		= 0x8; // 1000
+	static const unsigned char TypeDelIns	= 0xC; // 1100
+	
+	inline unsigned char GetBase() const { return m_ucNuc & MaskBase; }
+	inline unsigned char GetType() const { return m_ucNuc & MaskType; }
+	inline void SetBase(unsigned char uc) { m_ucNuc =  (uc & MaskBase) | (m_ucNuc & MaskType); }
+	inline void SetType(unsigned char uc) { m_ucNuc =  (uc & MaskType) | (m_ucNuc & MaskBase); }
+	inline void SetNuc(unsigned char ucB, unsigned char ucT)
+		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType); }
+	inline bool IsType(unsigned char uc) const { return (GetType() == uc); }
+	inline bool IsDeletion() const { return ((m_ucNuc & MaskDel) == MaskDel); }
+	inline bool IsInsertion() const { return ((m_ucNuc & MaskIns) == MaskIns); }
+
+	inline bool FromChar(char ch)
+	{
+		switch(ch)
+		{
+		case 'A':
+		case 'a':
+			m_ucNuc = 0;
+			return true;
+		case 'C':
+		case 'c':
+			m_ucNuc = 1;
+			return true;
+		case 'G':
+		case 'g':
+			m_ucNuc = 2;
+			return true;
+		case 'T':
+		case 't':
+			m_ucNuc = 3;
+			return true;
+		default:
+			return false;
+		}
+	}
+	inline char ToChar() const
+	{
+		char csNuc[]	= "ACGT";
+		char csType[]	= " +-=";
+		return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
+	}
+};
+
+class Sequence : public std::vector<Nucleotide>
+{
+public:
+	typedef std::vector<Nucleotide> Base;
+	Sequence() : m_uLength(0) { }
+	Sequence(unsigned long uSize) : Base(uSize, Nucleotide(0xF, -1.0))
+	{
+		m_uLength = uSize;
+	}
+	unsigned long SeqLength() const { return m_uLength; }
+
+	const_iterator SeqPos(unsigned long uPos) const;
+	iterator SeqPos(unsigned long uPos);
+
+	unsigned long Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
+	unsigned long Deletion(iterator itBegin, unsigned long uSize);
+
+	void Append(const Sequence &seq);
+
+	void ToString(std::string &ss) const;
+
+private:
+	unsigned long m_uLength;
 };
 
 class Tree
@@ -74,15 +118,17 @@ public:
 		std::vector<Handle> m_vAncestors;
 		std::map<Handle, double> m_mBranchLens;
 		bool m_bTouched;
-		unsigned long m_uWidth;
-		Node() : m_bTouched(false), m_uWidth(1) { }
-		unsigned long SeqLength() const;
-		unsigned long Insert(unsigned long uPos,
-			Sequence::DNAVec::const_iterator itBegin,
-			Sequence::DNAVec::const_iterator itEnd);
-		unsigned long Delete(unsigned long uPos, unsigned long uSize);
+		Node() : m_bTouched(false) { }
 		void Flatten(Sequence& seq) const;
+		unsigned long SeqLength() const;
+
+		typedef std::pair<std::vector<Sequence>::iterator, Sequence::iterator> iterator;
+		typedef std::pair<std::vector<Sequence>::const_iterator, Sequence::const_iterator> const_iterator;
+
+		iterator SeqPos(unsigned long uPos);
+		const_iterator SeqPos(unsigned long uPos) const;
 	};
+
 	typedef std::map<std::string, std::string> Alignment;
 	
 	bool SetupEvolution(double pFreqs[], double pSubs[],
@@ -93,11 +139,11 @@ public:
 		const std::vector<std::vector<double> > &vRates);
 
 	double RandomRate(unsigned long uPos) const;
-	Nucleotide::Nuc RandomNuc() const;
+	unsigned char RandomNuc() const;
 	Nucleotide RandomNucleotide(unsigned long uPos) const
 		{ return Nucleotide(RandomNuc(), RandomRate(uPos)); }
 
-	Tree() : m_nSec(0), m_uWidth(1){}
+	Tree() : m_nSec(0), m_uWidth(1) {}
 	
 	inline unsigned long BlockTrim(unsigned long u) { return u - u%m_uWidth; }
 
@@ -115,7 +161,7 @@ protected:
 
 private:
 	int m_nSec;
-	std::vector< Sequence::DNAVec > m_vDNASeqs;
+	std::vector< Sequence > m_vDNASeqs;
 	Node::Map m_map;
 
 	unsigned long m_uWidth;
@@ -146,30 +192,6 @@ private:
 inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
 {
 	return &*A < &*B;
-}
-
-inline Nucleotide::Nuc CharToNuc(char ch)
-{
-	switch(ch)
-	{
-		case 'a':
-		case 'A': return 0;
-		case 'c':
-		case 'C': return 1;
-		case 'g':
-		case 'G': return 2;
-		case 't':
-		case 'T': return 3;
-		case '-': return 4;
-		case '?': return 5;
-		default : return (Nucleotide::Nuc)-1;
-	}
-}
-
-inline char NucToChar(Nucleotide::Nuc n)
-{
-	char cs[] = "ACGT-?";
-	return (n > 4) ? '?' : cs[n];
 }
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln);

@@ -15,6 +15,12 @@
 #	include <math.h>
 #endif
 
+#ifndef HAVE_COPYSIGN
+#	ifdef HAVE__COPYSIGN
+#		define copysign _copysign
+#	endif
+#endif
+
 #define LAMBDA_THREASHOLD	FLT_EPSILON
 #define SUM_THREASHOLD		DBL_EPSILON
 #define THETA_TH1 1.3407807929942596e+154

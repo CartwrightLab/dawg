@@ -40,6 +40,9 @@
 #ifdef HAVE_STDARG_H
 #	include <stdarg.h>
 #endif
+#ifdef HAVE_PROCESS_H
+#	include <process.h>
+#endif
 
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
@@ -57,5 +60,11 @@ public:
 	void operator ( ) ( const Type& elem ) {m_Sum += elem;}
     operator Type() const { return m_Sum; }
 };
+
+#ifndef HAVE_GETPID
+#	ifdef HAVE__GETPID
+#		define getpid _getpid
+#	endif
+#endif
 
 #endif

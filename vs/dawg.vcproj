@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="dawg"
 	ProjectGUID="{523579F8-2C8F-4503-A435-277A76350A36}"
+	RootNamespace="dawg"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,10 +20,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="C:\Home\Reed\Desktop\dawg\src;C:\Home\Reed\Desktop\dawg\vs"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_CONFIG_H"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -66,11 +70,14 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="C:\Home\Reed\Desktop\dawg\src;C:\Home\Reed\Desktop\dawg\vs"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;HAVE_CONFIG_H"
 				RuntimeLibrary="4"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -137,7 +144,27 @@
 				RelativePath="..\src\indel.cc">
 			</File>
 			<File
+				RelativePath=".\Release\lexer.cc">
+			</File>
+			<File
 				RelativePath="..\src\lexer.ll">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(OutDir)\$(InputName).cc&quot;
+"
+						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(OutDir)\$(InputName).cc&quot;
+"
+						AdditionalDependencies=""
+						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\matrix.cc">
@@ -146,7 +173,28 @@
 				RelativePath="..\src\output.cc">
 			</File>
 			<File
+				RelativePath=".\Release\parser.cc">
+			</File>
+			<File
 				RelativePath="..\src\parser.yy">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="bison -y -d  -o &quot;$(OutDir)\$(InputName).cc&quot; &quot;$(InputPath)&quot;
+move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&quot;
+"
+						Outputs="&quot;$(OutDir)\$(InputName).cc&quot; &quot;$(OutDir)\$(InputName).h&quot;"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="bison -y -d  -o &quot;$(OutDir)\$(InputName).cc&quot; &quot;$(InputPath)&quot;
+move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&quot;
+"
+						Outputs="&quot;$(OutDir)\$(InputName).cc&quot; &quot;$(OutDir)\$(InputName).h&quot;"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\src\rand.cc">
@@ -162,6 +210,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\config.h">
+			</File>
 			<File
 				RelativePath="..\src\dawg.h">
 			</File>

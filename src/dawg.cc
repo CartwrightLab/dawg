@@ -147,7 +147,7 @@ bool Execute()
 	string ssFormat;
 	string ssNexusCode;
 
-	bool bGapSingle = false, bGapPlus = false;
+	bool bGapSingle = false, bGapPlus = false, bLowerCase = false;
 	unsigned long uWidth = 1;
 	int nRes;
 
@@ -216,6 +216,7 @@ bool Execute()
 	
 	DawgVar::Get("GapSingleChar", bGapSingle);
 	DawgVar::Get("GapPlus", bGapPlus);
+	DawgVar::Get("LowerCase", bLowerCase);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
 	if(nRes)

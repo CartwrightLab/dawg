@@ -40,103 +40,76 @@ void NewickNode::MakeName()
 ////////////////////////////////////////////////////////////
 //  class Sequence
 ////////////////////////////////////////////////////////////
-Sequence::Sequence()
+
+Sequence::const_iterator Sequence::SeqPos(unsigned long uPos) const
 {
-
-}
-
-Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), '.')
-{
-
-}
-
-inline bool IsDel(char ch)
-{
-	switch(ch)
+	const_iterator it = begin();
+	// Skip deletions
+	while(it->IsDeletion()) {++it;}
+	while(uPos--)
 	{
-	case 'D': //start of deletion
-	case 'd': //deletion
-	case 'J': //start of deletion on an insertion
-	case 'j': //deletion on an insertion
-		return true;
-	default:
-		return false;
+		++it;
+		// Skip deletions
+		while(it->IsDeletion()) {++it;}
 	}
-	return false;
+	return it;
 }
 
-inline bool IsIns(char ch)
+Sequence::iterator Sequence::SeqPos(unsigned long uPos)
 {
-	switch(ch)
-	{
-	case 'I': //start of insertion
-	case 'i': //insertion
-	case 'J': //start of deletion on an insertion
-	case 'j': //deletion on an insertion
-		return true;
-	default:
-		return false;
-	}
-	return false;
-}
-
-// return the History position which corresponds to the sequence position
-unsigned long Sequence::HisPos(unsigned long uPos) const
-{
-	vector<char>::const_iterator it=m_vHistory.begin();
+	iterator it = begin();
 	// Skip deletions in the history
-	while(IsDel(*it)) {++it;}
+	while(it->IsDeletion()) {++it;}
 	while(uPos--)
 	{
 		++it;
 		// Skip deletions in the history
-		while(IsDel(*it)) {++it;}
+		while(it->IsDeletion()) {++it;}
 	}
-	return (unsigned long)(it-m_vHistory.begin());
+	return it;
 }
 
-unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd)
+unsigned long Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
 {
-	unsigned long uSize = (unsigned long)(itEnd-itBegin);
-	if(uSize == 0 || uPos > m_vDNA.size())
-		return 0;
-	m_vDNA.insert(m_vDNA.begin()+uPos, itBegin, itEnd);
-	uPos = HisPos(uPos);
-	m_vHistory.insert(m_vHistory.begin()+uPos, uSize, 'i');
-	return uSize;
+	unsigned long uRet = (unsigned long)(itEnd-itBegin);
+	size_type off = size() == 0 ? 0 : itPos - begin();
+	insert(itPos, itBegin, itEnd);
+	iterator it = begin()+off;
+	iterator itE = it+uRet;
+	for(;it!=itE;++it)
+		it->SetType(Nucleotide::TypeIns);
+	m_uLength += uRet;
+	return uRet;
 }
 
-unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
+unsigned long Sequence::Deletion(iterator itBegin, unsigned long uSize)
 {
-	if(uSize == 0)
-		return 0;
-	uPos++;
-	unsigned long uStart = (uSize < uPos)? uPos-uSize : 0u;
-	unsigned long uEnd = (m_vDNA.size() > uPos) ? uPos : m_vDNA.size();
-	
-	m_vDNA.erase(m_vDNA.begin()+uStart, m_vDNA.begin()+uEnd);
-
-	uPos = HisPos(uStart);
-	
-	//delete uTemp nucleotides in the history starting at uPos
-	for(unsigned long u = uEnd-uStart; u; u--)
+	unsigned long uRet = 0;
+	for(;uRet < uSize && itBegin != end(); ++itBegin)
 	{
-		m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
-		do {uPos++;} while(IsDel(m_vHistory[uPos]));
+		if(itBegin->IsDeletion())
+			continue;
+		itBegin->SetType(itBegin->IsInsertion() ?
+			Nucleotide::TypeDelIns : Nucleotide::TypeDel);
+		uRet++;
 	}
-	return uEnd-uStart;
+	m_uLength -= uRet;
+	return uRet;
 }
+
 
 void Sequence::Append(const Sequence &seq)
 {
-		m_vDNA.insert(m_vDNA.end(), seq.m_vDNA.begin(), seq.m_vDNA.end());
-		m_vHistory.insert(m_vHistory.end(), seq.m_vHistory.begin(), seq.m_vHistory.end());
+		insert(end(), seq.begin(), seq.end());
+		m_uLength += seq.m_uLength;
 }
 
-void Sequence::ResetHistory()
+void Sequence::ToString(std::string &ss) const
 {
-	m_vHistory.assign(m_vHistory.size(), '.');
+	for(const_iterator cit = begin(); cit != end(); ++cit)
+		ss.push_back(cit->ToChar());
 }
+
 
 ////////////////////////////////////////////////////////////
 //  class Tree::Node
@@ -146,65 +119,8 @@ unsigned long Tree::Node::SeqLength() const
 {
 	unsigned long uRet = 0;
 	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
-		uRet += it->Length();
-	return uRet/m_uWidth;
-}
-
-unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_iterator itBegin,
-			Sequence::DNAVec::const_iterator itEnd)
-{
-	unsigned long uSize = (unsigned long)(itEnd-itBegin);
-	uPos *= m_uWidth;
-	if(uSize == 0)
-		return 0;	
-	vector<Sequence>::iterator it;
-	// find the section belonging to uPos
-	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
-			uPos -= it->Length();
-	if( it == m_vSections.end())
-		return 0;
-	else if(uPos < it->Length())
-		return it->Insert(uPos, itBegin, itEnd)/m_uWidth;
-	else
-	{
-		// Insertion occurs at a gap between sections
-		// Randomly allocate uSize among the sections
-		vector<unsigned long> vTemp;
-		vTemp.push_back(0);
-		vTemp.push_back(m_uWidth*rand_ulong(uSize/m_uWidth));
-		for(vector<Sequence>::iterator jt = it; jt != m_vSections.end() && jt->Length(); ++jt)
-			vTemp.push_back(m_uWidth*rand_ulong(uSize/m_uWidth));
-		vTemp.push_back(uSize);
-		sort(vTemp.begin(), vTemp.end());
-		unsigned long uTemp = it->Insert(uPos, itBegin+vTemp[0], itBegin+vTemp[1]);
-		int i=1;
-		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt, ++i)
-			uTemp += jt->Insert(0, itBegin+vTemp[i], itBegin+vTemp[i+1]);
-		return uTemp/m_uWidth;
-	}
-}
-
-unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
-{
-	if(uSize == 0)
-		return 0;
-	uPos = (uPos+1)*(m_uWidth)-1;
-	uSize *= m_uWidth;
-	vector<Sequence>::iterator it;
-	// find the first section
-	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
-			uPos -= it->Length();
-	if( it == m_vSections.end())
-		return 0;
-	unsigned long u = it->Delete(uPos, uSize);
-	unsigned long uTemp = u;
-	while(u < uSize && ++it != m_vSections.end())
-	{
-		uSize -= u;
-		u = it->Delete(m_uWidth-1, uSize);
-		uTemp += u;
-	}
-	return uTemp/m_uWidth;
+		uRet += it->SeqLength();
+	return uRet;
 }
 
 void Tree::Node::Flatten(Sequence& seq) const
@@ -212,6 +128,32 @@ void Tree::Node::Flatten(Sequence& seq) const
 	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
 		cit != m_vSections.end(); ++cit)
 		seq.Append(*cit);
+}
+
+Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
+{
+	vector<Sequence>::iterator itA;
+	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
+	{
+		if(uPos < itA->SeqLength())
+			break;
+		uPos -= itA->SeqLength();
+	}
+	Sequence::iterator itB = (itA != m_vSections.end()) ? itA->SeqPos(uPos) : NULL;
+	return iterator(itA,itB);
+}
+
+Tree::Node::const_iterator Tree::Node::SeqPos(unsigned long uPos) const
+{
+	vector<Sequence>::const_iterator itA;
+	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
+	{
+		if(uPos < itA->SeqLength())
+			break;
+		uPos -= itA->SeqLength();
+	}
+	Sequence::const_iterator itB = (itA != m_vSections.end()) ? itA->SeqPos(uPos) : NULL;
+	return const_iterator(itA,itB);
 }
 
 
@@ -251,19 +193,18 @@ void Tree::Evolve()
 	// Setup Root
 	Node& rNode = m_map["_R()()T"];
 	rNode.m_bTouched = true;
-	for(vector<Sequence::DNAVec>::iterator it = m_vDNASeqs.begin();
-		it != m_vDNASeqs.end(); ++it)
+	rNode.m_vSections = m_vDNASeqs;
+	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
+		it != rNode.m_vSections.end(); ++it)
 	{
-		rNode.m_vSections.push_back(Sequence(*it));
 		for(unsigned int u = 0;u<it->size();++u)
 		{
-			if(rNode.m_vSections.back()[u].m_dRate < 0.0)
-				rNode.m_vSections.back()[u].m_dRate = RandomRate(u);
-			if(rNode.m_vSections.back()[u].m_nuc >= 4)
-				rNode.m_vSections.back()[u].m_nuc = RandomNuc();
+			if((*it)[u].m_dRate < 0.0)
+				(*it)[u].m_dRate = RandomRate(u);
+			if((*it)[u].m_ucNuc >= 4)
+				(*it)[u].m_ucNuc = RandomNuc();
 		}
 	}
-
 	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
 		Evolve(it->second);
 }
@@ -297,11 +238,16 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return; // Nothing to evolve
 	
 	// Substitutions
+	unsigned long uNuc = 0;
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
-		for(unsigned long u = 0; u < it->Length(); ++u)
+	{
+		for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
 		{
+			// Skip any position that is a deletion
+			if(jt->IsDeletion())
+				continue;
 			// Total Evolution Rate for the position
-			double dTemp = dTime*(*it)[u].m_dRate*m_vdScale[u%m_uWidth];
+			double dTemp = dTime*jt->m_dRate*m_vdScale[uNuc%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			if(dTemp != m_dOldTime)
@@ -322,21 +268,23 @@ void Tree::Evolve(Node &rNode, double dTime)
 				}
 			}
 			dTemp = rand_real();
-			if(dTemp <= m_matSubst((*it)[u].m_nuc, 0))
-				(*it)[u].m_nuc = 0;
-			else if(dTemp <= m_matSubst((*it)[u].m_nuc, 1))
-				(*it)[u].m_nuc = 1;
-			else if(dTemp <= m_matSubst((*it)[u].m_nuc, 2))
-				(*it)[u].m_nuc = 2;
+			if(dTemp <= m_matSubst(jt->m_ucNuc, 0))
+				jt->m_ucNuc = 0;
+			else if(dTemp <= m_matSubst(jt->m_ucNuc, 1))
+				jt->m_ucNuc = 1;
+			else if(dTemp <= m_matSubst(jt->m_ucNuc, 2))
+				jt->m_ucNuc = 2;
 			else
-				(*it)[u].m_nuc = 3;
+				jt->m_ucNuc = 3;
+
+			++uNuc; // Increase position
 		}
+	}
 	// Indels
 	if(m_funcRateSum(0.0) < DBL_EPSILON)
 		return;
 
-	rNode.m_uWidth = m_uWidth; // Set Block Width
-	unsigned long uLength = rNode.SeqLength();
+	unsigned long uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
@@ -345,18 +293,37 @@ void Tree::Evolve(Node &rNode, double dTime)
 		{
 			//Insertion
 			unsigned long ul = m_pInsertionModel->RandSize();
-			unsigned long uPos = rand_ulong(uLength);
-			Sequence::DNAVec dna;
-			for(unsigned int uc = 0; uc < m_uWidth*ul; ++ul)
-				dna.push_back(RandomNucleotide(uc));
-			uLength += rNode.Insert(uPos, dna.begin(), dna.end());
+			unsigned long uPos = rand_ulong(uLength); // pos is in [0,L]
+			Sequence seq;
+			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
+				seq.push_back(RandomNucleotide(uc));
+			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
+			if(itPos.first == rNode.m_vSections.end())
+			{
+				uLength += rNode.m_vSections.back().Insertion(
+					rNode.m_vSections.back().end(), seq.begin(), seq.end())/m_uWidth;
+			}
+			else
+			{
+				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end())/m_uWidth;
+			}
 		}
 		else
 		{
 			//Deletion
 			unsigned long ul = m_pDeletionModel->RandSize();
-			unsigned long uPos = rand_ulong(uLength+ul-1);
-			uLength -= rNode.Delete(uPos, ul);
+			unsigned long uPos = rand_ulong(uLength+ul-1)+1;
+			unsigned long uB = (ul >= uPos) ? 0 : uPos - ul;
+			unsigned long uSize = (uPos > uLength) ? uLength : uPos;
+			uSize -= uB;
+			uSize *= m_uWidth;
+			uB *= m_uWidth;
+
+			Node::iterator itPos = rNode.SeqPos(uB);
+			uSize -= itPos.first->Deletion(itPos.second, uSize);
+			for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
+				uSize -= itPos.first->Deletion(itPos.first->begin(), uSize);
+			uLength -= (ul*m_uWidth - uSize)/m_uWidth;
 		}
 		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
@@ -449,7 +416,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 
 	// Scale such that the total rate of substitution is equal to one
 	double dX = 0.0;
-	for(int i=0;i<m_vdIota.size();++i)
+	for(unsigned int i=0;i<m_vdIota.size();++i)
 		dX -= (1.0-m_vdIota[i])*m_vdScale[i];
 	dX = m_vdIota.size()/dX;
 	matQ(0,0) = -(matQ(0,1)+matQ(0,2)+matQ(0,3));
@@ -523,16 +490,17 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	{	
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
-			Sequence::DNAVec dna(cit->size(), Nucleotide(5, -1.0));
-			for(unsigned int u=0; u< BlockTrim(cit->size()); ++u)
-				dna[u].m_nuc = CharToNuc(cit->at(u));
-			m_vDNASeqs.push_back(dna);
+			Sequence seq(BlockTrim((unsigned long)cit->size()));
+			for(unsigned int u=0; u<seq.size(); ++u)
+				if(!seq[u].FromChar((*cit)[u]))
+					return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
+			m_vDNASeqs.push_back(seq);
 		}
 	}
 	else
 	{
 		for(vector<unsigned long>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence::DNAVec(BlockTrim(*cit), Nucleotide(5, -1.0)));
+			m_vDNASeqs.push_back(Sequence(BlockTrim(*cit)));
 	}
 	if(vRates.size())
 	{
@@ -543,7 +511,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	return true;
 }
 
-Nucleotide::Nuc Tree::RandomNuc() const
+unsigned char Tree::RandomNuc() const
 {
 	double d = rand_real();
 	if(d <= m_dNucCumFreqs[0])
@@ -570,83 +538,78 @@ double Tree::RandomRate(unsigned long uPos) const
 void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 {
 	// construct a table of flattened sequences
-	vector<Sequence::HistoryVec> vHisTable;
-	vector<Sequence::DNAVec> vDnaTable;
-
-	for(Node::Map::const_iterator cit = m_map.begin();
-		cit != m_map.end(); ++cit)
+	vector<Sequence> vTable;
+	vector<string> vNames;
+	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit)
 	{
+		vNames.push_back(cit->first);
 		Sequence s;
 		cit->second.Flatten(s);
-		vHisTable.push_back(s.History());
-		vDnaTable.push_back(s.DNA());
+		vTable.push_back(s);
 	}
-
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
-
-	bool bGo = true;
-	for(unsigned int uCol = 0; bGo; uCol++)
+	
+	unsigned char uState = 1;
+	for(unsigned int uCol = 0; uState; uCol++)
 	{
-		bGo = false;
-
-		// Test to see if gaps need to be inserted at this column
-		for(vector<Sequence::HistoryVec>::const_iterator cit = vHisTable.begin();
-			cit != vHisTable.end(); ++cit)
+		uState = 0;
+		for(vector<Sequence>::const_iterator cit = vTable.begin();
+			cit != vTable.end(); ++cit)
 		{
 			if(uCol >= cit->size())
 				continue;
-			bGo = true;
-			if(IsIns((*cit)[uCol]))
+			uState = 1;
+			if((*cit)[uCol].IsInsertion())
 			{
-				char ch = (*cit)[uCol];
-				for(vector<Sequence::HistoryVec>::iterator it = vHisTable.begin();
-					it != vHisTable.end(); ++it)
-				{
-					if(uCol >= it->size())
-						it->resize(uCol+1, ch);
-					else if(!IsIns((*it)[uCol]))
-						it->insert(it->begin()+uCol, ch);
-					else if((*it)[uCol] == 'i')
-						(*it)[uCol] = '*';
-				}
-				cit = vHisTable.end()-1;
+				uState = 2;
+				break;
 			}
 		}
-	}
-	unsigned int u = 0;
-	for(Node::Map::const_iterator cit = m_map.begin();
-		cit != m_map.end(); ++cit, ++u)
-	{
-		Sequence::HistoryVec& his = vHisTable[u];
-		Sequence::DNAVec &dna = vDnaTable[u];
-		string& ss = aln[cit->first];
-		ss.resize(his.size(), '-');
-		bool bInGap = false;
-		for(unsigned int uh = 0, ud=0; uh < his.size(); ++uh)
+		if(uState == 2)
 		{
-			switch(his[uh])
+			for(vector<Sequence>::iterator it = vTable.begin();
+				it != vTable.end(); ++it)
 			{
-			case '.':
-			case '*':
-				ss[uh] = NucToChar(dna[ud++].m_nuc);
-				bInGap = false;
-				break;
-			case 'j':
-			case 'd':
-				if(bGapSingleChar && bInGap)
-					ss[uh] = '?';
-				bInGap = true;
-				break;
-			case 'i':
-				if(bGapSingleChar && bInGap)
-					ss[uh] = '?';
-				else if(bGapPlus)
-					ss[uh] = '+';
-				bInGap = true;
-				break;
-			};
+				switch((*it)[uCol].GetType())
+				{
+				case Nucleotide::TypeIns:
+					(*it)[uCol].SetType(Nucleotide::TypeRoot);
+					break;
+				case Nucleotide::TypeDelIns:
+					break;
+				default:
+					it->insert(it->begin()+uCol, Nucleotide(Nucleotide::TypeIns, 1.0));
+					break;
+				}
+			}
+		}
+
+
+	}
+	for(unsigned int u = 0; u < vNames.size(); ++u)
+	{
+		string& ss = aln[vNames[u]];
+		vTable[u].ToString(ss);
+		//GapPlus and GappSingleChar
+		bool bInGap = false;
+		for(unsigned int v = 0; v < ss.length(); ++v)
+		{
+			if(!bGapPlus && (ss[v] == '+' || ss[v] == '='))
+				ss[v] = '-';
+			if(bGapSingleChar)
+			{
+				if(ss[v] == '-')
+				{	
+					if(bInGap)
+						ss[v] = '?';
+					else
+						bInGap = true;
+				}
+				else
+					bInGap = false;
+			}
 		}
 	}
 
