@@ -63,9 +63,45 @@ $avgL /= @table;
 my $numgaps = keys(%gaps);
 
 #calculate lambda estimate
-
 my $lambda = $numgaps/$avgL/$totlen;
+
+#calculate distribution of gaps sizes
+my %gapsizes = ();
+my $maxgap = 0;
+my $suml = 0;
+my $sumll = 0;
+foreach(keys(%gaps))
+{
+	my ($f, $l) = split(/$;/);
+	$l -= $f;
+	$gapsizes{$l} ||=0;
+	$gapsizes{$l}++;
+	$maxgap = $l if($l > $maxgap);
+	$suml += $l;
+	$sumll += $l**2;
+}
+my $avgG = $suml/$numgaps-1;
+my %qhat = ();
+my $rlog = 0;
+foreach my $r(1..2)
+{	
+	my $q = $avgG/($avgG+$r);
+	my $LL = $numgaps*($r*log(1-$q)-$rlog-log($q));
+	while(my($g,$n) = each(%gaps))
+	{
+		$LL += $n*$g*log($q);
+		$LL += $n*log($_) foreach($g..$g+$r-2);
+	}
+	$qhat{$r} = [$q, $LL];
+	$rlog += log($r);
+}
+
+#output
 print "Total Len is $totlen.\n";
 print "Number of gaps is $numgaps.\n";
 print "Average Length is $avgL.\n";
-print "Lambda is $lambda.\n";
+print "Lambda Estimate is $lambda.\n";
+print "Gap Size Distribution:\n";
+print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
+print "Estimates of q\n";
+print join("\t", $_, $qhat{$_}->[0], $qhat{$_}->[1]), "\n" foreach(1..$maxgap);
