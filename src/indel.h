@@ -42,6 +42,13 @@ public:
 
 protected:
 	std::vector<double> m_vSizesCum;
+	UserModel() { };
+};
+
+class PowerModel : public UserModel
+{
+public:
+	PowerModel(const std::vector<double>& vdModel);
 };
 
 class LinearFunc : public std::unary_function<double, double>

@@ -78,7 +78,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="3"/>
+				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -144,7 +144,7 @@
 				RelativePath="..\src\indel.cc">
 			</File>
 			<File
-				RelativePath=".\Release\lexer.cc">
+				RelativePath="$(OutDir)\lexer.cc">
 			</File>
 			<File
 				RelativePath="..\src\lexer.ll">
@@ -173,7 +173,7 @@
 				RelativePath="..\src\output.cc">
 			</File>
 			<File
-				RelativePath=".\Release\parser.cc">
+				RelativePath="$(OutDir)\parser.cc">
 			</File>
 			<File
 				RelativePath="..\src\parser.yy">

@@ -183,5 +183,4 @@ inline unsigned long rand_poisson(double lambda)
 	while(d > e) {++u; d*=rand_real();}
 	return u;
 }
-
 #endif

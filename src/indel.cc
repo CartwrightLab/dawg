@@ -42,7 +42,7 @@ UserModel::UserModel(const vector<double>& vdModel)
 		cit != vdModel.end(); ++cit)
 	{
 		if(*cit > 1.0 || dSum > 1.0)
-			throw(DawgError("User Gap Model parameters must sum to one."));
+			throw(DawgError("User Model parameters must sum to one."));
 		dSum += *cit;
 		m_vSizesCum.push_back(dSum);
 	}
@@ -71,3 +71,26 @@ double UserModel::MeanSize() const
 	return dSum;
 }
 
+////////////////////////////////////////////////////////////
+//  class PowerModel
+////////////////////////////////////////////////////////////
+PowerModel::PowerModel(const vector<double>& vdModel)
+{
+	if(vdModel.size() < 2)
+		throw(DawgError("Power Law Model requires two parameters."));
+	if(vdModel[0] < 1.0)
+		throw(DawgError("Power Law Model requires a >= 1.0."));
+	if(vdModel[1] < 1.0)
+		throw(DawgError("Power Law Model requires Max >= 1."));
+	unsigned long M = (unsigned long)vdModel[1];
+	double a = -vdModel[0];
+	m_vSizesCum.resize(M);
+	double dSum = 0.0;
+	for(unsigned long k=1;k<=M;++k)
+	{
+		dSum += pow((double)k, a);
+		m_vSizesCum[k-1] = dSum;
+	}
+	for(unsigned long k=0;k<M;++k)
+		m_vSizesCum[k] /= dSum;
+}

@@ -460,6 +460,11 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		try {m_pInsertionModel.reset(new NegBnModel(rIns.vdModel));}
 			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
 	}
+	else if(rIns.ssModel == "Power")
+	{
+		try {m_pInsertionModel.reset(new PowerModel(rIns.vdModel));}
+			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
+	}
 	else
 	{
 		try {m_pInsertionModel.reset(new UserModel(rIns.vdModel));}
@@ -472,6 +477,11 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	else if(rDel.ssModel == "NB")
 	{
 		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}
+			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
+	}
+	else if(rIns.ssModel == "Power")
+	{
+		try {m_pDeletionModel.reset(new PowerModel(rDel.vdModel));}
 			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
 	}
 	else
