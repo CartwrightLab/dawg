@@ -120,10 +120,10 @@ inline unsigned int rand_seed()
 bool Execute()
 {
 	// Variables
-	int nReps  =  1;
-	vector<int> vSeqLen;
-	vector<string> vSeqs;
-	int nTotalSeqLen = 0, nTotalRateLen = 0;
+	unsigned long uReps  =  1;
+	vector<unsigned long> vuSeqLen;
+	vector<string> vssSeqs;
+	unsigned long uTotalSeqLen = 0, uTotalRateLen = 0;
 	
 	vector<double> vdGamma, vdIota, vdScale;
 
@@ -138,18 +138,17 @@ bool Execute()
 
 	vector<NewickNode*> vtTrees;
 	double	dTreeScale = 1.0;
-	vector<int>   vnSeed;
+	vector<unsigned long>   vuSeed;
 
 
 
 	string ssFile = "-";
 	FileFormat fmt = FASTA;
 	string ssFormat;
-	string ssBlockFile;
-	string ssBlock;
+	string ssNexusCode;
 
 	bool bGapSingle = false, bGapPlus = false;
-	unsigned long uFrame = 1;
+	unsigned long uWidth = 1;
 	int nRes;
 
 	// Ready Variables
@@ -162,44 +161,43 @@ bool Execute()
 		if(vSeqs.size() < vtTrees.size())
 			return DawgError("\"Sequence\" and \"Tree\" must have the same size.");
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
-			nTotalSeqLen += cit->length();
+			uTotalSeqLen += cit->length();
 	}
 	else if(DawgVar::GetVector("Length", vSeqLen))
 	{
 		if(vSeqLen.size() < vtTrees.size())
 			return DawgError("\"Length\" and \"Tree\" must have the same size.");
-		for(vector<int>::const_iterator cit = vSeqLen.begin(); cit != vSeqLen.end(); ++cit)
-			nTotalSeqLen += *cit;
+		for(vector<unsigned long>::const_iterator cit = vSeqLen.begin(); cit != vSeqLen.end(); ++cit)
+			uTotalSeqLen += *cit;
 	}
 	else
 		vSeqLen.resize(vtTrees.size(), 100);
 	
-	DawgVar::Get("Frame", nRes);
-	uFrame = nRes;
+	DawgVar::Get("Width", uWidth);
 
-	vdGamma.resize(uFrame, 0.0);
-	vdIota.resize(uFrame, 0.0);
-	vdScale.resize(uFrame, 1.0);
+	vdGamma.resize(uWidth, 0.0);
+	vdIota.resize(uWisth, 0.0);
+	vdScale.resize(uWidth, 1.0);
 
 	vvdRates.resize(vtTrees.size());
 	if(DawgVar::GetMatrix("Rates", &vvdRates[0], vvdRates.size()))
 	{
 		for(vector< vector<double> >::const_iterator cit = vvdRates.begin();
 			cit != vvdRates.end(); ++cit)
-			nTotalRateLen += cit->size();
-		if(nTotalRateLen > 0 && nTotalRateLen < nTotalSeqLen)
+			uTotalRateLen += cit->size();
+		if(uTotalRateLen > 0 && uTotalRateLen < uTotalSeqLen)
 			return DawgError("\"Rates\" vector is too small");
 	}
 	else
 		vvdRates.clear();
 
-    DawgVar::Get("Reps", nReps);
-	DawgVar::GetVector("Seed", vnSeed);
+    DawgVar::Get("Reps", uReps);
+	DawgVar::GetVector("Seed", vuSeed);
 	DawgVar::Get("Model", ssModel);
 	DawgVar::GetVector("Params", vdParams);
-	if(!DawgVar::GetVector("Gamma", vdGamma)) // Coef of Variation
+	if(!DawgVar::GetArray("Gamma", &vdGamma[0], uWidth)) // Coef of Variation
 	{
-		if(DawgVar::GetVector("Alpha", vdGamma))  // Shape parameter
+		if(DawgVar::GetArray("Alpha", &vdGamma[0], uWidth))  // Shape parameter
 		{
 			for(vector<double>::iterator it = vdGamma.begin();
 				it != vdGamma.end(); ++it)
@@ -208,8 +206,8 @@ bool Execute()
 			}
 		}
 	}
-	DawgVar::GetVector("Iota", vdGamma);
-	DawgVar::GetVector("Scale", vdScale);
+	DawgVar::GetArray("Iota", &vdIota[0], uWidth);
+	DawgVar::GetArray("Scale", &vdScale[0], uWidth);
 	DawgVar::Get("TreeScale", dTreeScale);
 	DawgVar::GetArray("GapModel", ssGapModel, 2);
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
@@ -229,8 +227,7 @@ bool Execute()
 
 	DawgVar::Get("File", ssFile);
 	DawgVar::Get("Format", ssFormat);
-	if(!DawgVar::Get("NexusBlock", ssBlock))
-		DawgVar::Get("NexusBlockFile", ssBlockFile);
+	DawgVar::Get("NexusCode", ssNexusCode);
 
 	// Load Variables
 	if(vnSeed.empty())
@@ -243,7 +240,7 @@ bool Execute()
 		mt_srand(uSeed, 4);
 	}
 	else
-		mt_srand((unsigned long*)&vnSeed[0], vnSeed.size());
+		mt_srand(vuSeed, vuSeed.size());
 	
 	Tree myTree;
 	for(vector<NewickNode*>::const_iterator treeit = vtTrees.begin(); treeit != vtTrees.end(); ++treeit)
@@ -320,16 +317,16 @@ bool Execute()
 	paramsDel.vdModel = vdGapModel[1];
 	
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		uFrame, vdGamma, vdIota, vdScale, dTreeScale ))
+		uWidth, vdGamma, vdIota, vdScale, dTreeScale ))
 		return DawgError("Bad evolution parameters");
 	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
 	
-   	if(ssBlock.empty() && !ssBlockFile.empty())
+   	if(!ssNexusCode.empty())
 	{
-		ifstream iFile(ssBlockFile.c_str());
-		if(!iFile.is_open())return DawgError("Unable to open \"%s\" for block file.", ssBlockFile.c_str());
-		getline(iFile, ssBlock, '\0');
+		ifstream iFile(ssNexusCode.c_str());
+		if(iFile.is_open())
+			getline(iFile, ssNexusCode, '\0');
 	}
 	if(ssFormat.empty() || ssFormat == "Fasta")
 		fmt = FASTA;
@@ -340,7 +337,7 @@ bool Execute()
 	else
 		return DawgError("Unknown file format, \"%s\".");
 	
-	SetFormat(fmt, nReps, ssBlock.empty() ? NULL : ssBlock.c_str());
+	SetFormat(fmt, nReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
 	
 	ostream* pOut;
 	ofstream ofOut;
@@ -355,7 +352,7 @@ bool Execute()
 	}
 	DawgIniOutput(*pOut);
 
-	while(nReps--)
+	while(uReps--)
 	{
 		//Evolve
 		myTree.Evolve();

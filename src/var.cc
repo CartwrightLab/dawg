@@ -50,6 +50,14 @@ bool DawgVar::Get( int &rnVar ) const
 	return true;
 }
 
+bool DawgVar::Get(unsigned long &ruVar ) const
+{
+	if(!IsType(tyNumber))
+		return false;
+	ruVar = (unsigned long)GetNumber();
+	return true;
+}
+
 bool DawgVar::Get(bool &rbVar ) const
 {
 	if(!IsType(tyBool))
@@ -100,6 +108,13 @@ void DawgVar::Set(int nVar )
 	Unset();
 	m_tyType = tyNumber;
 	m_dData = (double)nVar;
+}
+
+void DawgVar::Set(unsigned long uVar )
+{
+	Unset();
+	m_tyType = tyNumber;
+	m_dData = (double)uVar;
 }
 
 void DawgVar::Set(bool bVar )

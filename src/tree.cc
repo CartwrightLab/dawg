@@ -147,14 +147,14 @@ unsigned long Tree::Node::SeqLength() const
 	unsigned long uRet = 0;
 	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
 		uRet += it->Length();
-	return uRet;
+	return uRet/m_uWidth;
 }
 
 unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_iterator itBegin,
-			Sequence::DNAVec::const_iterator itEnd, int nFrame)
+			Sequence::DNAVec::const_iterator itEnd)
 {
 	unsigned long uSize = (unsigned long)(itEnd-itBegin);
-
+	uPos *= m_uWidth;
 	if(uSize == 0)
 		return 0;	
 	vector<Sequence>::iterator it;
@@ -164,7 +164,7 @@ unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_ite
 	if( it == m_vSections.end())
 		return 0;
 	else if(uPos < it->Length())
-		return it->Insert(uPos, itBegin, itEnd);
+		return it->Insert(uPos, itBegin, itEnd)/m_uWidth;
 	else
 	{
 		// Insertion occurs at a gap between sections
@@ -180,14 +180,16 @@ unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_ite
 		int i=1;
 		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt, ++i)
 			uTemp += jt->Insert(0, itBegin+vTemp[i], itBegin+vTemp[i+1]);
-		return uTemp;
+		return uTemp/m_uWidth;
 	}
 }
 
-unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize, int nFrame)
+unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
 {
 	if(uSize == 0)
 		return 0;
+	uPos = (uPos+1)*(m_uWidth)-1;
+	uSize *= m_uWidth;
 	vector<Sequence>::iterator it;
 	// find the first section
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
@@ -199,10 +201,10 @@ unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize, int nF
 	while(u < uSize && ++it != m_vSections.end())
 	{
 		uSize -= u;
-		u = it->Delete(nFrame-1, uSize);
+		u = it->Delete(m_uWidth-1, uSize);
 		uTemp += u;
 	}
-	return uTemp;
+	return uTemp/m_uWidth;
 }
 
 void Tree::Node::Flatten(Sequence& seq) const
@@ -333,7 +335,8 @@ void Tree::Evolve(Node &rNode, double dTime)
 	if(m_funcRateSum(0.0) < DBL_EPSILON)
 		return;
 
-	unsigned long uLength = rNode.SeqLength()/m_uFrame; // Number of frames
+	rNode.m_uWidth = m_uWidth; // Set Block Width
+	unsigned long uLength = rNode.SeqLength();
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW);)
@@ -346,14 +349,14 @@ void Tree::Evolve(Node &rNode, double dTime)
 			Sequence::DNAVec dna;
 			for(unsigned int uc = 0; uc < m_uFrame*ul; ++ul)
 				dna.push_back(RandomNucleotide(uc));
-			uLength += rNode.Insert(m_uFrame*uPos, dna.begin(), dna.end(), m_uFrame )/m_nFrame;
+			uLength += rNode.Insert(uPos, dna.begin(), dna.end());
 		}
 		else
 		{
 			//Deletion
 			unsigned long ul = m_pDeletionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength+ul-1);
-			uLength -= rNode.Delete(m_uFrame*uPos+m_uFrame-1, m_uFrame*ul, m_uFrame)/m_nFrame;
+			uLength -= rNode.Delete(uPos, ul, m_uFrame);
 		}
 		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
@@ -363,7 +366,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns,
 		const IndelModel::Params& rDel,
-		unsigned long uFrame,
+		unsigned long uWidth,
 		const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota,
 		const std::vector<double> &vdScale,
@@ -410,7 +413,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		return DawgError("Invalid TreeScale, \"%f\". TreeScale must be positive.", dTreeScale);
 
 	// Setup Frame
-	m_uFrame = uFrame;
+	m_uWidth = uWidth;
 
 	// Setup Rate Parameters
 	m_vdGamma = vdGamma;

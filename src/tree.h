@@ -74,20 +74,20 @@ public:
 		std::vector<Handle> m_vAncestors;
 		std::map<Handle, double> m_mBranchLens;
 		bool m_bTouched;
-		Node() : m_bTouched(false) { }
+		unsigned long m_uWidth;
+		Node() : m_bTouched(false), m_uWidth(1) { }
 		unsigned long SeqLength() const;
 		unsigned long Insert(unsigned long uPos,
 			Sequence::DNAVec::const_iterator itBegin,
-			Sequence::DNAVec::const_iterator itEnd,
-			int nFrame);
-		unsigned long Delete(unsigned long uPos, unsigned long uSize, int nFrame);
+			Sequence::DNAVec::const_iterator itEnd);
+		unsigned long Delete(unsigned long uPos, unsigned long uSize);
 		void Flatten(Sequence& seq) const;
 	};
 	typedef std::map<std::string, std::string> Alignment;
 	
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-		unsigned long uFrame, const std::vector<double> &vdGamma,
+		unsigned long uWidth, const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
 		const std::vector<std::vector<double> > &vRates);
@@ -118,7 +118,7 @@ private:
 	std::vector< Sequence::DNAVec > m_vDNASeqs;
 	Node::Map m_map;
 
-	unsigned long m_uFrame;
+	unsigned long m_uWidth;
 	std::vector<double> m_vdScale;
 	std::vector<double> m_vdGamma;
 	std::vector<double> m_vdIota;
