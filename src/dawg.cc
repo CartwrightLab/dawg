@@ -368,10 +368,10 @@ bool Execute()
 	else
 	{
 		ofOut.open(ssFile.c_str());
+		if(!ofOut.is_open())
+			return DawgError("Unable to open \"%s\" for output.", ssFile.c_str());
 		pOut = &ofOut;
 	}
-	if(!pOut->is_open())
-		return DawgError("Unable to open \"%s\" for output.", ssFile.c_str());
 	DawgIniOutput(*pOut);
 
 	while(nReps--)
