@@ -8,15 +8,15 @@
 "  -h: display help information\n" \
 "  -?: same as -h\n" \
 "\n" \
-"  Dawg will read stdin if filename is \"-".\n" \
+"  Dawg will read stdin if filename is \"-\".\n" \
 "\n" \
 "FILE FORMAT\n" \
-"  The file format takes a series of statements in the form of \"name = value,"\n" \
-"  where \"name" is alphanumeric and value can be a string, number, boolean,\n" \
+"  The file format takes a series of statements in the form of \"name = value,\"\n" \
+"  where \"name\" is alphanumeric and value can be a string, number, boolean,\n" \
 "  tree, or vector of values.  A single variable is equivalent to a vector of\n" \
 "  a single entry.\n" \
 "\n" \
-"  string:  \"[char-sequence]"\n" \
+"  string:  \"[char-sequence]\"\n" \
 "           <<EOF [several lines] EOF\n" \
 "  number:  [sign]digits[.digits][(e|E)[sign]digits]\n" \
 "  boolean: true|false\n" \
