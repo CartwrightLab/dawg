@@ -15,6 +15,7 @@ NewickNode::NewickNode(NewickNode* p, const char *cs, double d) : m_dLen(d), m_p
 		m_ssLabel = cs;
 	else
 		MakeName();
+	//printf("%s - %.15f\n", m_ssLabel.c_str(), d);
 }
 
 void NewickNode::MakeName()
@@ -176,6 +177,7 @@ void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 		ProcessNewickNode(pNode->m_pSib.get(), hAnc);
 
 	Node& node = m_map[pNode->m_ssLabel];
+	node.m_ssName = pNode->m_ssLabel;
 	node.m_mBranchLens[hAnc] = pNode->m_dLen;
 	node.m_vAncestors.resize(m_nSec+1, m_map.end());
 	node.m_vAncestors[m_nSec] = hAnc;
@@ -194,6 +196,7 @@ void Tree::Evolve()
 	}
 	// Setup Root
 	Node& rNode = m_map["_R()()T"];
+	rNode.m_ssName = "_R()()T";
 	rNode.m_bTouched = true;
 	rNode.m_vSections = m_vDNASeqs;
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
@@ -226,6 +229,10 @@ void Tree::Evolve(Node &rNode)
 			// Copy ancestor to temporary location
 			mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
 			// Evolve temporary location
+			//printf("Evolving '%s' -> '%s' %.15f\n",
+			//	mapSeqs[rNode.m_vAncestors[a]].m_ssName.c_str(),
+			//	rNode.m_ssName.c_str(),
+			//	m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 			Evolve(mapSeqs[rNode.m_vAncestors[a]], m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 		}
 		// Assemble final sequence
@@ -269,15 +276,18 @@ void Tree::Evolve(Node &rNode, double dTime)
 					//m_matSubst(i,3) = 1.0;
 				}
 			}
+			unsigned int uBase = jt->GetBase();
 			dTemp = rand_real();
-			if(dTemp <= m_matSubst(jt->GetBase(), 0))
+			if(dTemp <= m_matSubst(uBase, 0))
 				jt->SetBase(0);
-			else if(dTemp <= m_matSubst(jt->GetBase(), 1))
+			else if(dTemp <= m_matSubst(uBase, 1))
 				jt->SetBase(1);
-			else if(dTemp <= m_matSubst(jt->GetBase(), 2))
+			else if(dTemp <= m_matSubst(uBase, 2))
 				jt->SetBase(2);
 			else
 				jt->SetBase(3);
+			//if(jt->GetBase() != uBase)
+			//	printf("Sub %u -> %u @ %lu\n", uBase, jt->GetBase(), uNuc);
 
 			++uNuc; // Increase position
 		}
@@ -296,13 +306,17 @@ void Tree::Evolve(Node &rNode, double dTime)
 			//Insertion
 			unsigned long ul = m_pInsertionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength); // pos is in [0,L]
+			//printf("Ins of %lu @ %lu : ", ul, uPos);
+
 			Sequence seq;
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
 				nuc.SetType(Nucleotide::TypeIns);
+				//printf("%u", nuc.GetBase());
 				seq.push_back(nuc);
 			}
+			//printf("\n");
 			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
 			if(itPos.first == rNode.m_vSections.end())
 			{
@@ -319,6 +333,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			//Deletion
 			unsigned long ul = m_pDeletionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength+ul-1)+1;
+			//printf("Del of %lu @ %lu\n", ul, uPos);
 			unsigned long uB = (ul >= uPos) ? 0 : uPos - ul;
 			unsigned long uSize = (uPos > uLength) ? uLength : uPos;
 			uSize -= uB;
@@ -588,17 +603,23 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLower
 			for(vector<Sequence>::iterator it = vTable.begin();
 				it != vTable.end(); ++it)
 			{
-				switch((*it)[uCol].GetType())
+				if(uCol < it->size())
 				{
-				case Nucleotide::TypeIns:
-					(*it)[uCol].SetType(Nucleotide::TypeRoot);
-					break;
-				case Nucleotide::TypeDelIns:
-					break;
-				default:
-					it->insert(it->begin()+uCol, Nucleotide(Nucleotide::TypeIns, 1.0));
-					break;
+					switch((*it)[uCol].GetType())
+					{
+					case Nucleotide::TypeIns:
+						(*it)[uCol].SetType(Nucleotide::TypeRoot);
+						break;
+					case Nucleotide::TypeDelIns:
+						break;
+					default:
+						it->insert(it->begin()+uCol, Nucleotide(Nucleotide::TypeIns, 1.0));
+						break;
+					}
 				}
+				else
+					it->resize(uCol+1, Nucleotide(Nucleotide::TypeIns, 1.0));
+
 			}
 		}
 

@@ -117,6 +117,7 @@ public:
 		std::vector<Sequence> m_vSections;
 		std::vector<Handle> m_vAncestors;
 		std::map<Handle, double> m_mBranchLens;
+		std::string m_ssName;
 		bool m_bTouched;
 		Node() : m_bTouched(false) { }
 		void Flatten(Sequence& seq) const;
