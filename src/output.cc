@@ -10,6 +10,7 @@ void PrintVar(const DawgVar* var);
 void   PrintSequencesFasta(ostream &os, const Tree::Alignment& aln);
 void   PrintSequencesNexus(ostream &os, const Tree::Alignment& aln);
 void   PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln);
+void   PrintSequencesClustal(ostream &os, const Tree::Alignment& aln);
 
 FileFormat g_fileFormat = FASTA;
 const char *g_csBlock = NULL;
@@ -27,11 +28,23 @@ bool SetFormat(FileFormat fmt, int nNum, const char* csBlock)
 
 void DawgIniOutput(ostream& os)
 {
-	if(g_fileFormat == NEXUS)
+	switch(g_fileFormat)
 	{
-		os << "#NEXUS" << endl << "[Created by DAWG Version " << VERSION << endl << endl;
+	case NEXUS:
+		os << "#NEXUS" << endl << "[Created by DAWG Version "
+			<< VERSION << endl << endl;
 		os << /*EvoDescription() <<*/ ']' << endl;
+		break;
+	case CLUSTAL:
+		os << "CLUSTAL multiple sequence alignment (Created by DAWG Version "
+			<< VERSION << ")" << endl << endl << endl;
+		break;
+	case FASTA:
+	case PHYLIP:
+	default:
+		break;
 	}
+
 }
 
 bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln)
@@ -40,15 +53,16 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln)
 		rFile << "[DataSet " << ++g_nDataSet << ']' << endl;
 	switch(g_fileFormat)
 	{
-		case FASTA:
-			PrintSequencesFasta(rFile, aln);
-			break;
 		case NEXUS:
 			PrintSequencesNexus(rFile, aln);
 			break;
 		case PHYLIP:
 			PrintSequencesPhylip(rFile, aln);
 			break;
+		case CLUSTAL:
+			PrintSequencesClustal(rFile, aln);
+			break;
+		case FASTA:
 		default:
 			PrintSequencesFasta(rFile, aln);
 	};
@@ -96,4 +110,17 @@ void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln)
 	for(; cit != aln.end(); ++cit)
 		os << setw(10) << setiosflags(ios::left) << cit->first.substr(0,10) << cit->second << endl;
 	os << endl;
+}
+
+void   PrintSequencesClustal(ostream &os, const Tree::Alignment& aln)
+{
+	unsigned long uLen = aln.begin()->second.length();
+	unsigned long l;
+	for(unsigned long u = 0; u < uLen; u+=l)
+	{
+		l = min(60ul, uLen);
+		for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
+			os << setw(15) << setiosflags(ios::left) << cit->first << " " << cit->second.substr(u, l) << endl;
+		os << endl << endl;
+	}
 }

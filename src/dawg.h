@@ -47,7 +47,7 @@
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
 
-enum FileFormat { FASTA, NEXUS, PHYLIP };
+enum FileFormat { FASTA, NEXUS, PHYLIP, CLUSTAL };
 bool SetFormat(FileFormat fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);
 

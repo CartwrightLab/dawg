@@ -146,7 +146,7 @@ bool Execute()
 
 	string ssFile = "-";
 	FileFormat fmt = FASTA;
-	string ssFormat;
+	string ssFormat = "Fasta";
 	string ssNexusCode;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false;
@@ -328,12 +328,14 @@ bool Execute()
 		if(iFile.is_open())
 			getline(iFile, ssNexusCode, '\0');
 	}
-	if(ssFormat.empty() || ssFormat == "Fasta")
+	if(ssFormat == "Fasta")
 		fmt = FASTA;
 	else if(ssFormat == "Nexus")
 		fmt = NEXUS;
 	else if(ssFormat == "Phylip")
 		fmt = PHYLIP;
+	else if(ssFormat == "Clustal")
+		fmt = CLUSTAL;
 	else
 		return DawgError("Unknown file format, \"%s\".");
 	
