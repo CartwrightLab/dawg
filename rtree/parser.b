@@ -51,12 +51,12 @@ void PrintNode(Node* pNode)
 %token <ch> COLON ':'
 %token <ch> SEMICOLON ';'
 
-%type <node> node;
-%type <node> nodeseq;
+%type <node> node
+%type <node> nodeseq
 
-%start input;
+%start input
 
-%expect 1;
+%expect 1
 
 %%
 

@@ -17,23 +17,22 @@ unsigned long hash_adler32(const char* cs);
 
 bool Parse(const char* cs);
 
-struct Section
-{
-	double dBranchLen;
-	int nAncestor;
-};
-
-typedef	vector<Section> RNode;
-
 class RTree
 {
 public:
-	vector<RNode> m_vNodes;
-	vector<string> m_vLabels;
+	struct Section;
+	typedef	vector<Section> RNode;
+	typedef map<string, RNode> Map;
+	struct Section
+	{
+		double dBranchLen;
+		Map::iterator itAncestor;
+	};
+	Map m_map;
 
 	void Process(Node* pNode)
 	{
-		static vector<int> vStack;
+		static vector<Map::iterator> vStack;
 
 		if(pNode->pSib)
 			Process(pNode->pSib);
@@ -41,27 +40,63 @@ public:
 		Section sec;
 		sec.dBranchLen = pNode->dLen;
 		if(vStack.empty())
-			sec.nAncestor = -1;
+			sec.itAncestor = m_map.end();
 		else
-			sec.nAncestor = vStack.back();
-		vector<string>::iterator pos = find(m_vLabels.begin(), m_vLabels.end(), pNode->csLabel);
-		if(pos == m_vLabels.end())
+			sec.itAncestor = vStack.back();
+		RNode& rn = m_map[pNode->csLabel];
+		for(RNode::const_iterator it = rn.begin(); it != rn.end(); ++it)
 		{
-			m_vLabels.push_back(pNode->csLabel);
-			m_vNodes.push_back(RNode());
-			pos = m_vLabels.end()-1;
+			if(sec.itAncestor == it->itAncestor)
+				sec.dBranchLen = it->dBranchLen;
 		}
-		int id = pos-m_vLabels.begin();
-		m_vNodes[id].push_back(sec);
-		
+		rn.push_back(sec);
+				
 		if(pNode->pSub)
 		{
-			vStack.push_back(id);
+			vStack.push_back(m_map.find(pNode->csLabel));
 			Process(pNode->pSub);
 			vStack.pop_back();
 		}
 	}
 };
+
+//class RTree
+//{
+//public:
+//	vector<RNode> m_vNodes;
+//	vector<string> m_vLabels;
+//
+//	void Process(Node* pNode)
+//	{
+//		static vector<int> vStack;
+//
+//		if(pNode->pSib)
+//			Process(pNode->pSib);
+//
+//		Section sec;
+//		sec.dBranchLen = pNode->dLen;
+//		if(vStack.empty())
+//			sec.nAncestor = -1;
+//		else
+//			sec.nAncestor = vStack.back();
+//		vector<string>::iterator pos = find(m_vLabels.begin(), m_vLabels.end(), pNode->csLabel);
+//		if(pos == m_vLabels.end())
+//		{
+//			m_vLabels.push_back(pNode->csLabel);
+//			m_vNodes.push_back(RNode());
+//			pos = m_vLabels.end()-1;
+//		}
+//		int id = pos-m_vLabels.begin();
+//		m_vNodes[id].push_back(sec);
+//		
+//		if(pNode->pSub)
+//		{
+//			vStack.push_back(id);
+//			Process(pNode->pSub);
+//			vStack.pop_back();
+//		}
+//	}
+//};
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -72,18 +107,31 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		tree.Process(*it);
 	}
-	for(int i=0; i<tree.m_vNodes.size(); ++i)
+	for(RTree::Map::iterator it = tree.m_map.begin(); it != tree.m_map.end(); ++it)
 	{
-		cout << tree.m_vLabels[i] << " " << setbase(16) << hash_adler32(tree.m_vLabels[i].c_str()) <<  endl;
-		for(int j=0; j< tree.m_vNodes[i].size(); ++j)
+		cout << it->first << endl;
+		for(int j=0; j< it->second.size(); ++j)
 		{
-			cout << "    " << j << ": ";
-			if(tree.m_vNodes[i][j].nAncestor == -1)
-				cout << "NULL" << endl;
+			cout << "    " << j << ": " << it->second[j].dBranchLen << " ";
+			if(it->second[j].itAncestor == tree.m_map.end())
+				cout << "!NONE" << endl;
 			else
-				cout << tree.m_vLabels[tree.m_vNodes[i][j].nAncestor] << endl;
+				cout << it->second[j].itAncestor->first << endl;
+
 		}
 	}
+	//for(int i=0; i<tree.m_vNodes.size(); ++i)
+	//{
+	//	cout << tree.m_vLabels[i] << " " << setbase(16) << hash_adler32(tree.m_vLabels[i].c_str()) <<  endl;
+	//	for(int j=0; j< tree.m_vNodes[i].size(); ++j)
+	//	{
+	//		cout << "    " << j << ": ";
+	//		if(tree.m_vNodes[i][j].nAncestor == -1)
+	//			cout << "NULL" << endl;
+	//		else
+	//			cout << tree.m_vLabels[tree.m_vNodes[i][j].nAncestor] << endl;
+	//	}
+	//}
 
 	
 	for(vector<Node*>::iterator it = Node::s_stack.begin();

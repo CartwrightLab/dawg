@@ -14,12 +14,12 @@ void yyerror (char *s)
 int yyparse (void);
 bool Parse(const char* cs)
 {
-	FILE* stream = fopen(cs, "r");
-	if(stream == NULL)
-		return false;
-	yyin = stream;
+	//FILE* stream = fopen(cs, "r");
+	//if(stream == NULL)
+		//return false;
+	//yyin = stream;
 	yyparse();
-	fclose(stream);
+	//fclose(stream);
 	return true;
 }
 
