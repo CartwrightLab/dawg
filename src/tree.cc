@@ -333,32 +333,30 @@ void Tree::Evolve(Node &rNode, double dTime)
 	if(m_funcRateSum(0.0) < DBL_EPSILON)
 		return;
 
-	unsigned long uLength = rNode.SeqLength();
-	double dLength = (double)uLength/m_uFrame;
+	unsigned long uLength = rNode.SeqLength()/m_uFrame; // Number of frames
+	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
-	double dt = rand_exp(dW);
-	while(dt <= dTime)
+	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW);)
 	{
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
 			//Insertion
-			unsigned long ul = m_uFrame*m_pInsertionModel->RandSize();
-			unsigned long uPos = m_uFrame*rand_ulong(uLength/m_uFrame);
+			unsigned long ul = m_pInsertionModel->RandSize();
+			unsigned long uPos = rand_ulong(uLength);
 			Sequence::DNAVec dna;
-			for(unsigned int uc = 0; uc < ul; ++ul)
+			for(unsigned int uc = 0; uc < m_uFrame*ul; ++ul)
 				dna.push_back(RandomNucleotide(uc));
-			uLength += rNode.Insert(uPos, dna.begin(), dna.end(), m_uFrame );
+			uLength += rNode.Insert(m_uFrame*uPos, dna.begin(), dna.end(), m_uFrame )/m_nFrame;
 		}
 		else
 		{
 			//Deletion
-			unsigned long ul = m_uFrame*m_pDeletionModel->RandSize();
-			unsigned long uPos = m_uFrame*rand_ulong((uLength+ul)/m_uFrame-1)+m_uFrame-1;
-			uLength -= rNode.Delete(uPos, ul, m_uFrame);
+			unsigned long ul = m_pDeletionModel->RandSize();
+			unsigned long uPos = rand_ulong(uLength+ul-1);
+			uLength -= rNode.Delete(m_uFrame*uPos+m_uFrame-1, m_uFrame*ul, m_uFrame)/m_nFrame;
 		}
-		dLength = (double)uLength/m_uFrame;
+		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
-		dt += rand_exp(dW);
 	}
 }
 

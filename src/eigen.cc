@@ -15,10 +15,6 @@
 #	include <math.h>
 #endif
 
-#ifdef _WIN32
-#define copysign _copysign
-#endif
-
 #define LAMBDA_THREASHOLD	FLT_EPSILON
 #define SUM_THREASHOLD		DBL_EPSILON
 #define THETA_TH1 1.3407807929942596e+154
