@@ -52,12 +52,8 @@
 #define MIXBITS(u,v) ( ((u) & UMASK) | ((v) & LMASK) )
 #define TWIST(u,v) ((MIXBITS(u,v) >> 1) ^ ((v)&1UL ? MATRIX_A : 0UL))
 
-#if !defined(USE_MMX)
 static unsigned long state[N]; /* the array for the state vector  */
-#else
-static __m64	state64[N/2];
-static unsigned long *state = (unsigned long *)&state64[0];
-#endif
+
 static int left = 1;
 static unsigned long *next;
 
@@ -106,47 +102,14 @@ void mt_srand(unsigned long uKeys[], unsigned long uLen)
 
 inline void mt_next_state()
 {
-#if !defined(USE_MMX)
+	left = N;
+    next = state;
 	unsigned long *p=state;
     for (int j=N-M+1; --j; p++) 
         *p = p[M] ^ TWIST(p[0], p[1]);
     for (int j=M; --j; p++) 
         *p = p[M-N] ^ TWIST(p[0], p[1]);
     *p = p[M-N] ^ TWIST(p[0], state[0]);
-#else
-	static const __m64 Zero = _mm_setzero_si64();
-	static const __m64 One = _mm_set1_pi32(1u);
-	static const __m64 Magic = _mm_set1_pi32(0x9908b0dfu);
-	static const __m64 Low = _mm_set1_pi32(0x7fffffffu);
-
-	__m64 *v1 = &state64[0];
-	for(int i=0;i<113;++i)
-	{
-		*v1++ = _mm_xor_si64(_mm_xor_si64(_mm_srli_pi32(_mm_xor_si64(
-			_mm_and_si64(_mm_xor_si64(*v1, *(__m64*)(((unsigned long*)v1)+1)),Low), *v1), 1), 
-			_mm_and_si64(_mm_cmpeq_pi32(_mm_and_si64(*(__m64*)(((unsigned long*)v1)+1),
-			One), One), Magic)), *(__m64*)(((unsigned long*)v1)+M));
-	}
-	state[226] = ((((state[226]^state[227])&0x7fffffffu)^state[226])>>1)
-		^(0x9908b0dfu & (((state[227]& 1u) == 1u) ? 0xFFFFFFFFu : 0u))^state[623];
-	state[227] = ((((state[227]^state[228])&0x7fffffffu)^state[227])>>1)
-					^(0x9908b0dfu & (((state[228]& 1u) == 1u) ? 0xFFFFFFFFu : 0u))^state[0];
-	*v1++;
-	for(int i=114;i<311;++i)
-	{
-		*v1++ = _mm_xor_si64(_mm_xor_si64(_mm_srli_pi32(_mm_xor_si64(
-			_mm_and_si64(_mm_xor_si64(*v1, *(__m64*)(((unsigned long*)v1)+1)),Low), *v1), 1), 
-			_mm_and_si64(_mm_cmpeq_pi32(_mm_and_si64(*(__m64*)(((unsigned long*)v1)+1),
-			One), One), Magic)), *(__m64*)(((unsigned long*)v1)+M-N));
-	}
-	state[622] = ((((state[622]^state[623])&0x7fffffffu)^state[622])>>1)
-					^(0x9908b0dfu & (((state[623]& 1u) == 1u) ? 0xFFFFFFFFu : 0u))^state[395];
-	state[623] = ((((state[623]^state[0])&0x7fffffffu)^state[623])>>1)
-					^(0x9908b0dfu & (((state[0]& 1u) == 1u) ? 0xFFFFFFFFu : 0u))^state[396];
-	_mm_empty();
-#endif
-	left = N;
-    next = state;
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
