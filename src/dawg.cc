@@ -218,9 +218,11 @@ bool Execute()
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
 
-	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
+	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
 	if(nRes)
 	{
+		if(nRes == 1)
+			dLambda[1] = dLambda[0] *= 0.5;
 		nRes = DawgVar::GetMatrix("GapParams", vdGapModel, 2);
 		if(nRes == 0)
 			return DawgError("\"GapParams\" must be specified if \"Lambda\" is.");

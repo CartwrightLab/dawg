@@ -42,13 +42,19 @@ public:
 
 protected:
 	std::vector<double> m_vSizesCum;
-	UserModel() { };
+	double m_dMean;
 };
 
-class PowerModel : public UserModel
+class PowerModel : public IndelModel
 {
 public:
 	PowerModel(const std::vector<double>& vdModel);
+	virtual unsigned long RandSize() const;
+	virtual double MeanSize() const;
+protected:
+	double m_dA;
+	unsigned long m_uM;
+	double m_dMean;
 };
 
 class LinearFunc : public std::unary_function<double, double>

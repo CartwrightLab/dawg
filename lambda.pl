@@ -78,47 +78,102 @@ foreach(keys(%gaps))
 	$maxgap = $l if($l > $maxgap);
 	$suml += $l;
 }
+my $avgG = $suml/$numgaps-1.0;
 
-#use liklihood to estimate p and q
-my $avgG = $suml/$numgaps-1;
-my %qhat = ();
+my %model = ();
+
+#geometric model
+#MLE of q
+my $q = $avgG/($avgG+1.0);
+#calculate LL(q)
+my $LL = $numgaps*(log(1.0-$q)-log($q))+$suml * log($q);
+#calculate BIC 
+my $bic = -2*$LL+log($numgaps)*1.0;
+#calculate xsq
+my $xsq = 0.0;
+my $df = $maxgap-2;
+while(my($g,$n) = each(%gapsizes))
+{
+	my $e = $numgaps*((1.0-$q) * $q**($g-1.0));
+	$xsq += ($n-$e)**2/$e;
+}
+
+
+$model{Geometric} = {BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {q => $q}};
+
+my %rmodel = ();
 my $rlog = 0;
-foreach my $r(1..$maxgap)
+foreach my $r(2..$maxgap)
 {	
 	#estimate q | r
 	my $q = $avgG/($avgG+$r);
 	#calculate LL(q,r)
-	my $LL = $numgaps*($r*log(1-$q)-$rlog-log($q));
+	my $LL = $numgaps*($r*log(1-$q)-$rlog-log($q))+$suml * log($q);
+	my $xsq = 0.0;
+	my $df = $maxgap-3;
 	while(my($g,$n) = each(%gapsizes))
 	{
-		$LL += $n*$g*log($q);
-		$LL += $n*log($_) foreach($g..$g+$r-2);
+		my $sl = 0.0;
+		$sl += log($_) foreach($g..$g+$r-2);
+		my $e = $numgaps*( (1.0-$q)**$r * $q**($g-1) /exp($rlog)*exp($sl) );
+		$xsq += ($n-$e)**2/$e;
+		$LL += $n*$sl;
 	}
-	#calculate BIC to test whether r=1 is a better explaination
-	my $bic = -2*$LL+log($numgaps)*($r==1 ? 1 : 2);
+	#calculate BIC
+	my $bic = -2*$LL+log($numgaps)*2.0;
 	#store data
-	$qhat{$r} = [$q, $LL, $bic];
+	$rmodel{$r} = {BIC => $bic, LL => $LL,  DF => $df, XSQ => $xsq, Params => {r => $r, q => $q }};
 	$rlog += log($r);
 }
-#find maximimum liklihood and minimium BIC
-my $r_bic = 1;
-my $r_ll = 1;
-foreach my $r(1..$maxgap)
+#find maximimum liklihood
+my $r_ll = 2;
+foreach my $r(3..$maxgap)
 {
-	$r_bic = $r if($qhat{$r}->[2] < $qhat{$r_bic}->[2]);
-	$r_ll = $r if($qhat{$r}->[1] > $qhat{$r_ll}->[1]);
+	$r_ll = $r if($rmodel{$r}{LL} > $rmodel{$r_ll}{LL});
 }
+$model{NegBin} = $rmodel{$r_ll};
+
+# truncated power-law
+my @gs = (sort(keys(%gapsizes)))[0..4];
+
+my $sx = 0.0;
+my $sx2 = 0.0;
+my $sxy = 0.0;
+my $sy = 0.0;
+my $n = @gs;
+foreach(@gs)
+{
+	my $x = log($_);
+	my $y = log($gapsizes{$_}/$numgaps);
+	$sx += $x;
+	$sy += $y;
+	$sxy += $x*$y;
+	$sx2 += $x*$x;
+}
+my $a = ($n*$sxy-$sx*$sy)/($n*$sx2-$sx*$sx);
+my $b = ($sy-$a*$sx)/$n;
+$model{PowerLaw} = {BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {a => -$a, b => exp($b)}};
 
 #output
 print "Total Len is $totlen.\n";
 print "Number of gaps is $numgaps.\n";
 print "Average Length is $avgL.\n";
 print "\nLambda Estimate is $lambda.\n";
+print "\nAverage Gap Size is ", $avgG + 1.0, ".\n";
 print "\nGap Size Distribution:\n";
 print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
-print "\nEstimates of r and q based on Maximum Liklihood\n";
-print "\tr Estimate is $r_ll.  (BIC $qhat{$r_ll}->[2])\n";
-print "\tq Estimate is ${qhat{$r_ll}->[0]}.  (LH ${qhat{$r_ll}->[2]})\n";
-print "\nEstimates of r and q based on Minimum BIC\n";
-print "\tr Estimate is $r_bic.  (BIC $qhat{$r_bic}->[2])\n";
-print "\tq Estimate is $qhat{$r_bic}->[0].  (LH $qhat{$r_bic}->[2])\n";
+print "\nEstimated Models\n";
+foreach my $k (sort(keys(%model)))
+{
+	print "$k:\n\t";
+	my @par = ();
+	while(my($p,$v) = each(%{$model{$k}{Params}}))
+	{
+		push(@par, "$p = $v");
+	}
+	print join(', ', @par), "\n";
+	print "\tLogLik = $model{$k}{LL}\n";
+	print "\tBIC    = $model{$k}{BIC}\n";
+	print "\tXSQ    = $model{$k}{XSQ} ($model{$k}{DF} df)\n";
+}
+
