@@ -158,25 +158,25 @@ bool Execute()
 
 	if(DawgVar::GetVector("Sequence", vSeqs))
 	{
-		if(vSeqs.size() < vtTrees.size())
+		if(vssSeqs.size() < vtTrees.size())
 			return DawgError("\"Sequence\" and \"Tree\" must have the same size.");
-		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
+		for(vector<string>::const_iterator cit = vssSeqs.begin(); cit != vssSeqs.end(); ++cit)
 			uTotalSeqLen += cit->length();
 	}
-	else if(DawgVar::GetVector("Length", vSeqLen))
+	else if(DawgVar::GetVector("Length", vuSeqLen))
 	{
-		if(vSeqLen.size() < vtTrees.size())
+		if(vuSeqLen.size() < vtTrees.size())
 			return DawgError("\"Length\" and \"Tree\" must have the same size.");
-		for(vector<unsigned long>::const_iterator cit = vSeqLen.begin(); cit != vSeqLen.end(); ++cit)
+		for(vector<unsigned long>::const_iterator cit = vSueqLen.begin(); cit != vuSeqLen.end(); ++cit)
 			uTotalSeqLen += *cit;
 	}
 	else
-		vSeqLen.resize(vtTrees.size(), 100);
+		vuSeqLen.resize(vtTrees.size(), 100);
 	
 	DawgVar::Get("Width", uWidth);
 
 	vdGamma.resize(uWidth, 0.0);
-	vdIota.resize(uWisth, 0.0);
+	vdIota.resize(uWidth, 0.0);
 	vdScale.resize(uWidth, 1.0);
 
 	vvdRates.resize(vtTrees.size());
@@ -230,17 +230,12 @@ bool Execute()
 	DawgVar::Get("NexusCode", ssNexusCode);
 
 	// Load Variables
-	if(vnSeed.empty())
+	if(vuSeed.empty())
 	{
-		unsigned long uSeed[4];
-		uSeed[0] = rand_seed();
-		uSeed[1] = rand_seed();
-		uSeed[2] = rand_seed();
-		uSeed[3] = rand_seed();
-		mt_srand(uSeed, 4);
+		for(unsigned int u=0;u<4;++u)
+			vuSeed.push_back(rand_seed());
 	}
-	else
-		mt_srand(vuSeed, vuSeed.size());
+	mt_srand(&vuSeed[0], vuSeed.size());
 	
 	Tree myTree;
 	for(vector<NewickNode*>::const_iterator treeit = vtTrees.begin(); treeit != vtTrees.end(); ++treeit)

@@ -97,7 +97,7 @@ public:
 	Nucleotide RandomNucleotide(unsigned long uPos) const
 		{ return Nucleotide(RandomNuc(), RandomRate(uPos)); }
 
-	Tree() : m_nSec(0), m_uFrame(1){}
+	Tree() : m_nSec(0), m_uWidth(1){}
 	
 	inline unsigned long FrameTrim(unsigned long u) { return u - u%m_uFrame; }
 
