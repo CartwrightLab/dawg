@@ -25,11 +25,11 @@
 #endif
 
 #if !HAVE_MALLOC
-void *rpl_malloc(size_t n);
+extern "C" void *rpl_malloc(size_t n);
 #endif
 
 #if !HAVE_REALLOC
-void *rpl_realloc(void *p, size_t n);
+extern "C" void *rpl_realloc(void *p, size_t n);
 #endif
 
 #ifdef HAVE_TIME_H
