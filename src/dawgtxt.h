@@ -12,16 +12,12 @@
 "  \"name = value,\" where \"name\" is alphanumeric and value can\n" \
 "  be a string, number, boolean, tree, or vector of values.\n" \
 "\n" \
-"  string:  \"[char-sequence]\" [. \"[char-sequence]\" ...]\n" \
+"  string:  \"[char-sequence]\"\n" \
+"	   <<EOF [several lines] EOF\n" \
 "  number:  [sign]digits[.digits][(e|E)[sign]digits]\n" \
 "  boolean: true|false\n" \
 "  tree:    Newick Format\n" \
 "  vector:  { value, value, ...}\n" \
-"\n" \
-"  The \'.\' operator allows for multiple lines to be included\n" \
-"  in the same string.  It automatically inserts a new line.\n" \
-"  A vector with a single value is treated the same as a single\n" \
-"  value.\n" \
 "\n" \
 "OPTIONS\n" \
 "  Name          Type            Description\n" \
@@ -34,7 +30,7 @@
 "  Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN\n" \
 "  Freqs          VD  nucleotide (ACGT) frequencies \n" \
 "  Params         VN  parameters for the model of evolution\n" \
-"  Gamma          N   coefecient of variance for rate heterogenity\n" \
+"  Gamma          N   coefficient of variance for rate heterogenity\n" \
 "  Alpha          N   shape parameter\n" \
 "  Iota           N   proportion of invariant sites\n" \
 "  GapModel       VS  models of indel formation: NB|User\n" \

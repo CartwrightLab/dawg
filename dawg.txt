@@ -12,16 +12,12 @@ FILE FORMAT
   "name = value," where "name" is alphanumeric and value can
   be a string, number, boolean, tree, or vector of values.
 
-  string:  "[char-sequence]" [. "[char-sequence]" ...]
+  string:  "[char-sequence]"
+	   <<EOF [several lines] EOF
   number:  [sign]digits[.digits][(e|E)[sign]digits]
   boolean: true|false
   tree:    Newick Format
   vector:  { value, value, ...}
-
-  The '.' operator allows for multiple lines to be included
-  in the same string.  It automatically inserts a new line.
-  A vector with a single value is treated the same as a single
-  value.
 
 OPTIONS
   Name          Type            Description
@@ -34,7 +30,7 @@ OPTIONS
   Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
   Freqs          VD  nucleotide (ACGT) frequencies 
   Params         VN  parameters for the model of evolution
-  Gamma          N   coefecient of variance for rate heterogenity
+  Gamma          N   coefficient of variance for rate heterogenity
   Alpha          N   shape parameter
   Iota           N   proportion of invariant sites
   GapModel       VS  models of indel formation: NB|User

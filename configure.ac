@@ -14,6 +14,8 @@ AC_PROG_YACC
 AM_PROG_LEX
 AC_CHECK_PROG(DIFF, diff, diff)
 
+AC_LANG_PUSH(C++)
+
 # Checks for libraries.
 
 # Checks for header files.
@@ -35,6 +37,8 @@ AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getpid _getpid])
+
+AC_LANG_POP(C++)
 
 AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile tests/Makefile doc/Makefile])
 AC_OUTPUT
