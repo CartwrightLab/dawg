@@ -91,6 +91,7 @@ my $q = $avgG/($avgG+1.0);
 my $LL = $numgaps*(log(1.0-$q)-log($q))+$suml * log($q);
 #calculate BIC 
 my $bic = -2*$LL+log($numgaps)*1.0;
+my $aic = -2*$LL+2*1.0;
 #calculate xsq
 my $xsq = 0.0;
 my $df = $maxgap-2;
@@ -101,7 +102,7 @@ while(my($g,$n) = each(%gapsizes))
 }
 
 
-$model{Geometric} = {BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {q => $q}};
+$model{Geometric} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {q => $q}};
 
 my %rmodel = ();
 my $rlog = 0;
@@ -123,8 +124,9 @@ foreach my $r(2..$maxgap)
 	}
 	#calculate BIC
 	my $bic = -2*$LL+log($numgaps)*2.0;
+	my $aic = -2*$LL+2*2.0;
 	#store data
-	$rmodel{$r} = {BIC => $bic, LL => $LL,  DF => $df, XSQ => $xsq, Params => {r => $r, q => $q }};
+	$rmodel{$r} = {AIC => $aic, BIC => $bic, LL => $LL,  DF => $df, XSQ => $xsq, Params => {r => $r, q => $q }};
 	$rlog += log($r);
 }
 #find maximimum liklihood
@@ -158,15 +160,16 @@ my $b = ($sy-$a*$sx)/$n;
 $LL = 0;
 $LL += log($_) * $gapsizes{$_} foreach(keys(%gapsizes));
 $LL = $numgaps*$b + $a*$LL;
-$bic = -2*$LL+log($numgaps)*1.0;
+$bic = -2*$LL+log($numgaps)*2.0;
 $df = $maxgap-2;
+my $aic = -2*$LL+2*2.0;
 $xsq = 0.0;
 while(my($g,$n) = each(%gapsizes))
 {
 	my $e = $numgaps*(exp($b+$a*log($g)));
 	$xsq += ($n-$e)**2/$e;
 }
-$model{PowerLaw} = {BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {a => -$a, b => exp($b)}};
+$model{PowerLaw} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {a => -$a, b => exp($b)}};
 $model{PowerLaw}{Params}{Error} = "True" if(-$a < 1.0);
 
 #output
@@ -188,6 +191,7 @@ foreach my $k (sort(keys(%model)))
 	}
 	print join(', ', @par), "\n";
 	print "\tLogLik = $model{$k}{LL}\n";
+	print "\tAIC    = $model{$k}{AIC}\n";
 	print "\tBIC    = $model{$k}{BIC}\n";
 	print "\tXSQ    = $model{$k}{XSQ} ($model{$k}{DF} df)\n";
 }
