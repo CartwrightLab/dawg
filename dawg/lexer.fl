@@ -1,0 +1,183 @@
+%{
+// cmd: "flex -t -CF lexer.fl > lexer.cpp"
+//
+// Error Warning: Does not check for circular includes.
+
+#include "dawg.h"
+#include <vector>
+#include <iostream>
+#include <math.h>
+#include <float.h>
+
+// depending on your version of bison include one of the following files
+// Makefile should be updated accordingly
+//#include "parser.cpp.h"
+#include "parser.hpp"
+
+
+#pragma warning(disable: 4127 4244)
+
+using namespace std;
+struct State
+{
+	int    nLine;	
+	string ssFile;
+} g_state;
+
+void yyerror (char *s)
+{
+	cerr << "ALERT: " << s << " in " << g_state.ssFile << " at line " << g_state.nLine;
+	cerr << ": \"" << yytext << "\"." << endl;
+}
+int yyparse (void);
+bool Parse(const char* cs)
+{
+	FILE* stream = (cs==NULL || !strcmp(cs, "-")) ? stdin : fopen(cs, "r");
+	if(stream == NULL)
+		return false;
+	g_state.nLine = 1;
+	g_state.ssFile = (cs==NULL || !strcmp(cs, "-")) ? "stdin" : cs;
+	yyin = stream;
+	yyparse();
+	if(cs!=NULL)
+		fclose(stream);
+	return true;
+}
+
+%}
+
+%option nounput
+%option noyywrap
+
+DIGIT  [0-9]
+IDWORD [A-Za-z][A-Za-z_0-9]*
+STR    \"[^\"\n]*\"
+LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
+
+%x tree
+%x length
+
+
+%%
+
+[-+]?{DIGIT}+([eE][+-]?{DIGIT}+)?  |
+[-+]?{DIGIT}+"."{DIGIT}*([eE][+-]?{DIGIT}+)? |
+[-+]?"."{DIGIT}+([eE][+-]?{DIGIT}+)? {
+	yylval.d = atof(yytext);
+	return NUM;
+}
+
+[Ff]"alse" {
+	yylval.b = false;
+	return BOOL;
+}
+
+[Tt]"rue" {
+	yylval.b = true;
+	return BOOL;
+}
+
+{STR} {
+	size_t t = strlen(yytext);
+	yytext[t-1] = '\0';
+	yylval.cs = strcpy(new char[t],yytext+1);
+	return STRING;
+}
+
+{IDWORD} {
+	size_t t = strlen(yytext);
+	yylval.cs = strcpy(new char[t+1],yytext);
+	return ID;
+}
+
+"." {
+	yylval.ch = yytext[0];
+	return DOT;
+}
+
+"(" {
+	yylval.ch = yytext[0];
+	BEGIN(tree);
+	return LPARTH;
+}
+
+"=" {
+	yylval.ch = yytext[0];
+	return EQ;
+}
+
+"{" {
+	yylval.ch = yytext[0];
+	return LBRACE;
+}
+
+"}" {
+	yylval.ch = yytext[0];
+	return RBRACE;
+}
+
+"#"[^\n]* {
+}
+
+"/""/"[^\n]* {
+}
+
+<tree>"(" {
+	yylval.ch = yytext[0];
+	return LPARTH;
+}
+
+<tree>")" {
+	yylval.ch = yytext[0];
+	return RPARTH;
+}
+
+<tree>":" {
+	yylval.ch = yytext[0];
+	BEGIN(length);
+	return COLON;
+}
+
+<length>[-+]?{DIGIT}+([eE][+-]?{DIGIT}+)?  |
+<length>[-+]?{DIGIT}+"."{DIGIT}*([eE][+-]?{DIGIT}+)? |
+<length>[-+]?"."{DIGIT}+([eE][+-]?{DIGIT}+)? {
+	yylval.d = atof(yytext);
+	BEGIN(tree);
+	return NUM;
+}
+
+<tree>";" { BEGIN(INITIAL); }
+
+<tree>{STR} {
+	size_t t = strlen(yytext);
+	yytext[t-1] = '\0';
+	yylval.cs = strcpy(new char[t],yytext+1);
+	return LABEL;
+}
+
+<tree>{LABELCH}+ {
+	size_t t = strlen(yytext);
+	yylval.cs = strcpy(new char[t+1],yytext);
+	return LABEL;	
+}
+<tree>"[".+"]" { }
+
+<*><<EOF>> {
+	yyterminate();
+	return END;
+}
+
+";" { }
+
+<*>[, \t\r\v\f]+ { }
+
+<*>\n {
+	g_state.nLine++;
+}
+
+<*>. {
+	//yylval.ch = yytext[0];
+	return UNKNOWN;	
+}
+
+%%
