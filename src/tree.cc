@@ -356,7 +356,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			//Deletion
 			unsigned long ul = m_pDeletionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength+ul-1);
-			uLength -= rNode.Delete(uPos, ul, m_uFrame);
+			uLength -= rNode.Delete(uPos, ul);
 		}
 		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
@@ -388,12 +388,12 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		return DawgError("Lambda (Del) must not be negative.");
 	if(uFrame <= 0)
 		return DawgError("Frame must be positive.");
-	if(vdGamma.size() != uFrame)
-		return DawgError("Gamma must have the same size as the value of Frame.");
-	if(vdIota.size() != uFrame)
-		return DawgError("Iota must have the same size as the value of Frame.");
-	if(vdScale.size() != uFrame)
-		return DawgError("Scale must have the same size as the value of Frame.");
+	if(vdGamma.size() != uWidth)
+		return DawgError("Gamma must have the same size as the value of Width.");
+	if(vdIota.size() != uWidth)
+		return DawgError("Iota must have the same size as the value of Width.");
+	if(vdScale.size() != uWidth)
+		return DawgError("Scale must have the same size as the value of Width.");
 	for(vector<double>::const_iterator cit = vdGamma.begin(); cit != vdGamma.end(); ++cit)
 	{
 		if(*cit < 0.0)
@@ -531,7 +531,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	}
 	else
 	{
-		for(vector<int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
+		for(vector<unsigned int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
 			m_vDNASeqs.push_back(Sequence::DNAVec(BlockTrim(*cit), Nucleotide(5, -1.0)));
 	}
 	if(vRates.size())
