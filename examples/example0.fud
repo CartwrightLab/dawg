@@ -1,0 +1,4 @@
+#!dawg
+#example0.fud
+
+Tree = ((A:0.1,B:0.1)D:0.1,C:0.2)R;

@@ -362,7 +362,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Setup Cumulative Frequencies
 	m_dNucCumFreqs[0] = pFreqs[0];
 	m_dNucCumFreqs[1] = m_dNucCumFreqs[0]+pFreqs[1];
-	m_dNucCumFreqs[2] = m_dNucCumFreqs[0]+pFreqs[2];
+	m_dNucCumFreqs[2] = m_dNucCumFreqs[1]+pFreqs[2];
 	m_dNucCumFreqs[3] = 1.0;
 
 	// Setup Symetric Matrix

@@ -68,3 +68,4 @@ double UserModel::MeanSize() const
 	}
 	return dSum;
 }
+
