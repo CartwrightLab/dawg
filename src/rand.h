@@ -183,4 +183,19 @@ inline unsigned long rand_poisson(double lambda)
 	while(d > e) {++u; d*=rand_real();}
 	return u;
 }
+
+inline unsigned long rand_zipf(double a)
+{
+	double b = pow(2.0, a-1.0);
+	double c = -1.0/(a-1.0);
+	double u,v,r,t;
+	do {
+	 u = rand_real();
+	 v = rand_real();
+	 r = floor(pow(u, c));
+	 t = pow(1.0+1.0/r, a-1.0);
+	} while( v*r*(t-1.0)/(b-1.0) > t/b);
+	return (unsigned long)r;
+}
+
 #endif
