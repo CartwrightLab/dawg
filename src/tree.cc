@@ -362,8 +362,12 @@ void Tree::Evolve(Node &rNode, double dTime)
 }
 
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
-	const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-	double dGamma, double dIota, double dScale, int nFrame)
+		const IndelModel::Params& rIns,
+		const IndelModel::Params& rDel,
+		unsigned long uFrame,
+		const std::vector<double> &vdGamma,
+		const std::vector<double> &vdIota,
+		const std::vector<double> &vdScale )
 {
 	// Verifiy Parameters
 	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
@@ -374,28 +378,45 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	if(pSubs[0] < 0.0 || pSubs[1] < 0.0 || pSubs[2] < 0.0
 		|| pSubs[3] < 0.0 || pSubs[4] < 0.0 || pSubs[5] < 0.0)
 		return DawgError("Substitution rates need to be positive.");
+
 	if(rIns.dLambda < 0.0)
 		return DawgError("Lambda (Ins) must not be negative.");
 	if(rDel.dLambda < 0.0)
 		return DawgError("Lambda (Del) must not be negative.");
-	if(dGamma < 0.0)
-		return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", dGamma);
-	else if(0.0 > dIota || dIota > 1.0)
-		return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", dIota);
-	if(dScale <= 0.0)
-		return DawgError("Scale must be positive.");
-	if(nFrame <= 0)
+	if(uFrame <= 0)
 		return DawgError("Frame must be positive.");
+	if(vdGamma.size() != uFrame)
+		return DawgError("Gamma must have the same size as the value of Frame.");
+	if(vdIota.size() != uFrame)
+		return DawgError("Iota must have the same size as the value of Frame.");
+	if(vdScale.size() != uFrame)
+		return DawgError("Scale must have the same size as the value of Frame.");
+	for(vector<double>::const_iterator cit = vdGamma.begin(); cit != vdGamma.end(); ++cit)
+	{
+		if(*cit < 0.0)
+			return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", *cit);
+	}
+	for(vector<double>::const_iterator cit = vdIota.begin(); cit != vdIota.end(); ++cit)
+	{
+		if(0.0 > *cit || *cit > 1.0)
+			return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", *cit);
+	}
+	for(vector<double>::const_iterator cit = vdScale.begin(); cit != vdScale.end(); ++cit)
+	{
+		if(*cit <= 0.0)
+			return DawgError("Invalid Scale, \"%f\". Scale must be positive.", *cit);
+	}
+
 
 	// Setup Frame
-	m_nFrame = nFrame;
+	m_uFrame = uFrame;
 
 	// Setup Rate Parameters
-	m_dGamma = dGamma;
-	m_dIota = dIota;
+	m_vdGamma = vdGamma;
+	m_vdIota = vdIota;
 
 	// Setup Scale
-	m_dScale = dScale;
+	m_vdScale = vdScale;
 
 	// Setup Cumulative Frequencies
 	m_dNucCumFreqs[0] = pFreqs[0];
@@ -424,7 +445,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
 	matQ(3,3) = -(matQ(3,0)+matQ(3,1)+matQ(3,2));
-	matQ.Scale(matQ, -1.0/((1.0-m_dIota)*(vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
+	matQ.Scale(matQ, -1.0/((vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
 		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3))));
 	
 	// Store Scaled Q Matrix
@@ -524,12 +545,13 @@ Nucleotide::Nuc Tree::RandomNuc() const
 		return 3; // T
 }
 
-double Tree::RandomRate() const
+double Tree::RandomRate(unsigned long uPos) const
 {
-	if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
+	uPos %= m_uFrame;
+	if(m_vdIota[uPos] > DBL_EPSILON && rand_bool(m_vdIota[uPos]))
 		return 0.0;  // Site Invariant
-	else if(m_dGamma > DBL_EPSILON)
-		return rand_gamma1(m_dGamma); // Gamma with mean 1.0 and var of m_dGamma
+	else if(m_vdGamma[uPos] > DBL_EPSILON)
+		return rand_gamma1(m_vdGamma[uPos]); // Gamma with mean 1.0 and var of m_dGamma
 	else
 		return 1.0;
 }

@@ -87,17 +87,19 @@ public:
 	
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-		double dGamma, double dIota, double dScale, int nFrame);
+		int nFrame, const std::vector<double> &vdGamma,
+		const std::vector<double> &vdIota, const std::vector<double> &vdScale);
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
 		const std::vector<std::vector<double> > &vRates);
 
-	double RandomRate() const;
+	double RandomRate(unsigned long uPos) const;
 	Nucleotide::Nuc RandomNuc() const;
-	Nucleotide RandomNucleotide() const { return Nucleotide(RandomNuc(), RandomRate()); }
+	Nucleotide RandomNucleotide(unsigned long uPos) const
+		{ return Nucleotide(RandomNuc(), RandomRate(uPos)); }
 
-	Tree() : m_nSec(0), m_nFrame(1){}
+	Tree() : m_nSec(0), m_uFrame(1){}
 	
-	inline unsigned long FrameTrim(unsigned long u) { return u - u%m_nFrame; }
+	inline unsigned long FrameTrim(unsigned long u) { return u - u%m_uFrame; }
 
 	void Evolve();
 	void ProcessTree(NewickNode* pNode);
@@ -115,10 +117,11 @@ private:
 	int m_nSec;
 	std::vector< Sequence::DNAVec > m_vDNASeqs;
 	Node::Map m_map;
-	double m_dScale;
 
-	double m_dGamma;
-	double m_dIota;
+	unsigned long m_uFrame;
+	std::vector<double> m_vdScale;
+	std::vector<double> m_vdGamma;
+	std::vector<double> m_vdIota;
 
 	double m_dOldTime;
 	double m_dFreqs[4];
@@ -136,8 +139,6 @@ private:
 	double m_dLambdaDel;
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
-
-	int m_nFrame;
 };
 
 inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
