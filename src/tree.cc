@@ -544,7 +544,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	else
 	{
 		for(vector<unsigned long>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence(BlockTrim(*cit)));
+			m_vDNASeqs.push_back(Sequence(*cit*m_uWidth));
 	}
 	if(vRates.size())
 	{
