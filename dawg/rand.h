@@ -154,7 +154,7 @@ inline unsigned long rand_geometric(double q)
 }
 
 // Draw from Negative Binomial(r, 1-q):
-//   P(X=x) = (r+x-1 nch x)q^x(1-q)^r; x<=0
+//   P(X=x) = (r+x-1 nch x)q^x(1-q)^r; x>=0
 inline unsigned long rand_negbinomial(unsigned long r, double q)
 {
 	unsigned long u=0;

@@ -25,6 +25,62 @@ public:
 	argument_type b;
 };
 
+class IndelModel
+{
+public:
+	virtual unsigned int RandSize() const = 0;
+	virtual double MeanSize() const = 0;
+};
+
+class NegBnModel : public IndelModel
+{
+public:
+	//NegBnModel(unsigned long uR, double dQ) :
+	//  m_uR(uR), m_dQ(dQ) { }
+	virtual unsigned long RandSize() const
+	{
+		return 1ul+rand_negbinomial(m_uR, m_dQ);
+	}
+	virtual double MeanSize() const
+	{
+		return 1.0+m_uR*m_dQ/(1.0-m_dQ);
+	}
+	unsigned long m_uR;
+	double m_dQ;
+};
+
+class UserModel : public IndelModel
+{
+public:
+	virtual unsigned long RandSize() const
+	{
+		double d = rand_real();
+		unsigned long u = 1;
+		for(vector<double>::const_iterator dit = m_vSizesCum.begin();
+			dit != m_vSizesCum.end() && d > *dit; ++dit)
+			++u;
+		return u;
+	}
+	virtual double MeanSize() const
+	{
+		double dSize = 1.0;
+		double dLast = 0.0;
+		double dSum = 0.0;
+		for(vector<double>::const_iterator dit = m_vSizesCum.begin();
+			dit != m_vSizesCum.end(); ++dit)
+		{
+			dSum += dSize*(*dit-dLast);
+			dLast = *dit;
+			dSize += 1.0;
+		}
+		return dSum;
+	}
+	vector<double> m_vSizesCum;
+};
+
+
+
+
 // rate of del: lambda*length+lambda*(E(size)-1)
 // rate of ins: lambda*length+lambda
 
@@ -303,9 +359,8 @@ void SubstitutionMatrix(double dTime, Matrix44& rMat)
 	rMat.Multiply(g_matV, mat);
 }
 
-void MakeIndel(Node* pNode)
+void Node::MakeIndel()
 {
-	Seq& rSeq = pNode->Sequence();
 	unsigned int u;
 	double d;
 	if(rand_bool(g_sIndelParams.sIns.dLambda))
@@ -321,7 +376,7 @@ void MakeIndel(Node* pNode)
 				dit != g_sIndelParams.sIns.vSizes.end() && d > *dit; dit++)
 				u++;
 		}
-		pNode->Insert(rand_ulong(rSeq.size()), u);
+		Insert(rand_ulong(m_seq.size()), u);
 	}
 	else
 	{
@@ -336,14 +391,13 @@ void MakeIndel(Node* pNode)
 				dit != g_sIndelParams.sDel.vSizes.end() && d > *dit; dit++)
 				u++;
 		}
-		pNode->Delete(rand_ulong(rSeq.size()-u), u);
+		Delete(rand_ulong(m_seq.size()-u), u);
 	}	
 }
 
-void EvolveSeq(Node* pNode)
+void Node::EvolveSeq()
 {
-	Seq& rSeq = pNode->Sequence();
-	double dLen = fabs(g_dScale*pNode->BranchLength());
+	double dLen = fabs(g_dScale*m_dBranchLength);
 	if(dLen < DBL_EPSILON)
 		return; // Nothing to evolve
 	
@@ -351,7 +405,7 @@ void EvolveSeq(Node* pNode)
 	double dOldRate = -1.0, dRate, dTemp;
 
 	// Substitution Algorithm
-	for(Seq::iterator nit = rSeq.begin(); nit != rSeq.end(); ++nit)
+	for(Seq::iterator nit = m_seq.begin(); nit != m_seq.end(); ++nit)
 	{
         if(nit->m_dRate < DBL_EPSILON || nit->m_nuc > 3)
 			continue; // Invariant Site or gap
@@ -382,7 +436,7 @@ void EvolveSeq(Node* pNode)
 		return; // No Indels
 	for(double tau = rand_exp(1.0/(g_dLambda*rSeq.size())); tau < dLen;
 			tau += rand_exp(1.0/(g_dLambda*rSeq.size())))
-		MakeIndel(pNode);
+		MakeIndel();
 }
 
 void Node::Evolve()
@@ -393,7 +447,7 @@ void Node::Evolve()
 		m_pSib->m_ssGaps = m_ssGaps;
 		m_pSib->Evolve();
 	}
-	EvolveSeq(this);
+	EvolveSeq();
 	if(m_pChild != NULL)
 	{
 		m_pChild->m_seq = m_seq;
