@@ -1,0 +1,69 @@
+%{
+#pragma warning(disable: 4244 4267)
+
+#include <iostream>
+#include "rtree.h"
+#include "parser.h"
+
+using namespace std;
+
+void yyerror (char *s)
+{
+	cerr << yytext << endl;
+}
+int yyparse (void);
+bool Parse(const char* cs)
+{
+	FILE* stream = fopen(cs, "r");
+	if(stream == NULL)
+		return false;
+	yyin = stream;
+	yyparse();
+	fclose(stream);
+	return true;
+}
+
+
+%}
+
+%option nounput
+%option noyywrap
+
+DIGIT  [0-9]
+IDWORD [A-Za-z][A-Za-z_0-9]*
+LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
+
+%%
+
+[\(\):;] {
+	yylval.ch = yytext[0];
+	return yylval.ch;
+}
+
+[-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)? {
+	yylval.d = atof(yytext);
+	return NUM;
+}
+
+{LABELCH}+ {
+	strcpy(yylval.cs, yytext);
+	return LABEL;
+}
+
+"#"[^\n]*
+[, \t\r\v\f\n]+
+{
+
+}
+
+<<EOF>> {
+	yyterminate();
+	return END;
+}
+
+. {
+	return UNKNOWN;
+}
+
+%%
+
