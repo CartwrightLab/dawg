@@ -199,7 +199,7 @@ bool Execute()
 	DawgVar::GetVector("Params", vdParams);
 	if(!DawgVar::GetVector("Gamma", vdGamma)) // Coef of Variation
 	{
-		if(DawgVar::Get("Alpha", vdGamma))  // Shape parameter
+		if(DawgVar::GetVector("Alpha", vdGamma))  // Shape parameter
 		{
 			for(vector<double>::iterator it = vdGamma.begin();
 				it != vdGamma.end(); ++it)
