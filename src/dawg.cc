@@ -438,5 +438,3 @@ bool DawgError(const char* csErr, ...)
 	fprintf(stderr, "\n");
 	return false;
 }
-
-#endif
