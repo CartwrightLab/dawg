@@ -1,5 +1,7 @@
-#!dawg
 #example0.fud
+#simple tree with set seed
+#used to check dawg
+#because every node is labeled every node is in the output
 
 Tree = ((A:0.1,B:0.1)D:0.1,C:0.2)R;
 Seed = 1000

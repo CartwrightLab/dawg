@@ -1,18 +1,31 @@
-#!dawg
 #example1.fud
 
-Tree   = (Hylobates:0.36079,(Pongo:0.33636,(Gorilla:0.17147,  
-	(Pan:0.19268,Homo:0.11927):0.08386):0.06124):0.15057)Ancestor;
+# An Ape Tree
+# branch lengths are the expected number of substitutions along that branch
+Tree   = (Hylobates:0.036079,(Pongo:0.033636,(Gorilla:0.017147,  
+	(Pan:0.019268,Homo:0.011927):0.008386):0.006124):0.015057);
+
+#Size of the sequence to be simulated
 Length = 800
+
+#Use a full GTR model
 Model  = "GTR"
-Params = {1.5, 3.0, 0.9, 1.2, 2.5, 1.0} # AC,AG,AT,CG,CT,GT
-Freqs  = {0.20, 0.30, 0.30, 0.20}       # A,C,G,T
-GapModel = {"NB", "NB"}
-GapParams = {{1, 0.5},{1,0.5}} # Mean gap size is 2
-Lambda = {0.05, 0.05} # 10 gaps for every 100 substitutions
-#Seed = {1978,1129}
-#GapSingleChar = true
-Format = "Nexus"
-Scale = 0.1
+
+#Rates of substitution: AC,AG,AT,CG,CT,GT
+Params = {1.5, 3.0, 0.9, 1.2, 2.5, 1.0}
+
+#Nucleotide frequencies: A,C,G,T
+Freqs  = {0.20, 0.30, 0.30, 0.20}
+
+#Number of datasets to return
 Reps = 10
-File = "out.nex"
+
+#Output information
+File = "example1.nex"
+Format = "Nexus"
+NexusBlock = <<EOF
+Begin Paup;
+set cr=parsimony;
+hsearch;
+End;
+EOF

@@ -1,0 +1,13 @@
+#example4.fud
+
+# Construct a tree where B is the result of a recombination.
+# Nodes _C and _E are not outputed because they begin with
+# an underscore.
+Tree =
+{
+    ((A:0.1,B:0.1)_C:0.1, (D:0.1)_E:0.1);
+    ((A:0.1)_C:0.1, (B:0.1,D:0.1)_E:0.1);
+}
+
+# Each tree in the above vector must be associated with a root section
+Length = {100,100}
