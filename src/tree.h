@@ -27,7 +27,7 @@ public:
 
 	Sequence();
 	Sequence(const DNAVec &dna);
-	unsigned long GapPos(unsigned long uPos) const;
+	unsigned long HisPos(unsigned long uPos) const;
 	
 	unsigned long Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd);
 	unsigned long Delete(unsigned long uPos, unsigned long uSize);

@@ -80,7 +80,7 @@ inline bool IsIns(char ch)
 	return false;
 }
 
-unsigned long Sequence::GapPos(unsigned long uPos) const
+unsigned long Sequence::HisPos(unsigned long uPos) const
 {
 	vector<char>::const_iterator it=m_vHistory.begin();
 	unsigned long v=0;
@@ -102,7 +102,7 @@ unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegi
 	if(uSize == 0 || uPos > m_vDNA.size())
 		return 0;
 	m_vDNA.insert(m_vDNA.begin()+uPos, itBegin, itEnd);
-	uPos = GapPos(uPos);
+	uPos = HisPos(uPos);
 	if(uSize > 1)
 		m_vHistory.insert(m_vHistory.begin()+uPos, uSize-1, 'i');
 	m_vHistory.insert(m_vHistory.begin()+uPos, 1, 'I');
@@ -119,21 +119,16 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 	
 	m_vDNA.erase(m_vDNA.begin()+uStart, m_vDNA.begin()+uEnd);
 
-	unsigned long uTemp = uSize = uEnd-uStart;
-	uPos = GapPos(uStart);
+	uPos = HisPos(uStart);
 	
 	//delete uTemp nucleotides in the history starting at uPos
-	m_vHistory[uPos++] = (m_vHistory[uPos] == '.') ? 'D' : 'J';
-	while(uTemp)
+	m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'D' : 'J';
+	for(unsigned long u = uEnd-uStart-1; u; u--)
 	{
-		if(!IsDel(m_vHistory[uPos]))
-		{
-			m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
-			--uTemp;
-		}
-		uPos++;
+		do {uPos++} while(IsDel(m_vHistory[uPos]));
+		m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
 	}
-	return uSize;
+	return uEnd-uStart;
 }
 
 void Sequence::Append(const Sequence &seq)
@@ -579,7 +574,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 					else if(!IsIns((*it)[uCol]))
 						it->insert(it->begin()+uCol, 1, (*cit)[uCol]);
 					else if((*it)[uCol] == 'I' || (*it)[uCol] == 'i')
-						(*it)[uCol] = '.';
+						(*it)[uCol] = '*';
 				}
 				cit = vHisTable.end()-1;
 			}
@@ -598,6 +593,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 			switch(his[uh])
 			{
 			case '.':
+			case '*':
 				ss[uh] = NucToChar(dna[ud++].m_nuc);
 				break;
 			case 'D':
