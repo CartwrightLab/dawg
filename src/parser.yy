@@ -83,12 +83,12 @@ node
 ;
 
 node:
-  '(' nodeseq ')' LABEL LENGTH { $$ = new NewickNode($2, $4->c_str();, $5 ); delete $4; }
-| '(' nodeseq ')' LABEL { $$ = new NewickNode($2, $4->c_str();, 0.0); delete $4; }
+  '(' nodeseq ')' LABEL LENGTH { $$ = new NewickNode($2, $4->c_str(), $5 ); delete $4; }
+| '(' nodeseq ')' LABEL { $$ = new NewickNode($2, $4->c_str(), 0.0); delete $4; }
 | '(' nodeseq ')' LENGTH { $$ = new NewickNode($2, NULL, $4); }
 | '(' nodeseq ')' {	$$ = new NewickNode($2, NULL, 0.0); }
-| LABEL LENGTH { $$ = new NewickNode(NULL, $1->c_str();, $2); delete $1; }
-| LABEL { $$ = new NewickNode(NULL, $1->c_str();, 0.0); }
+| LABEL LENGTH { $$ = new NewickNode(NULL, $1->c_str(), $2); delete $1; }
+| LABEL { $$ = new NewickNode(NULL, $1->c_str(), 0.0); }
 ;
 
 nodeseq:

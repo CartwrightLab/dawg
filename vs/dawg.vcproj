@@ -137,10 +137,16 @@
 				RelativePath="..\src\indel.cc">
 			</File>
 			<File
+				RelativePath="..\src\lexer.ll">
+			</File>
+			<File
 				RelativePath="..\src\matrix.cc">
 			</File>
 			<File
 				RelativePath="..\src\output.cc">
+			</File>
+			<File
+				RelativePath="..\src\parser.yy">
 			</File>
 			<File
 				RelativePath="..\src\rand.cc">
