@@ -73,6 +73,8 @@ unsigned long Sequence::GapPos(unsigned long uPos) const
 
 bool Sequence::Insert(unsigned long uPos, unsigned long uSize)
 {
+	if(uSize == 0)
+		return true;
 	if(uPos > m_vDNA.size())
 		return false;
 	m_vHistory.insert(m_vHistory.begin()+GapPos(uPos), uSize, '+');
@@ -84,6 +86,8 @@ bool Sequence::Insert(unsigned long uPos, unsigned long uSize)
 
 bool Sequence::Delete(unsigned long uPos, unsigned long uSize)
 {
+	if(uSize == 0)
+		return true;
 	uPos++;
 	unsigned long uStart = (uSize < uPos)? uPos-uSize : 0u;
 	unsigned long uEnd = (m_vDNA.size() > uPos) ? uPos : m_vDNA.size();
@@ -128,6 +132,8 @@ unsigned long Tree::Node::SeqLength() const
 
 bool Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 {
+	if(uSize == 0)
+		return true;	
 	vector<Sequence>::iterator it;
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
 			uPos -= it->Length();
@@ -143,25 +149,30 @@ bool Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 		// Insertion occurs at a gap between sections
 		// Randomly allocate uSize among the sections
 		vector<unsigned long> vTemp;
+		vTemp.push_back(0);
 		vTemp.push_back(rand_ulong(uSize));
 		for(vector<Sequence>::iterator jt = it; jt != m_vSections.end() && jt->Length(); ++jt)
 			vTemp.push_back(rand_ulong(uSize));
+		vTemp.push_back(uSize);
 		sort(vTemp.begin(), vTemp.end());
-		
-		unsigned long uTemp = vTemp[0];
-		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt)
-		{
-			
-		}
-		it->Insert(uPos, uTemp);
-		
-
+		it->Insert(uPos, vTemp[1]-vTemp[0]);
+		int i=1;
+		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt, ++i)
+			jt->Insert(0, vTemp[i+1]-vTemp[i]);
 	}
 	return true;
 }
 
 bool Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
 {
+	if(uSize == 0)
+		return true;
+	vector<Sequence>::iterator it;
+	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
+			uPos -= it->Length();
+	if( it == m_vSections.end())
+		return false;
+	it->Delete(uPos, uSize);
 	return true;
 }
 
