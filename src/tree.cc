@@ -139,7 +139,9 @@ Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
 			break;
 		uPos -= itA->SeqLength();
 	}
-	Sequence::iterator itB = (itA != m_vSections.end()) ? itA->SeqPos(uPos) : NULL;
+	Sequence::iterator itB;
+	if(itA != m_vSections.end())
+		itB = itA->SeqPos(uPos);
 	return iterator(itA,itB);
 }
 
