@@ -1,4 +1,4 @@
-m4_include(config/rev.m4)
+m4_define([dawg_rev], [m4_esyscmd([svnversion -n .])])
 AC_INIT([dawg], [1.0.dawg_rev()-rc4], [http://scit.us/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
