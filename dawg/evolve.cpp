@@ -28,15 +28,17 @@ public:
 class IndelModel
 {
 public:
-	virtual unsigned int RandSize() const = 0;
+	virtual unsigned long RandSize() const = 0;
 	virtual double MeanSize() const = 0;
 };
 
 class NegBnModel : public IndelModel
 {
 public:
-	//NegBnModel(unsigned long uR, double dQ) :
-	//  m_uR(uR), m_dQ(dQ) { }
+	NegBnModel(const vector<double>& vdModel)
+	{
+
+	}
 	virtual unsigned long RandSize() const
 	{
 		return 1ul+rand_negbinomial(m_uR, m_dQ);
@@ -52,6 +54,19 @@ public:
 class UserModel : public IndelModel
 {
 public:
+	UserModel(const vector<double>& vdModel)
+	{
+		m_vSizesCum.clear();
+		double dSum = 0.0;
+		for(vector<double>::const_iterator cit = vdModel.begin();
+			cit != vdModel.end(); ++cit)
+		{
+			if(*cit > 1.0 || dSum > 1.0)
+				throw(DawgError("User Gap Model parameters must sum to one."));
+			dSum += *cit;
+			m_vSizesCum.push_back(dSum);
+		}
+	}
 	virtual unsigned long RandSize() const
 	{
 		double d = rand_real();
@@ -78,6 +93,50 @@ public:
 	vector<double> m_vSizesCum;
 };
 
+class IndelProcessor
+{
+public:
+	IndelProcessor();
+	virtual ~IndelProcessor()
+	{
+		if(m_pInsertionModel)
+			delete m_pInsertionModel;
+		if(m_pDeletionModel)
+			delete m_pDeletionModel;
+	}
+	
+	IndelModel* m_pInsertionModel;
+	IndelModel* m_pDeletionModel;
+	double m_dLambdaIns;
+	double m_dLambdaDel;
+	LinearFunc m_funcRateIns;
+	LinearFunc m_funcRateSum;
+
+	bool Setup(const string& ssModel, double dLambda[],
+		const vector<double>& vdInsModel, const vector<double>& vdDelModel)
+	{
+		m_dLambdaIns = dLambda[0];
+		m_dLambdaDel = dLambda[1];
+		if(ssModel == "NB")
+		{
+			try {m_pInsertionModel = new NegBnModel(vdInsModel);}
+				catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
+			try{m_pDeletionModel  = new NegBnModel(vdDelModel);}
+				catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
+		}
+		else
+		{
+			try {m_pInsertionModel = new UserModel(vdInsModel);}
+				catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
+			try{m_pDeletionModel  = new UserModel(vdDelModel);}
+				catch(...) {return DawgError("Deletion model parameters not specified correctly.");}		}
+		m_funcRateIns.m = m_dLambdaIns;
+		m_funcRateIns.b = m_dLambdaIns;
+		m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
+		m_funcRateSum.b = m_dLambdaIns+m_dLambdaDel*(m_pDeletionModel->MeanSize()-1.0);
+	}
+};
+
 
 
 
@@ -88,19 +147,6 @@ double g_dGamma = 0.0;  // The parameter of the Gamma distribution with mean 1
 double g_dIota = 0.0;   // The probability that a site is invariant
 
 double g_dScale = 1.0;
-
-bool   g_bNegBnIndel = true; //Whether or not to draw indel size from neg binomial
-double g_dLambda = 0.0; // The rate of indel formation {sum of ins and del}
-// Gap Parameters
-struct IndelParams {
-	struct Params
-	{
-		double dLambda;
-		unsigned long uR;
-		double dQ;
-		vector<double> vSizes;
-	} sIns, sDel;
-} g_sIndelParams;
 
 double g_dNucCumFreqs[4] = {0.25, 0.5, 0.75, 1.0}; // ACGT cummulative frequencies.
 double g_dFreqs[4] = {0.25, 0.25, 0.25, 0.25}; // ACGT Frequencies
@@ -125,7 +171,7 @@ string EvoDescription()
 	ss << "  Heterogenous Rates:" << endl;
 	ss << "    Gamma = " << g_dGamma << endl;
 	ss << "    Iota  = " << g_dIota << endl;
-	ss << endl << "Gap Parameters:" << endl;
+/*	ss << endl << "Gap Parameters:" << endl;
 	ss << "  Insertions:" << endl;
 	ss << "    Lambda = " << ((g_dLambda > DBL_EPSILON) ? g_sIndelParams.sIns.dLambda*g_dLambda : 0.0) << endl;
 	if(g_bNegBnIndel)
@@ -160,7 +206,7 @@ string EvoDescription()
 		}
 		ss << ")" << endl;
 	}
-	ss << endl << "Other Parameters:" << endl;
+*/	ss << endl << "Other Parameters:" << endl;
 	ss << "   Branch Scale = " << g_dScale << endl;
 	return ss.str();
 }
@@ -259,7 +305,7 @@ bool EvoScaleTrees(double dScale)
 bool EvoIndelUser(double dInsL, double pIns[], int nIns,
 				  double dDelL, double pDel[], int nDel)
 {
-	g_bNegBnIndel = false;
+/*	g_bNegBnIndel = false;
 	g_dLambda = dInsL+dDelL;
 	g_sIndelParams.sIns.dLambda = dInsL/g_dLambda;
 	g_sIndelParams.sDel.dLambda = dDelL/g_dLambda;
@@ -284,13 +330,14 @@ bool EvoIndelUser(double dInsL, double pIns[], int nIns,
 		g_sIndelParams.sDel.vSizes.push_back(dSum);
 	}
 	g_sIndelParams.sDel.vSizes.back() = 1.0;
+	*/
 	return true;
 }
 
 bool EvoIndelNegBn(double dInsL, unsigned long uInsR, double dInsQ,
 				   double dDelL, unsigned long uDelR, double dDelQ)
 {
-	bool bRet = true;
+/*	bool bRet = true;
 	g_bNegBnIndel = true;
 	if(0.0 > dInsL || dInsL > 1.0)
 		bRet = DawgError("NB Gap Model (Ins) Lambda must be a probability.");
@@ -312,8 +359,9 @@ bool EvoIndelNegBn(double dInsL, unsigned long uInsR, double dInsQ,
 
 	g_sIndelParams.sDel.dLambda = dDelL/g_dLambda;
 	g_sIndelParams.sDel.uR = uDelR;
-	g_sIndelParams.sDel.dQ = dDelQ;
-	return bRet;
+	g_sIndelParams.sDel.dQ = dDelQ; 
+	return bRet;*/
+	return true;
 }
 
 inline Nucleotide::Nuc rand_nuc()
@@ -434,8 +482,8 @@ void Node::EvolveSeq()
 	//indel formation
 	if(g_dLambda < DBL_EPSILON)
 		return; // No Indels
-	for(double tau = rand_exp(1.0/(g_dLambda*rSeq.size())); tau < dLen;
-			tau += rand_exp(1.0/(g_dLambda*rSeq.size())))
+	for(double tau = rand_exp(1.0/(g_dLambda*m_seq.size())); tau < dLen;
+			tau += rand_exp(1.0/(g_dLambda*m_seq.size())))
 		MakeIndel();
 }
 

@@ -102,7 +102,7 @@ public:
 	
 	double BranchLength() const { return m_dBranchLength; }
 	const std::string& Label() const { return m_ssLabel; }
-	void SetBranchLength(double d) { m_dLength = d; }
+	void SetBranchLength(double d) { m_dBranchLength = d; }
 
 	std::string ToString() const;
 

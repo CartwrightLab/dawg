@@ -222,12 +222,12 @@ string Node::ToString() const
 		ssTemp += ')';
 	}
 	ssTemp += Label();
-	double d = Length();
+	double d = BranchLength();
 	if(d != 0.0)
 	{
 		ssTemp += ':';
 		char csBuffer[32];
-		sprintf(csBuffer, "%0.10f", Length());
+		sprintf(csBuffer, "%0.10f", BranchLength());
 		char *p = &csBuffer[0];
 		while (*p) {p++; }
 		while(*(--p) == '0' || *p == '.')
