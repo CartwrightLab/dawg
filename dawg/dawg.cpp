@@ -1,9 +1,7 @@
 // dawg.cpp
 
 #include "dawg.h"
-#include <iostream>
-#include <algorithm>
-#include <iomanip>
+
 #include <time.h>
 #include <float.h>
 #include <stdio.h>
@@ -12,6 +10,12 @@
 #else
 #	include <unistd.h>
 #endif
+
+
+#include <iostream>
+#include <algorithm>
+#include <iomanip>
+#include <memory>
 
 using namespace std;
 

@@ -1,7 +1,9 @@
 #include "dawg.h"
-#include <map>
+
 #include <float.h>
 #include <stdio.h>
+
+#include <map>
 
 using namespace std;
 
@@ -191,48 +193,4 @@ unsigned int DawgVar::Size()
 		case tyNone:	return 0;
 		default:		return 1;
 	};
-}
-
-
-/********************************************************
-class Node
-********************************************************/
-Node::~Node()
-{
-	if(m_pSib != NULL)
-		delete m_pSib;
-	if(m_pChild != NULL)
-		delete m_pChild;
-}
-
-string Node::ToString() const
-{
-	string ssTemp = "";
-	if(IsClade())
-	{
-		ssTemp += '(';
-		ssTemp += m_pChild->ToString();
-		Node* p = m_pChild->m_pSib;
-		while(p)
-		{
-			ssTemp += ',';
-			ssTemp += p->ToString();
-			p = p->m_pSib;
-		}
-		ssTemp += ')';
-	}
-	ssTemp += Label();
-	double d = BranchLength();
-	if(d != 0.0)
-	{
-		ssTemp += ':';
-		char csBuffer[32];
-		sprintf(csBuffer, "%0.10f", BranchLength());
-		char *p = &csBuffer[0];
-		while (*p) {p++; }
-		while(*(--p) == '0' || *p == '.')
-			*p = '\0';
-		ssTemp += csBuffer;
-	}
-	return ssTemp;
 }

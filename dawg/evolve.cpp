@@ -17,143 +17,15 @@ using namespace std;
 
 //void PrintMatrix(const SPMatrix& mat);
 
-class LinearFunc : public unary_function<double, double>
-{
-public:
-	result_type operator()( argument_type x) { return m*x+b; }
-	argument_type m;
-	argument_type b;
-};
-
-class IndelModel
-{
-public:
-	virtual unsigned long RandSize() const = 0;
-	virtual double MeanSize() const = 0;
-};
-
-class NegBnModel : public IndelModel
-{
-public:
-	NegBnModel(const vector<double>& vdModel)
-	{
-
-	}
-	virtual unsigned long RandSize() const
-	{
-		return 1ul+rand_negbinomial(m_uR, m_dQ);
-	}
-	virtual double MeanSize() const
-	{
-		return 1.0+m_uR*m_dQ/(1.0-m_dQ);
-	}
-	unsigned long m_uR;
-	double m_dQ;
-};
-
-class UserModel : public IndelModel
-{
-public:
-	UserModel(const vector<double>& vdModel)
-	{
-		m_vSizesCum.clear();
-		double dSum = 0.0;
-		for(vector<double>::const_iterator cit = vdModel.begin();
-			cit != vdModel.end(); ++cit)
-		{
-			if(*cit > 1.0 || dSum > 1.0)
-				throw(DawgError("User Gap Model parameters must sum to one."));
-			dSum += *cit;
-			m_vSizesCum.push_back(dSum);
-		}
-	}
-	virtual unsigned long RandSize() const
-	{
-		double d = rand_real();
-		unsigned long u = 1;
-		for(vector<double>::const_iterator dit = m_vSizesCum.begin();
-			dit != m_vSizesCum.end() && d > *dit; ++dit)
-			++u;
-		return u;
-	}
-	virtual double MeanSize() const
-	{
-		double dSize = 1.0;
-		double dLast = 0.0;
-		double dSum = 0.0;
-		for(vector<double>::const_iterator dit = m_vSizesCum.begin();
-			dit != m_vSizesCum.end(); ++dit)
-		{
-			dSum += dSize*(*dit-dLast);
-			dLast = *dit;
-			dSize += 1.0;
-		}
-		return dSum;
-	}
-	vector<double> m_vSizesCum;
-};
-
-class IndelProcessor
-{
-public:
-	IndelProcessor();
-	virtual ~IndelProcessor()
-	{
-		if(m_pInsertionModel)
-			delete m_pInsertionModel;
-		if(m_pDeletionModel)
-			delete m_pDeletionModel;
-	}
-	
-	IndelModel* m_pInsertionModel;
-	IndelModel* m_pDeletionModel;
-	double m_dLambdaIns;
-	double m_dLambdaDel;
-	LinearFunc m_funcRateIns;
-	LinearFunc m_funcRateSum;
-
-	bool Setup(const string& ssModel, double dLambda[],
-		const vector<double>& vdInsModel, const vector<double>& vdDelModel)
-	{
-		m_dLambdaIns = dLambda[0];
-		m_dLambdaDel = dLambda[1];
-		if(ssModel == "NB")
-		{
-			try {m_pInsertionModel = new NegBnModel(vdInsModel);}
-				catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
-			try{m_pDeletionModel  = new NegBnModel(vdDelModel);}
-				catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
-		}
-		else
-		{
-			try {m_pInsertionModel = new UserModel(vdInsModel);}
-				catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
-			try{m_pDeletionModel  = new UserModel(vdDelModel);}
-				catch(...) {return DawgError("Deletion model parameters not specified correctly.");}		}
-		m_funcRateIns.m = m_dLambdaIns;
-		m_funcRateIns.b = m_dLambdaIns;
-		m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
-		m_funcRateSum.b = m_dLambdaIns+m_dLambdaDel*(m_pDeletionModel->MeanSize()-1.0);
-	}
-};
-
-
-
-
-// rate of del: lambda*length+lambda*(E(size)-1)
-// rate of ins: lambda*length+lambda
-
 double g_dGamma = 0.0;  // The parameter of the Gamma distribution with mean 1
 double g_dIota = 0.0;   // The probability that a site is invariant
-
-double g_dScale = 1.0;
 
 double g_dNucCumFreqs[4] = {0.25, 0.5, 0.75, 1.0}; // ACGT cummulative frequencies.
 double g_dFreqs[4] = {0.25, 0.25, 0.25, 0.25}; // ACGT Frequencies
 Matrix44 g_matV, g_matU, g_matQ, g_matR;  // U = transpose(V)
 Vector4  g_vecL;
 
-string EvoDescription()
+/*string EvoDescription()
 {
 	ostringstream ss;
 	ss << "Substitution Parameters:" << endl;
@@ -171,7 +43,7 @@ string EvoDescription()
 	ss << "  Heterogenous Rates:" << endl;
 	ss << "    Gamma = " << g_dGamma << endl;
 	ss << "    Iota  = " << g_dIota << endl;
-/*	ss << endl << "Gap Parameters:" << endl;
+	ss << endl << "Gap Parameters:" << endl;
 	ss << "  Insertions:" << endl;
 	ss << "    Lambda = " << ((g_dLambda > DBL_EPSILON) ? g_sIndelParams.sIns.dLambda*g_dLambda : 0.0) << endl;
 	if(g_bNegBnIndel)
@@ -206,10 +78,11 @@ string EvoDescription()
 		}
 		ss << ")" << endl;
 	}
-*/	ss << endl << "Other Parameters:" << endl;
+	ss << endl << "Other Parameters:" << endl;
 	ss << "   Branch Scale = " << g_dScale << endl;
 	return ss.str();
 }
+*/
 
 // Substitution Model is REV	
 bool EvoRevParams(double pFreqs[], double pSubs[])
@@ -362,199 +235,5 @@ bool EvoIndelNegBn(double dInsL, unsigned long uInsR, double dInsQ,
 	g_sIndelParams.sDel.dQ = dDelQ; 
 	return bRet;*/
 	return true;
-}
-
-inline Nucleotide::Nuc rand_nuc()
-{
-	double d = rand_real();
-	if(d <= g_dNucCumFreqs[0])
-		return 0; // A
-	else if(d <= g_dNucCumFreqs[1])
-		return 1; // C
-	else if(d <= g_dNucCumFreqs[2])
-		return 2; // G
-	else
-		return 3; // T
-}
-
-inline double rand_rate()
-{
-	if(g_dIota > DBL_EPSILON && rand_bool(g_dIota))
-		return 0.0;  // Site Invariant
-	else if(g_dGamma > DBL_EPSILON)
-		return rand_gamma1(g_dGamma); // Gamma with mean 1.0 and var of g_dGamma
-	else
-		return 1.0;
-}
-
-Nucleotide Nucleotide::Rand()
-{
-	return Nucleotide(rand_nuc(), rand_rate());
-}
-
-/*******************************************************
-	Evolution Algorithm
-*******************************************************/
-
-void SubstitutionMatrix(double dTime, Matrix44& rMat)
-{
-	Matrix44 mat;	Vector4  vec;
-	vec[0] = exp(dTime*g_vecL[0]);
-	vec[1] = exp(dTime*g_vecL[1]);
-	vec[2] = exp(dTime*g_vecL[2]);
-	vec[3] = exp(dTime*g_vecL[3]);
-	mat.Scale(vec, g_matU);
-	rMat.Multiply(g_matV, mat);
-}
-
-void Node::MakeIndel()
-{
-	unsigned int u;
-	double d;
-	if(rand_bool(g_sIndelParams.sIns.dLambda))
-	{
-		//Insertion
-		if(g_bNegBnIndel)
-			u = 1+rand_negbinomial(g_sIndelParams.sIns.uR, g_sIndelParams.sIns.dQ);
-		else
-		{
-			d = rand_real();
-			u = 1;
-			for(vector<double>::const_iterator dit = g_sIndelParams.sIns.vSizes.begin();
-				dit != g_sIndelParams.sIns.vSizes.end() && d > *dit; dit++)
-				u++;
-		}
-		Insert(rand_ulong(m_seq.size()), u);
-	}
-	else
-	{
-		//Deletion
-		if(g_bNegBnIndel)
-			u = 1+rand_negbinomial(g_sIndelParams.sDel.uR, g_sIndelParams.sDel.dQ);
-		else
-		{
-			d = rand_real();
-			u = 1;
-			for(vector<double>::const_iterator dit = g_sIndelParams.sDel.vSizes.begin();
-				dit != g_sIndelParams.sDel.vSizes.end() && d > *dit; dit++)
-				u++;
-		}
-		Delete(rand_ulong(m_seq.size()-u), u);
-	}	
-}
-
-void Node::EvolveSeq()
-{
-	double dLen = fabs(g_dScale*m_dBranchLength);
-	if(dLen < DBL_EPSILON)
-		return; // Nothing to evolve
-	
-	Matrix44 matSub;
-	double dOldRate = -1.0, dRate, dTemp;
-
-	// Substitution Algorithm
-	for(Seq::iterator nit = m_seq.begin(); nit != m_seq.end(); ++nit)
-	{
-        if(nit->m_dRate < DBL_EPSILON || nit->m_nuc > 3)
-			continue; // Invariant Site or gap
-		dRate = dLen*nit->m_dRate;
-		if(dOldRate == -1.0 || dRate != dOldRate)
-		{
-			dOldRate = dRate;			
-			SubstitutionMatrix(dRate, matSub);
-			for(Matrix44::Pos i = 0;i<4;++i)
-			{
-				matSub(i,1) += matSub(i,0);
-				matSub(i,2) += matSub(i,1);
-				//matSub(i,3) = 1.0;
-			}
-		}
-		dTemp = rand_real();
-		if(dTemp <= matSub(nit->m_nuc, 0))
-			nit->m_nuc = 0;
-		else if(dTemp <= matSub(nit->m_nuc, 1))
-			nit->m_nuc = 1;
-		else if(dTemp <= matSub(nit->m_nuc, 2))
-			nit->m_nuc = 2;
-		else
-			nit->m_nuc = 3;
-	}
-	//indel formation
-	if(g_dLambda < DBL_EPSILON)
-		return; // No Indels
-	for(double tau = rand_exp(1.0/(g_dLambda*m_seq.size())); tau < dLen;
-			tau += rand_exp(1.0/(g_dLambda*m_seq.size())))
-		MakeIndel();
-}
-
-void Node::Evolve()
-{
-	if(m_pSib != NULL)
-	{
-		m_pSib->m_seq = m_seq;
-		m_pSib->m_ssGaps = m_ssGaps;
-		m_pSib->Evolve();
-	}
-	EvolveSeq();
-	if(m_pChild != NULL)
-	{
-		m_pChild->m_seq = m_seq;
-		m_pChild->m_ssGaps = m_ssGaps;
-		m_pChild->Evolve();
-	}
-}
-
-unsigned int Node::GapPos(unsigned int u) const
-{
-	string::const_iterator it=m_ssGaps.begin();
-	unsigned int v=0;
-	//skip leading 'gapspace'
-	for(;(*it == '-' || *it == '=') && it != m_ssGaps.end(); ++it)
-		v++;
-	for(; u && it!=m_ssGaps.end() ;++it)
-	{
-		v++;
-		if(*it != '-' && *it != '=')
-			u--;
-	}
-	return v;
-}
-
-void Node::Insert(unsigned int uPos, unsigned int uSize)
-{
-	//assert(uPos <= m_seq.size());
-	m_ssGaps.insert(GapPos(uPos), uSize, '^');
-
-	Seq seq(uSize);
-	generate(seq.begin(), seq.end(), Nucleotide::Rand);
-	m_seq.insert(m_seq.begin()+uPos, seq.begin(), seq.end());
-
-}
-void Node::Delete(unsigned int uPos, unsigned int uSize)
-{
-	//assert(uPos <= m_seq.size());
-	if(uPos+uSize > m_seq.size())
-		uSize = m_seq.size()-uPos;
-	m_seq.erase(m_seq.begin()+uPos, m_seq.begin()+uPos+uSize);
-
-	uPos = GapPos(uPos);
-	while(uSize)
-	{
-		switch(m_ssGaps[uPos])
-		{
-		case '=':
-		case '-':
-			break;
-		case '^':
-			m_ssGaps[uPos] = '=';
-			uSize--;
-			break;
-		default:
-			m_ssGaps[uPos] = '-';
-			uSize--;
-			break;
-		};
-		uPos++;
-	}
 }
 

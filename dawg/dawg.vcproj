@@ -140,6 +140,9 @@
 				RelativePath="evolve.cpp">
 			</File>
 			<File
+				RelativePath=".\indel.cpp">
+			</File>
+			<File
 				RelativePath="lexer.fl">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -162,6 +165,9 @@
 			</File>
 			<File
 				RelativePath="matrix.cpp">
+			</File>
+			<File
+				RelativePath=".\node.cpp">
 			</File>
 			<File
 				RelativePath="output.cpp">
@@ -191,6 +197,9 @@
 				RelativePath="rand.cpp">
 			</File>
 			<File
+				RelativePath=".\subst.cpp">
+			</File>
+			<File
 				RelativePath="var.cpp">
 			</File>
 		</Filter>
@@ -201,10 +210,19 @@
 				RelativePath="dawg.h">
 			</File>
 			<File
+				RelativePath=".\indel.h">
+			</File>
+			<File
 				RelativePath="matrix.h">
 			</File>
 			<File
+				RelativePath=".\node.h">
+			</File>
+			<File
 				RelativePath="rand.h">
+			</File>
+			<File
+				RelativePath=".\subst.h">
 			</File>
 		</Filter>
 		<Filter

@@ -5,10 +5,11 @@
 #include <string>
 #include <fstream>
 
+#include "node.h"
 
 inline const char* DawgVersion()
 {
-	return "1.0.2 (Mastiff)";
+	return "1.1.0";
 }
 
 // Error Reporting
@@ -34,111 +35,6 @@ bool SetFormat(FileFormat fmt, int nNum, const char* csBlock, bool bGapSingle);
 bool DawgOpen(const char* csFile, std::ofstream& rFile);
 void DawgIniOutput(std::ostream& os);
 bool SaveSequences(std::ostream &rFile, const Tree *arTrees[], unsigned int uSize);
-
-struct Nucleotide
-{
-	typedef unsigned char Nuc;
-	double m_dRate; // 0.0 means invarant
-	Nuc    m_nuc;
-
-	Nucleotide() : m_nuc(5), m_dRate(1.0) { }
-	Nucleotide(Nuc nuc, double rate) : m_nuc(nuc), m_dRate(rate) { }
-	static Nucleotide Rand();
-};
-
-typedef std::vector<Nucleotide> Seq;
-
-inline Nucleotide::Nuc CharToNuc(char ch)
-{
-	switch(ch)
-	{
-		case 'a':
-		case 'A': return 0;
-		case 'c':
-		case 'C': return 1;
-		case 'g':
-		case 'G': return 2;
-		case 't':
-		case 'T': return 3;
-		case '-': return 4;
-		case '?': return 5;
-		default : return (Nucleotide::Nuc)-1;
-	}
-}
-
-inline char NucToChar(Nucleotide::Nuc n)
-{
-	static char cs[] = "ACGT-?";
-	return (n > 4) ? '?' : cs[n];
-}
-
-class Node
-{
-public:
-	Node(const char* csName = "", Node * pChild = NULL) : m_ssLabel(csName),
-		m_pChild(pChild), m_pSib(NULL), m_dBranchLength(0.0) { }
-	virtual ~Node();
-
-	bool IsTaxon() const { return m_pChild == NULL; }
-	bool IsClade() const { return m_pChild != NULL; }
-
-	void AddChild(Node* pNode)
-	{
-		pNode->m_pSib = m_pChild;
-		m_pChild = pNode;
-	}
-	bool IsChild(Node* pNode)
-	{
-		Node *p = m_pChild;
-		while(p != pNode && p)
-			p = p->m_pSib;
-		return p != NULL;
-	}
-	void AddSib(Node* pNode)
-	{
-		pNode->m_pSib = m_pSib;
-		m_pSib = pNode;
-	}
-	
-	double BranchLength() const { return m_dBranchLength; }
-	const std::string& Label() const { return m_ssLabel; }
-	void SetBranchLength(double d) { m_dBranchLength = d; }
-
-	std::string ToString() const;
-
-	const Seq& Sequence() const { return m_seq; }
-	Seq& Sequence() { return m_seq; }
-
-	const Node *Child() const {return m_pChild; }
-	const Node *Sibling() const {return m_pSib; }
-
-	void Evolve();
-
-	const std::string& Gaps() const { return m_ssGaps; }
-	void  ResetGaps() { m_ssGaps.assign(m_seq.size(), '%'); }
-	unsigned int GapPos(unsigned int uPos) const;
-	void Insert(unsigned int uPos, unsigned int uSize);
-	void Delete(unsigned int uPos, unsigned int uSize);
-
-
-protected:
-	Node* m_pSib;
-	Node* m_pChild;
-	double m_dBranchLength;
-	std::string m_ssLabel;
-
-	Seq m_seq;
-	std::string m_ssGaps;
-
-private:
-	Node(const Node&);
-	Node& operator=(const Node&);
-
-	friend void PrintTreeSeq(Node* pTree);
-
-	void EvolveSeq();
-	void MakeIndel();
-};
 
 class DawgVar
 {
