@@ -136,8 +136,7 @@ int main(int argc, char* argv[])
 // based off of NR's randqd1
 inline unsigned int rand_seed()
 {
-	// 	
-	static unsigned long u = time(NULL)+3*getpid();
+	static unsigned int u = (unsigned int)(time(NULL)+3*getpid());
 	return (u = u*1664525u + 1013904223u);
 }
 
@@ -145,10 +144,10 @@ inline unsigned int rand_seed()
 bool Execute()
 {
 	// Variables
-	unsigned long uReps  =  1;
-	vector<unsigned long> vuSeqLen;
+	unsigned int uReps  =  1;
+	vector<unsigned int> vuSeqLen;
 	vector<string> vssSeqs;
-	unsigned long uTotalSeqLen = 0, uTotalRateLen = 0;
+	string::size_type uTotalSeqLen = 0, uTotalRateLen = 0;
 	
 	vector<double> vdGamma, vdIota, vdScale;
 
@@ -165,16 +164,16 @@ bool Execute()
 
 	vector<NewickNode*> vtTrees;
 	double	dTreeScale = 1.0;
-	vector<unsigned long>   vuSeed;
+	vector<unsigned int>   vuSeed;
 
 	string ssFile = "-";
-	unsigned long uFmt = FormatFasta;
+	unsigned int uFmt = FormatFasta;
 	string ssFormat = "Fasta";
 	string ssNexusCode;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
-	unsigned long uWidth = 1;
-	int nRes;
+	unsigned int uWidth = 1;
+	DawgVar::Vec::size_type nRes;
 
 	// Read variables from configuration
 
@@ -192,7 +191,7 @@ bool Execute()
 	{
 		if(vuSeqLen.size() < vtTrees.size())
 			return DawgError("\"Length\" and \"Tree\" must have the same size.");
-		for(vector<unsigned long>::const_iterator cit = vuSeqLen.begin(); cit != vuSeqLen.end(); ++cit)
+		for(vector<unsigned int>::const_iterator cit = vuSeqLen.begin(); cit != vuSeqLen.end(); ++cit)
 			uTotalSeqLen += *cit;
 	}
 	else
@@ -382,7 +381,7 @@ bool Execute()
 		return DawgError("Translate requires a Width of 3.");
 	
 	// setup output flags
-	unsigned long uOutFlags = 0u;
+	unsigned int uOutFlags = 0u;
 	if(bGapSingle)
 		uOutFlags |= FlagOutGapSingleChar;
 	if(bGapPlus)
@@ -428,8 +427,34 @@ bool DawgError(const char* csErr, ...)
 	fprintf(stderr, "Error: ");
 	va_list args;
 	va_start(args, csErr);
+#if defined(HAVE_VFPRINTF)
 	vfprintf(stderr, csErr, args);
+#elif defined(HAVE_DOPRNT)
+	_doprnt(csErr, args, stderr);
+#else
+	fprintf(stderr, csErr);
+#endif
 	va_end(args);
 	fprintf(stderr, "\n");
 	return false;
 }
+
+// Compatibility functions
+
+#ifndef HAVE_MALLOC
+#undef malloc
+void *rpl_malloc(size_t n)
+{
+	if(n == 0) n = 1;
+	return malloc(n);
+}
+#endif
+
+#ifndef HAVE_REALLOC
+#undef realloc
+void *rpl_rellac(void *p, size_t n)
+{
+	if(n == 0) n = 1;
+	return realloc(p,n);
+}
+#endif

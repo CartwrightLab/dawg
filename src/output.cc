@@ -5,19 +5,19 @@
 
 using namespace std;
 
-void FilterSequence(const string& ssSrc, string& ssDest, unsigned long uFlags);
-void PrintSequencesFasta(  ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
-void PrintSequencesNexus(  ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
-void PrintSequencesPhylip( ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
-void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
+void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags);
+void PrintSequencesFasta(  ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
+void PrintSequencesNexus(  ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
+void PrintSequencesPhylip( ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
+void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
 
-unsigned long g_fileFormat = FormatFasta;
+unsigned int g_fileFormat = FormatFasta;
 const char *g_csBlock = NULL;
 int			g_nDataSet = 0;
 int			g_nDataSetNum = 1;
 
 // Reset Format
-bool SetFormat(unsigned long fmt, int nNum, const char* csBlock)
+bool SetFormat(unsigned int fmt, int nNum, const char* csBlock)
 {
 	g_fileFormat = fmt;
 	g_csBlock = csBlock;
@@ -41,7 +41,7 @@ void DawgIniOutput(ostream& os)
 }
 
 // Save alignment to output stream
-bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned long uFlags)
+bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags)
 {
 	// Print DataSet number if multiple sequences will be returned
 	if(g_nDataSetNum > 1)
@@ -73,7 +73,7 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned long uFl
 }
 
 // Fasta Output
-void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln, unsigned long)
+void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln, unsigned int)
 {
 	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
 	{
@@ -96,12 +96,12 @@ void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln, unsigned long)
 }
 
 // Nexus Non-Interleaved Output
-void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned long uFlags)
+void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned int uFlags)
 {
 	// Write header for data block
 	Tree::Alignment::const_iterator cit = aln.begin();
 	os << "BEGIN DATA;" << endl;
-	os << "\tDIMENSIONS NTAX=" << aln.size() << " NCHAR=" << cit->second.length() << ';' << endl;
+	os << "\tDIMENSIONS NTAX=" << (unsigned int)aln.size() << " NCHAR=" << (unsigned int)cit->second.length() << ';' << endl;
 	os << "\tFORMAT DATATYPE=";
 	if(uFlags & FlagOutTranslate)
 		os << "PROTEIN";
@@ -123,11 +123,11 @@ void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned long 
 }
 
 // Phylip Non-Interleaved Output
-void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln, unsigned long)
+void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln, unsigned int)
 {
 	// Header
 	Tree::Alignment::const_iterator cit = aln.begin();
-	os << aln.size() << ' ' << cit->second.length() << endl;
+	os << (unsigned int)aln.size() << ' ' << (unsigned int)cit->second.length() << endl;
 	
 	// Print non-interleaved sequences
 	os << setfill(' ');
@@ -137,14 +137,14 @@ void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln, unsigned long
 }
 
 // Clustal Output
-void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned long)
+void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned int)
 {
-	unsigned long uLen = aln.begin()->second.length();
-	unsigned long l;
+	unsigned int uLen = (unsigned int)aln.begin()->second.length();
+	unsigned int l;
 	// Print interleaved sequences
-	for(unsigned long u = 0; u < uLen; u+=l)
+	for(unsigned int u = 0; u < uLen; u+=l)
 	{
-		l = min(60ul, uLen);
+		l = min(60u, uLen);
 		// Print a row of each sequence
 		for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
 			os << setw(15) << setiosflags(ios::left) << cit->first << " " << cit->second.substr(u, l) << endl;
@@ -227,7 +227,7 @@ void FilterTranslate(string& ss)
 }
 
 // Filter the sequence based on the flags
-void FilterSequence(const string& ssSrc, string& ssDest, unsigned long uFlags)
+void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags)
 {
 	// Copy Sequence
 	ssDest = ssSrc;

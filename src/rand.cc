@@ -51,12 +51,12 @@
 #define MIXBITS(u,v) ( ((u) & UMASK) | ((v) & LMASK) )
 #define TWIST(u,v) ((MIXBITS(u,v) >> 1) ^ ((v)&1UL ? MATRIX_A : 0UL))
 
-static unsigned long state[N]; /* the array for the state vector  */
+static uint32_t state[N]; /* the array for the state vector  */
 
 static int left = 1;
-static unsigned long *next;
+static uint32_t *next;
 
-void mt_srand(unsigned long s)
+void mt_srand(uint32_t s)
 {
     int j;
     state[0]= s & 0xffffffffUL;
@@ -73,9 +73,10 @@ static struct mt_rand_init
 	mt_rand_init() { mt_srand(5489UL); }
 } drinit;
 
-void mt_srand(unsigned long uKeys[], unsigned long uLen)
+void mt_srand(uint32_t uKeys[], size_t uLen)
 {
-    unsigned int i, j, k;
+    uint32_t i, j;
+	size_t k;
     mt_srand(19650218UL);
     i=1; j=0;
     k = (N>uLen ? N : uLen);
@@ -103,7 +104,7 @@ inline void mt_next_state()
 {
 	left = N;
     next = state;
-	unsigned long *p=state;
+	uint32_t *p=state;
     for (int j=N-M+1; --j; p++) 
         *p = p[M] ^ TWIST(p[0], p[1]);
     for (int j=M; --j; p++) 
@@ -112,12 +113,12 @@ inline void mt_next_state()
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long mt_rand()
+uint32_t mt_rand()
 {
     if (--left == 0)
 		mt_next_state();
 
-	unsigned long y = *next++;
+	uint32_t y = *next++;
 
     /* Tempering */
     y ^= (y >> 11);

@@ -47,20 +47,20 @@
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
 
-bool SetFormat(unsigned long fmt, int nNum, const char* csBlock);
+bool SetFormat(unsigned int fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);
 
 // File Formats
-const unsigned long FormatFasta = 0;
-const unsigned long FormatNexus = 1;
-const unsigned long FormatPhylip = 2;
-const unsigned long FormatClustal = 3;
+const unsigned int FormatFasta = 0;
+const unsigned int FormatNexus = 1;
+const unsigned int FormatPhylip = 2;
+const unsigned int FormatClustal = 3;
 
 // Output Flags
-const unsigned long FlagOutLowerCase = 1;
-const unsigned long FlagOutGapPlus = 2;
-const unsigned long FlagOutGapSingleChar = 4;
-const unsigned long FlagOutTranslate = 8;
+const unsigned int FlagOutLowerCase = 1;
+const unsigned int FlagOutGapPlus = 2;
+const unsigned int FlagOutGapSingleChar = 4;
+const unsigned int FlagOutTranslate = 8;
 
 // Nucleotide Numbers
 const int NumAdenine	= 0;
@@ -82,6 +82,18 @@ public:
 #	ifdef HAVE__GETPID
 #		define getpid _getpid
 #	endif
+#endif
+
+#ifndef HAVE_MALLOC
+void *rpl_malloc(size_t n);
+#endif
+
+#ifndef HAVE_REALLOC
+void *rpl_realloc(void *p, size_t n);
+#endif
+
+#ifndef HAVE_VPRINTF
+#define vprintf 
 #endif
 
 #endif

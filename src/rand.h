@@ -1,13 +1,13 @@
 // rand.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
 
-#if !defined(DAWG_RAND_H)
+#ifndef DAWG_RAND_H
 #define DAWG_RAND_H
 
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #	include "config.h"
 #endif
 
-#if defined(WORDS_BIGENDIAN)
+#ifdef WORDS_BIGENDIAN
 #	define RR_0 1
 #	define RR_1 0
 #else
@@ -15,12 +15,18 @@
 #	define RR_1 1
 #endif
 
-#if defined(HAVE_MATH_H)
+#ifdef HAVE_MATH_H
 #	include <math.h>
 #endif
 
-#if defined(HAVE_FLOAT_H)
+#ifdef HAVE_FLOAT_H
 #	include <float.h>
+#endif
+
+#ifdef HAVE_STDTYPES_H
+#	include <stdtypes.h>
+#else
+typedef unsigned int uint32_t;
 #endif
 
 #define RDBL32_MIN  2.3283064365386963e-010
@@ -35,29 +41,29 @@
 ************************************************/
 
 // Seed random number generator from an array
-void mt_srand(unsigned long uKeys[], unsigned long uLen);
+void mt_srand(uint32_t uKeys[], size_t uLen);
 
 // Draw integer from [0,0xFFFFFFFF]
-unsigned long mt_rand();
+uint32_t mt_rand();
 
 /************************************************
 	Generic Random number generators
 ************************************************/
 
 // Draw integer from [0,0xFFFFFFFF]
-inline unsigned long rand_ulong() { return mt_rand(); }
+inline uint32_t rand_uint() { return mt_rand(); }
 
 // Draw integer from [0,uMax]
-inline unsigned long rand_ulong(unsigned long uMax)
+inline uint32_t rand_uint(uint32_t uMax)
 {
-		unsigned long uMask = uMax;
+		uint32_t uMask = uMax;
 		uMask |= uMask >> 1;
 		uMask |= uMask >> 2;
 		uMask |= uMask >> 4;
 		uMask |= uMask >> 8;
 		uMask |= uMask >> 16;
-		unsigned long u;
-		do { u = rand_ulong() & uMask; } while ( u > uMax);
+		uint32_t u;
+		do { u = rand_uint() & uMask; } while ( u > uMax);
 		return u;
 }
 
@@ -65,8 +71,8 @@ inline unsigned long rand_ulong(unsigned long uMax)
 // Actual range is [RDBL_MIN, 1.0] by steps of size RDBL_MIN.
 inline double rand_real()
 {
-	union { double d; unsigned long l[2];} r;
-	unsigned long u = rand_ulong();
+	union { double d; uint32_t l[2];} r;
+	uint32_t u = rand_uint();
 	r.l[RR_0] =  u << 20;
 	r.l[RR_1] = (u >> 12) | 0x3FF00000;
 
@@ -158,25 +164,25 @@ inline double rand_gamma1(double b)
 
 // Draw from Geometric(1-q):
 //   P(X=x)=(1-q)q^x; x <=0
-inline unsigned long rand_geometric(double q)
+inline uint32_t rand_geometric(double q)
 {
-	return (unsigned long)(log(rand_real())/log(q));
+	return (uint32_t)(log(rand_real())/log(q));
 }
 
 // Draw from Negative Binomial(r, 1-q):
 //   P(X=x) = (r+x-1 nch x)q^x(1-q)^r; x>=0
-inline unsigned long rand_negbinomial(unsigned long r, double q)
+inline uint32_t rand_negbinomial(uint32_t r, double q)
 {
-	unsigned long u=0;
+	uint32_t u=0;
 	while(r--)
 		u += rand_geometric(q);
 	return u;
 }
 
 // Draw Poisson(l)
-inline unsigned long rand_poisson(double lambda)
+inline uint32_t rand_poisson(double lambda)
 {
-	unsigned int u = 0;
+	uint32_t u = 0;
 	double d, e = exp(lambda);
 	// effecient for lambda < 12
 	d = rand_real();
@@ -187,7 +193,7 @@ inline unsigned long rand_poisson(double lambda)
 // Draw from Zipf distribution, with parameter a > 1.0
 // Devroye Luc (1986) Non-uniform random variate generation.
 //     Springer-Verlag: Berlin. p551
-inline unsigned long rand_zipf(double a)
+inline uint32_t rand_zipf(double a)
 {
 	double b = pow(2.0, a-1.0);
 	double x,t;
@@ -195,7 +201,7 @@ inline unsigned long rand_zipf(double a)
 	 x = floor(pow(rand_real(), -1.0/(a-1.0)));
 	 t = pow(1.0+1.0/x, a-1.0);
 	} while( rand_real()*x*(t-1.0)*b > t*(b-1.0));
-	return (unsigned long)x;
+	return (uint32_t)x;
 }
 
 #endif

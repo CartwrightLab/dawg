@@ -45,8 +45,8 @@ public:
 	void		Set(double dVar );
 	bool		Get(int &rnVar ) const;
 	void		Set(int nVar );
-	bool		Get(unsigned long &ruVar ) const;
-	void		Set(unsigned long uVar );
+	bool		Get(unsigned int &ruVar ) const;
+	void		Set(unsigned int uVar );
 	
 	// Bool Routines
 	explicit DawgVar(bool bVar) : m_tyType(tyBool), m_bData(bVar) { }

@@ -63,25 +63,25 @@ class Sequence : public std::vector<Nucleotide>
 public:
 	typedef std::vector<Nucleotide> Base;
 	Sequence() : m_uLength(0) { }
-	explicit Sequence(unsigned long uSize) : Base(uSize, Nucleotide(0xF, -1.0))
+	explicit Sequence(size_type uSize) : Base(uSize, Nucleotide(0xF, -1.0))
 	{
 		m_uLength = uSize;
 	}
-	unsigned long SeqLength() const { return m_uLength; }
+	size_type SeqLength() const { return m_uLength; }
 	
 	// find the uPos-th true nucleotide (skips gaps)
-	const_iterator SeqPos(unsigned long uPos) const;
-	iterator SeqPos(unsigned long uPos);
+	const_iterator SeqPos(size_type uPos) const;
+	iterator SeqPos(size_type uPos);
 
-	unsigned long Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
-	unsigned long Deletion(iterator itBegin, unsigned long uSize);
+	size_type Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
+	size_type Deletion(iterator itBegin, Base::size_type uSize);
 
 	void Append(const Sequence &seq);
 
 	void ToString(std::string &ss) const;
 
 private:
-	unsigned long m_uLength;
+	size_type m_uLength;
 };
 
 
@@ -105,15 +105,15 @@ public:
 
 		Node() : m_bTouched(false) { }
 		void Flatten(Sequence& seq) const;
-		unsigned long SeqLength() const;
+		Sequence::size_type SeqLength() const;
 
 		typedef std::pair<std::vector<Sequence>::iterator, Sequence::iterator> iterator;
 		typedef std::pair<std::vector<Sequence>::const_iterator, Sequence::const_iterator> const_iterator;
 	
 		// find the uPos-th nucleotide in the node
 		// skips gaps and recognizes different sections
-		iterator SeqPos(unsigned long uPos);
-		const_iterator SeqPos(unsigned long uPos) const;
+		iterator SeqPos(Sequence::size_type uPos);
+		const_iterator SeqPos(Sequence::size_type uPos) const;
 	};
 
 	typedef std::map<std::string, std::string> Alignment;
@@ -121,25 +121,25 @@ public:
 	// Setup the model of evolution
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-		unsigned long uWidth, const std::vector<double> &vdGamma,
+		unsigned int uWidth, const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
 	
 	// Setup the root node
-	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vData,
+	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vData,
 		const std::vector<std::vector<double> > &vRates);
 	
 	// Draw a random relative rate of substitution from the evolutionary parameters
-	double RandomRate(unsigned long uPos) const;
+	double RandomRate(Sequence::size_type uPos) const;
 	// Draw a random base from the evolutionary parameters
 	unsigned char RandomBase() const;
 	// Draw a random nucleotide (base and rate)
-	Nucleotide RandomNucleotide(unsigned long uPos) const
+	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
 		{ return Nucleotide(RandomBase(), RandomRate(uPos)); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
 	
 	// Trim a length to be compatible with the block width
-	inline unsigned long BlockTrim(unsigned long u) { return u - u%m_uWidth; }
+	inline unsigned int BlockTrim(unsigned int u) { return u - u%m_uWidth; }
 	
 	// Evolve the tree
 	void Evolve();
@@ -163,7 +163,7 @@ private:
 	Node::Map m_map;
 	std::vector<std::string> m_vTips;
 
-	unsigned long m_uWidth;
+	unsigned int m_uWidth;
 	std::vector<double> m_vdScale;
 	std::vector<double> m_vdGamma;
 	std::vector<double> m_vdIota;
@@ -188,12 +188,16 @@ private:
 	LinearFunc m_funcRateSum;
 };
 
+bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
+
+namespace std {
+
 inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
 {
 	return &*A < &*B;
 }
 
-bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned long uFlags);
+}
 
 #endif //DAWG_TREE_H
 

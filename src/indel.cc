@@ -23,9 +23,9 @@ NegBnModel::NegBnModel(const vector<double>& vdModel)
 	if(0.0 > m_dQ || m_dQ > 1.0)
 		throw(DawgError("Negative Binomial Model requires that Q be a a probability."));
 }
-unsigned long NegBnModel::RandSize() const
+IndelModel::size_type NegBnModel::RandSize() const
 {
-	return 1ul+rand_negbinomial(m_uR, m_dQ);
+	return (IndelModel::size_type)(1ul+rand_negbinomial(m_uR, m_dQ));
 }
 double NegBnModel::MeanSize() const
 {
@@ -53,10 +53,10 @@ UserModel::UserModel(const vector<double>& vdModel) : m_dMean(0.0)
 	}
 }
 
-unsigned long UserModel::RandSize() const
+IndelModel::size_type UserModel::RandSize() const
 {
 	double d = rand_real();
-	unsigned long ul = 1ul;
+	IndelModel::size_type ul = 1ul;
 	
 	// not efficient, but it gets the job done.
 	for(vector<double>::const_iterator dit = m_vSizesCum.begin();
@@ -79,7 +79,7 @@ PowerModel::PowerModel(const vector<double>& vdModel) : m_dMean(0.0)
 		throw(DawgError("Power Law Model requires two parameters."));
 
 	m_dA = vdModel[0];
-	m_uM = (unsigned long)vdModel[1];
+	m_uM = (IndelModel::size_type)vdModel[1];
 	
 	if(m_dA < 1.0)
 		throw(DawgError("Power Law Model requires a >= 1.0."));
@@ -87,7 +87,7 @@ PowerModel::PowerModel(const vector<double>& vdModel) : m_dMean(0.0)
 		throw(DawgError("Power Law Model requires Max >= 1."));
 	
 	double dSum = 0.0, d;
-	for(unsigned long u = 1;u<=m_uM;++u)
+	for(IndelModel::size_type u = 1;u<=m_uM;++u)
 	{
 		d = pow((double)u, -m_dA);
 		m_dMean += u*d;
@@ -96,11 +96,11 @@ PowerModel::PowerModel(const vector<double>& vdModel) : m_dMean(0.0)
 	m_dMean /= dSum;
 }
 
-unsigned long PowerModel::RandSize() const
+IndelModel::size_type PowerModel::RandSize() const
 {
-	unsigned long u;
+	IndelModel::size_type u;
 	do {
-		u = rand_zipf(m_dA);
+		u = (IndelModel::size_type)rand_zipf(m_dA);
 	} while (u > m_uM);
 	return u;
 }

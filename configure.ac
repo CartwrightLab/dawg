@@ -1,5 +1,5 @@
 m4_define([dawg_rev], [m4_esyscmd([svnversion -n .])])
-AC_INIT([dawg], [1.0.0.dawg_rev()], [http://scit.us/dawg/])
+AC_INIT([dawg], [1.1.0.dawg_rev()], [http://scit.us/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.59)
@@ -21,7 +21,7 @@ AC_LANG_PUSH(C++)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h process.h])
+AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h stdtypes.h process.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

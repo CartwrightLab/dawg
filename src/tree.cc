@@ -44,7 +44,7 @@ void NewickNode::MakeName()
 //  class Sequence
 ////////////////////////////////////////////////////////////
 
-Sequence::const_iterator Sequence::SeqPos(unsigned long uPos) const
+Sequence::const_iterator Sequence::SeqPos(size_type uPos) const
 {
 	const_iterator it = begin();
 	// Skip deletions
@@ -58,7 +58,7 @@ Sequence::const_iterator Sequence::SeqPos(unsigned long uPos) const
 	return it;
 }
 
-Sequence::iterator Sequence::SeqPos(unsigned long uPos)
+Sequence::iterator Sequence::SeqPos(size_type uPos)
 {
 	iterator it = begin();
 	// Skip deletions
@@ -73,21 +73,22 @@ Sequence::iterator Sequence::SeqPos(unsigned long uPos)
 }
 
 // Insert itBegin to itEnd at itPos
-unsigned long Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
+
+Sequence::size_type Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
 {
 	if(itPos > end() || itPos < begin())
 		return 0;
 
-	unsigned long uRet = (unsigned long)(itEnd-itBegin);
+	size_type uRet = (size_type)(itEnd-itBegin);
 	insert(itPos, itBegin, itEnd);
 	m_uLength += uRet;
 	return uRet;
 }
 
 // Delete uSize nucleotides at itBegin
-unsigned long Sequence::Deletion(iterator itBegin, unsigned long uSize)
+Sequence::size_type Sequence::Deletion(iterator itBegin, size_type uSize)
 {
-	unsigned long uRet = 0;
+	size_type uRet = 0;
 	for(;uRet < uSize && itBegin != end(); ++itBegin)
 	{
 		// Skip Gaps
@@ -146,9 +147,9 @@ char Nucleotide::ToChar() const
 ////////////////////////////////////////////////////////////
 
 // Get the total sequence length of the node
-unsigned long Tree::Node::SeqLength() const
+Sequence::size_type Tree::Node::SeqLength() const
 {
-	unsigned long uRet = 0;
+	Sequence::size_type uRet = 0;
 	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
 		uRet += it->SeqLength();
 	return uRet;
@@ -162,7 +163,7 @@ void Tree::Node::Flatten(Sequence& seq) const
 		seq.Append(*cit);
 }
 
-Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
+Tree::Node::iterator Tree::Node::SeqPos(Sequence::size_type uPos)
 {
 	vector<Sequence>::iterator itA;
 	// Find section containing uPos
@@ -179,7 +180,7 @@ Tree::Node::iterator Tree::Node::SeqPos(unsigned long uPos)
 	return iterator(itA,itB);
 }
 
-Tree::Node::const_iterator Tree::Node::SeqPos(unsigned long uPos) const
+Tree::Node::const_iterator Tree::Node::SeqPos(Sequence::size_type uPos) const
 {
 	vector<Sequence>::const_iterator itA;
 	// Find section containing uPos
@@ -280,7 +281,7 @@ void Tree::Evolve(Node &rNode)
 	// Temporary Sequences
 	map<Node::Handle, Node> mapSeqs;
 	// Evolve ancestors and assemble
-	for(unsigned long a = 0; a < rNode.m_vAncestors.size(); ++a)
+	for(vector<Node::Handle>::size_type a = 0; a < rNode.m_vAncestors.size(); ++a)
 	{
 		if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
 		{
@@ -304,7 +305,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return; // Nothing to evolve
 	
 	// Substitutions
-	unsigned long uNuc = 0;
+	unsigned int uNuc = 0;
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
 	{
 		for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
@@ -356,7 +357,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return;
 
 	// Get current length
-	unsigned long uLength = rNode.SeqLength()/m_uWidth;
+	Sequence::size_type uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
 	// Do indels
@@ -366,8 +367,8 @@ void Tree::Evolve(Node &rNode, double dTime)
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
 			//Insertion 
-			unsigned long ul = m_pInsertionModel->RandSize();
-			unsigned long uPos = rand_ulong(uLength); // pos is in [0,L]
+			Sequence::size_type ul = m_pInsertionModel->RandSize();
+			Sequence::size_type uPos = (Sequence::size_type)rand_uint((uint32_t)uLength); // pos is in [0,L]
 			// Construct sequence to be inserted
 			Sequence seq;
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
@@ -394,10 +395,10 @@ void Tree::Evolve(Node &rNode, double dTime)
 		{
 			// Deletion
 			// Draw random size and random pos and rearrange
-			unsigned long ul = m_pDeletionModel->RandSize();
-			unsigned long uPos = rand_ulong(uLength+ul-1)+1;
-			unsigned long uB = (ul >= uPos) ? 0 : uPos - ul;
-			unsigned long uSize = (uPos > uLength) ? uLength : uPos;
+			Sequence::size_type ul = m_pDeletionModel->RandSize();
+			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-1))+1u;
+			Sequence::size_type uB = (ul >= uPos) ? 0u : uPos - ul;
+			Sequence::size_type uSize = (uPos > uLength) ? uLength : uPos;
 			uSize -= uB;
 			uSize *= m_uWidth;
 			uB *= m_uWidth;
@@ -420,7 +421,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns,
 		const IndelModel::Params& rDel,
-		unsigned long uWidth,
+		unsigned int uWidth,
 		const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota,
 		const std::vector<double> &vdScale,
@@ -591,7 +592,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 }
 
 // Setup Root Template
-bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vLens,
+bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vLens,
 					   const std::vector<std::vector<double> > &vRates)
 {
 	// Clear Template
@@ -603,7 +604,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		// Read sequence of each section
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
-			Sequence seq(BlockTrim((unsigned long)cit->size()));
+			Sequence seq(BlockTrim((unsigned int)cit->size()));
 			for(unsigned int u=0; u<seq.size(); ++u)
 				if(!seq[u].FromChar((*cit)[u]))
 					return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
@@ -613,7 +614,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	else
 	{
 		// Create random sequences
-		for(vector<unsigned long>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
+		for(vector<unsigned int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
 			m_vDNASeqs.push_back(Sequence(*cit*m_uWidth));
 	}
 	// Check to see if rates are specified
@@ -650,7 +651,7 @@ unsigned char Tree::RandomBase() const
 		return 3; // T
 }
 
-double Tree::RandomRate(unsigned long uPos) const
+double Tree::RandomRate(Sequence::size_type uPos) const
 {
 	uPos %= m_uWidth;
 	if(m_vdIota[uPos] > DBL_EPSILON && rand_bool(m_vdIota[uPos]))

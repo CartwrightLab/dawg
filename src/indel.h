@@ -11,6 +11,7 @@ class Node;
 class IndelModel
 {
 public:
+	typedef std::vector<double>::size_type size_type;
 	class Params
 	{
 	public:
@@ -18,7 +19,7 @@ public:
 		double dLambda;
 		std::vector<double> vdModel;
 	};
-	virtual unsigned long RandSize() const = 0;
+	virtual size_type RandSize() const = 0;
 	virtual double MeanSize() const = 0;
 };
 
@@ -28,11 +29,11 @@ class NegBnModel : public IndelModel
 {
 public:
 	NegBnModel(const std::vector<double>& vdModel);
-	virtual unsigned long RandSize() const;
+	virtual size_type RandSize() const;
 	virtual double MeanSize() const;
 
 protected:
-	unsigned long m_uR;
+	unsigned int m_uR;
 	double m_dQ;
 };
 
@@ -43,7 +44,7 @@ class UserModel : public IndelModel
 {
 public:
 	UserModel(const std::vector<double>& vdModel);
-	virtual unsigned long RandSize() const;
+	virtual size_type RandSize() const;
 	virtual double MeanSize() const;
 
 protected:
@@ -57,11 +58,11 @@ class PowerModel : public IndelModel
 {
 public:
 	PowerModel(const std::vector<double>& vdModel);
-	virtual unsigned long RandSize() const;
+	virtual size_type RandSize() const;
 	virtual double MeanSize() const;
 protected:
 	double m_dA;
-	unsigned long m_uM;
+	size_type m_uM;
 	double m_dMean;
 };
 
