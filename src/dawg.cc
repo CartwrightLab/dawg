@@ -5,6 +5,10 @@
 #include "rand.h"
 #include "var.h"
 
+char g_csDawgTxt[] =
+#include "dawgtxt.h"
+;
+
 using namespace std;
 
 bool Parse(const char* cs);
@@ -16,7 +20,6 @@ int main(int argc, char* argv[])
 {
 	bool bSerial = true; // Process files in serial fashion
 	bool bUsage = (argc==1);
-	bool bFullUsage = false;
 	bool bVersion = (argc==1);
 	bool bOk = true;
 	//Parse Cmds
@@ -43,9 +46,9 @@ int main(int argc, char* argv[])
 					bVersion = true;
 					break;
 				case '?':
-					bFullUsage = true;
 				case 'h':
 				case 'H':
+					bVersion = true;
 					bUsage = true;
 					break;
 				case 'u':
@@ -70,8 +73,7 @@ int main(int argc, char* argv[])
 			cout << "Version " << VERSION << endl << endl;
 		}
 		if(bUsage)
-			cout << "Usage: dawg -[scvh?] file1 [file2 ...]" << endl;
-		if(bFullUsage) { /*Todo*/ }
+			cout << g_csDawgTxt << endl;
 
 		return 0;
 	}
