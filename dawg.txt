@@ -1,0 +1,49 @@
+COMMAND LINE USAGE
+  dawg -[scvh?] file1 [file2...]
+  -s: process files serially
+  -c: process files combined together
+  -u: unbuffered output
+  -v: display verison information
+  -h: display help information
+  -?: same as -h
+
+FILE FORMAT
+  The file format takes a series of statements in the form of
+  "name = value," where "name" is alphanumeric and value can
+  be a string, number, boolean, tree, or vector of values.
+
+  string:  "[char-sequence]" [. "[char-sequence]" ...]
+  number:  [sign]digits[.digits][(e|E)[sign]digits]
+  boolean: true|false
+  tree:    Newick Format
+  vector:  { value, value, ...}
+
+  The '.' operator allows for multiple lines to be included
+  in the same string.  It automatically inserts a new line.
+  A vector with a single value is treated the same as a single
+  value.
+
+OPTIONS
+  Name          Type            Description
+--------------------------------------------------------------------------
+  Tree           VT  phylogeny
+  Scale          N   coefficient to scale branch lengths by
+  Sequence       VS  root sequences 
+  Length         VN  length of generated root sequences
+  Rates          VVN rate of evolution of each root nucleotide
+  Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
+  Freqs          VD  nucleotide (ACGT) frequencies 
+  Params         VN  parameters for the model of evolution
+  Gamma          N   coefecient of variance for rate heterogenity
+  Alpha          N   shape parameter
+  Iota           N   proportion of invariant sites
+  GapModel       VS  models of indel formation: NB|User
+  Lambda         VN  rates of indel formation
+  GapParams      VN  parameter for the indel model
+  Reps           N   number of data sets to output
+  File           S   output file 
+  Format         S   output format: Fasta|Nexus|Phylip
+  GapSingleChar  B   output gaps as a single character
+  NexusBlock     S   text to include between datasets in Nexus format
+  NexusBlockFile S   file to read the Nexus block from
+  Seed           VN  PRNG seed

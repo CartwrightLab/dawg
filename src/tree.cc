@@ -501,7 +501,7 @@ double Tree::RandomRate() const
 // Deleted Insertion: =
 // Root Nuc: .
 
-void Tree::Align(Alignment &aln) const
+void Tree::Align(Alignment &aln, bool bGapSingleChar) const
 {
 	// construct a table of flattened sequences
 	vector<Sequence::HistoryVec> vHisTable;
@@ -558,6 +558,9 @@ void Tree::Align(Alignment &aln) const
 		{
 			if(his[uh] == '.' || his[uh] == '+')
 				ss[uh] = NucToChar(dna[ud++].m_nuc);
+			if(bGapSingleChar && uh > 0 && his[uh] == '-' 
+				&& his[uh-1] != '.' && his[uh-1] != '+')
+				ss[uh] = '?';
 		}
 	}
 

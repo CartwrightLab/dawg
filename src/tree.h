@@ -99,7 +99,7 @@ public:
 	
 	const Node::Map& GetMap() const { return m_map; }
 
-	void Align(Alignment &aln) const;
+	void Align(Alignment &aln, bool bGapSingleChar) const;
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);

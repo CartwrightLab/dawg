@@ -13,23 +13,13 @@ FileFormat g_fileFormat = FASTA;
 const char *g_csBlock = NULL;
 int			g_nDataSet = 0;
 int			g_nDataSetNum = 1;
-bool		g_bGapSingle = false;
 
-bool SetFormat(FileFormat fmt, int nNum, const char* csBlock, bool bGapSingle)
+bool SetFormat(FileFormat fmt, int nNum, const char* csBlock)
 {
 	g_fileFormat = fmt;
 	g_csBlock = csBlock;
 	g_nDataSet = 0;
-	g_bGapSingle = bGapSingle;
 	g_nDataSetNum = nNum;
-	return true;
-}
-
-bool DawgOpen(const char* csFile, ofstream& rFile)
-{
-	rFile.open(csFile);
-	if(!rFile.is_open())
-		return false;
 	return true;
 }
 
@@ -119,51 +109,3 @@ void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln)
 	}
 	os << endl;
 }
-
-//void PrintTree(const Node* pNode)
-//{
-//	cout << pNode->ToString();
-//}
-//
-//void PrintVar(const DawgVar* var)
-//{
-//	switch(var->GetType())
-//	{
-//	case DawgVar::tyNone:
-//		cout << "(null)";
-//		break;
-//	case DawgVar::tyString:
-//		cout << var->GetString();
-//		break;
-//	case DawgVar::tyNumber:
-//		cout << var->GetNumber();
-//		break;
-//	case DawgVar::tyBool:
-//		cout << var->GetBool();
-//		break;
-//	case DawgVar::tyVector:
-//		{
-//			cout << '{';
-//			const DawgVar::Vec *v = var->GetVector();
-//			if(!v->empty())
-//			{
-//				DawgVar::Vec::const_iterator it = v->begin();
-//				PrintVar(*it);
-//				for( ++it;it != v->end(); ++it)
-//				{
-//					cout << ",";
-//					PrintVar(*it);
-//				}
-//			}
-//			cout << '}';
-//			break;
-//		}
-//	case DawgVar::tyTree:
-//		{
-//			PrintTree(var->GetTree());
-//			cout << ";";
-//			break;
-//		}
-//	}
-//}
-

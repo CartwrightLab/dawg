@@ -41,12 +41,9 @@
 
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
-std::string EvoDescription();
-
 
 enum FileFormat { FASTA, NEXUS, PHYLIP };
-bool SetFormat(FileFormat fmt, int nNum, const char* csBlock, bool bGapSingle);
-bool DawgOpen(const char* csFile, std::ofstream& rFile);
+bool SetFormat(FileFormat fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);
 
 template <class Type> class SumValue

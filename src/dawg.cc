@@ -53,7 +53,11 @@ int main(int argc, char* argv[])
 					break;
 				case 'u':
 				case 'U':
+					#ifdef SETVBUF_REVERSED
+					setvbuf(stdout, _IONBF, csBuffer, 32);
+					#else
 					setvbuf(stdout, csBuffer, _IONBF, 32);
+					#endif
 					break;
 				default:
 					DawgError("Unreconized switch, \"%c\"", *pch);
@@ -242,7 +246,8 @@ bool Execute()
 		vdDelModel = vdInsModel;
 	}
 
-	DawgVar::Get("File", ssFile);
+	if(!DawgVar::Get("File", ssFile))
+		ssFile = "-";
 	DawgVar::Get("Format", ssFormat);
 	if(!DawgVar::Get("NexusBlock", ssBlock))
 		DawgVar::Get("NexusBlockFile", ssBlockFile);
@@ -354,38 +359,29 @@ bool Execute()
 	else
 		return DawgError("Unknown file format, \"%s\".");
 	
-	SetFormat(fmt, nReps, ssBlock.empty() ? NULL : ssBlock.c_str(), bGapSingle);
-
-	ofstream oFile;
+	SetFormat(fmt, nReps, ssBlock.empty() ? NULL : ssBlock.c_str());
+	
 	ostream* pOut;
-	if(ssFile.empty())
+	ofstream ofOut;
+	if(ssFile.empty() || ssFile == "-")
 		pOut = &cout;
-	else if(DawgOpen(ssFile.c_str(), oFile))
-		pOut = &oFile;
 	else
+	{
+		ofOut.open(ssFile.c_str());
+		pOut = &ofOut;
+	}
+	if(!pOut->is_open())
 		return DawgError("Unable to open \"%s\" for output.", ssFile.c_str());
 	DawgIniOutput(*pOut);
 
 	while(nReps--)
 	{
-		
 		//Evolve
 		myTree.Evolve();
-		//Temp Area
-		//for(Tree::Node::Map::const_iterator cit = myTree.GetMap().begin(); cit != myTree.GetMap().end(); ++cit)
-		//{
-		//	cout << cit->first << endl;
-		//	for(Sequence::HistoryVec::const_iterator dit = cit->second.m_vSections[0].History().begin();
-		//		dit != cit->second.m_vSections[0].History().end(); ++dit)
-		//		cout << *dit;
-		//	cout << endl;
-		//}
-		//cout << "END" << endl;
-		//End
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln);
+		myTree.Align(aln, bGapSingle);
 		if(!SaveAlignment(*pOut, aln))
 			return DawgError("Error saving alignment.");
 	}

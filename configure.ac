@@ -32,7 +32,6 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([sqrt])
 
 AC_ARG_ENABLE(mmx, AC_HELP_STRING([--enable-mmx], [use mmx if available (default=yes)]), [enable_mmx=$enableval], [enable_mmx=yes])
 
