@@ -1,1 +1,0 @@
-EXTRA_DIST = malloc.cc realloc.cc

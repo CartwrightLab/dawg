@@ -7,10 +7,21 @@
 #	include "config.h"
 #endif
 
+#pragma warning(disable: 4702)
+
+
 #ifndef HAVE_GETPID
 #	ifdef HAVE__GETPID
 #		define getpid _getpid
 #	endif
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+#	include <sys/types.h>
+#endif
+
+#ifdef HAVE_STDDEF_H
+#	include <stddef.h>
 #endif
 
 #if !HAVE_MALLOC
@@ -20,18 +31,6 @@ void *rpl_malloc(size_t n);
 #if !HAVE_REALLOC
 void *rpl_realloc(void *p, size_t n);
 #endif
-
-#pragma warning(disable: 4702)
-
-#include <vector>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <algorithm>
-#include <iomanip>
-#include <memory>
-#include <map>
-#include <functional>
 
 #ifdef HAVE_TIME_H
 #	include <time.h>
@@ -57,6 +56,16 @@ void *rpl_realloc(void *p, size_t n);
 #ifdef HAVE_PROCESS_H
 #	include <process.h>
 #endif
+
+#include <vector>
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <iomanip>
+#include <memory>
+#include <map>
+#include <functional>
 
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
