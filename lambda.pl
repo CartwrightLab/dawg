@@ -152,7 +152,19 @@ foreach(@gs)
 }
 my $a = ($n*$sxy-$sx*$sy)/($n*$sx2-$sx*$sx);
 my $b = ($sy-$a*$sx)/$n;
+$LL = 0;
+$LL += log($_) * $gapsizes{$_} foreach(keys(%gapsizes));
+$LL = $numgaps*$b + $a*$LL;
+$bic = -2*$LL+log($numgaps)*1.0;
+$df = $maxgap-2;
+$xsq = 0.0;
+while(my($g,$n) = each(%gapsizes))
+{
+	my $e = $numgaps*(exp($b+$a*log($g)));
+	$xsq += ($n-$e)**2/$e;
+}
 $model{PowerLaw} = {BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {a => -$a, b => exp($b)}};
+$model{PowerLaw}{Params}{Error} = "True" if(-$a < 1.0);
 
 #output
 print "Total Len is $totlen.\n";

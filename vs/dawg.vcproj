@@ -128,10 +128,11 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx;cc"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\src\dawg.cc">
+				RelativePath="..\src\dawg.cc"
+				FileType="0">
 			</File>
 			<File
 				RelativePath=".\dawg.cpp">
@@ -149,13 +150,16 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\src\eigen.cc">
+				RelativePath="..\src\eigen.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="..\src\indel.cc">
+				RelativePath="..\src\indel.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="$(OutDir)\lexer.cc">
+				RelativePath=".\lexer.cc"
+				FileType="0">
 			</File>
 			<File
 				RelativePath="..\src\lexer.ll">
@@ -163,28 +167,31 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(OutDir)\$(InputName).cc&quot;
+						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(InputName).cc&quot;
 "
-						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;"/>
+						Outputs="&quot;$(InputName).cc&quot;"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(OutDir)\$(InputName).cc&quot;
+						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(InputName).cc&quot;
 "
-						AdditionalDependencies="&quot;$(OutDir)\parser.h&quot;"
-						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;"/>
+						AdditionalDependencies=""
+						Outputs="&quot;$(InputName).cc&quot;"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\src\matrix.cc">
+				RelativePath="..\src\matrix.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="..\src\output.cc">
+				RelativePath="..\src\output.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="$(OutDir)\parser.cc">
+				RelativePath=".\parser.cc"
+				FileType="0">
 			</File>
 			<File
 				RelativePath="..\src\parser.yy">
@@ -192,29 +199,32 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison -y -d  -o &quot;$(OutDir)\$(InputName).cc&quot; &quot;$(InputPath)&quot;
-move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&quot;
+						CommandLine="bison -y -d  -o &quot;$(InputName).cc&quot; &quot;$(InputPath)&quot;
+move  /Y &quot;$(InputName).hh&quot; &quot;$(InputName).h&quot;
 "
-						Outputs="&quot;$(OutDir)\$(InputName).cc&quot; &quot;$(OutDir)\$(InputName).h&quot;"/>
+						Outputs="&quot;$(InputName).cc&quot;; &quot;$(InputName).h&quot;"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison -y -d  -o &quot;$(OutDir)\$(InputName).cc&quot; &quot;$(InputPath)&quot;
-move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&quot;
+						CommandLine="bison -y -d  -o &quot;$(InputName).cc&quot; &quot;$(InputPath)&quot;
+move  /Y &quot;$(InputName).hh&quot; &quot;$(InputName).h&quot;
 "
-						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;;&quot;$(OutDir)\$(InputName).h&quot;"/>
+						Outputs="&quot;$(InputName).cc&quot;;&quot;$(InputName).h&quot;"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\src\rand.cc">
+				RelativePath="..\src\rand.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="..\src\tree.cc">
+				RelativePath="..\src\tree.cc"
+				FileType="0">
 			</File>
 			<File
-				RelativePath="..\src\var.cc">
+				RelativePath="..\src\var.cc"
+				FileType="0">
 			</File>
 		</Filter>
 		<Filter
@@ -235,6 +245,9 @@ move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&qu
 			</File>
 			<File
 				RelativePath="..\src\matrix.h">
+			</File>
+			<File
+				RelativePath=".\parser.h">
 			</File>
 			<File
 				RelativePath="..\src\rand.h">

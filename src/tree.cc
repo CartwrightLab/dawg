@@ -71,13 +71,11 @@ Sequence::iterator Sequence::SeqPos(unsigned long uPos)
 
 unsigned long Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
 {
+	if(itPos > end() || itPos < begin())
+		return 0;
+
 	unsigned long uRet = (unsigned long)(itEnd-itBegin);
-	size_type off = size() == 0 ? 0 : itPos - begin();
 	insert(itPos, itBegin, itEnd);
-	iterator it = begin()+off;
-	iterator itE = it+uRet;
-	for(;it!=itE;++it)
-		it->SetType(Nucleotide::TypeIns);
 	m_uLength += uRet;
 	return uRet;
 }
@@ -89,8 +87,7 @@ unsigned long Sequence::Deletion(iterator itBegin, unsigned long uSize)
 	{
 		if(itBegin->IsDeletion())
 			continue;
-		itBegin->SetType(itBegin->IsInsertion() ?
-			Nucleotide::TypeDelIns : Nucleotide::TypeDel);
+		itBegin->SetType(itBegin->GetType()|Nucleotide::TypeDel);
 		uRet++;
 	}
 	m_uLength -= uRet;
@@ -106,6 +103,7 @@ void Sequence::Append(const Sequence &seq)
 
 void Sequence::ToString(std::string &ss) const
 {
+	ss.clear();
 	for(const_iterator cit = begin(); cit != end(); ++cit)
 		ss.push_back(cit->ToChar());
 }
@@ -206,7 +204,7 @@ void Tree::Evolve()
 			if((*it)[u].m_dRate < 0.0)
 				(*it)[u].m_dRate = RandomRate(u);
 			if((*it)[u].m_ucNuc >= 4)
-				(*it)[u].m_ucNuc = RandomNuc();
+				(*it)[u].m_ucNuc = RandomBase();
 		}
 	}
 	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
@@ -272,14 +270,14 @@ void Tree::Evolve(Node &rNode, double dTime)
 				}
 			}
 			dTemp = rand_real();
-			if(dTemp <= m_matSubst(jt->m_ucNuc, 0))
-				jt->m_ucNuc = 0;
-			else if(dTemp <= m_matSubst(jt->m_ucNuc, 1))
-				jt->m_ucNuc = 1;
-			else if(dTemp <= m_matSubst(jt->m_ucNuc, 2))
-				jt->m_ucNuc = 2;
+			if(dTemp <= m_matSubst(jt->GetBase(), 0))
+				jt->SetBase(0);
+			else if(dTemp <= m_matSubst(jt->GetBase(), 1))
+				jt->SetBase(1);
+			else if(dTemp <= m_matSubst(jt->GetBase(), 2))
+				jt->SetBase(2);
 			else
-				jt->m_ucNuc = 3;
+				jt->SetBase(3);
 
 			++uNuc; // Increase position
 		}
@@ -300,7 +298,11 @@ void Tree::Evolve(Node &rNode, double dTime)
 			unsigned long uPos = rand_ulong(uLength); // pos is in [0,L]
 			Sequence seq;
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
-				seq.push_back(RandomNucleotide(uc));
+			{
+				Nucleotide nuc = RandomNucleotide(uc);
+				nuc.SetType(Nucleotide::TypeIns);
+				seq.push_back(nuc);
+			}
 			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
 			if(itPos.first == rNode.m_vSections.end())
 			{
@@ -525,7 +527,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	return true;
 }
 
-unsigned char Tree::RandomNuc() const
+unsigned char Tree::RandomBase() const
 {
 	double d = rand_real();
 	if(d <= m_dNucCumFreqs[0])
@@ -604,6 +606,9 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLower
 	}
 	for(unsigned int u = 0; u < vNames.size(); ++u)
 	{
+		// Skip any sequence that begin with one of the two special characters
+		if(vNames[u][0] == '(' || vNames[u][0] == '_')
+			continue;
 		string& ss = aln[vNames[u]];
 		vTable[u].ToString(ss);
 		//GapPlus and GappSingleChar

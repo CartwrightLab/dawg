@@ -86,7 +86,7 @@ class Sequence : public std::vector<Nucleotide>
 public:
 	typedef std::vector<Nucleotide> Base;
 	Sequence() : m_uLength(0) { }
-	Sequence(unsigned long uSize) : Base(uSize, Nucleotide(0xF, -1.0))
+	explicit Sequence(unsigned long uSize) : Base(uSize, Nucleotide(0xF, -1.0))
 	{
 		m_uLength = uSize;
 	}
@@ -139,9 +139,9 @@ public:
 		const std::vector<std::vector<double> > &vRates);
 
 	double RandomRate(unsigned long uPos) const;
-	unsigned char RandomNuc() const;
+	unsigned char RandomBase() const;
 	Nucleotide RandomNucleotide(unsigned long uPos) const
-		{ return Nucleotide(RandomNuc(), RandomRate(uPos)); }
+		{ return Nucleotide(RandomBase(), RandomRate(uPos)); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
 	

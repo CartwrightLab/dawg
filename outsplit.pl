@@ -42,6 +42,7 @@ else
 		my $out = "${name}_$i$ext";
 		print "Creating file $out\n";
 		open(OUT, ">$out") or die("Unable to open file.");
+		print OUT $blocks[0];
 		print OUT $blocks[$i];
 		close(OUT);
 	}

@@ -36,7 +36,8 @@ void DawgIniOutput(ostream& os)
 
 bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln)
 {
-	++g_nDataSet;
+	if(g_nDataSetNum > 1)
+		rFile << "[DataSet " << ++g_nDataSet << ']' << endl;
 	switch(g_fileFormat)
 	{
 		case FASTA:
@@ -56,13 +57,8 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln)
 
 void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln)
 {
-	if(g_nDataSetNum > 1)
-		os << "[DataSet " << g_nDataSet << ']' << endl;
 	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
 	{
-		// Skip any sequence that begin with one of the two special characters
-		if(cit->first[0] == '(' || cit->first[0] == '_')
-			continue;
 		// Print Label
 		os << '>' << cit->first << endl;
 		// Print Sequence
@@ -81,33 +77,23 @@ void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln)
 
 void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln)
 {
-	Tree::Alignment::const_iterator cit = aln.begin();	
-	os << "BEGIN DATA; [DataSet " << g_nDataSet << ']' << endl;
+	Tree::Alignment::const_iterator cit = aln.begin();
+	os << "BEGIN DATA;" << endl;
 	os << "\tDIMENSIONS NTAX=" << aln.size() << " NCHAR=" << cit->second.length() << ';' << endl;
 	os << "\tFORMAT MISSING=? GAP=- DATATYPE=DNA;" << endl;
 	os << "\tMATRIX" << endl;
 	for(; cit != aln.end(); ++cit)
-	{
-		if(cit->first[0] == '(' || cit->first[0] == '_')
-			continue;
 		os << setw(15) << setiosflags(ios::left) << cit->first << ' ' << cit->second << endl;
-	}
 	os << ';' << endl << "END;" << endl << endl;
 	if(g_csBlock)
 		os << g_csBlock << endl << endl;
 }
 void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln)
 {
-	if(g_nDataSetNum > 1)
-		os << "[DataSet " << g_nDataSet << ']' << endl;
 	Tree::Alignment::const_iterator cit = aln.begin();
 	os << aln.size() << ' ' << cit->second.length() << endl;
 	os << setfill(' ');
 	for(; cit != aln.end(); ++cit)
-	{
-		if(cit->first[0] == '(' || cit->first[0] == '_')
-			continue;
 		os << setw(10) << setiosflags(ios::left) << cit->first.substr(0,10) << cit->second << endl;
-	}
 	os << endl;
 }

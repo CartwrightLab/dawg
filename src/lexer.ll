@@ -16,8 +16,11 @@ struct State
 	string ssFile;
 } g_state;
 
+bool g_bParseOkay = true;
+
 void yyerror (char *s)
 {
+	g_bParseOkay = false;
 	cerr << "ALERT: " << s << " in " << g_state.ssFile << " at line " << g_state.nLine;
 	cerr << ": \"" << yytext << "\"." << endl;
 }
@@ -30,10 +33,11 @@ bool Parse(const char* cs)
 	g_state.nLine = 1;
 	g_state.ssFile = (cs==NULL || !strcmp(cs, "-")) ? "stdin" : cs;
 	yyin = stream;
+	g_bParseOkay = true;
 	yyparse();
 	if(cs!=NULL)
 		fclose(stream);
-	return true;
+	return g_bParseOkay;
 }
 
 %}
@@ -86,31 +90,35 @@ SPACE [ \t\r\v\f]
 
 "<<"{IDWORD}{SPACE}*"\n" {
 	yytext += 2;
-	int s=0;
-	while(!isspace(yytext[s]))
-		++s;
-	yytext[s] = '\n';
-	yytext[s+1] = '\0';
+
+	int s;
+	for(s=0;!isspace(yytext[s]);++s) { }
+	yytext[s] = '\0';
 	
 	yylval.pss = new string;
 	string ssTemp;
+	string ssEnd(yytext);
 	while(1)
 	{
 		int c = yyinput();
-		ssTemp += c;
-		if(c == '\n')
+		if(c == '\r')
+			continue;
+		if(c == '\n' || c == EOF)
 		{
-			if(ssTemp == yytext)
+			g_state.nLine++;
+			if(ssTemp == ssEnd)
 				break;
 			yylval.pss->append(ssTemp);
+			yylval.pss->append("\n");
 			ssTemp.clear();
 		}
-		else if(c == EOF)
+		else
 		{
-			yylval.pss->append(ssTemp);
-			ssTemp.clear();
-			break;			
+			ssTemp += c;
 		}
+		
+		if(c == EOF)
+			return UNKNOWN;
 	}
 	return STRING;
 }
