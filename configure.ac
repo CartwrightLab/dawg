@@ -20,6 +20,11 @@ AC_LANG_PUSH(C++)
 
 dnl Checks for libraries.
 AC_CHECK_LIB(stdc++, main)
+AC_CHECK_LIB(gcc, main)
+AC_CHECK_LIB(cxa, main)
+AC_CHECK_LIB(cprts, main)
+AC_CHECK_LIB(unwind, main)
+
 
 dnl Checks for header files.
 AC_HEADER_STDC
