@@ -184,18 +184,18 @@ inline unsigned long rand_poisson(double lambda)
 	return u;
 }
 
+// Draw from Zipf distribution, with parameter a > 1.0
+// Devroye Luc (1986) Non-uniform random variate generation.
+//     Springer-Verlag: Berlin. p551
 inline unsigned long rand_zipf(double a)
 {
 	double b = pow(2.0, a-1.0);
-	double c = -1.0/(a-1.0);
-	double u,v,r,t;
+	double x,t;
 	do {
-	 u = rand_real();
-	 v = rand_real();
-	 r = floor(pow(u, c));
-	 t = pow(1.0+1.0/r, a-1.0);
-	} while( v*r*(t-1.0)/(b-1.0) > t/b);
-	return (unsigned long)r;
+	 x = floor(pow(rand_real(), -1.0/(a-1.0)));
+	 t = pow(1.0+1.0/x, a-1.0);
+	} while( rand_real()*x*(t-1.0)*b > t*(b-1.0));
+	return (unsigned long)x;
 }
 
 #endif
