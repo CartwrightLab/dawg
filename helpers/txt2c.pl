@@ -10,3 +10,4 @@ while(<>)
 	s/"/\\"/g;
 	print qq("$_\\n" \\\n);
 }
+print qq(\n);
