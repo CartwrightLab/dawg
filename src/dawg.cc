@@ -432,7 +432,7 @@ bool DawgError(const char* csErr, ...)
 #elif defined(HAVE_DOPRNT)
 	_doprnt(csErr, args, stderr);
 #else
-	fprintf(stderr, csErr);
+	fprintf(stderr, "%s", csErr);
 #endif
 	va_end(args);
 	fprintf(stderr, "\n");
@@ -452,7 +452,7 @@ void *rpl_malloc(size_t n)
 
 #ifndef HAVE_REALLOC
 #undef realloc
-void *rpl_rellac(void *p, size_t n)
+void *rpl_realloc(void *p, size_t n)
 {
 	if(n == 0) n = 1;
 	return realloc(p,n);

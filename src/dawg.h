@@ -92,8 +92,4 @@ void *rpl_malloc(size_t n);
 void *rpl_realloc(void *p, size_t n);
 #endif
 
-#ifndef HAVE_VPRINTF
-#define vprintf 
-#endif
-
 #endif
