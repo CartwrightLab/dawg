@@ -105,7 +105,7 @@ unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegi
 	uPos = HisPos(uPos);
 	if(uSize > 1)
 		m_vHistory.insert(m_vHistory.begin()+uPos, uSize-1, 'i');
-	m_vHistory.insert(m_vHistory.begin()+uPos, 1, 'I');
+	m_vHistory.insert(m_vHistory.begin()+uPos, 'I');
 	return uSize;
 }
 
@@ -528,11 +528,6 @@ double Tree::RandomRate() const
 		return 1.0;
 }
 
-// Insertion: +
-// Deletion:  -
-// Deleted Insertion: =
-// Root Nuc: .
-
 void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 {
 	// construct a table of flattened sequences
@@ -546,7 +541,9 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 		cit->second.Flatten(s);
 		vHisTable.push_back(s.History());
 		vDnaTable.push_back(s.DNA());
+		aln[cit->first] = string(vHisTable.back().begin(), vHisTable.back().end());
 	}
+	return;
 
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
