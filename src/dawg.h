@@ -1,3 +1,5 @@
+// dawg.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #ifndef DAWG_DAWG_H
 #define DAWG_DAWG_H
 

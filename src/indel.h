@@ -1,3 +1,5 @@
+// indel.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #ifndef DAWG_INDEL_H
 #define DAWG_INDEL_H
 

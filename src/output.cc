@@ -1,3 +1,5 @@
+// output.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #include "dawg.h"
 #include "var.h"
 

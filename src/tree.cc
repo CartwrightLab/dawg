@@ -1,3 +1,5 @@
+// tree.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #include "dawg.h"
 #include "tree.h"
 #include "rand.h"

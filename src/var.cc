@@ -1,3 +1,5 @@
+// var.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #include "dawg.h"
 #include "var.h"
 
@@ -31,36 +33,6 @@ void DawgVar::SetVar(const std::string &ssKey, DawgVar* pVar)
 {
 	GetMap()[ssKey] = pVar;
 }
-
-//bool DawgVar::Get(const std::string& ssKey, double &rdVar )
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rdVar));
-//}
-//
-//bool DawgVar::Get(const std::string& ssKey, int &rnVar )
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rnVar));
-//}
-//
-//bool DawgVar::Get(const std::string& ssKey, std::string &rssVar )
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rssVar));
-//}
-//
-//bool DawgVar::Get(const std::string& ssKey, bool &rbVar )
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rbVar));
-//}
-//
-//bool DawgVar::Get(const std::string &ssKey, Vec *&rpVec)
-//{
-//	DawgVar *pVar = GetVar(ssKey);
-//	return ( pVar != NULL && pVar->Get(rpVec));
-//}
 
 bool DawgVar::Get( double &rdVar ) const
 {

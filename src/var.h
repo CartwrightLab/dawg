@@ -1,3 +1,5 @@
+// var.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #ifndef DAWG_VAR_H
 #define DAWG_VAR_H
 
@@ -44,7 +46,7 @@ public:
 	bool		Get(bool &rbVar ) const;
 	void		Set(bool bVar );
 
-    // String Routines
+ 	// String Routines
 	explicit DawgVar(const std::string &rssVar) : m_tyType(tyString)
 		{ m_pssData = new std::string(rssVar); }
 	const std::string&	GetString() const { return *m_pssData; }

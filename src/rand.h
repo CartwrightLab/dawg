@@ -1,3 +1,5 @@
+// rand.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #if !defined(DAWG_RAND_H)
 #define DAWG_RAND_H
 

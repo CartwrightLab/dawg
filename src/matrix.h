@@ -1,3 +1,5 @@
+// matrix.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #ifndef DAWG_MATRIX_H
 #define DAWG_MATRIX_H
 

@@ -1,4 +1,6 @@
 %{
+// parser.yy - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #pragma warning(disable: 4244 4065 4255 4127 4102)
 #include "dawg.h"
 #include "var.h"

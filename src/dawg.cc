@@ -1,4 +1,4 @@
-// dawg.cpp
+// dawg.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
 
 #include "dawg.h"
 #include "tree.h"
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 		if(bVersion)
 		{
 			cout << "DAWG - DNA Assembly With Gaps" << endl;
-			cout << "Copyright (c) 2003-2004 Reed A. Cartwright (all rights reserved)" << endl;
+			cout << "Copyright (C) 2004 Reed A. Cartwright (all rights reserved)" << endl;
 			cout << "Version " << VERSION << endl << endl;
 		}
 		if(bUsage)

@@ -1,8 +1,7 @@
+// rand.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+
 #include "rand.h"
 /* 
-   rand.cc - Copyright (C) 2003-2004, Reed A. Cartwright
-   All right reserved.
-
    ======================================================================  
    MT19937-2002 Algorithm
 
