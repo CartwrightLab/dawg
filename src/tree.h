@@ -94,7 +94,7 @@ public:
 	Nucleotide::Nuc RandomNuc() const;
 	Nucleotide RandomNucleotide() const { return Nucleotide(RandomNuc(), RandomRate()); }
 
-	Tree() : m_nSec(0) {}
+	Tree() : m_nSec(0), m_nFrame(1){}
 	
 	void Evolve();
 	void ProcessTree(NewickNode* pNode);
