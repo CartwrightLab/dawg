@@ -23,6 +23,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
 
+/* Define to 1 if you have the <mmintrin.h> header file. */
+#define HAVE_MMINTRIN_H 1
+
 /* Define to 1 if your system has a GNU libc compatible `realloc' function,
    and to 0 otherwise. */
 #define HAVE_REALLOC 1
@@ -82,13 +85,13 @@
 #define PACKAGE_NAME "dawg"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "dawg 1.0.0"
+#define PACKAGE_STRING "dawg 1.0.0-rc1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "dawg"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0.0"
+#define PACKAGE_VERSION "1.0.0-rc1"
 
 /* Define to 1 if the C compiler supports function prototypes. */
 #define PROTOTYPES 1
@@ -101,8 +104,11 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
+/* Define to 1 if MMX assembly is available. */
+#define USE_MMX 1
+
 /* Version number of package */
-#define VERSION "1.0.0"
+#define VERSION "1.0.0-rc1"
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */

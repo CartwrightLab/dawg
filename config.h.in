@@ -22,6 +22,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the <mmintrin.h> header file. */
+#undef HAVE_MMINTRIN_H
+
 /* Define to 1 if your system has a GNU libc compatible `realloc' function,
    and to 0 otherwise. */
 #undef HAVE_REALLOC
@@ -99,6 +102,9 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define to 1 if MMX assembly is available. */
+#undef USE_MMX
 
 /* Version number of package */
 #undef VERSION
