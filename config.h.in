@@ -3,6 +3,9 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
+/* Define to 1 if you have the `copysign' function. */
+#undef HAVE_COPYSIGN
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
 
@@ -80,6 +83,9 @@
 
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
+
+/* Define to 1 if you have the `_copysign' function. */
+#undef HAVE__COPYSIGN
 
 /* Define to 1 if you have the `_getpid' function. */
 #undef HAVE__GETPID

@@ -1,7 +1,4 @@
-define([svn_rev], [$Rev$])
-define([rev], substr(svn_rev, 6, eval(len(svn_rev)-7)))
-
-AC_INIT(dawg, [1.0.rev], rac@uga.edu)
+AC_INIT(dawg, 1.0.0-rc3, rac@uga.edu)
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.59)

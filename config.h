@@ -4,6 +4,9 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
 
+/* Define to 1 if you have the `copysign' function. */
+#define HAVE_COPYSIGN 1
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 /* #undef HAVE_DOPRNT */
 
@@ -82,6 +85,9 @@
 /* Define to 1 if the system has the type `_Bool'. */
 /* #undef HAVE__BOOL */
 
+/* Define to 1 if you have the `_copysign' function. */
+/* #undef HAVE__COPYSIGN */
+
 /* Define to 1 if you have the `_getpid' function. */
 #define HAVE__GETPID 1
 
@@ -95,13 +101,13 @@
 #define PACKAGE_NAME "dawg"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "dawg 1.0.0-rc2"
+#define PACKAGE_STRING "dawg 1.0.0-rc3"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "dawg"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0.0-rc2"
+#define PACKAGE_VERSION "1.0.0-rc3"
 
 /* Define to 1 if the C compiler supports function prototypes. */
 #define PROTOTYPES 1
@@ -115,7 +121,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.0.0-rc2"
+#define VERSION "1.0.0-rc3"
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
