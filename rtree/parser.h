@@ -11,7 +11,7 @@ typedef union {
 # define YYSTYPE yystype
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
-# define	NUM	257
+# define	LENGTH	257
 # define	LABEL	258
 # define	END	259
 # define	UNKNOWN	260

@@ -8,77 +8,112 @@
 class Nucleotide;
 typedef std::vector<Nucleotide> Seq;
 
-class Node
-{
+class Node {
 public:
-	Node(const char* csName = "", Node * pChild = NULL) : m_ssLabel(csName),
-		m_pChild(pChild), m_pSib(NULL), m_dBranchLength(0.0) { }
-
-	bool IsTaxon() const { return m_pChild.get() == NULL; }
-	bool IsClade() const { return m_pChild.get() != NULL; }
-
-	void AddChild(Node* pNode)
-	{
-		pNode->m_pSib = m_pChild;
-		m_pChild.reset(pNode);
-	}
-	bool IsChild(Node* pNode)
-	{
-		Node *p = m_pChild.get();
-		while(p != pNode && p)
-			p = p->m_pSib.get();
-		return p != NULL;
-	}
-	void AddSib(Node* pNode)
-	{
-		pNode->m_pSib = m_pSib;
-		m_pSib.reset(pNode);
-	}
-	
-	const std::string& Label() const { return m_ssLabel; }
-	void BranchLength(double d) { m_dBranchLength = d; }
-	double BranchLength() const { return m_dBranchLength; }
-	double ScaledLength() const { return s_dScale*m_dBranchLength; }
-
-	std::string ToString() const;
-
-	const Seq& Sequence() const { return m_seq; }
-	Seq& Sequence() { return m_seq; }
-
-	const Node *Child() const {return m_pChild.get(); }
-	const Node *Sibling() const {return m_pSib.get(); }
-
-	void Evolve();
-
-	const std::string& Gaps() const { return m_ssGaps; }
-	void  ResetGaps() { m_ssGaps.assign(m_seq.size(), '%'); }
-	unsigned int GapPos(unsigned int uPos) const;
-	void Insert(unsigned int uPos, unsigned int uSize);
-	void Delete(unsigned int uPos, unsigned int uSize);
-	
-	static void Scale(double d) { s_dScale = d; }
-	static double Scale() { return s_dScale; }
-	
-	static IndelProcessor s_procIndel;
-	static SubstProcessor s_procSubst;
+	Node(Node* p, const char *cs, double d);
+	char m_csLabel[1024];
+	double m_dLen;
+	std::auto_ptr<Node> m_pSib;
+	std::auto_ptr<Node> m_pSub;
 
 protected:
-	std::auto_ptr<Node> m_pSib;
-	std::auto_ptr<Node> m_pChild;
-	double m_dBranchLength;
-	std::string m_ssLabel;
-
-	Seq m_seq;
-	std::string m_ssGaps;
-
-private:
-	Node(const Node&);
-	Node& operator=(const Node&);
-
-	void EvolveSeq();
-
-	static double s_dScale;
+	void MakeName();
 };
+
+class Tree
+{
+public:
+	struct Section;
+	typedef	std::vector<Section> node;
+	typedef std::map<std::string, node> Map;
+	struct Section
+	{
+		Section() { }
+		Section(double d, Map::iterator it) : dBranchLen(d), itAncestor(it) { }
+		double dBranchLen;
+		Map::iterator itAncestor;
+	};
+	
+	Tree() : m_nSec(0) {}
+
+	Map m_map;
+	int m_nSec;
+	void Process(Node* pNode);
+	void ProcessNode(Node* pNode);
+};
+
+
+//class Node
+//{
+//public:
+//	Node(const char* csName = "", Node * pChild = NULL) : m_ssLabel(csName),
+//		m_pChild(pChild), m_pSib(NULL), m_dBranchLength(0.0) { }
+//
+//	bool IsTaxon() const { return m_pChild.get() == NULL; }
+//	bool IsClade() const { return m_pChild.get() != NULL; }
+//
+//	void AddChild(Node* pNode)
+//	{
+//		pNode->m_pSib = m_pChild;
+//		m_pChild.reset(pNode);
+//	}
+//	bool IsChild(Node* pNode)
+//	{
+//		Node *p = m_pChild.get();
+//		while(p != pNode && p)
+//			p = p->m_pSib.get();
+//		return p != NULL;
+//	}
+//	void AddSib(Node* pNode)
+//	{
+//		pNode->m_pSib = m_pSib;
+//		m_pSib.reset(pNode);
+//	}
+//	
+//	const std::string& Label() const { return m_ssLabel; }
+//	void BranchLength(double d) { m_dBranchLength = d; }
+//	double BranchLength() const { return m_dBranchLength; }
+//	double ScaledLength() const { return s_dScale*m_dBranchLength; }
+//
+//	std::string ToString() const;
+//
+//	const Seq& Sequence() const { return m_seq; }
+//	Seq& Sequence() { return m_seq; }
+//
+//	const Node *Child() const {return m_pChild.get(); }
+//	const Node *Sibling() const {return m_pSib.get(); }
+//
+//	void Evolve();
+//
+//	const std::string& Gaps() const { return m_ssGaps; }
+//	void  ResetGaps() { m_ssGaps.assign(m_seq.size(), '%'); }
+//	unsigned int GapPos(unsigned int uPos) const;
+//	void Insert(unsigned int uPos, unsigned int uSize);
+//	void Delete(unsigned int uPos, unsigned int uSize);
+//	
+//	static void Scale(double d) { s_dScale = d; }
+//	static double Scale() { return s_dScale; }
+//	
+//	static IndelProcessor s_procIndel;
+//	static SubstProcessor s_procSubst;
+//
+//protected:
+//	std::auto_ptr<Node> m_pSib;
+//	std::auto_ptr<Node> m_pChild;
+//	double m_dBranchLength;
+//	std::string m_ssLabel;
+//
+//	Seq m_seq;
+//	std::string m_ssGaps;
+//
+//private:
+//	Node(const Node&);
+//	Node& operator=(const Node&);
+//
+//	void EvolveSeq();
+//
+//	static double s_dScale;
+//};
 
 class Nucleotide
 {

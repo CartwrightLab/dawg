@@ -25,17 +25,28 @@ public:
 	typedef map<string, RNode> Map;
 	struct Section
 	{
+		Section() { }
+		Section(double d, Map::iterator it) : dBranchLen(d), itAncestor(it) { }
 		double dBranchLen;
 		Map::iterator itAncestor;
 	};
-	Map m_map;
+	
+	RTree() : m_nSec(0) {}
 
+	Map m_map;
+	int m_nSec;
 	void Process(Node* pNode)
+	{
+		ProcessNode(pNode);
+		m_nSec++;
+	}
+
+	void ProcessNode(Node* pNode)
 	{
 		static vector<Map::iterator> vStack;
 
 		if(pNode->pSib)
-			Process(pNode->pSib);
+			ProcessNode(pNode->pSib);
 
 		Section sec;
 		sec.dBranchLen = pNode->dLen;
@@ -49,12 +60,13 @@ public:
 			if(sec.itAncestor == it->itAncestor)
 				sec.dBranchLen = it->dBranchLen;
 		}
-		rn.push_back(sec);
+		rn.resize(m_nSec+1, Section(0.0, m_map.end()));
+		rn[m_nSec] = sec;
 				
 		if(pNode->pSub)
 		{
 			vStack.push_back(m_map.find(pNode->csLabel));
-			Process(pNode->pSub);
+			ProcessNode(pNode->pSub);
 			vStack.pop_back();
 		}
 	}

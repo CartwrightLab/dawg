@@ -42,7 +42,7 @@ void PrintNode(Node* pNode)
 	char ch;
 }
 
-%token <d>  NUM
+%token <d>  LENGTH
 %token <cs> LABEL
 %token      END
 %token      UNKNOWN
@@ -71,11 +71,11 @@ node ';' { Node::s_stack.push_back($1); }
 ;
 
 node:
-'(' nodeseq ')' LABEL ':' NUM {	$$ = new Node($4, $6, $2); }
+'(' nodeseq ')' LABEL LENGTH {	$$ = new Node($4, $5, $2); }
 | '(' nodeseq ')' LABEL { $$ = new Node($4, 0.0, $2); }
-| '(' nodeseq ')' ':' NUM { $$ = new Node(NULL, $5, $2); }
+| '(' nodeseq ')' LENGTH { $$ = new Node(NULL, $4, $2); }
 | '(' nodeseq ')' {$$ = new Node(NULL, 0.0, $2); }
-| LABEL ':' NUM { $$ = new Node($1, $3, NULL); }
+| LABEL LENGTH { $$ = new Node($1, $2, NULL); }
 | LABEL { $$ = new Node($1, 0.0, NULL); }
 ;
 

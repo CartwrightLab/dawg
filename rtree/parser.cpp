@@ -3,7 +3,7 @@
 
 #define YYBISON 1  /* Identify Bison output.  */
 
-# define	NUM	257
+# define	LENGTH	257
 # define	LABEL	258
 # define	END	259
 # define	UNKNOWN	260
@@ -66,7 +66,7 @@ typedef union {
 
 
 
-#define	YYFINAL		21
+#define	YYFINAL		18
 #define	YYFLAG		-32768
 #define	YYNTBASE	15
 
@@ -108,16 +108,15 @@ static const char yytranslate[] =
 #if YYDEBUG
 static const short yyprhs[] =
 {
-       0,     0,     3,     5,     8,    10,    17,    22,    28,    32,
-      36,    38,    41
+       0,     0,     3,     5,     8,    10,    16,    21,    26,    30,
+      33,    35,    38
 };
 static const short yyrhs[] =
 {
       15,    16,     0,    16,     0,    17,    14,     0,     5,     0,
-       8,    18,    10,     4,    12,     3,     0,     8,    18,    10,
-       4,     0,     8,    18,    10,    12,     3,     0,     8,    18,
-      10,     0,     4,    12,     3,     0,     4,     0,    18,    17,
-       0,    17,     0
+       8,    18,    10,     4,     3,     0,     8,    18,    10,     4,
+       0,     8,    18,    10,     3,     0,     8,    18,    10,     0,
+       4,     3,     0,     4,     0,    18,    17,     0,    17,     0
 };
 
 #endif
@@ -137,9 +136,9 @@ static const short yyrline[] =
 /* YYTNAME[TOKEN_NUM] -- String name of the token TOKEN_NUM. */
 static const char *const yytname[] =
 {
-  "$", "error", "$undefined.", "NUM", "LABEL", "END", "UNKNOWN", "LPARTH", 
-  "'('", "RPARTH", "')'", "COLON", "':'", "SEMICOLON", "';'", "input", 
-  "tree", "node", "nodeseq", 0
+  "$", "error", "$undefined.", "LENGTH", "LABEL", "END", "UNKNOWN", 
+  "LPARTH", "'('", "RPARTH", "')'", "COLON", "':'", "SEMICOLON", "';'", 
+  "input", "tree", "node", "nodeseq", 0
 };
 #endif
 
@@ -153,7 +152,7 @@ static const short yyr1[] =
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN. */
 static const short yyr2[] =
 {
-       0,     2,     1,     2,     1,     6,     4,     5,     3,     3,
+       0,     2,     1,     2,     1,     5,     4,     4,     3,     2,
        1,     2,     1
 };
 
@@ -162,9 +161,8 @@ static const short yyr2[] =
    error. */
 static const short yydefact[] =
 {
-       0,    10,     4,     0,     0,     2,     0,     0,    12,     0,
-       1,     3,     9,     8,    11,     6,     0,     0,     7,     5,
-       0,     0
+       0,    10,     4,     0,     0,     2,     0,     9,    12,     0,
+       1,     3,     8,    11,     7,     6,     5,     0,     0
 };
 
 static const short yydefgoto[] =
@@ -174,32 +172,31 @@ static const short yydefgoto[] =
 
 static const short yypact[] =
 {
-      10,   -10,-32768,    12,     0,-32768,   -11,     8,-32768,     2,
-  -32768,-32768,-32768,    -3,-32768,     5,    16,    18,-32768,-32768,
-      22,-32768
+       6,    12,-32768,     9,     0,-32768,     2,-32768,-32768,    -1,
+  -32768,-32768,    -2,-32768,-32768,    15,-32768,    19,-32768
 };
 
 static const short yypgoto[] =
 {
-  -32768,    19,     4,-32768
+  -32768,    16,     3,-32768
 };
 
 
-#define	YYLAST		23
+#define	YYLAST		20
 
 
 static const short yytable[] =
 {
-      20,    15,     7,    11,     1,     2,     1,     8,     3,    16,
-       3,    12,    13,    14,     1,     2,     1,    17,     3,    18,
-       3,    19,    21,    10
+      17,    14,    15,     1,     1,     2,     8,     3,     3,    12,
+       1,     2,    13,     1,     3,     7,    11,     3,    16,    18,
+      10
 };
 
 static const short yycheck[] =
 {
-       0,     4,    12,    14,     4,     5,     4,     3,     8,    12,
-       8,     3,    10,     9,     4,     5,     4,    12,     8,     3,
-       8,     3,     0,     4
+       0,     3,     4,     4,     4,     5,     3,     8,     8,    10,
+       4,     5,     9,     4,     8,     3,    14,     8,     3,     0,
+       4
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "C:/program files/gnuwin32/share/bison/bison.simple"
@@ -914,7 +911,7 @@ case 3:
     break;}
 case 5:
 #line 74 "parser.b"
-{	yyval.node = new Node(yyvsp[-2].cs, yyvsp[0].d, yyvsp[-4].node); ;
+{	yyval.node = new Node(yyvsp[-1].cs, yyvsp[0].d, yyvsp[-3].node); ;
     break;}
 case 6:
 #line 75 "parser.b"
@@ -922,7 +919,7 @@ case 6:
     break;}
 case 7:
 #line 76 "parser.b"
-{ yyval.node = new Node(NULL, yyvsp[0].d, yyvsp[-3].node); ;
+{ yyval.node = new Node(NULL, yyvsp[0].d, yyvsp[-2].node); ;
     break;}
 case 8:
 #line 77 "parser.b"
@@ -930,7 +927,7 @@ case 8:
     break;}
 case 9:
 #line 78 "parser.b"
-{ yyval.node = new Node(yyvsp[-2].cs, yyvsp[0].d, NULL); ;
+{ yyval.node = new Node(yyvsp[-1].cs, yyvsp[0].d, NULL); ;
     break;}
 case 10:
 #line 79 "parser.b"

@@ -32,17 +32,18 @@ bool Parse(const char* cs)
 DIGIT  [0-9]
 IDWORD [A-Za-z][A-Za-z_0-9]*
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
+SPACE [ \t\n\r\v\f]*
 
 %%
 
-[\(\):;] {
+[\(\);] {
 	yylval.ch = yytext[0];
 	return yylval.ch;
 }
 
-[-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)? {
-	yylval.d = atof(yytext);
-	return NUM;
+":"{SPACE}[-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)? {
+	yylval.d = atof(yytext+1);
+	return LENGTH;
 }
 
 {LABELCH}+ {

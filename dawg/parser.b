@@ -16,31 +16,31 @@ using namespace std;
 
 %union {
 	double d;	/* number values */
-	char*  cs;  /* string values */
+	char  cs[1024];  /* string values */
 	char   ch;  /* characters */
 	bool   b;   /* booleans */
 	DawgVar::Vec *pvec; /*vector*/
 	DawgVar *pvar; /*DawgVar*/
 	Node	*pnode; /*Tree*/
+	std::string* pstr;
 }
 
 %token <d>  NUM
+%token <d>  LENGTH
 %token <cs> STRING
-%token <ch> DOT
 %token <cs> LABEL
-%token <ch> EQ
-%token      END
 %token <cs> ID
 %token <b>  BOOL
-%token <ch> COLON
-%token <ch> LBRACE
-%token <ch> RBRACE
-%token <ch> LPARTH
-%token <ch> RPARTH
+%token <ch> DOT		'.'
+%token <ch> EQ		'='
+%token <ch> LBRACE	'{'
+%token <ch> RBRACE	'}'
+%token <ch> LPARTH	'('
+%token <ch> RPARTH	')'
 %token <ch> UNKNOWN
+%token      END
 
-%type <cs>	  label
-%type <cs>	  str
+%type <pstr> str
 %type <pvar> dvar
 %type <pvec> vvector
 %type <pvec> vseq
@@ -59,115 +59,48 @@ input:
 ;
 
 statement:
-
-END
-{
-
-}
-
-| ID EQ dvar
-{
-	DawgVar::SetVar(string($1), $3);
-	delete[] $1;
-}
+END { }
+| ID '=' dvar { DawgVar::SetVar(string($1), $3); }
 ;
 
 str:
-str DOT STRING {
-	size_t t1 = strlen($1);
-	size_t t2 = strlen($3);
-	$$ = strcpy(new char[t1+t2+2], $1);
-	strcat($$, "\n");
-	strcat($$, $3);
-	delete[] $1;
-	delete[] $3;
-}
-| STRING { $$ = $1; }
+str '.' STRING { $$ = $1; $$->append("\n");	$$->append($3); }
+| STRING { $$ = new std::string($1); }
 ;
 
 dvar:
-
-vvector
-{
-	$$ = new DawgVar($1);
-}
+  vvector { $$ = new DawgVar($1); }
 | NUM { $$= new DawgVar($1); }
 | BOOL { $$= new DawgVar($1); }
-| str
-{
-	$$= new DawgVar(string($1));
-	delete[] $1;
-}
+| str {	$$ = new DawgVar(*$1); delete $1; }
 | tree { $$ = new DawgVar($1); }
 ;
 
-vvector: LBRACE vseq RBRACE { $$ = $2; };
+vvector: '{' vseq '}' { $$ = $2; }
+;
 
 vseq:
-vseq dvar
-{
-	$$->push_back($2);
-}
+  dvar { $$ = new DawgVar::Vec; $$->push_back($1); };
+| vseq dvar { $$ = $1; $$->push_back($2); }
+;
 
-| dvar
-{
-	$$ = new DawgVar::Vec;
-	$$->push_back($1);
-};
-
-label:
-LABEL { $$ = $1; };
-
-tree: node { $$ = $1; };
+tree:
+node
+;
 
 node:
-LPARTH nodeseq RPARTH label COLON NUM
-{
-	$$ = new Node($4, $2);
-	$$->BranchLength($6);
-	delete[] $4;	
-}
-
-| LPARTH nodeseq RPARTH label
-{
-	$$ = new Node($4, $2);
-	delete[] $4;	
-}
-
-| LPARTH nodeseq RPARTH COLON NUM
-{
-	$$ = new Node("", $2);
-	$$->BranchLength($5);
-}
-
-| LPARTH nodeseq RPARTH
-{
-	$$ = new Node("", $2);
-}
-
-| label COLON NUM
-{
-	$$ = new Node($1);
-	$$->BranchLength($3);
-	delete[] $1;		
-}
-
-| label
-{
-	$$ = new Node($1);
-	delete[] $1;		
-};
+  '(' nodeseq ')' LABEL LENGTH { $$ = new Node($2, $4, $5 ); }
+| '(' nodeseq ')' LABEL { $$ = new Node($2, $4, 0.0); }
+| '(' nodeseq ')' LENGTH { $$ = new Node($2, NULL, $4); }
+| '(' nodeseq ')' {	$$ = new Node($2, NULL, 0.0); }
+| LABEL LENGTH { $$ = new Node(NULL, $1, $2); }
+| LABEL { $$ = new Node(NULL, $1, 0.0); }
+;
 
 nodeseq:
-nodeseq node
-{
-	$1->AddSib($2);
-}
-
+nodeseq node { $$ = $2; $$->m_pSib.reset($1); }
 | node
-{
-	$$ = $1;
-};
+;
 
 %%
 
