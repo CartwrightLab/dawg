@@ -89,7 +89,7 @@ public:
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		unsigned long uWidth, const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
-	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
+	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vData,
 		const std::vector<std::vector<double> > &vRates);
 
 	double RandomRate(unsigned long uPos) const;

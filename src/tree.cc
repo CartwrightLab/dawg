@@ -515,7 +515,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	return true;
 }
 
-bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vLens,
+bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned long> &vLens,
 					   const std::vector<std::vector<double> > &vRates)
 {
 	m_vDNASeqs.clear();
