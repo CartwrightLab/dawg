@@ -43,5 +43,5 @@ dnl AC_CHECK_FUNCS([floor pow sqrt])
 
 AC_LANG_POP(C++)
 
-AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile tests/Makefile doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile lib/Makefile examples/Makefile tests/Makefile doc/Makefile])
 AC_OUTPUT
