@@ -1,11 +1,11 @@
-#ifndef DAWG_RAND_H
+#if !defined(DAWG_RAND_H)
 #define DAWG_RAND_H
 
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H)
 #	include "config.h"
 #endif
 
-#ifdef WORDS_BIGENDIAN 
+#if defined(WORDS_BIGENDIAN)
 #	define RR_0 1
 #	define RR_1 0
 #else
@@ -13,15 +13,15 @@
 #	define RR_1 1
 #endif
 
-#ifdef HAVE_MATH_H
+#if defined(HAVE_MATH_H)
 #	include <math.h>
 #endif
 
-#ifdef HAVE_FLOAT_H
+#if defined(HAVE_FLOAT_H)
 #	include <float.h>
 #endif
 
-#ifdef HAVE_MMINTRIN_H
+#if defined(HAVE_MMINTRIN_H)
 #	include <mmintrin.h>
 #endif
 
@@ -31,9 +31,6 @@
 #ifndef M_E
 #	define M_E        2.71828182845904523536
 #endif
-
-bool check_endian();
-
 
 /************************************************
 	Mersenne Twister Generator

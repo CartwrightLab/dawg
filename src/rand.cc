@@ -52,7 +52,7 @@
 #define MIXBITS(u,v) ( ((u) & UMASK) | ((v) & LMASK) )
 #define TWIST(u,v) ((MIXBITS(u,v) >> 1) ^ ((v)&1UL ? MATRIX_A : 0UL))
 
-#ifndef(USE_MMX)
+#if !defined(USE_MMX)
 static unsigned long state[N]; /* the array for the state vector  */
 #else
 static __m64	state64[N/2];
@@ -106,7 +106,7 @@ void mt_srand(unsigned long uKeys[], unsigned long uLen)
 
 inline void mt_next_state()
 {
-#ifndef(USE_MMX)
+#if !defined(USE_MMX)
 	unsigned long *p=state;
     for (int j=N-M+1; --j; p++) 
         *p = p[M] ^ TWIST(p[0], p[1]);
