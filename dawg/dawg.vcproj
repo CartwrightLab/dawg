@@ -167,9 +167,6 @@
 				RelativePath="matrix.cpp">
 			</File>
 			<File
-				RelativePath=".\node.cpp">
-			</File>
-			<File
 				RelativePath="output.cpp">
 			</File>
 			<File
@@ -201,9 +198,6 @@ move /Y $(InputName).hpp $(InputName).h
 				RelativePath="rand.cpp">
 			</File>
 			<File
-				RelativePath=".\subst.cpp">
-			</File>
-			<File
 				RelativePath=".\tree.cpp">
 			</File>
 			<File
@@ -220,22 +214,13 @@ move /Y $(InputName).hpp $(InputName).h
 				RelativePath="dawg.h">
 			</File>
 			<File
-				RelativePath=".\indel.h">
-			</File>
-			<File
 				RelativePath="matrix.h">
-			</File>
-			<File
-				RelativePath=".\node.h">
 			</File>
 			<File
 				RelativePath=".\parser.h">
 			</File>
 			<File
 				RelativePath="rand.h">
-			</File>
-			<File
-				RelativePath=".\subst.h">
 			</File>
 			<File
 				RelativePath=".\tree.h">

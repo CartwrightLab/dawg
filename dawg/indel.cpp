@@ -1,83 +1,8 @@
 #include "dawg.h"
 #include "indel.h"
-#include "node.h"
 #include "rand.h"
 
 using namespace std;
-
-// rate of del: lambda*length+lambda*(E(size)-1)
-// rate of ins: lambda*length+lambda
-
-////////////////////////////////////////////////////////////
-//  class IndelProcessor
-////////////////////////////////////////////////////////////
-
-bool IndelProcessor::Setup(const IndelModel::Params& rIns, const IndelModel::Params& rDel)
-{
-	m_dLambdaIns = rIns.dLambda;
-	if(m_dLambdaIns < 0.0)
-		return DawgError("Lambda (Ins) must not be negative.");
-	if(rIns.ssModel == "NB")
-	{
-		try {m_pInsertionModel.reset(new NegBnModel(rIns.vdModel));}
-			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
-	}
-	else
-	{
-		try {m_pInsertionModel.reset(new UserModel(rIns.vdModel));}
-			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
-	}
-
-	m_dLambdaDel = rDel.dLambda;
-	if(m_dLambdaDel < 0.0)
-		return DawgError("Lambda (Del) must not be negative.");
-	if(rDel.ssModel == "NB")
-	{
-		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}
-			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
-	}
-	else
-	{
-		try {m_pDeletionModel.reset(new UserModel(rDel.vdModel));}
-			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
-	}    
-	m_funcRateIns.m = m_dLambdaIns;
-	m_funcRateIns.b = m_dLambdaIns;
-	m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
-	m_funcRateSum.b = m_dLambdaIns+m_dLambdaDel*(m_pDeletionModel->MeanSize()-1.0);
-	return true;
-}
-
-void IndelProcessor::Process(Node *pNode)
-{
-	// Check to see if we are doing indels
-	if(m_funcRateSum(0.0) < DBL_EPSILON)
-		return;
-
-	double dtMax = fabs(pNode->ScaledLength());
-	unsigned long uSize = pNode->Sequence().size();
-	double dSize = (double)uSize;
-	double dW = 1.0/m_funcRateSum(dSize);
-	double dt = rand_exp(dW);
-	while(dt <= dtMax)
-	{
-		if(rand_bool(m_funcRateIns(dSize)*dW))
-		{
-			//Insertion
-			pNode->Insert(rand_ulong(uSize), m_pInsertionModel->RandSize());
-		}
-		else
-		{
-			//Deletion
-			unsigned long ul = m_pDeletionModel->RandSize();
-			pNode->Delete(rand_ulong(uSize+ul-1), ul);
-		}
-		uSize = pNode->Sequence().size();
-		dSize = (double)uSize;
-		dW = 1.0/m_funcRateSum(dSize);
-		dt += rand_exp(dW);
-	}
-}
 
 ////////////////////////////////////////////////////////////
 //  class NegBnModel

@@ -72,8 +72,8 @@ public:
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode);
-	//void Touch(node& rNode);
 	void Evolve(Node &rNode, double dTime);
+	void Evolve(Node &rNode);
 
 private:
 	int m_nSec;
@@ -151,7 +151,5 @@ inline char NucToChar(Nucleotide::Nuc n)
 	static char cs[] = "ACGT-?";
 	return (n > 4) ? '?' : cs[n];
 }
-
-bool SaveSequences(std::ostream &rFile, const Node *arTrees[], unsigned int uSize);
 
 #endif //DAWG_TREE_H

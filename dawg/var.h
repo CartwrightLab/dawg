@@ -2,7 +2,7 @@
 #define DAWG_VAR_H
 
 #include "dawg.h"
-#include "node.h"
+#include "tree.h"
 
 class MapSsToVar;
 
@@ -68,10 +68,10 @@ public:
 		{ return GetAt(uIndex); }
 	
 	// Tree Routines
-	explicit DawgVar(Node* p) : m_tyType(tyTree), m_ptrData(p) { }
-	Node*	GetTree() const { return m_ptrData; }
-	bool		Get(Node *&rTree) const;
-	void		Set(Node *pTree);
+	explicit DawgVar(NewickNode* p) : m_tyType(tyTree), m_ptrData(p) { }
+	NewickNode*	GetTree() const { return m_ptrData; }
+	bool		Get(NewickNode *&rTree) const;
+	void		Set(NewickNode *pTree);
 
 protected:
 	Type m_tyType;
@@ -81,7 +81,7 @@ protected:
 		bool   m_bData;
 		const Vec*   m_pvData;
 		const std::string* m_pssData;
-		Node*  m_ptrData;
+		NewickNode*  m_ptrData;
 	};
 private:
 	DawgVar(const DawgVar& var);

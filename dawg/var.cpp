@@ -152,14 +152,14 @@ void DawgVar::Set(const Vec *pVec)
 	m_pvData = pVec;
 }
 
-bool DawgVar::Get(Node *&rTree) const
+bool DawgVar::Get(NewickNode *&rTree) const
 {
 	if(!IsType(tyTree))
 		return false;
 	rTree = GetTree();
 	return true;
 }
-void DawgVar::Set(Node *pTree)
+void DawgVar::Set(NewickNode *pTree)
 {
 	Unset();
 	m_tyType = tyTree;

@@ -99,7 +99,7 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 
 <tree>[\(\)] {
 	yylval.ch = yytext[0];
-	return yytext[0]
+	return yytext[0];
 }
 
 <tree>";" { BEGIN(INITIAL); }

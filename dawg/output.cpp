@@ -1,5 +1,4 @@
 #include "dawg.h"
-#include "node.h"
 #include "var.h"
 
 using namespace std;

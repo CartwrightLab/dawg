@@ -202,6 +202,37 @@ void Tree::ProcessNewickNode(NewickNode* pNode)
 	}
 }
 
+void Tree::Evolve()
+{
+	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
+		Evolve(it->second);
+}
+
+void Tree::Evolve(Node &rNode)
+{
+	if(rNode.m_bTouched)
+		return;
+	rNode.m_bTouched = true;
+	map<Node::Handle, Node> mapSeqs;
+	for(unsigned long a = 0; a < rNode.m_vAncestors.size(); ++a)
+	{
+		if(rNode.m_vAncestors[a] == m_map.end())
+		{
+			// no ancestor need to create one
+		}
+		else
+		{
+			if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
+			{
+				Evolve(rNode.m_vAncestors[a]->second);
+				mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
+				Evolve(mapSeqs[rNode.m_vAncestors[a]], rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
+			}
+			rNode.m_vSections.push_back(mapSeqs[rNode.m_vAncestors[a]].m_vSections[a]);
+		}
+	}
+}
+
 void Tree::Evolve(Node &rNode, double dTime)
 {
 	dTime = fabs(dTime);

@@ -127,7 +127,7 @@ bool Execute()
 	vector<double> vdInsModel;
 	vector<double> vdDelModel;
 
-	vector<Node*> vtTrees;
+	vector<NewickNode*> vtTrees;
 	double		  dScale = 1.0;
 	vector<int>   vnSeed;
 

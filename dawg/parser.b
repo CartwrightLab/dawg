@@ -21,7 +21,7 @@ using namespace std;
 	bool   b;   /* booleans */
 	DawgVar::Vec *pvec; /*vector*/
 	DawgVar *pvar; /*DawgVar*/
-	Node	*pnode; /*Tree*/
+	NewickNode	*pnode; /*Tree*/
 	std::string* pstr;
 }
 
@@ -80,7 +80,7 @@ vvector: '{' vseq '}' { $$ = $2; }
 ;
 
 vseq:
-  dvar { $$ = new DawgVar::Vec; $$->push_back($1); };
+  dvar { $$ = new DawgVar::Vec; $$->push_back($1); }
 | vseq dvar { $$ = $1; $$->push_back($2); }
 ;
 
@@ -89,12 +89,12 @@ node
 ;
 
 node:
-  '(' nodeseq ')' LABEL LENGTH { $$ = new Node($2, $4, $5 ); }
-| '(' nodeseq ')' LABEL { $$ = new Node($2, $4, 0.0); }
-| '(' nodeseq ')' LENGTH { $$ = new Node($2, NULL, $4); }
-| '(' nodeseq ')' {	$$ = new Node($2, NULL, 0.0); }
-| LABEL LENGTH { $$ = new Node(NULL, $1, $2); }
-| LABEL { $$ = new Node(NULL, $1, 0.0); }
+  '(' nodeseq ')' LABEL LENGTH { $$ = new NewickNode($2, $4, $5 ); }
+| '(' nodeseq ')' LABEL { $$ = new NewickNode($2, $4, 0.0); }
+| '(' nodeseq ')' LENGTH { $$ = new NewickNode($2, NULL, $4); }
+| '(' nodeseq ')' {	$$ = new NewickNode($2, NULL, 0.0); }
+| LABEL LENGTH { $$ = new NewickNode(NULL, $1, $2); }
+| LABEL { $$ = new NewickNode(NULL, $1, 0.0); }
 ;
 
 nodeseq:
