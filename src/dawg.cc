@@ -5,6 +5,7 @@
 #include "rand.h"
 #include "var.h"
 
+// Help Information
 char g_csDawgTxt[] =
 #include "dawgtxt.h"
 ;
@@ -14,15 +15,16 @@ using namespace std;
 bool Parse(const char* cs);
 bool Execute();
 
-char csBuffer[32];
-
 int main(int argc, char* argv[])
 {
-	bool bSerial = true; // Process files in serial fashion
+	bool bSerial = true;
+
+	// Check to see if Usage and Version need to be printed
 	bool bUsage = (argc==1);
 	bool bVersion = (argc==1);
 	bool bOk = true;
-	//Parse Cmds
+
+	//Parse Aruments
 	int i=1;
 	for(;i<argc;++i)
 	{
@@ -33,32 +35,47 @@ int main(int argc, char* argv[])
 		{
 			switch(*pch)
 			{
+				//Serial Mode
 				case 's':
 				case 'S':
-					bSerial = true;  //Serial Mode
+					bSerial = true;  
 					break;
+				//Combined Mode
 				case 'c':
 				case 'C':
-					bSerial = false; //Combine Mode
+					bSerial = false; 
 					break;
+				// Version Information
 				case 'v':
 				case 'V':
 					bVersion = true;
 					break;
+				// Help Information
 				case '?':
 				case 'h':
 				case 'H':
 					bVersion = true;
 					bUsage = true;
 					break;
+				// Unbuffered Output
 				case 'u':
 				case 'U':
 					#ifdef SETVBUF_REVERSED
-					setvbuf(stdout, _IONBF, csBuffer, 32);
+					setvbuf(stdout, _IONBF, NULL, 0);
 					#else
-					setvbuf(stdout, csBuffer, _IONBF, 32);
+					setvbuf(stdout, NULL, _IONBF, 0);
 					#endif
 					break;
+				// Buffered Output
+				case 'b':
+				case 'B':
+					#ifdef SETVBUF_REVERSED
+					setvbuf(stdout, _IOFBF, NULL, BUFSIZ);
+					#else
+					setvbuf(stdout, NULL, _IOFBF, BUFSIZ);
+					#endif
+					break;
+				// Error Reporting
 				default:
 					DawgError("Unreconized switch, \"%c\"", *pch);
 					bOk = false;
@@ -68,6 +85,7 @@ int main(int argc, char* argv[])
 			};
 		}
 	}
+	// Print Version and/or Usage Information and exit
 	if(bVersion || bUsage)
 	{
 		if(bVersion)
@@ -75,17 +93,19 @@ int main(int argc, char* argv[])
 			cout << PACKAGE_STRING << endl 
 				<< "DNA Assembly With Gaps" << endl
 				<< "Copyright (C) 2005 Reed A. Cartwright (all rights reserved)" << endl
-				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << endl << endl;
+				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << "." << endl << endl;
 		}
 		if(bUsage)
 			cout << g_csDawgTxt << endl;
 
 		return 0;
 	}
+	// Close if Error
 	if(!bOk)
 		return 1;
 	if(bSerial)
 	{
+		// Process files in serial mode
 		for(;i<argc;++i)
 		{
 			if(Parse(argv[i]))
@@ -100,6 +120,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
+		// Process files in combined mode
 		for(;i<argc;++i)
 		{
 			if(!Parse(argv[i]))
@@ -111,13 +132,16 @@ int main(int argc, char* argv[])
 	return (int)!bOk;
 }
 
+// Fast and dirty random seed algorithm
+// based off of NR's randqd1
 inline unsigned int rand_seed()
 {
-	// based off of NR's randqd1	
+	// 	
 	static unsigned long u = time(NULL)+3*getpid();
 	return (u = u*1664525u + 1013904223u);
 }
 
+// Execute the Dawg process based on the current configuration
 bool Execute()
 {
 	// Variables
@@ -143,8 +167,6 @@ bool Execute()
 	double	dTreeScale = 1.0;
 	vector<unsigned long>   vuSeed;
 
-
-
 	string ssFile = "-";
 	unsigned long uFmt = FormatFasta;
 	string ssFormat = "Fasta";
@@ -154,7 +176,7 @@ bool Execute()
 	unsigned long uWidth = 1;
 	int nRes;
 
-	// Ready Variables
+	// Read variables from configuration
 
 	if(!DawgVar::GetVector("Tree", vtTrees))
 		return DawgError("No trees specified.");
@@ -236,7 +258,9 @@ bool Execute()
 	DawgVar::Get("Format", ssFormat);
 	DawgVar::Get("NexusCode", ssNexusCode);
 
-	// Load Variables
+	// Setup Model Parameters from Variables
+
+	// Load random number generator
 	if(vuSeed.empty())
 	{
 		for(unsigned int u=0;u<4;++u)
@@ -244,10 +268,12 @@ bool Execute()
 	}
 	mt_srand(&vuSeed[0], vuSeed.size());
 	
+	// Setup recombinant tree
 	Tree myTree;
 	for(vector<NewickNode*>::const_iterator treeit = vtTrees.begin(); treeit != vtTrees.end(); ++treeit)
 		myTree.ProcessTree(*treeit);
 
+	// Construct substitution matrices
 	if(ssModel == "GTR")
 	{
 		if(vdParams.size() < 6)
@@ -309,6 +335,7 @@ bool Execute()
 	else
 		return DawgError("Unknown substitution model, \"%s\".", ssModel.c_str());
 	
+	// Construct Indel parameters
 	IndelModel::Params paramsDel, paramsIns;
 	paramsIns.ssModel = ssGapModel[0];
 	paramsIns.dLambda = dLambda[0];
@@ -318,18 +345,24 @@ bool Execute()
 	paramsDel.dLambda = dLambda[1];
 	paramsDel.vdModel = vdGapModel[1];
 	
+	// Initialize Evolution
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
 		uWidth, vdGamma, vdIota, vdScale, dTreeScale ))
 		return DawgError("Bad evolution parameters");
+
+	// Initialize Root
 	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
 	
+	// Read NexusCode from file if neccessary
    	if(!ssNexusCode.empty())
 	{
 		ifstream iFile(ssNexusCode.c_str());
 		if(iFile.is_open())
 			getline(iFile, ssNexusCode, '\0');
 	}
+
+	// Output Format
 	if(ssFormat == "Fasta")
 		uFmt = FormatFasta;
 	else if(ssFormat == "Nexus")
@@ -343,9 +376,11 @@ bool Execute()
 	
 	SetFormat(uFmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
 	
+	// Check translate parameter
 	if(bTranslate && uWidth != 3)
 		return DawgError("Translate requires a Width of 3.");
-
+	
+	// setup output flags
 	unsigned long uOutFlags = 0u;
 	if(bGapSingle)
 		uOutFlags |= FlagOutGapSingleChar;
@@ -356,6 +391,7 @@ bool Execute()
 	if(bTranslate)
 		uOutFlags |= FlagOutTranslate;
 
+	// setup output location
 	ostream* pOut;
 	ofstream ofOut;
 	if(ssFile == "-" || ssFile.empty())
@@ -369,6 +405,7 @@ bool Execute()
 	}
 	DawgIniOutput(*pOut);
 
+	// Evolve Many Sequences
 	while(uReps--)
 	{
 		//Evolve
@@ -384,6 +421,7 @@ bool Execute()
 	return true;
 }
 
+// Error Reporting Routine
 bool DawgError(const char* csErr, ...)
 {
 	fprintf(stderr, "Error: ");

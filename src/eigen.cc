@@ -28,14 +28,17 @@
 
 using namespace std;
 
+// Various Tests
 inline double nearZero(double d)
 {
 	return (-LAMBDA_THREASHOLD < d && d < LAMBDA_THREASHOLD) ? 0.0f : d;
 }
-
 inline bool epsTest(double d) { return (-DBL_EPSILON <= d && d <= DBL_EPSILON); }
 inline bool thetaTest(double d) { return ( d < -THETA_TH1 || THETA_TH1 < d); }
 
+
+// Jacobi Rotation for a 4x4 matrix with double precision
+// Adapted from Numerical Recipies for C
 void JacobiRot44(int p, int q, Matrix44& a, Matrix44& v) // q > p
 {
 	if(a(p,q) == 0.0)
@@ -83,6 +86,7 @@ void JacobiRot44(int p, int q, Matrix44& a, Matrix44& v) // q > p
 	}
 }
 
+// Calculate the Eigensystem of a 4x4 matrix
 int EigenSystem(const Matrix44& rOrig, Vector4& rValues, Matrix44& rVectors)
 {
 	rValues.Zero();

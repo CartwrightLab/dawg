@@ -50,21 +50,23 @@ bool DawgError(const char* csErr, ...);  //always returns false
 bool SetFormat(unsigned long fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);
 
+// File Formats
 const unsigned long FormatFasta = 0;
 const unsigned long FormatNexus = 1;
 const unsigned long FormatPhylip = 2;
 const unsigned long FormatClustal = 3;
 
+// Output Flags
 const unsigned long FlagOutLowerCase = 1;
 const unsigned long FlagOutGapPlus = 2;
 const unsigned long FlagOutGapSingleChar = 4;
 const unsigned long FlagOutTranslate = 8;
 
+// Nucleotide Numbers
 const int NumAdenine	= 0;
 const int NumCytosine	= 1;
 const int NumThymine	= 2;
 const int NumGuanine	= 3;
-
 
 template <class Type> class SumValue
 {

@@ -7,6 +7,7 @@
 
 class Node;
 
+// Base class for indel models
 class IndelModel
 {
 public:
@@ -21,6 +22,8 @@ public:
 	virtual double MeanSize() const = 0;
 };
 
+// Negative Binomial Model
+// f(x) = NCh(r+x-2,x-1) (1-q)^r q^(x-1)
 class NegBnModel : public IndelModel
 {
 public:
@@ -33,6 +36,9 @@ protected:
 	double m_dQ;
 };
 
+
+// User Model
+// f(x) = parameter(x-1)
 class UserModel : public IndelModel
 {
 public:
@@ -45,6 +51,8 @@ protected:
 	double m_dMean;
 };
 
+// Power-Law Model
+// f(x) is proportional to (x^-a)
 class PowerModel : public IndelModel
 {
 public:
@@ -57,27 +65,14 @@ protected:
 	double m_dMean;
 };
 
+
+// A class wrapping y = m*x + b
 class LinearFunc : public std::unary_function<double, double>
 {
 public:
 	result_type operator()( argument_type x) { return m*x+b; }
 	argument_type m;
 	argument_type b;
-};
-
-class IndelProcessor
-{
-public:
-	bool Setup(const IndelModel::Params& rIns, const IndelModel::Params& rDel);
-	void Process(Node* pNode);
-
-protected:	
-	std::auto_ptr<IndelModel> m_pInsertionModel;
-	std::auto_ptr<IndelModel> m_pDeletionModel;
-	double m_dLambdaIns;
-	double m_dLambdaDel;
-	LinearFunc m_funcRateIns;
-	LinearFunc m_funcRateSum;
 };
 
 #endif // DAWG_INDEL_H

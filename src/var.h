@@ -8,6 +8,7 @@
 
 class MapSsToVar;
 
+// DawgVar is a variant representing the input variables
 class DawgVar
 {
 public:
@@ -30,6 +31,11 @@ public:
 	static void		ClearMap();
 	
 	// General Routines
+
+	// Size returns
+	//   0 if tyNone
+	//   1 if tyBool, tyNumber, tyString, tyTree
+	//   z if tyVector, where z is the length of the vector
 	Vec::size_type Size();
 
 	// Number Routines
@@ -93,34 +99,46 @@ private:
 
 public:
 	// Templates
+
+	// Get the value of Key and place it in R
 	template<class T>
 	static bool Get(const std::string &ssKey, T &r)
 	{
 		DawgVar *pVar = GetVar(ssKey);
 		return ( pVar != NULL && pVar->Get(r) );
 	}
+
+	// Get as array filling in values as neccessary.
+	// An array has a set length.
 	template<class T>
 	Vec::size_type GetArray(T ar[], Vec::size_type uSize, bool bExpand=true)
 	{
 		Vec::size_type uMax = min(uSize, Size());
 		Vec::size_type u = 0;
+		// read uMax elements from vector
 		for(; u<uMax; u++)
 		{
+			// stop if element is of wrong type
 			if(!GetAt(u).Get(ar[u]))
 				return u;
 		}
+		// fill-in additional elements with the first one
 		for(; bExpand && u<uSize; u++)
 		{
 			ar[u] = ar[0];
 		}
+		// return number of elements set
 		return u;		
 	}
-
+	
+	// Get as vector.
+	// A vector has a variable length.
 	template<class T>
 	bool GetVector(std::vector<T> &rVec)
 	{
 		T tTemp;
 		rVec.clear();
+		// read each element in vector, stoping if of wrong type
 		for(Vec::size_type u = 0; u<Size(); u++)
 		{
 			if(!GetAt(u).Get(tTemp))
@@ -129,6 +147,9 @@ public:
 		}
 		return true;
 	}
+
+	// Get as matrix, filling in rows as neccessary
+	// A matrix is an array of vectors.
 	template< class T >
 	Vec::size_type GetMatrix(std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
 	{
@@ -137,22 +158,31 @@ public:
 		Vec::size_type u = 0;
 		Vec::size_type uMax = min(uSize, Size());
 
-		//Check to see if it is a Matrix
+		// Check to see if it is a double vector
+		// not 100% accurate
 		if(GetAt(0).IsType(tyVector))
 		{
+			// read rows
 			for(;u<uMax;++u)
-				GetAt(u).GetVector(ar[u]);
+			{
+				if(!GetAt(u).GetVector(ar[u]))
+					return u;
+			}
 		}
 		else
 		{
-			GetVector(ar[0]);
+			// if single vector, read values into the first row
+			if(!GetVector(ar[0]))
+				return 0;
 			u = 1;
 		}
+		// fill-in rows as neccessary
 		for(; bExpand && u<uSize; u++)
 			ar[u] = ar[0];
 		return u;
 	}
-
+	
+	// Get Key as Array
 	template< class T >
 	static Vec::size_type GetArray( const std::string &ssKey,  T ar[], Vec::size_type uSize, bool bExpand=true)
 	{
@@ -161,6 +191,7 @@ public:
 			return 0;
 		return pVar->GetArray(ar, uSize, bExpand);
 	}
+	// Get Key as Vector
 	template<class T>
 	static bool GetVector( const std::string &ssKey, std::vector<T> &rVec)
 	{
@@ -169,6 +200,7 @@ public:
 			return false;
 		return pVar->GetVector(rVec);
 	}
+	// Get Key as Matrix
 	template<class T>
 	static Vec::size_type GetMatrix(const std::string &ssKey,  std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
 	{
@@ -180,6 +212,7 @@ public:
 
 };
 
+// A map class that will delete pointers upon destruction
 class MapSsToVar : public std::map<std::string, DawgVar*>
 {
 public:	
