@@ -1,5 +1,5 @@
 define([dawg_version_svn], [$Rev$])
-define([dawg_verson], subst(dawg_version_svn, 6, len(dawg_version_svn)-7))
+define([dawg_version], subst(dawg_version_svn, 6, len(dawg_version_svn)-7))
 
 AC_INIT(dawg, [1.0.]dawg_version, rac@uga.edu)
 AC_CONFIG_SRCDIR([src/dawg.h])
