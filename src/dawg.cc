@@ -72,9 +72,9 @@ int main(int argc, char* argv[])
 	{
 		if(bVersion)
 		{
-			cout << "DAWG - DNA Assembly With Gaps" << endl;
-			cout << "Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)" << endl;
-			cout << "Version " << VERSION << endl << endl;
+			cout << PACKAGE_STRING << endl 
+				<< "Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)"
+				<< endl << endl;
 		}
 		if(bUsage)
 			cout << g_csDawgTxt << endl;

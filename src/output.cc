@@ -32,11 +32,10 @@ void DawgIniOutput(ostream& os)
 	switch(g_fileFormat)
 	{
 	case FormatNexus:
-		os << "#NEXUS" << endl << "[Created by DAWG Version " << VERSION << ']' << endl;
+		os << "#NEXUS" << endl << "[Created by " << PACKAGE_STRING << ']' << endl;
 		break;
 	case FormatClustal:
-		os << "CLUSTAL multiple sequence alignment (Created by DAWG Version "
-			<< VERSION << ")" << endl << endl << endl;
+		os << "CLUSTAL multiple sequence alignment (Created by " << PACKAGE_STRING << ")" << endl << endl << endl;
 		break;
 	}
 }
