@@ -128,8 +128,8 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 	{
 		if(!IsDel(m_vHistory[uPos]))
 		{
-			m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';;
-			uTemp++;
+			m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
+			--uTemp;
 		}
 		uPos++;
 	}
