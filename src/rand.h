@@ -29,6 +29,10 @@
 typedef unsigned int uint32_t;
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+#	include <sys/types.h>
+#endif
+
 #define RDBL32_MIN  2.3283064365386963e-010
 #define RDBL_MIN	RDBL32_MIN
 
