@@ -339,7 +339,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 	unsigned long uLength = rNode.SeqLength();
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
-	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW);)
+	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
 	{
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
@@ -386,8 +386,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		return DawgError("Lambda (Ins) must not be negative.");
 	if(rDel.dLambda < 0.0)
 		return DawgError("Lambda (Del) must not be negative.");
-	if(uFrame <= 0)
-		return DawgError("Frame must be positive.");
+	if(uWidth == 0)
+		return DawgError("Width must be positive.");
 	if(vdGamma.size() != uWidth)
 		return DawgError("Gamma must have the same size as the value of Width.");
 	if(vdIota.size() != uWidth)
@@ -531,7 +531,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	}
 	else
 	{
-		for(vector<unsigned int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
+		for(vector<unsigned long>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
 			m_vDNASeqs.push_back(Sequence::DNAVec(BlockTrim(*cit), Nucleotide(5, -1.0)));
 	}
 	if(vRates.size())
@@ -558,7 +558,7 @@ Nucleotide::Nuc Tree::RandomNuc() const
 
 double Tree::RandomRate(unsigned long uPos) const
 {
-	uPos %= m_uFrame;
+	uPos %= m_uWidth;
 	if(m_vdIota[uPos] > DBL_EPSILON && rand_bool(m_vdIota[uPos]))
 		return 0.0;  // Site Invariant
 	else if(m_vdGamma[uPos] > DBL_EPSILON)
