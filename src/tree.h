@@ -152,7 +152,7 @@ public:
 	
 	const Node::Map& GetMap() const { return m_map; }
 
-	void Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const;
+	void Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLowerCase) const;
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);

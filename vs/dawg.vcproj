@@ -162,7 +162,7 @@
 						Name="VCCustomBuildTool"
 						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(OutDir)\$(InputName).cc&quot;
 "
-						AdditionalDependencies=""
+						AdditionalDependencies="&quot;$(OutDir)\parser.h&quot;"
 						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;"/>
 				</FileConfiguration>
 			</File>
@@ -193,7 +193,7 @@ move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&qu
 						CommandLine="bison -y -d  -o &quot;$(OutDir)\$(InputName).cc&quot; &quot;$(InputPath)&quot;
 move  /Y &quot;$(OutDir)\$(InputName).hh&quot; &quot;$(OutDir)\$(InputName).h&quot;
 "
-						Outputs="&quot;$(OutDir)\$(InputName).cc&quot; &quot;$(OutDir)\$(InputName).h&quot;"/>
+						Outputs="&quot;$(OutDir)\$(InputName).cc&quot;;&quot;$(OutDir)\$(InputName).h&quot;"/>
 				</FileConfiguration>
 			</File>
 			<File

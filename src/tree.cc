@@ -539,7 +539,7 @@ double Tree::RandomRate(unsigned long uPos) const
 		return 1.0;
 }
 
-void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
+void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLowerCase) const
 {
 	// construct a table of flattened sequences
 	vector<Sequence> vTable;
@@ -597,23 +597,32 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 		string& ss = aln[vNames[u]];
 		vTable[u].ToString(ss);
 		//GapPlus and GappSingleChar
-		bool bInGap = false;
+		int nGapState = 0;
 		for(unsigned int v = 0; v < ss.length(); ++v)
 		{
-			if(!bGapPlus && (ss[v] == '+' || ss[v] == '='))
-				ss[v] = '-';
 			if(bGapSingleChar)
 			{
-				if(ss[v] == '-')
+				if(ss[v] == '-' || ss[v] == '=')
 				{	
-					if(bInGap)
+					if(nGapState == 1)
 						ss[v] = '?';
 					else
-						bInGap = true;
+						nGapState = 1;
+				}
+				else if(ss[v] == '+')
+				{
+					if(nGapState == 2)
+						ss[v] = '?';
+					else
+						nGapState = 2;
 				}
 				else
-					bInGap = false;
+					nGapState = 0;
 			}
+			if(!bGapPlus && (ss[v] == '+' || ss[v] == '='))
+				ss[v] = '-';
+			if(bLowerCase && 0x41 <= ss[v] && ss[v] <= 0x5A)
+				ss[v] |= 0x20;
 		}
 	}
 

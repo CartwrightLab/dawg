@@ -355,7 +355,7 @@ bool Execute()
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln, bGapPlus, bGapSingle);
+		myTree.Align(aln, bGapPlus, bGapSingle, bLowerCase);
 		if(!SaveAlignment(*pOut, aln))
 			return DawgError("Error saving alignment.");
 	}
