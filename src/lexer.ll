@@ -86,9 +86,11 @@ SPACE [ \t\r\v\f]
 
 "<<"{IDWORD}{SPACE}+"\n" {
 	yytext += 2;
-	for(int i=0;!isspace(*(yytext+i));++i) { }
-	yytext[i] = '\n';
-	yytext[i+1] = '\0';
+	int s=0;
+	while(!isspace(yytext[s]))
+		++s;
+	yytext[s] = '\n';
+	yytext[s+1] = '\0';
 	
 	yylval.pss = new string;
 	string ssTemp;
