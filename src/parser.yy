@@ -16,31 +16,30 @@ using namespace std;
 
 %union {
 	double d;	/* number values */
-	char  cs[1024];  /* string values */
+	std::string* pss;  /* string values */
 	char   ch;  /* characters */
 	bool   b;   /* booleans */
 	DawgVar::Vec *pvec; /*vector*/
 	DawgVar *pvar; /*DawgVar*/
 	NewickNode	*pnode; /*Tree*/
-	std::string* pstr;
+	
 }
 
 %token <d>  NUM
 %token <d>  LENGTH
-%token <cs> STRING
-%token <cs> LABEL
-%token <cs> ID
+%token <pss> STRING
+%token <pss> LABEL
+%token <pss> ID
 %token <b>  BOOL
-%token <ch> DOT		'.'
 %token <ch> EQ		'='
 %token <ch> LBRACE	'{'
 %token <ch> RBRACE	'}'
 %token <ch> LPARTH	'('
 %token <ch> RPARTH	')'
+%token <ch> TO		'<'
 %token <ch> UNKNOWN
 %token      END
 
-%type <pstr> str
 %type <pvar> dvar
 %type <pvec> vvector
 %type <pvec> vseq
@@ -59,20 +58,15 @@ input:
 ;
 
 statement:
-END { }
-| ID '=' dvar { DawgVar::SetVar(string($1), $3); }
-;
-
-str:
-str '.' STRING { $$ = $1; $$->append("\n");	$$->append($3); }
-| STRING { $$ = new std::string($1); }
+END
+| ID '=' dvar { DawgVar::SetVar(*$1, $3); delete $1; }
 ;
 
 dvar:
   vvector { $$ = new DawgVar($1); }
 | NUM { $$= new DawgVar($1); }
 | BOOL { $$= new DawgVar($1); }
-| str {	$$ = new DawgVar(*$1); delete $1; }
+| STRING {	$$ = new DawgVar(*$1); delete $1; }
 | tree { $$ = new DawgVar($1); }
 ;
 
@@ -89,12 +83,12 @@ node
 ;
 
 node:
-  '(' nodeseq ')' LABEL LENGTH { $$ = new NewickNode($2, $4, $5 ); }
-| '(' nodeseq ')' LABEL { $$ = new NewickNode($2, $4, 0.0); }
+  '(' nodeseq ')' LABEL LENGTH { $$ = new NewickNode($2, $4->c_str();, $5 ); delete $4; }
+| '(' nodeseq ')' LABEL { $$ = new NewickNode($2, $4->c_str();, 0.0); delete $4; }
 | '(' nodeseq ')' LENGTH { $$ = new NewickNode($2, NULL, $4); }
 | '(' nodeseq ')' {	$$ = new NewickNode($2, NULL, 0.0); }
-| LABEL LENGTH { $$ = new NewickNode(NULL, $1, $2); }
-| LABEL { $$ = new NewickNode(NULL, $1, 0.0); }
+| LABEL LENGTH { $$ = new NewickNode(NULL, $1->c_str();, $2); delete $1; }
+| LABEL { $$ = new NewickNode(NULL, $1->c_str();, 0.0); }
 ;
 
 nodeseq:

@@ -363,7 +363,7 @@ bool Execute()
 	
 	ostream* pOut;
 	ofstream ofOut;
-	if(ssFile.empty() || ssFile == "-")
+	if(ssFile == "-" || ssFile.empty())
 		pOut = &cout;
 	else
 	{

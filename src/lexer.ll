@@ -46,10 +46,17 @@ IDWORD [A-Za-z][A-Za-z_0-9]*
 STR    \"[^\"\n]*\"
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
+SPACE [ \t\r\v\f]
 
 %x tree
+%x tostr
 
 %%
+
+[=\{\}] {
+	yylval.ch = yytext[0];
+	return yytext[0];
+}
 
 [Ff]"alse" {
 	yylval.b = false;
@@ -62,8 +69,7 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 }
 
 {IDWORD} {
-	strncpy(yylval.cs, yytext, 1023);
-	yylval.cs[1023] = '\0';
+	yylval.pss = new string(yytext);
 	return ID;
 }
 
@@ -73,16 +79,38 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 }
 
 {STR} {
-	size_t t = strlen(yytext);
-	yytext[t-1] = '\0';
-	strncpy(yylval.cs, yytext+1, 1023);
-	yylval.cs[1023] = '\0';
+	yytext[strlen(yytext)-1] = '\0';
+	yylval.pss = new string(yytext+1);
 	return STRING;
 }
 
-[=.\{\}] {
-	yylval.ch = yytext[0];
-	return yytext[0];
+"<<"{IDWORD}{SPACE}+"\n" {
+	yytext += 2;
+	for(int i=0;!isspace(yytext+i);++i) { }
+	yytext[i] = '\n';
+	yytext[i+1] = '\0';
+	
+	yylval.pss = new string;
+	string ssTemp;
+	while(1)
+	{
+		int c = yyinput();
+		ssTemp += c;
+		if(c == '\n')
+		{
+			if(sTemp == yytext)
+				break;
+			yylval.pss->append(ssTemp);
+			ssTemp.clear();
+		}
+		else if(c == EOF)
+		{
+			yylval.pss->append(ssTemp);
+			ssTemp.clear();
+			break;			
+		}
+	}
+	return STRING;
 }
 
 "#"[^\n]* {
@@ -111,16 +139,13 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 
 
 <tree>{STR} {
-	size_t t = strlen(yytext);
-	yytext[t-1] = '\0';
-	strncpy(yylval.cs, yytext+1, 1023);
-	yylval.cs[1023] = '\0';
+	yytext[strlen(yytext)-1] = '\0';
+	yylval.pss = new string(yytext+1);
 	return LABEL;
 }
 
 <tree>{LABELCH}+ {
-	strncpy(yylval.cs, yytext, 1023);
-	yylval.cs[1023] = '\0';
+	yylval.pss = new string(yytext);
 	return LABEL;	
 }
 <tree>"[".+"]" { }
