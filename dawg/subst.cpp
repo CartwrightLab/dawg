@@ -34,8 +34,8 @@ bool SubstProcessor::Setup(double pFreqs[], double pSubs[])
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
 	matQ(3,3) = -(matQ(3,0)+matQ(3,1)+matQ(3,2));
-	matQ.Scale(matQ, -1.0/(vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
-		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3)));
+	matQ.Scale(matQ, -1.0/((1.0-Nucleotide::Iota())*(vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
+		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3))));
 	
 	// Store Scaled Q Matrix
 	m_matQ = matQ;

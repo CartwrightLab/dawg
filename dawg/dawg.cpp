@@ -285,11 +285,11 @@ bool Execute()
 	else
 		return DawgError("Unknown Model, \"%s\"", ssModel.c_str());
 
-	if(!Node::s_procSubst.Setup(dNucFreq, dRevParams))
-		return DawgError("Invalid substitution model parameters.");
-	
 	if(!Nucleotide::Setup(dNucFreq, dGamma, dIota))
 		return DawgError("Invalid G+I rates");
+
+	if(!Node::s_procSubst.Setup(dNucFreq, dRevParams))
+		return DawgError("Invalid substitution model parameters.");
 	
 	//if(!Node::Scale(dScale))
 	//	return DawgError("Invalid scaling parameter");

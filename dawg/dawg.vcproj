@@ -245,9 +245,6 @@ move /Y $(InputName).hpp $(InputName).h
 		<File
 			RelativePath=".\example1.fud">
 		</File>
-		<File
-			RelativePath="readme.txt">
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

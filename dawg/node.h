@@ -93,6 +93,9 @@ public:
 
 	static Nucleotide Rand();
 	static bool Setup(double pFreqs[], double dG, double dI);
+	
+	static double Iota();
+	static double Gamma();
 
 protected:
 	static double s_dNucCumFreqs[4];

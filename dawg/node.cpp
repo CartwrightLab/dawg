@@ -135,6 +135,16 @@ double Nucleotide::s_dNucFreqs[4] = {0.25, 0.25, 0.25, 0.25};
 double Nucleotide::s_dGamma = 0.0;
 double Nucleotide::s_dIota = 0.0;
 
+double Nucleotide::Gamma()
+{
+	return Nucleotide::s_dGamma;
+}
+
+double Nucleotide::Iota()
+{
+	return Nucleotide::s_dIota;
+}
+
 bool Nucleotide::Setup(double pFreqs[], double dG, double dI)
 {
 	s_dGamma = dG;
