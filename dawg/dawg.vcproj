@@ -140,9 +140,6 @@
 				RelativePath="evolve.cpp">
 			</File>
 			<File
-				RelativePath="lexer.cpp">
-			</File>
-			<File
 				RelativePath="lexer.fl">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -191,9 +188,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="parser.cpp">
-			</File>
-			<File
 				RelativePath="rand.cpp">
 			</File>
 			<File
@@ -210,9 +204,6 @@
 				RelativePath="matrix.h">
 			</File>
 			<File
-				RelativePath="parser.hpp">
-			</File>
-			<File
 				RelativePath="rand.h">
 			</File>
 		</Filter>
@@ -220,9 +211,6 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		</Filter>
-		<File
-			RelativePath=".\makefile">
-		</File>
 		<File
 			RelativePath="readme.txt">
 		</File>
