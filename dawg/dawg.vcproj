@@ -176,9 +176,11 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Bisoning Parser. . ."
-						CommandLine="bison -d -v $(InputName).b -o $(InputName).cpp
+						CommandLine="bison -d $(InputFileName) -o $(InputName).cpp
+move /Y $(InputName).hpp $(InputName).h
+
 "
-						Outputs="$(InputName).cpp; $(InputName).hpp"/>
+						Outputs="$(InputName).cpp;$(InputName).h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">

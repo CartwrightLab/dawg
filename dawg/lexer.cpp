@@ -1510,7 +1510,7 @@ case 10:
 YY_RULE_SETUP
 {
 	yylval.ch = yytext[0];
-	return yytext[0]
+	return yytext[0];
 }
 	YY_BREAK
 case 11:

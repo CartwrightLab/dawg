@@ -1,6 +1,7 @@
 // dawg.cpp
 
 #include "dawg.h"
+#include "tree.h"
 #include "rand.h"
 #include "var.h"
 
@@ -115,13 +116,14 @@ bool Execute()
 	// Variables
 	int nReps  =  1;
 	vector<int> vSeqLen;
-	int nTotalSeqLen = 0;
+	vector<string> vSeqs;
+	int nTotalSeqLen = 0, nTotalRateLen = 0;
 	double dGamma = 0.0, dIota = 0.0;
 	double dNucFreq[4] = {0.25,0.25,0.25,0.25};
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 	vector<double> vdParams;
-	vector<double> vdRates;
-	string ssSeq, ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
+	vector< vector<double> > vvdRates;
+	string ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
 
 	double dLambda[2] = {0.0, 0.0};
 	vector<double> vdInsModel;
@@ -143,22 +145,55 @@ bool Execute()
 
 	if(!DawgVar::GetVector("Tree", vtTrees))
 		return DawgError("No trees specified.");
-	
-	if(!DawgVar::GetVector("Length", vSeqLen))
-		vSeqLen.push_back(100);
-    if(DawgVar::Get("Sequence", ssSeq))
+
+	if(DawgVar::GetVector("Sequence", vSeqs))
 	{
-		if(vSeqLen.size() == 1)
-			vSeqLen[0] = ssSeq.length();
-		nTotalSeqLen = for_each(vSeqLen.begin(), vSeqLen.end(), SumValue<int>());
-		if(nTotalSeqLen != (int)ssSeq.length())
-			return DawgError("The sum of \"Length\" does not equal the length of \"Sequence\".");
+		if(vSeqs.size() < vtTrees.size())
+			return DawgError("\"Sequence\" and \"Tree\" must have the same size.");
+		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
+			nTotalSeqLen += cit->length();
 	}
-	if(vSeqLen.size() > 1 && vSeqLen.size() < vtTrees.size())
-		return DawgError("When using variable section lengths, \"Length\" \
-						 and \"Tree\" must have the same size.");
-	DawgVar::GetVector("Rates", vdRates);  //bug (see below)
-	if(vdRates.size() > 0 && vdRates.size() < (unsigned int)nTotalSeqLen)
+	else if(DawgVar::GetVector("Length", vSeqLen))
+	{
+		if(vSeqLen.size() < vtTrees.size())
+			return DawgError("\"Length\" and \"Tree\" must have the same size.");
+		for(vector<int>::const_iterator cit = vSeqLen.begin(); cit != vSeqLen.end(); ++cit)
+			nTotalSeqLen += *cit;
+	}
+	else
+		vSeqLen.resize(100, vtTrees.size());
+
+	DawgVar *pVar = DawgVar::GetVar("Rates");
+	if(pVar != NULL && pVar->Size())
+	{
+		double dTemp;
+		vvdRates.resize(pVar->Size());
+		if(pVar->IsType(DawgVar::tyVector))
+		{
+			if(pVar->GetAt(0).IsType(DawgVar::tyVector))
+			{
+				// Assume Matrix
+				for(unsigned int u=0; u<pVar->Size(); ++u)
+					pVar->GetAt(u).GetVector(vvdRates[u]);
+			}
+			else
+			{
+				// Assume Vector
+				if(!pVar->GetVector(vvdRates[0]))
+					return DawgError("Error reading \"Rates\" vector.");
+			}
+		}
+		else if(pVar->Get(dTemp))
+		{
+			vvdRates[0].push_back(dTemp);
+		}
+		else
+			return DawgError("Error reading \"Rates\" vector.");
+		for(vector< vector<double> >::const_iterator cit = vvdRates.begin();
+			cit != vvdRates.end(); ++cit)
+			nTotalRateLen += cit->size();
+	}
+	if(vvdRates.size() > 0 && nTotalRateLen < nTotalSeqLen)
 		return DawgError("\"Rates\" vector is too small");
 
     DawgVar::Get("Reps", nReps);
@@ -181,11 +216,11 @@ bool Execute()
 		return DawgError("\"Freqs\" specified incorrectly.");
 	
 	DawgVar::Get("GapSingleChar", bGapSingle);
-	
+
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
 	if(nRes == 1)
 		dLambda[1] = dLambda[0];
-	DawgVar* pVar = DawgVar::GetVar("GapParams");
+	pVar = DawgVar::GetVar("GapParams");
 	if(pVar == NULL || pVar->Size() == 0)
 	{
 		if(nRes)
@@ -221,9 +256,12 @@ bool Execute()
 		mt_srand(uSeed, 4);
 	}
 	else
-	{
 		mt_srand((unsigned long*)&vnSeed[0], vnSeed.size());
-	}
+	
+	Tree myTree;
+	for(vector<NewickNode*>::const_iterator treeit = vtTrees.begin(); treeit != vtTrees.end(); ++treeit)
+		myTree.ProcessTree(*treeit);
+
 	if(ssModel == "GTR")
 	{
 		if(vdParams.size() < 6)
@@ -284,16 +322,6 @@ bool Execute()
 	}
 	else
 		return DawgError("Unknown Model, \"%s\"", ssModel.c_str());
-
-	if(!Nucleotide::Setup(dNucFreq, dGamma, dIota))
-		return DawgError("Invalid G+I rates");
-
-	if(!Node::s_procSubst.Setup(dNucFreq, dRevParams))
-		return DawgError("Invalid substitution model parameters.");
-	
-	//if(!Node::Scale(dScale))
-	//	return DawgError("Invalid scaling parameter");
-	Node::Scale(dScale);
 	
 	IndelModel::Params paramsDel, paramsIns;
 	paramsIns.ssModel = ssGapModel[0];
@@ -302,8 +330,10 @@ bool Execute()
 	paramsDel.ssModel = ssGapModel[1];
 	paramsDel.dLambda = dLambda[1];
 	paramsDel.vdModel = vdDelModel;
-	if(!Node::s_procIndel.Setup(paramsIns, paramsDel))
 	
+	myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
+		dGamma, dIota, dScale);
+	myTree.SetupRoot(vSeqs, vSeqLen, vvdRates);
 	
    	if(ssBlock.empty() && !ssBlockFile.empty())
 	{
@@ -331,36 +361,20 @@ bool Execute()
 	else
 		return DawgError("Unable to open \"%s\" for output.", ssFile.c_str());
 	DawgIniOutput(*pOut);
-	//Evolve
+	
 	while(nReps--)
 	{
-		vector<double>::iterator dit = vdRates.begin();
-		for(unsigned int uTree = 0; uTree < vtTrees.size(); ++uTree)
-		{
-			Node *pTree = vtTrees[uTree];
-			Seq &rSeq = pTree->Sequence();
-			int nSeqLen = (vSeqLen.size() == 1) ? vSeqLen[0]/vtTrees.size() : vSeqLen[uTree];
 
-			rSeq.resize(nSeqLen);
-			generate(rSeq.begin(), rSeq.end(), Nucleotide::Rand);
-			if(!ssSeq.empty())
-			{
-				int nIndex = 0;
-				for(Seq::iterator nit = rSeq.begin(); nit != rSeq.end(); ++nit)
-					nit->m_nuc = CharToNuc(ssSeq[nIndex++]);
-			}
-			if(vdRates.size() > 0)
-			{
-				if(vdRates.size() < rSeq.size())
-					return DawgError("Specified rate vector is smaller than sequence length.");
-				for(Seq::iterator nit = rSeq.begin(); nit != rSeq.end(); ++nit)
-					nit->m_dRate = *dit++;
-			}
-			pTree->ResetGaps();
-			pTree->Evolve();
-		}
-		SaveSequences(*pOut, (const Node**)&(vtTrees[0]), vtTrees.size());
+		//Evolve
+		myTree.Evolve();
+
+		//SaveOutput
+		Tree::Alignment aln;
+		myTree.Align(aln);
+		if(!SaveAlignment(*pOut, aln))
+			return DawgError("Error saving alignment.");
 	}
+
 	return true;
 }
 

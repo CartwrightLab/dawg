@@ -108,8 +108,8 @@ public:
 		return u;		
 	}
 
-	template<class _T>
-	bool GetVector(std::vector<_T> &rVec)
+	template<class _T, class _A>
+	bool GetVector(std::vector<_T, _A> &rVec)
 	{
 		_T tTemp;
 		rVec.clear();
@@ -129,8 +129,8 @@ public:
 			return 0;
 		return pVar->GetArray(ar, uSize);
 	}
-	template<class _T>
-	static bool GetVector( const std::string &ssKey, std::vector<_T> &rVec)
+	template<class _T, class _A >
+	static bool GetVector( const std::string &ssKey, std::vector<_T, _A> &rVec)
 	{
 		DawgVar* pVar = GetVar(ssKey);
 		if(pVar == NULL)

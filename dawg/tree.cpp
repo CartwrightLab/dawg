@@ -43,16 +43,9 @@ Sequence::Sequence()
 
 }
 
-Sequence::Sequence(unsigned long uSize) : m_vDNA(uSize), m_vHistory(uSize, '.')
+Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), '.')
 {
-	generate(m_vDNA.begin(), m_vDNA.end(), Nucleotide::Rand);
-}
 
-Sequence::Sequence(std::string ssDNA) : m_vDNA(ssDNA.length()), m_vHistory(ssDNA.length(), '.')
-{
-	generate(m_vDNA.begin(), m_vDNA.end(), Nucleotide::Rand);
-	for(unsigned long u = 0; u < m_vDNA.size(); ++u)
-		m_vDNA[u].m_nuc = CharToNuc(ssDNA[u]);
 }
 
 unsigned long Sequence::GapPos(unsigned long uPos) const
@@ -71,14 +64,13 @@ unsigned long Sequence::GapPos(unsigned long uPos) const
 	return v;
 }
 
-unsigned long Sequence::Insert(unsigned long uPos, unsigned long uSize)
+unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd)
 {
+	unsigned long uSize = (unsigned long)(itEnd-itBegin);
 	if(uSize == 0 || uPos > m_vDNA.size())
 		return 0;
 	m_vHistory.insert(m_vHistory.begin()+GapPos(uPos), uSize, '+');
-	vector<Nucleotide> seq(uSize);
-	generate(seq.begin(), seq.end(), Nucleotide::Rand);
-	m_vDNA.insert(m_vDNA.begin()+uPos, seq.begin(), seq.end());
+	m_vDNA.insert(m_vDNA.begin()+uPos, itBegin, itEnd);
 	return uSize;
 }
 
@@ -115,6 +107,16 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 	return uSize;
 }
 
+void Sequence::Append(const Sequence &seq)
+{
+		m_vDNA.insert(m_vDNA.end(), seq.m_vDNA.begin(), seq.m_vDNA.end());
+		m_vHistory.insert(m_vHistory.end(), seq.m_vHistory.begin(), seq.m_vHistory.end());
+}
+
+void Sequence::ResetHistory()
+{
+	m_vHistory.assign(m_vHistory.size(), '.');
+}
 
 ////////////////////////////////////////////////////////////
 //  class Tree::Node
@@ -128,8 +130,11 @@ unsigned long Tree::Node::SeqLength() const
 	return uRet;
 }
 
-unsigned long Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
+unsigned long Tree::Node::Insert(unsigned long uPos,
+			Sequence::DNAVec::const_iterator itBegin, Sequence::DNAVec::const_iterator itEnd)
 {
+	unsigned long uSize = (unsigned long)(itEnd-itBegin);
+
 	if(uSize == 0)
 		return 0;	
 	vector<Sequence>::iterator it;
@@ -138,7 +143,7 @@ unsigned long Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 	if( it == m_vSections.end())
 		return 0;
 	else if(uPos < it->Length())
-		return it->Insert(uPos, uSize);
+		return it->Insert(uPos, itBegin, itEnd);
 	else
 	{
 		// Insertion occurs at a gap between sections
@@ -150,10 +155,10 @@ unsigned long Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 			vTemp.push_back(rand_ulong(uSize));
 		vTemp.push_back(uSize);
 		sort(vTemp.begin(), vTemp.end());
-		unsigned long uTemp = it->Insert(uPos, vTemp[1]-vTemp[0]);
+		unsigned long uTemp = it->Insert(uPos, itBegin+vTemp[0], itBegin+vTemp[1]);
 		int i=1;
 		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt, ++i)
-			uTemp += jt->Insert(0, vTemp[i+1]-vTemp[i]);
+			uTemp += jt->Insert(0, itBegin+vTemp[i], itBegin+vTemp[i+1]);
 		return uTemp;
 	}
 }
@@ -170,40 +175,57 @@ unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
 	return it->Delete(uPos, uSize);
 }
 
+void Tree::Node::Flatten(Sequence& seq) const
+{
+	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
+		cit != m_vSections.end(); ++cit)
+		seq.Append(*cit);
+}
+
+
 ////////////////////////////////////////////////////////////
 //  class Tree
 ////////////////////////////////////////////////////////////
 
 void Tree::ProcessTree(NewickNode* pNode)
 {
-	ProcessNewickNode(pNode);
+	ProcessNewickNode(pNode, m_map.find("R()()T"));
 	m_nSec++;
 }
 
-void Tree::ProcessNewickNode(NewickNode* pNode)
+void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 {
-	// NOT THREAD SAFE!!!!!!
-	static vector<Node::Handle> vStack;
-
 	if(pNode->m_pSib.get())
-		ProcessNewickNode(pNode->m_pSib.get());
-	
-	Node::Handle hAnc = (vStack.size()) ? vStack.back() : m_map.end();
+		ProcessNewickNode(pNode->m_pSib.get(), hAnc);
+
 	Node& node = m_map[pNode->m_ssLabel];
 	node.m_mBranchLens[hAnc] = pNode->m_dLen;
 	node.m_vAncestors.resize(m_nSec+1, m_map.end());
 	node.m_vAncestors[m_nSec] = hAnc;
 			
 	if(pNode->m_pSub.get())
-	{
-		vStack.push_back(m_map.find(pNode->m_ssLabel));
-		ProcessNewickNode(pNode->m_pSub.get());
-		vStack.pop_back();
-	}
+		ProcessNewickNode(pNode->m_pSub.get(), m_map.find(pNode->m_ssLabel));
 }
 
 void Tree::Evolve()
 {
+	m_map.clear();
+
+	// Setup Root
+	Node& rNode = m_map["R()()T"];
+	rNode.m_bTouched = true;
+	for(vector<Sequence::DNAVec>::iterator it = m_vDNASeqs.begin();
+		it != m_vDNASeqs.end(); ++it)
+	{
+		rNode.m_vSections.push_back(Sequence(*it));
+		for(unsigned int u = 0;u<it->size();++u)
+		{
+			if((*it)[u].m_dRate < 0.0)
+				(*it)[u].m_dRate = RandomRate();
+			if((*it)[u].m_nuc >= 4)
+				(*it)[u].m_nuc = RandomNuc();
+		}
+	}
 	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
 		Evolve(it->second);
 }
@@ -216,20 +238,17 @@ void Tree::Evolve(Node &rNode)
 	map<Node::Handle, Node> mapSeqs;
 	for(unsigned long a = 0; a < rNode.m_vAncestors.size(); ++a)
 	{
-		if(rNode.m_vAncestors[a] == m_map.end())
+		if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
 		{
-			// no ancestor need to create one
+			// Touch Ancestor, make sure it exists
+			Evolve(rNode.m_vAncestors[a]->second);
+			// Copy ancestor to temporary location
+			mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
+			// Evolve temporary location
+			Evolve(mapSeqs[rNode.m_vAncestors[a]], rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 		}
-		else
-		{
-			if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
-			{
-				Evolve(rNode.m_vAncestors[a]->second);
-				mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
-				Evolve(mapSeqs[rNode.m_vAncestors[a]], rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
-			}
-			rNode.m_vSections.push_back(mapSeqs[rNode.m_vAncestors[a]].m_vSections[a]);
-		}
+		// Assemble final sequence
+		rNode.m_vSections.push_back(mapSeqs[rNode.m_vAncestors[a]].m_vSections[a]);
 	}
 }
 
@@ -286,7 +305,10 @@ void Tree::Evolve(Node &rNode, double dTime)
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
 			//Insertion
-			uLength += rNode.Insert(rand_ulong(uLength), m_pInsertionModel->RandSize());
+			Sequence::DNAVec dna(m_pInsertionModel->RandSize());
+			for(Sequence::DNAVec::iterator it = dna.begin(); it != dna.end(); ++it)
+				*it = RandomNucleotide();
+			uLength += rNode.Insert(rand_ulong(uLength), dna.begin(), dna.end() );
 		}
 		else
 		{
@@ -300,8 +322,11 @@ void Tree::Evolve(Node &rNode, double dTime)
 	}
 }
 
-bool Tree::SetupSubst(double pFreqs[], double pSubs[])
+bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
+	const IndelModel::Params& rIns, const IndelModel::Params& rDel,
+	double dGamma, double dIota, double dScale)
 {
+	// Verifiy Parameters
 	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
 		return DawgError("Nucleotide frequences need to be positive.");
 	pFreqs[3] = 1.0-pFreqs[0]-pFreqs[1]-pFreqs[2];
@@ -310,6 +335,23 @@ bool Tree::SetupSubst(double pFreqs[], double pSubs[])
 	if(pSubs[0] < 0.0 || pSubs[1] < 0.0 || pSubs[2] < 0.0
 		|| pSubs[3] < 0.0 || pSubs[4] < 0.0 || pSubs[5] < 0.0)
 		return DawgError("Substitution rates need to be positive.");
+	if(rIns.dLambda < 0.0)
+		return DawgError("Lambda (Ins) must not be negative.");
+	if(rDel.dLambda < 0.0)
+		return DawgError("Lambda (Del) must not be negative.");
+	if(dGamma < 0.0)
+		return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", dGamma);
+	else if(0.0 > dIota || dIota > 1.0)
+		return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", dIota);
+	if(dScale <= 0.0)
+		return DawgError("Scale must be positive.");
+	
+	// Setup Rate Parameters
+	m_dGamma = dGamma;
+	m_dIota = dIota;
+
+	// Setup Scale
+	m_dScale = dScale;
 
 	// Setup Symetric Matrix
 	Matrix44 matQ(Matrix44::s_Zero);
@@ -332,7 +374,7 @@ bool Tree::SetupSubst(double pFreqs[], double pSubs[])
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
 	matQ(3,3) = -(matQ(3,0)+matQ(3,1)+matQ(3,2));
-	matQ.Scale(matQ, -1.0/((1.0-Nucleotide::Iota())*(vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
+	matQ.Scale(matQ, -1.0/((1.0-m_dIota)*(vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
 		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3))));
 	
 	// Store Scaled Q Matrix
@@ -356,14 +398,8 @@ bool Tree::SetupSubst(double pFreqs[], double pSubs[])
 	m_matV.Scale(vecE, m_matV);
 	m_matU.Transpose();
 	m_matU.Scale(m_matU, vecD);
-	return true;
-}
 
-bool Tree::SetupIndel(const IndelModel::Params& rIns, const IndelModel::Params& rDel)
-{
 	m_dLambdaIns = rIns.dLambda;
-	if(m_dLambdaIns < 0.0)
-		return DawgError("Lambda (Ins) must not be negative.");
 	if(rIns.ssModel == "NB")
 	{
 		try {m_pInsertionModel.reset(new NegBnModel(rIns.vdModel));}
@@ -376,8 +412,6 @@ bool Tree::SetupIndel(const IndelModel::Params& rIns, const IndelModel::Params& 
 	}
 
 	m_dLambdaDel = rDel.dLambda;
-	if(m_dLambdaDel < 0.0)
-		return DawgError("Lambda (Del) must not be negative.");
 	if(rDel.ssModel == "NB")
 	{
 		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}
@@ -395,64 +429,165 @@ bool Tree::SetupIndel(const IndelModel::Params& rIns, const IndelModel::Params& 
 	return true;
 }
 
-////////////////////////////////////////////////////////////
-//  class Nucleotide
-////////////////////////////////////////////////////////////
-
-double Nucleotide::s_dNucCumFreqs[4] = {0.25, 0.50, 0.75, 1.0};
-double Nucleotide::s_dNucFreqs[4] = {0.25, 0.25, 0.25, 0.25};
-double Nucleotide::s_dGamma = 0.0;
-double Nucleotide::s_dIota = 0.0;
-
-double Nucleotide::Gamma()
+bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vLens,
+					   const std::vector<std::vector<double> > &vRates)
 {
-	return Nucleotide::s_dGamma;
-}
-
-double Nucleotide::Iota()
-{
-	return Nucleotide::s_dIota;
-}
-
-bool Nucleotide::Setup(double pFreqs[], double dG, double dI)
-{
-	s_dGamma = dG;
-	s_dIota = dI;
-	if(s_dGamma < 0.0)
-		return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", s_dGamma);
-	else if(0.0 > s_dIota || s_dIota > 1.0)
-		return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", s_dIota);
-
-	if(pFreqs[0] < 0 || pFreqs[1] < 0 || pFreqs[2] < 0 || pFreqs[3] < 0)
-		return DawgError("Nucleotide frequences need to be positive.");
-	memcpy(s_dNucFreqs, pFreqs, 4*sizeof(double));
-	s_dNucCumFreqs[0] = pFreqs[0];
-	s_dNucCumFreqs[1] = pFreqs[1]+s_dNucCumFreqs[0];
-	s_dNucCumFreqs[2] = pFreqs[2]+s_dNucCumFreqs[1];
-	s_dNucCumFreqs[3] = 1.0;
-	if(s_dNucCumFreqs[0] > 1.0 || s_dNucCumFreqs[1] > 1.0 || s_dNucCumFreqs[2] > 1.0)
-		return DawgError("Nucleotide frequences need to sum to 1.");
+	m_vDNASeqs.clear();
+	if(vSeqs.size())
+	{	
+		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
+		{
+			Sequence::DNAVec dna(cit->size(), Nucleotide(5, -1.0));
+			for(unsigned int u=0; u< cit->size(); ++u)
+				dna[u].m_nuc = CharToNuc(cit->at(u));
+			m_vDNASeqs.push_back(dna);
+		}
+	}
+	else
+	{
+		for(vector<int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
+			m_vDNASeqs.push_back(Sequence::DNAVec(*cit, Nucleotide(5, -1.0)));
+	}
+	if(vRates.size())
+	{
+		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
+		{
+			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
+				m_vDNASeqs[u][v].m_dRate = vRates[u][v];
+		}
+	}
 	return true;
 }
 
-Nucleotide Nucleotide::Rand()
-{
-	Nuc n;
-	double d = rand_real();
-	if(d <= s_dNucCumFreqs[0])
-		n = 0; // A
-	else if(d <= s_dNucCumFreqs[1])
-		n = 1; // C
-	else if(d <= s_dNucCumFreqs[2])
-		n = 2; // G
-	else
-		n = 3; // T
+//bool Tree::SetupRoot(const std::vector<std::string> &vData, const std::vector<double> &vRates)
+//{
+//	Node & rNode = m_map["R()()T"];
+//	rNode.m_bTouched = true;
+//	for(vector<string>::const_iterator cit = vData.begin();
+//		cit != vData.end(); ++cit)
+//	{
+//		Sequence::DNAVec dna;
+//		for(unsigned int j=0;j<cit->length();++j)
+//		{
+//			Nucleotide base = RandomNucleotide();
+//			base.m_nuc = CharToNuc(cit->at(j));
+//			if(!vRates.empty())	
+//				base.m_dRate = vRates[j];
+//			dna.push_back(base);
+//		}
+//		rNode.m_vSections.push_back(Sequence(dna));
+//	}
+//	return true;
+//}
+//
+//bool Tree::SetupRoot(const std::vector<int> &vData, const std::vector<double> &vRates)
+//{
+//	Node & rNode = m_map["R()()T"];
+//	rNode.m_bTouched = true;
+//	for(vector<int>::const_iterator cit = vData.begin();
+//		cit != vData.end(); ++cit)
+//	{
+//		Sequence::DNAVec dna;
+//		for(int j=0;j<*cit;++j)
+//		{
+//			Nucleotide base = RandomNucleotide();
+//			if(!vRates.empty())	
+//				base.m_dRate = vRates[j];
+//			dna.push_back(base);
+//		}
+//		rNode.m_vSections.push_back(Sequence(dna));
+//	}
+//	return true;
+//}
 
-	if(s_dIota > DBL_EPSILON && rand_bool(s_dIota))
-		d = 0.0;  // Site Invariant
-	else if(s_dGamma > DBL_EPSILON)
-		d = rand_gamma1(s_dGamma); // Gamma with mean 1.0 and var of g_dGamma
+Nucleotide::Nuc Tree::RandomNuc() const
+{
+	double d = rand_real();
+	if(d <= m_dNucCumFreqs[0])
+		return 0; // A
+	else if(d <= m_dNucCumFreqs[1])
+		return 1; // C
+	else if(d <= m_dNucCumFreqs[2])
+		return 2; // G
 	else
-		d = 1.0;
-	return Nucleotide(n, d);
+		return 3; // T
 }
+
+double Tree::RandomRate() const
+{
+	if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
+		return 0.0;  // Site Invariant
+	else if(m_dGamma > DBL_EPSILON)
+		return rand_gamma1(m_dGamma); // Gamma with mean 1.0 and var of m_dGamma
+	else
+		return 1.0;
+}
+
+// Insertion: +
+// Deletion:  -
+// Deleted Insertion: =
+// Root Nuc: .
+
+void Tree::Align(Alignment &aln) const
+{
+	// construct a table of flattened sequences
+	vector<Sequence::HistoryVec> vHisTable;
+	vector<Sequence::DNAVec> vDnaTable;
+
+	for(Node::Map::const_iterator cit = m_map.begin();
+		cit != m_map.end(); ++cit)
+	{
+		Sequence s;
+		cit->second.Flatten(s);
+		vHisTable.push_back(s.History());
+		vDnaTable.push_back(s.DNA());
+	}
+
+	// Alignment rules:
+	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
+	// Deletion & Original Nucleotide : w/ del, original nucl
+
+	bool bGo = true;
+	for(unsigned int uCol = 0; bGo; uCol++)
+	{
+		bGo = false;
+
+		// Test to see if gaps need to be inserted at this column
+		for(vector<Sequence::HistoryVec>::const_iterator cit = vHisTable.begin();
+			cit != vHisTable.end(); ++cit)
+		{
+			if(uCol >= cit->size())
+				continue;
+			bGo = true;
+			if(cit->at(uCol) == '+' || cit->at(uCol) == '=')
+			{
+				for(vector<Sequence::HistoryVec>::iterator it = vHisTable.begin();
+					it != vHisTable.end(); ++it)
+				{
+					if(uCol >= it->size())
+						it->resize(uCol+1, '-');
+					else if( it->at(uCol) != '+' && it->at(uCol) != '=')
+						it->insert(it->begin()+uCol, 1, '-');
+				}
+				cit = vHisTable.end();
+			}
+		}
+	}
+	unsigned int u = 0;
+	for(Node::Map::const_iterator cit = m_map.begin();
+		cit != m_map.end(); ++cit)
+	{
+		Sequence::HistoryVec& his = vHisTable[u];
+		Sequence::DNAVec &dna = vDnaTable[u];
+		string& ss = aln[cit->first];
+		ss.resize(his.size(), '-');
+		for(unsigned int uh = 0, ud=0; uh < his.size(); ++uh)
+		{
+			if(his[uh] == '.' || his[uh] == '+')
+				ss[uh] = NucToChar(dna[ud++].m_nuc);
+		}
+	}
+
+}
+
+

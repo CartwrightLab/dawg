@@ -5,18 +5,29 @@
 #include "indel.h"
 #include "matrix.h"
 
-class Nucleotide;
+class Nucleotide
+{
+public:
+	typedef unsigned char Nuc;
+
+	Nucleotide() : m_nuc(5), m_dRate(1.0) { }
+	Nucleotide(Nuc nuc, double rate) : m_nuc(nuc), m_dRate(rate) { }
+
+	double m_dRate; // 0.0 means invarant
+	Nuc    m_nuc;
+};
 
 class Sequence
 {
 public:
-	Sequence();
-	Sequence(unsigned long uSize);
-	Sequence(std::string ssDNA);
+	typedef std::vector<Nucleotide> DNAVec;
+	typedef std::vector<char> HistoryVec;
 
+	Sequence();
+	Sequence(const DNAVec &dna);
 	unsigned long GapPos(unsigned long uPos) const;
 	
-	unsigned long Insert(unsigned long uPos, unsigned long uSize);
+	unsigned long Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd);
 	unsigned long Delete(unsigned long uPos, unsigned long uSize);
 
 	// Access the dna sequence
@@ -24,10 +35,17 @@ public:
 	const Nucleotide& operator [](unsigned long uPos) const { return m_vDNA[uPos]; }
 
 	unsigned long Length() const { return m_vDNA.size(); }
+	
+	const DNAVec& DNA() const { return m_vDNA; }
+	const HistoryVec& History() const {return m_vHistory; } 
+	
+	void Append(const Sequence& seq);
+
+	void ResetHistory();
 
 private:
-	std::vector<Nucleotide> m_vDNA;
-	std::vector<char> m_vHistory;
+	DNAVec		m_vDNA;
+	HistoryVec	m_vHistory;
 };
 
 class NewickNode {
@@ -56,13 +74,24 @@ public:
 		bool m_bTouched;
 		Node() : m_bTouched(false) { }
 		unsigned long SeqLength() const;
-		unsigned long Insert(unsigned long uPos, unsigned long uSize);
+		unsigned long Insert(unsigned long uPos,
+			Sequence::DNAVec::const_iterator itBegin,
+			Sequence::DNAVec::const_iterator itEnd);
 		unsigned long Delete(unsigned long uPos, unsigned long uSize);
+		void Flatten(Sequence& seq) const;
 	};
+	typedef std::map<std::string, std::string> Alignment;
 	
-	bool SetupSubst(double pFreqs[], double pSubs[]);
-	bool SetupIndel(const IndelModel::Params& rIns, const IndelModel::Params& rDel);
-	
+	bool SetupEvolution(double pFreqs[], double pSubs[],
+		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
+		double dGamma, double dIota, double dScale);
+	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
+		const std::vector<std::vector<double> > &vRates);
+
+	double RandomRate() const;
+	Nucleotide::Nuc RandomNuc() const;
+	Nucleotide RandomNucleotide() const { return Nucleotide(RandomNuc(), RandomRate()); }
+
 	Tree() : m_nSec(0) {}
 	
 	void Evolve();
@@ -70,16 +99,21 @@ public:
 	
 	const Node::Map& GetMap() const { return m_map; }
 
+	void Align(Alignment &aln) const;
+
 protected:
-	void ProcessNewickNode(NewickNode* pNode);
+	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);
 	void Evolve(Node &rNode, double dTime);
 	void Evolve(Node &rNode);
 
 private:
 	int m_nSec;
+	std::vector< Sequence::DNAVec > m_vDNASeqs;
 	Node::Map m_map;
-	std::vector<unsigned int> m_vuSecLength;
 	double m_dScale;
+
+	double m_dGamma;
+	double m_dIota;
 
 	double m_dOldTime;
 	double m_dFreqs[4];
@@ -99,34 +133,10 @@ private:
 	LinearFunc m_funcRateSum;
 };
 
-bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
+inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
 {
 	return &*A < &*B;
 }
-
-class Nucleotide
-{
-public:
-	typedef unsigned char Nuc;
-
-	Nucleotide() : m_nuc(5), m_dRate(1.0) { }
-	Nucleotide(Nuc nuc, double rate) : m_nuc(nuc), m_dRate(rate) { }
-
-	double m_dRate; // 0.0 means invarant
-	Nuc    m_nuc;
-
-	static Nucleotide Rand();
-	static bool Setup(double pFreqs[], double dG, double dI);
-	
-	static double Iota();
-	static double Gamma();
-
-protected:
-	static double s_dNucCumFreqs[4];
-	static double s_dNucFreqs[4];
-	static double s_dGamma;
-	static double s_dIota;
-};
 
 inline Nucleotide::Nuc CharToNuc(char ch)
 {
@@ -151,5 +161,7 @@ inline char NucToChar(Nucleotide::Nuc n)
 	static char cs[] = "ACGT-?";
 	return (n > 4) ? '?' : cs[n];
 }
+
+bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln);
 
 #endif //DAWG_TREE_H
