@@ -80,20 +80,15 @@ inline bool IsIns(char ch)
 	return false;
 }
 
+// return the History position which corresponds to the sequence position
 unsigned long Sequence::HisPos(unsigned long uPos) const
 {
 	vector<char>::const_iterator it=m_vHistory.begin();
-	unsigned long v=0;
-	//skip leading 'deletions'
-	for(;IsDel(*it) && it != m_vHistory.end(); ++it)
-		v++;
-	for(; uPos && it != m_vHistory.end(); ++it)
-	{
-		v++;
-		if(!IsDel(*it))
-			uPos--;
-	}
-	return v;
+	do {
+		// Skip deletions in the history
+		while(IsDel(*it)) { it++; }
+	} while(uPos--)
+	return (unsigned long)(it-m_vHistory.begin());
 }
 
 unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegin, DNAVec::const_iterator itEnd)
