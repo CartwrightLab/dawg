@@ -138,3 +138,47 @@ AC_DEFUN([AX_CFLAGS_GCC_OPTION],[ifelse(m4_bregexp([$2],[-]),-1,
 
 AC_DEFUN([AX_CXXFLAGS_GCC_OPTION],[ifelse(m4_bregexp([$2],[-]),-1,
 [AX_CXXFLAGS_GCC_OPTION_NEW($@)],[AX_CXXFLAGS_GCC_OPTION_OLD($@)])])
+
+dnl Available from the GNU Autoconf Macro Archive at:
+dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_member_templates.html
+dnl
+AC_DEFUN([AC_CXX_MEMBER_TEMPLATES],
+[AC_CACHE_CHECK(whether the compiler supports member templates,
+ac_cv_cxx_member_templates,
+[AC_LANG_PUSH(C++)
+ AC_TRY_COMPILE([
+template<class T, int N> class A
+{ public:
+  template<int N2> A<T,N> operator=(const A<T,N2>& z) { return A<T,N>(); }
+};],[A<double,4> x; A<double,7> y; x = y; return 0;],
+ ac_cv_cxx_member_templates=yes, ac_cv_cxx_member_templates=no)
+ AC_LANG_POP(C++)
+])
+if test "$ac_cv_cxx_member_templates" = yes; then
+  AC_DEFINE(HAVE_MEMBER_TEMPLATES,,[define if the compiler supports member templates])
+fi
+])
+
+dnl Available from the GNU Autoconf Macro Archive at:
+dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_member_templates_outside_class.html
+dnl
+AC_DEFUN([AC_CXX_MEMBER_TEMPLATES_OUTSIDE_CLASS],
+[AC_CACHE_CHECK(whether the compiler supports member templates outside the class declaration,
+ac_cv_cxx_member_templates_outside_class,
+[AC_LANG_PUSH(C++)
+ AC_TRY_COMPILE([
+template<class T, int N> class A
+{ public :
+  template<int N2> A<T,N> operator=(const A<T,N2>& z);
+};
+template<class T, int N> template<int N2>
+A<T,N> A<T,N>::operator=(const A<T,N2>& z){ return A<T,N>(); }],[
+A<double,4> x; A<double,7> y; x = y; return 0;],
+ ac_cv_cxx_member_templates_outside_class=yes, ac_cv_cxx_member_templates_outside_class=no)
+ AC_LANG_POP(C++)
+])
+if test "$ac_cv_cxx_member_templates_outside_class" = yes; then
+  AC_DEFINE(HAVE_MEMBER_TEMPLATES_OUTSIDE_CLASS,,
+            [define if the compiler supports member templates outside the class declaration])
+fi
+])
