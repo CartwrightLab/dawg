@@ -347,7 +347,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			unsigned long ul = m_pInsertionModel->RandSize();
 			unsigned long uPos = rand_ulong(uLength);
 			Sequence::DNAVec dna;
-			for(unsigned int uc = 0; uc < m_uFrame*ul; ++ul)
+			for(unsigned int uc = 0; uc < m_uWidth*ul; ++ul)
 				dna.push_back(RandomNucleotide(uc));
 			uLength += rNode.Insert(uPos, dna.begin(), dna.end());
 		}
