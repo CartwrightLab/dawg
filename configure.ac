@@ -38,6 +38,7 @@ AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getpid _getpid copysign _copysign])
+dnl AC_CHECK_FUNCS([floor pow sqrt])
 
 AC_LANG_POP(C++)
 

@@ -84,11 +84,11 @@ public:
 #	endif
 #endif
 
-#ifndef HAVE_MALLOC
+#if !HAVE_MALLOC
 void *rpl_malloc(size_t n);
 #endif
 
-#ifndef HAVE_REALLOC
+#if !HAVE_REALLOC
 void *rpl_realloc(void *p, size_t n);
 #endif
 

@@ -427,7 +427,7 @@ bool DawgError(const char* csErr, ...)
 	fprintf(stderr, "Error: ");
 	va_list args;
 	va_start(args, csErr);
-#if defined(HAVE_VFPRINTF)
+#if defined(HAVE_VPRINTF)
 	vfprintf(stderr, csErr, args);
 #elif defined(HAVE_DOPRNT)
 	_doprnt(csErr, args, stderr);
@@ -439,22 +439,4 @@ bool DawgError(const char* csErr, ...)
 	return false;
 }
 
-// Compatibility functions
-
-#ifndef HAVE_MALLOC
-#undef malloc
-void *rpl_malloc(size_t n)
-{
-	if(n == 0) n = 1;
-	return malloc(n);
-}
-#endif
-
-#ifndef HAVE_REALLOC
-#undef realloc
-void *rpl_realloc(void *p, size_t n)
-{
-	if(n == 0) n = 1;
-	return realloc(p,n);
-}
 #endif
