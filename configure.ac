@@ -2,7 +2,7 @@ m4_define([dawg_rev], [m4_esyscmd([svnversion -n .])])
 AC_INIT([dawg], [1.1.0.dawg_rev()], [http://scit.us/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
-AC_PREREQ(2.59)
+AC_PREREQ(2.56)
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
@@ -43,9 +43,16 @@ AC_CHECK_FUNCS([getpid _getpid copysign _copysign])
 dnl AC_CHECK_FUNCS([floor pow sqrt])
 
 AX_CREATE_STDINT_H
-AX_CXXFLAGS_WARN_ALL_ANSI
-AX_CFLAGS_WARN_ALL_ANSI
-AX_CFLAGS_AIX_OPTION(-qweaksymbol)
+AX_CXXFLAGS_WARN_ALL
+AX_CFLAGS_WARN_ALL
+
+case "$CXX" in
+ xlC*)
+	AX_CXXFLAGS_AIX_OPTION(-qweaksymbol) ;;
+ *)
+	;;
+esac
+ 
 
 AC_LANG_POP(C++)
 

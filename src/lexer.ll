@@ -7,8 +7,6 @@
 #include "var.h"
 #include "parser.h"
 
-#pragma warning(disable: 4127 4244)
-
 using namespace std;
 struct State
 {

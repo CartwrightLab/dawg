@@ -135,8 +135,6 @@ inline double rand_gamma_big(double a)
 	return x;
 }
 
-;
-
 // Draw from Gamma with mean 'a' and var 'a'
 inline double rand_gamma(double a)
 {

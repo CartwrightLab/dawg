@@ -92,6 +92,10 @@ void DawgVar::Unset()
 			delete m_pvData;  break;
 		case tyTree:
 			delete m_ptrData; break;
+		case tyNone:
+		case tyBool:
+		case tyNumber:
+			break;
 	}
 	m_tyType = tyNone;
 }

@@ -7,9 +7,6 @@
 #	include "config.h"
 #endif
 
-#pragma warning(disable: 4702)
-
-
 #ifndef HAVE_GETPID
 #	ifdef HAVE__GETPID
 #		define getpid _getpid

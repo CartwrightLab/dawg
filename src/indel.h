@@ -21,6 +21,7 @@ public:
 	};
 	virtual size_type RandSize() const = 0;
 	virtual double MeanSize() const = 0;
+	virtual ~IndelModel() { }
 };
 
 // Negative Binomial Model
