@@ -517,7 +517,7 @@ s,@AMTAR@,${SHELL} /home/reed/dawg-unix/config/missing --run tar,;t t
 s,@am__tar@,${AMTAR} chof - "$$tardir",;t t
 s,@am__untar@,${AMTAR} xf -,;t t
 s,@CXX@,g++,;t t
-s,@CXXFLAGS@,-g -O2,;t t
+s,@CXXFLAGS@,-g -O2 -mmmx,;t t
 s,@LDFLAGS@,,;t t
 s,@CPPFLAGS@,,;t t
 s,@ac_ct_CXX@,g++,;t t
@@ -890,7 +890,18 @@ ${ac_dA}HAVE_REALLOC${ac_dB}HAVE_REALLOC${ac_dC}1${ac_dD}
 ${ac_dA}PROTOTYPES${ac_dB}PROTOTYPES${ac_dC}1${ac_dD}
 ${ac_dA}__PROTOTYPES${ac_dB}__PROTOTYPES${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_VPRINTF${ac_dB}HAVE_VPRINTF${ac_dC}1${ac_dD}
+${ac_dA}HAVE_GETPID${ac_dB}HAVE_GETPID${ac_dC}1${ac_dD}
+${ac_dA}HAVE__GETPID${ac_dB}HAVE__GETPID${ac_dC}1${ac_dD}
 ${ac_dA}USE_MMX${ac_dB}USE_MMX${ac_dC}1${ac_dD}
+CEOF
+  sed -f $tmp/defines.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  cat >$tmp/defines.sed <<CEOF
+/^[	 ]*#[	 ]*define/!b
+t clr
+: clr
 ${ac_dA}HAVE_MMINTRIN_H${ac_dB}HAVE_MMINTRIN_H${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
@@ -939,7 +950,18 @@ ${ac_uA}HAVE_REALLOC${ac_uB}HAVE_REALLOC${ac_uC}1${ac_uD}
 ${ac_uA}PROTOTYPES${ac_uB}PROTOTYPES${ac_uC}1${ac_uD}
 ${ac_uA}__PROTOTYPES${ac_uB}__PROTOTYPES${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_VPRINTF${ac_uB}HAVE_VPRINTF${ac_uC}1${ac_uD}
+${ac_uA}HAVE_GETPID${ac_uB}HAVE_GETPID${ac_uC}1${ac_uD}
+${ac_uA}HAVE__GETPID${ac_uB}HAVE__GETPID${ac_uC}1${ac_uD}
 ${ac_uA}USE_MMX${ac_uB}USE_MMX${ac_uC}1${ac_uD}
+CEOF
+  sed -f $tmp/undefs.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+
+  cat >$tmp/undefs.sed <<CEOF
+/^[	 ]*#[	 ]*undef/!b
+t clr
+: clr
 ${ac_uA}HAVE_MMINTRIN_H${ac_uB}HAVE_MMINTRIN_H${ac_uC}1${ac_uD}
 s,^[	 ]*#[	 ]*undef[	 ][	 ]*[a-zA-Z_][a-zA-Z_0-9]*,/* & */,
 CEOF

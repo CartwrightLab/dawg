@@ -389,170 +389,284 @@ configure:4207: $? = 0
 configure:4210: test -s conftest.o
 configure:4213: $? = 0
 configure:4224: result: yes
-configure:4257: checking time.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4258: checking time.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking time.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for time.h
-configure:4380: result: yes
-configure:4257: checking float.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking time.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for time.h
+configure:4381: result: yes
+configure:4258: checking float.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking float.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for float.h
-configure:4380: result: yes
-configure:4257: checking stdio.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking float.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for float.h
+configure:4381: result: yes
+configure:4258: checking stdio.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking stdio.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for stdio.h
-configure:4380: result: yes
-configure:4248: checking for unistd.h
-configure:4253: result: yes
-configure:4257: checking math.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking stdio.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for stdio.h
+configure:4381: result: yes
+configure:4249: checking for unistd.h
+configure:4254: result: yes
+configure:4258: checking math.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking math.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for math.h
-configure:4380: result: yes
-configure:4257: checking assert.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking math.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for math.h
+configure:4381: result: yes
+configure:4258: checking assert.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking assert.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for assert.h
-configure:4380: result: yes
-configure:4257: checking stdarg.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking assert.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for assert.h
+configure:4381: result: yes
+configure:4258: checking stdarg.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking stdarg.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for stdarg.h
-configure:4380: result: yes
-configure:4257: checking stddef.h usability
-configure:4269: gcc -c -g -O2  conftest.c >&5
-configure:4275: $? = 0
-configure:4279: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking stdarg.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for stdarg.h
+configure:4381: result: yes
+configure:4258: checking stddef.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+configure:4276: $? = 0
+configure:4280: test -z 
 			 || test ! -s conftest.err
-configure:4282: $? = 0
-configure:4285: test -s conftest.o
-configure:4288: $? = 0
-configure:4298: result: yes
-configure:4302: checking stddef.h presence
-configure:4312: gcc -E  conftest.c
-configure:4318: $? = 0
-configure:4338: result: yes
-configure:4373: checking for stddef.h
-configure:4380: result: yes
-configure:4395: checking for stdbool.h that conforms to C99
-configure:4448: gcc -c -g -O2  conftest.c >&5
-configure:4454: $? = 0
-configure:4458: test -z 
+configure:4283: $? = 0
+configure:4286: test -s conftest.o
+configure:4289: $? = 0
+configure:4299: result: yes
+configure:4303: checking stddef.h presence
+configure:4313: gcc -E  conftest.c
+configure:4319: $? = 0
+configure:4339: result: yes
+configure:4374: checking for stddef.h
+configure:4381: result: yes
+configure:4258: checking process.h usability
+configure:4270: gcc -c -g -O2  conftest.c >&5
+conftest.c:67:21: process.h: No such file or directory
+configure:4276: $? = 1
+configure: failed program was:
+| /* confdefs.h.  */
+| 
+| #define PACKAGE_NAME "dawg"
+| #define PACKAGE_TARNAME "dawg"
+| #define PACKAGE_VERSION "1.0.0-rc1"
+| #define PACKAGE_STRING "dawg 1.0.0-rc1"
+| #define PACKAGE_BUGREPORT "rac@uga.edu"
+| #define PACKAGE "dawg"
+| #define VERSION "1.0.0-rc1"
+| #ifdef __cplusplus
+| extern "C" void std::exit (int) throw (); using std::exit;
+| #endif
+| #define YYTEXT_POINTER 1
+| #define STDC_HEADERS 1
+| #define HAVE_SYS_TYPES_H 1
+| #define HAVE_SYS_STAT_H 1
+| #define HAVE_STDLIB_H 1
+| #define HAVE_STRING_H 1
+| #define HAVE_MEMORY_H 1
+| #define HAVE_STRINGS_H 1
+| #define HAVE_INTTYPES_H 1
+| #define HAVE_STDINT_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_TIME_H 1
+| #define HAVE_FLOAT_H 1
+| #define HAVE_STDIO_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
+| #define HAVE_STDARG_H 1
+| #define HAVE_STDDEF_H 1
+| /* end confdefs.h.  */
+| #include <stdio.h>
+| #if HAVE_SYS_TYPES_H
+| # include <sys/types.h>
+| #endif
+| #if HAVE_SYS_STAT_H
+| # include <sys/stat.h>
+| #endif
+| #if STDC_HEADERS
+| # include <stdlib.h>
+| # include <stddef.h>
+| #else
+| # if HAVE_STDLIB_H
+| #  include <stdlib.h>
+| # endif
+| #endif
+| #if HAVE_STRING_H
+| # if !STDC_HEADERS && HAVE_MEMORY_H
+| #  include <memory.h>
+| # endif
+| # include <string.h>
+| #endif
+| #if HAVE_STRINGS_H
+| # include <strings.h>
+| #endif
+| #if HAVE_INTTYPES_H
+| # include <inttypes.h>
+| #else
+| # if HAVE_STDINT_H
+| #  include <stdint.h>
+| # endif
+| #endif
+| #if HAVE_UNISTD_H
+| # include <unistd.h>
+| #endif
+| #include <process.h>
+configure:4299: result: no
+configure:4303: checking process.h presence
+configure:4313: gcc -E  conftest.c
+conftest.c:33:21: process.h: No such file or directory
+configure:4319: $? = 1
+configure: failed program was:
+| /* confdefs.h.  */
+| 
+| #define PACKAGE_NAME "dawg"
+| #define PACKAGE_TARNAME "dawg"
+| #define PACKAGE_VERSION "1.0.0-rc1"
+| #define PACKAGE_STRING "dawg 1.0.0-rc1"
+| #define PACKAGE_BUGREPORT "rac@uga.edu"
+| #define PACKAGE "dawg"
+| #define VERSION "1.0.0-rc1"
+| #ifdef __cplusplus
+| extern "C" void std::exit (int) throw (); using std::exit;
+| #endif
+| #define YYTEXT_POINTER 1
+| #define STDC_HEADERS 1
+| #define HAVE_SYS_TYPES_H 1
+| #define HAVE_SYS_STAT_H 1
+| #define HAVE_STDLIB_H 1
+| #define HAVE_STRING_H 1
+| #define HAVE_MEMORY_H 1
+| #define HAVE_STRINGS_H 1
+| #define HAVE_INTTYPES_H 1
+| #define HAVE_STDINT_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_TIME_H 1
+| #define HAVE_FLOAT_H 1
+| #define HAVE_STDIO_H 1
+| #define HAVE_UNISTD_H 1
+| #define HAVE_MATH_H 1
+| #define HAVE_ASSERT_H 1
+| #define HAVE_STDARG_H 1
+| #define HAVE_STDDEF_H 1
+| /* end confdefs.h.  */
+| #include <process.h>
+configure:4339: result: no
+configure:4374: checking for process.h
+configure:4381: result: no
+configure:4396: checking for stdbool.h that conforms to C99
+configure:4449: gcc -c -g -O2  conftest.c >&5
+configure:4455: $? = 0
+configure:4459: test -z 
 			 || test ! -s conftest.err
-configure:4461: $? = 0
-configure:4464: test -s conftest.o
-configure:4467: $? = 0
-configure:4478: result: yes
-configure:4480: checking for _Bool
-configure:4504: gcc -c -g -O2  conftest.c >&5
-configure:4510: $? = 0
-configure:4514: test -z 
+configure:4462: $? = 0
+configure:4465: test -s conftest.o
+configure:4468: $? = 0
+configure:4479: result: yes
+configure:4481: checking for _Bool
+configure:4505: gcc -c -g -O2  conftest.c >&5
+configure:4511: $? = 0
+configure:4515: test -z 
 			 || test ! -s conftest.err
-configure:4517: $? = 0
-configure:4520: test -s conftest.o
-configure:4523: $? = 0
-configure:4534: result: yes
-configure:4553: checking for an ANSI C-conforming const
-configure:4620: gcc -c -g -O2  conftest.c >&5
-configure:4626: $? = 0
-configure:4630: test -z 
+configure:4518: $? = 0
+configure:4521: test -s conftest.o
+configure:4524: $? = 0
+configure:4535: result: yes
+configure:4554: checking for an ANSI C-conforming const
+configure:4621: gcc -c -g -O2  conftest.c >&5
+configure:4627: $? = 0
+configure:4631: test -z 
 			 || test ! -s conftest.err
-configure:4633: $? = 0
-configure:4636: test -s conftest.o
-configure:4639: $? = 0
-configure:4650: result: yes
-configure:4660: checking for inline
-configure:4681: gcc -c -g -O2  conftest.c >&5
-configure:4687: $? = 0
-configure:4691: test -z 
+configure:4634: $? = 0
+configure:4637: test -s conftest.o
+configure:4640: $? = 0
+configure:4651: result: yes
+configure:4661: checking for inline
+configure:4682: gcc -c -g -O2  conftest.c >&5
+configure:4688: $? = 0
+configure:4692: test -z 
 			 || test ! -s conftest.err
-configure:4694: $? = 0
-configure:4697: test -s conftest.o
-configure:4700: $? = 0
-configure:4712: result: inline
-configure:4731: checking for size_t
-configure:4755: gcc -c -g -O2  conftest.c >&5
-configure:4761: $? = 0
-configure:4765: test -z 
+configure:4695: $? = 0
+configure:4698: test -s conftest.o
+configure:4701: $? = 0
+configure:4713: result: inline
+configure:4732: checking for size_t
+configure:4756: gcc -c -g -O2  conftest.c >&5
+configure:4762: $? = 0
+configure:4766: test -z 
 			 || test ! -s conftest.err
-configure:4768: $? = 0
-configure:4771: test -s conftest.o
-configure:4774: $? = 0
-configure:4785: result: yes
-configure:4797: checking whether byte ordering is bigendian
-configure:4824: gcc -c -g -O2  conftest.c >&5
-configure:4830: $? = 0
-configure:4834: test -z 
+configure:4769: $? = 0
+configure:4772: test -s conftest.o
+configure:4775: $? = 0
+configure:4786: result: yes
+configure:4798: checking whether byte ordering is bigendian
+configure:4825: gcc -c -g -O2  conftest.c >&5
+configure:4831: $? = 0
+configure:4835: test -z 
 			 || test ! -s conftest.err
-configure:4837: $? = 0
-configure:4840: test -s conftest.o
-configure:4843: $? = 0
-configure:4867: gcc -c -g -O2  conftest.c >&5
+configure:4838: $? = 0
+configure:4841: test -s conftest.o
+configure:4844: $? = 0
+configure:4868: gcc -c -g -O2  conftest.c >&5
 conftest.c: In function `main':
 conftest.c:42: error: syntax error before "big"
-configure:4873: $? = 1
+configure:4874: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | 
@@ -601,32 +715,32 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:5008: result: no
-configure:5034: checking for stdlib.h
-configure:5039: result: yes
-configure:5179: checking for GNU libc compatible malloc
-configure:5208: gcc -o conftest -g -O2   conftest.c  >&5
-configure:5211: $? = 0
-configure:5213: ./conftest
-configure:5216: $? = 0
-configure:5230: result: yes
-configure:5265: checking for stdlib.h
-configure:5270: result: yes
-configure:5410: checking for GNU libc compatible realloc
-configure:5439: gcc -o conftest -g -O2   conftest.c  >&5
-configure:5442: $? = 0
-configure:5444: ./conftest
-configure:5447: $? = 0
-configure:5461: result: yes
-configure:5491: checking for function prototypes
-configure:5494: result: yes
-configure:5511: checking whether setvbuf arguments are reversed
-configure:5536: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5009: result: no
+configure:5035: checking for stdlib.h
+configure:5040: result: yes
+configure:5180: checking for GNU libc compatible malloc
+configure:5209: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5212: $? = 0
+configure:5214: ./conftest
+configure:5217: $? = 0
+configure:5231: result: yes
+configure:5266: checking for stdlib.h
+configure:5271: result: yes
+configure:5411: checking for GNU libc compatible realloc
+configure:5440: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5443: $? = 0
+configure:5445: ./conftest
+configure:5448: $? = 0
+configure:5462: result: yes
+configure:5492: checking for function prototypes
+configure:5495: result: yes
+configure:5512: checking whether setvbuf arguments are reversed
+configure:5537: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:43: error: conflicting types for 'setvbuf'
 /usr/include/stdio.h:244: error: previous declaration of 'setvbuf' was here
 conftest.c:43: error: conflicting types for 'setvbuf'
 /usr/include/stdio.h:244: error: previous declaration of 'setvbuf' was here
-configure:5542: $? = 1
+configure:5543: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | 
@@ -679,23 +793,23 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:5663: result: no
-configure:5677: checking for vprintf
-configure:5734: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5664: result: no
+configure:5678: checking for vprintf
+configure:5735: gcc -o conftest -g -O2   conftest.c  >&5
 conftest.c:65: warning: conflicting types for built-in function 'vprintf'
-configure:5740: $? = 0
-configure:5744: test -z 
+configure:5741: $? = 0
+configure:5745: test -z 
 			 || test ! -s conftest.err
-configure:5747: $? = 0
-configure:5750: test -s conftest
-configure:5753: $? = 0
-configure:5765: result: yes
-configure:5772: checking for _doprnt
-configure:5829: gcc -o conftest -g -O2   conftest.c  >&5
-/var/tmp//ccIofnXS.o(.text+0x14): In function `main':
+configure:5748: $? = 0
+configure:5751: test -s conftest
+configure:5754: $? = 0
+configure:5766: result: yes
+configure:5773: checking for _doprnt
+configure:5830: gcc -o conftest -g -O2   conftest.c  >&5
+/var/tmp//cc83sASY.o(.text+0x14): In function `main':
 /home/reed/dawg-unix/conftest.c:82: undefined reference to `_doprnt'
-/var/tmp//ccIofnXS.o(.data+0x0):/home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
-configure:5835: $? = 1
+/var/tmp//cc83sASY.o(.data+0x0):/home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
+configure:5836: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
 | 
@@ -782,37 +896,66 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:5860: result: no
-configure:5884: checking whether MMX assembly is suported
-configure:5890: gcc -c -g -O2  conftest.c >&5
-configure:5896: $? = 0
-configure:5900: test -z 
+configure:5861: result: no
+configure:5880: checking for getpid
+configure:5937: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5943: $? = 0
+configure:5947: test -z 
 			 || test ! -s conftest.err
-configure:5903: $? = 0
-configure:5906: test -s conftest.o
-configure:5909: $? = 0
-configure:5911: result: yes
-configure:5918: checking CFLAGS for gcc -mmmx
-configure:5951: gcc -c -g -O2 -pedantic  -mmmx  conftest.c >&5
-configure:5957: $? = 0
-configure:5961: test -z 
+configure:5950: $? = 0
+configure:5953: test -s conftest
+configure:5956: $? = 0
+configure:5968: result: yes
+configure:5880: checking for _getpid
+configure:5937: gcc -o conftest -g -O2   conftest.c  >&5
+configure:5943: $? = 0
+configure:5947: test -z 
 			 || test ! -s conftest.err
-configure:5964: $? = 0
-configure:5967: test -s conftest.o
-configure:5970: $? = 0
-configure:5989: result: -mmmx
-configure:6001: : CFLAGS="$CFLAGS $ac_cv_cflags_gcc_option__mmmx"
-configure:6004: $? = 0
-configure:6011: checking for mmintrin.h
-configure:6029: gcc -c -g -O2 -mmmx  conftest.c >&5
-configure:6035: $? = 0
-configure:6039: test -z 
+configure:5950: $? = 0
+configure:5953: test -s conftest
+configure:5956: $? = 0
+configure:5968: result: yes
+configure:5988: checking whether MMX assembly is suported
+configure:5995: gcc -c -g -O2  conftest.c >&5
+configure:6001: $? = 0
+configure:6005: test -z 
 			 || test ! -s conftest.err
-configure:6042: $? = 0
-configure:6045: test -s conftest.o
-configure:6048: $? = 0
-configure:6050: result: yes
-configure:6197: creating ./config.status
+configure:6008: $? = 0
+configure:6011: test -s conftest.o
+configure:6014: $? = 0
+configure:6016: result: yes
+configure:6023: checking CFLAGS for gcc -mmmx
+configure:6054: gcc -c -g -O2 -pedantic  -mmmx  conftest.c >&5
+configure:6060: $? = 0
+configure:6064: test -z 
+			 || test ! -s conftest.err
+configure:6067: $? = 0
+configure:6070: test -s conftest.o
+configure:6073: $? = 0
+configure:6092: result: -mmmx
+configure:6104: : CFLAGS="$CFLAGS $ac_cv_cflags_gcc_option__mmmx"
+configure:6107: $? = 0
+configure:6114: checking CXXFLAGS for gcc -mmmx
+configure:6145: g++ -c -g -O2 -pedantic  -mmmx  conftest.cc >&5
+configure:6151: $? = 0
+configure:6155: test -z 
+			 || test ! -s conftest.err
+configure:6158: $? = 0
+configure:6161: test -s conftest.o
+configure:6164: $? = 0
+configure:6183: result: -mmmx
+configure:6195: : CXXFLAGS="$CXXFLAGS $ac_cv_cxxflags_gcc_option__mmmx"
+configure:6198: $? = 0
+configure:6205: checking for mmintrin.h
+configure:6223: gcc -c -g -O2 -mmmx  conftest.c >&5
+configure:6229: $? = 0
+configure:6233: test -z 
+			 || test ! -s conftest.err
+configure:6236: $? = 0
+configure:6239: test -s conftest.o
+configure:6242: $? = 0
+configure:6244: result: yes
+configure:6391: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -835,7 +978,8 @@ config.status:712: creating examples/Makefile
 config.status:712: creating tests/Makefile
 config.status:712: creating doc/Makefile
 config.status:816: creating config.h
-config.status:1142: executing depfiles commands
+config.status:984: config.h is unchanged
+config.status:1164: executing depfiles commands
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -849,6 +993,7 @@ ac_cv_c_const=yes
 ac_cv_c_inline=inline
 ac_cv_cflags_gcc_option__mmmx=-mmmx
 ac_cv_cxx_compiler_gnu=yes
+ac_cv_cxxflags_gcc_option__mmmx=-mmmx
 ac_cv_env_CC_set=
 ac_cv_env_CC_value=
 ac_cv_env_CFLAGS_set=
@@ -871,6 +1016,8 @@ ac_cv_env_target_alias_set=
 ac_cv_env_target_alias_value=
 ac_cv_exeext=
 ac_cv_func__doprnt=no
+ac_cv_func__getpid=yes
+ac_cv_func_getpid=yes
 ac_cv_func_malloc_0_nonnull=yes
 ac_cv_func_realloc_0_nonnull=yes
 ac_cv_func_setvbuf_reversed=no
@@ -880,6 +1027,7 @@ ac_cv_header_float_h=yes
 ac_cv_header_inttypes_h=yes
 ac_cv_header_math_h=yes
 ac_cv_header_memory_h=yes
+ac_cv_header_process_h=no
 ac_cv_header_stdarg_h=yes
 ac_cv_header_stdbool_h=yes
 ac_cv_header_stdc=yes
@@ -937,7 +1085,7 @@ CPP='gcc -E'
 CPPFLAGS=''
 CXX='g++'
 CXXDEPMODE='depmode=gcc3'
-CXXFLAGS='-g -O2'
+CXXFLAGS='-g -O2 -mmmx'
 CYGPATH_W='echo'
 DEFS='-DHAVE_CONFIG_H'
 DEPDIR='.deps'
@@ -1019,6 +1167,7 @@ target_alias=''
 
 #define HAVE_ASSERT_H 1
 #define HAVE_FLOAT_H 1
+#define HAVE_GETPID 1
 #define HAVE_INTTYPES_H 1
 #define HAVE_MALLOC 1
 #define HAVE_MATH_H 1
@@ -1042,6 +1191,7 @@ target_alias=''
 #define HAVE_UNISTD_H 1
 #define HAVE_VPRINTF 1
 #define HAVE__BOOL 1
+#define HAVE__GETPID 1
 #define PACKAGE "dawg"
 #define PACKAGE_BUGREPORT "rac@uga.edu"
 #define PACKAGE_NAME "dawg"
@@ -1059,3 +1209,21 @@ target_alias=''
 extern "C" void std::exit (int) throw (); using std::exit;
 
 configure: exit 0
+
+## ---------------------- ##
+## Running config.status. ##
+## ---------------------- ##
+
+This file was extended by dawg config.status 1.0.0-rc1, which was
+generated by GNU Autoconf 2.59.  Invocation command line was
+
+  CONFIG_FILES    = 
+  CONFIG_HEADERS  = 
+  CONFIG_LINKS    = 
+  CONFIG_COMMANDS = 
+  $ ./config.status config.h
+
+on asums8.genetics.uga.edu
+
+config.status:816: creating config.h
+config.status:984: config.h is unchanged

@@ -10,6 +10,9 @@
 /* Define to 1 if you have the <float.h> header file. */
 #define HAVE_FLOAT_H 1
 
+/* Define to 1 if you have the `getpid' function. */
+#define HAVE_GETPID 1
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
@@ -25,6 +28,9 @@
 
 /* Define to 1 if you have the <mmintrin.h> header file. */
 #define HAVE_MMINTRIN_H 1
+
+/* Define to 1 if you have the <process.h> header file. */
+/* #undef HAVE_PROCESS_H */
 
 /* Define to 1 if your system has a GNU libc compatible `realloc' function,
    and to 0 otherwise. */
@@ -71,6 +77,9 @@
 
 /* Define to 1 if the system has the type `_Bool'. */
 #define HAVE__BOOL 1
+
+/* Define to 1 if you have the `_getpid' function. */
+#define HAVE__GETPID 1
 
 /* Name of package */
 #define PACKAGE "dawg"

@@ -92,7 +92,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -O2 -mmmx
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -171,7 +171,7 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)
 AM_YFLAGS = -d
 AM_LFLAGS = -CF
 BUILT_SOURCES = parser.h
-dawg_SOURCES = dawg.cc eigen.cc  indel.cc matrix.cc output.cc rand.cc tree.cc var.cc dawg.h indel.h tree.h rand.h var.h matrix.h parser.yy lexer.ll
+dawg_SOURCES = dawg.cc eigen.cc  indel.cc matrix.cc output.cc rand.cc tree.cc var.cc dawg.h indel.h tree.h rand.h var.h matrix.h dawgtxt.h parser.yy lexer.ll
 dawg_LDADD = -lstdc++ -lfl
 CLEANFILES = parser.cc parser.h lexer.cc
 all: $(BUILT_SOURCES)
