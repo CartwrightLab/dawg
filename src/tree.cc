@@ -449,7 +449,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Scale such that the total rate of substitution is equal to one
 	double dX = 0.0;
 	for(int i=0;i<m_vdIota.size();++i)
-		dX -= (1.0-m_vdIota[i])*m_vdScale[i]);
+		dX -= (1.0-m_vdIota[i])*m_vdScale[i];
 	dX = m_vdIota.size()/dX;
 	matQ(0,0) = -(matQ(0,1)+matQ(0,2)+matQ(0,3));
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
