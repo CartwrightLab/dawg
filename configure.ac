@@ -2,7 +2,6 @@ m4_define([dawg_rev], [m4_esyscmd([svnversion -n .])])
 AC_INIT([dawg], [1.1.0.dawg_rev()], [http://scit.us/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_LIBOBJ_DIR([lib])
 AC_PREREQ(2.59)
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE
