@@ -73,8 +73,9 @@ int main(int argc, char* argv[])
 		if(bVersion)
 		{
 			cout << PACKAGE_STRING << endl 
-				<< "Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)"
-				<< endl << endl;
+				<< "DNA Assembly With Gaps" << endl
+				<< "Copyright (C) 2005 Reed A. Cartwright (all rights reserved)" << endl
+				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << endl << endl;
 		}
 		if(bUsage)
 			cout << g_csDawgTxt << endl;
