@@ -826,9 +826,9 @@ configure:5913: $? = 0
 configure:5925: result: yes
 configure:5932: checking for _doprnt
 configure:5989: gcc -o conftest -g -O2   conftest.c  >&5
-/var/tmp//cc9aNZxf.o(.text+0x14): In function `main':
+/var/tmp//cciSo5sU.o(.text+0x14): In function `main':
 /home/reed/dawg-unix/conftest.c:84: undefined reference to `_doprnt'
-/var/tmp//cc9aNZxf.o(.data+0x0):/home/reed/dawg-unix/conftest.c:83: undefined reference to `_doprnt'
+/var/tmp//cciSo5sU.o(.data+0x0):/home/reed/dawg-unix/conftest.c:83: undefined reference to `_doprnt'
 configure:5995: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
@@ -960,6 +960,7 @@ config.status:712: creating examples/Makefile
 config.status:712: creating tests/Makefile
 config.status:712: creating doc/Makefile
 config.status:816: creating config.h
+config.status:984: config.h is unchanged
 config.status:1164: executing depfiles commands
 
 ## ---------------- ##

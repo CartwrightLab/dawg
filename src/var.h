@@ -28,7 +28,7 @@ public:
 	static void		ClearMap();
 	
 	// General Routines
-	unsigned int Size();
+	Vec::size_type Size();
 
 	// Number Routines
 	explicit DawgVar(double dVar) : m_tyType(tyNumber), m_dData(dVar) { }
@@ -89,14 +89,14 @@ private:
 
 public:
 	// Templates
-	template<class _T>
-	static bool Get(const std::string &ssKey, _T &r)
+	template<class T>
+	static bool Get(const std::string &ssKey, T &r)
 	{
 		DawgVar *pVar = GetVar(ssKey);
 		return ( pVar != NULL && pVar->Get(r) );
 	}
-	template<class _T>
-	Vec::size_type GetArray(_T ar[], Vec::size_type uSize)
+	template<class T>
+	Vec::size_type GetArray(T ar[], Vec::size_type uSize)
 	{
 		Vec::size_type uMax = min(uSize, Size());
 		Vec::size_type u = 0;
@@ -108,10 +108,10 @@ public:
 		return u;		
 	}
 
-	template<class _T>
-	bool GetVector(std::vector<_T> &rVec)
+	template<class T>
+	bool GetVector(std::vector<T> &rVec)
 	{
-		_T tTemp;
+		T tTemp;
 		rVec.clear();
 		for(Vec::size_type u = 0; u<Size(); u++)
 		{
@@ -121,16 +121,16 @@ public:
 		}
 		return true;
 	}
-	template< class _T >
-	static Vec::size_type GetArray( const std::string &ssKey,  _T ar[], Vec::size_type uSize)
+	template< class T >
+	static Vec::size_type GetArray( const std::string &ssKey,  T ar[], Vec::size_type uSize)
 	{
 		DawgVar* pVar = GetVar(ssKey);
 		if(pVar == NULL)
 			return 0;
 		return pVar->GetArray(ar, uSize);
 	}
-	template<class _T>
-	static bool GetVector( const std::string &ssKey, std::vector<_T> &rVec)
+	template<class T>
+	static bool GetVector( const std::string &ssKey, std::vector<T> &rVec)
 	{
 		DawgVar* pVar = GetVar(ssKey);
 		if(pVar == NULL)

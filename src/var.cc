@@ -1,4 +1,3 @@
-
 #include "dawg.h"
 #include "var.h"
 
@@ -166,7 +165,7 @@ void DawgVar::Set(NewickNode *pTree)
 	m_ptrData = pTree;
 }
 
-unsigned int DawgVar::Size()
+DawgVar::Vec::size_type DawgVar::Size()
 {
 	switch(m_tyType)
 	{
