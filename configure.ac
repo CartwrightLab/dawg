@@ -1,4 +1,7 @@
-AC_INIT(dawg, 1.0.0-rc3, rac@uga.edu)
+define([dawg_version_svn], [$Rev$])
+define([dawg_verson], subst(dawg_version_svn, 6, len(dawg_version_svn)-7))
+
+AC_INIT(dawg, [1.0.]dawg_version, rac@uga.edu)
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.59)
