@@ -80,7 +80,7 @@
 				ImproveFloatingPointConsistency="TRUE"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="C:\Home\Reed\Desktop\dawg\src;C:\Home\Reed\Desktop\dawg\vs"
+				AdditionalIncludeDirectories="..\src;."
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;HAVE_CONFIG_H"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"

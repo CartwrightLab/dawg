@@ -7,10 +7,10 @@ using namespace std;
 
 void PrintVar(const DawgVar* var);
 
-void   PrintSequencesFasta(ostream &os, const Tree::Alignment& aln);
-void   PrintSequencesNexus(ostream &os, const Tree::Alignment& aln);
-void   PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln);
-void   PrintSequencesClustal(ostream &os, const Tree::Alignment& aln);
+void   PrintSequencesFasta(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
+void   PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
+void   PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
+void   PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned long uFlags);
 
 FileFormat g_fileFormat = FASTA;
 const char *g_csBlock = NULL;
@@ -47,29 +47,29 @@ void DawgIniOutput(ostream& os)
 
 }
 
-bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln)
+bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned long uFlags)
 {
 	if(g_nDataSetNum > 1)
 		rFile << "[DataSet " << ++g_nDataSet << ']' << endl;
 	switch(g_fileFormat)
 	{
 		case NEXUS:
-			PrintSequencesNexus(rFile, aln);
+			PrintSequencesNexus(rFile, aln, uFlags);
 			break;
 		case PHYLIP:
-			PrintSequencesPhylip(rFile, aln);
+			PrintSequencesPhylip(rFile, aln, uFlags);
 			break;
 		case CLUSTAL:
-			PrintSequencesClustal(rFile, aln);
+			PrintSequencesClustal(rFile, aln, uFlags);
 			break;
 		case FASTA:
 		default:
-			PrintSequencesFasta(rFile, aln);
+			PrintSequencesFasta(rFile, aln, uFlags);
 	};
 	return true;
 }
 
-void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln)
+void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln, unsigned long)
 {
 	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
 	{
@@ -89,12 +89,17 @@ void PrintSequencesFasta(ostream& os, const Tree::Alignment& aln)
 	}
 }
 
-void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln)
+void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned long uFlags)
 {
 	Tree::Alignment::const_iterator cit = aln.begin();
 	os << "BEGIN DATA;" << endl;
 	os << "\tDIMENSIONS NTAX=" << aln.size() << " NCHAR=" << cit->second.length() << ';' << endl;
-	os << "\tFORMAT MISSING=? GAP=- DATATYPE=DNA;" << endl;
+	os << "\tFORMAT DATATYPE=";
+	if(uFlags & Tree::FlagOutTranslate)
+		os << "PROTEIN";
+	else
+		os << "DNA";
+	os << " MISSING=? GAP=- MATCHCHAR=. EQUATE=\"+=-\";" << endl;
 	os << "\tMATRIX" << endl;
 	for(; cit != aln.end(); ++cit)
 		os << setw(15) << setiosflags(ios::left) << cit->first << ' ' << cit->second << endl;
@@ -102,7 +107,7 @@ void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln)
 	if(g_csBlock)
 		os << g_csBlock << endl << endl;
 }
-void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln)
+void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln, unsigned long)
 {
 	Tree::Alignment::const_iterator cit = aln.begin();
 	os << aln.size() << ' ' << cit->second.length() << endl;
@@ -112,7 +117,7 @@ void PrintSequencesPhylip(ostream &os, const Tree::Alignment& aln)
 	os << endl;
 }
 
-void   PrintSequencesClustal(ostream &os, const Tree::Alignment& aln)
+void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned long)
 {
 	unsigned long uLen = aln.begin()->second.length();
 	unsigned long l;

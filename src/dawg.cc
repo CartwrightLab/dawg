@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 		if(bVersion)
 		{
 			cout << "DAWG - DNA Assembly With Gaps" << endl;
-			cout << "Copyright (C) 2004 Reed A. Cartwright (all rights reserved)" << endl;
+			cout << "Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)" << endl;
 			cout << "Version " << VERSION << endl << endl;
 		}
 		if(bUsage)
@@ -149,7 +149,7 @@ bool Execute()
 	string ssFormat = "Fasta";
 	string ssNexusCode;
 
-	bool bGapSingle = false, bGapPlus = false, bLowerCase = false;
+	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
 	unsigned long uWidth = 1;
 	int nRes;
 
@@ -219,6 +219,7 @@ bool Execute()
 	DawgVar::Get("GapSingleChar", bGapSingle);
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
+	DawgVar::Get("Translate", bTranslate);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
 	if(nRes)
@@ -341,6 +342,19 @@ bool Execute()
 	
 	SetFormat(fmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
 	
+	if(bTranslate && uWidth != 3)
+		return DawgError("Translate requires a Width of 3.");
+
+	unsigned long uOutFlags = 0u;
+	if(bGapSingle)
+		uOutFlags |= Tree::FlagOutGapSingleChar;
+	if(bGapPlus)
+		uOutFlags |= Tree::FlagOutGapPlus;
+	if(bLowerCase)
+		uOutFlags |= Tree::FlagOutLowerCase;
+	if(bTranslate)
+		uOutFlags |= Tree::FlagOutTranslate;
+
 	ostream* pOut;
 	ofstream ofOut;
 	if(ssFile == "-" || ssFile.empty())
@@ -361,8 +375,8 @@ bool Execute()
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln, bGapPlus, bGapSingle, bLowerCase);
-		if(!SaveAlignment(*pOut, aln))
+		myTree.Align(aln, uOutFlags);
+		if(!SaveAlignment(*pOut, aln, uOutFlags))
 			return DawgError("Error saving alignment.");
 	}
 

@@ -19,6 +19,7 @@ protected:
 	void MakeName();
 };
 
+
 class Nucleotide
 {
 public:
@@ -51,33 +52,37 @@ public:
 
 	inline bool FromChar(char ch)
 	{
-		switch(ch)
-		{
-		case 'A':
-		case 'a':
-			m_ucNuc = 0;
-			return true;
-		case 'C':
-		case 'c':
-			m_ucNuc = 1;
-			return true;
-		case 'G':
-		case 'g':
-			m_ucNuc = 2;
-			return true;
-		case 'T':
-		case 't':
-			m_ucNuc = 3;
-			return true;
-		default:
+		unsigned long u = Nucleotide::Letter2Number(ch);
+		if(u == (unsigned long)(-1))
 			return false;
-		}
+		m_ucNuc = (unsigned char)u;
+		return true;
 	}
 	inline char ToChar() const
 	{
 		char csNuc[]	= "ACGT";
 		char csType[]	= " +-=";
 		return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
+	}
+	static unsigned long Letter2Number(char ch)
+	{
+		switch(ch)
+		{
+		case 'A':
+		case 'a':
+			return 0;
+		case 'C':
+		case 'c':
+			return 1;
+		case 'G':
+		case 'g':
+			return 2;
+		case 'T':
+		case 't':
+			return 3;
+		default:
+			return (unsigned long)(-1);
+		}
 	}
 };
 
@@ -153,7 +158,13 @@ public:
 	
 	const Node::Map& GetMap() const { return m_map; }
 
-	void Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLowerCase) const;
+	void Align(Alignment &aln, unsigned long uFlags) const;
+
+	static const unsigned long FlagOutLowerCase = 1;
+	static const unsigned long FlagOutGapPlus = 2;
+	static const unsigned long FlagOutGapSingleChar = 4;
+	static const unsigned long FlagOutTranslate = 8;
+
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);
@@ -196,7 +207,7 @@ inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle &
 	return &*A < &*B;
 }
 
-bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln);
+bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned long uFlags);
 
 #endif //DAWG_TREE_H
 
