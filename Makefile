@@ -87,6 +87,7 @@ CFLAGS = -g -O2
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
+CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
@@ -164,6 +165,7 @@ sharedstatedir = ${prefix}/com
 sysconfdir = ${prefix}/etc
 target_alias = 
 SUBDIRS = src examples tests doc
+EXTRA_DIST = lambda.pl
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

@@ -215,7 +215,7 @@ bool Execute()
 	DawgVar::Get("Scale", dScale); // make a vector (?)
 	int nRes = DawgVar::GetArray("GapModel", ssGapModel, 2);
 	if(nRes >0 && nRes < 2)
-		ssGapModel[2] = ssGapModel[1];
+		ssGapModel[1] = ssGapModel[0];
 
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4);
 	if(nRes > 0 && nRes < 4)
