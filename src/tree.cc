@@ -90,7 +90,7 @@ unsigned long Sequence::GapPos(unsigned long uPos) const
 	for(; uPos && it != m_vHistory.end(); ++it)
 	{
 		v++;
-		if(!IsDel())
+		if(!IsDel(*it))
 			uPos--;
 	}
 	return v;
