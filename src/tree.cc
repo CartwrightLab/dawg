@@ -87,7 +87,7 @@ unsigned long Sequence::HisPos(unsigned long uPos) const
 	do {
 		// Skip deletions in the history
 		while(IsDel(*it)) { it++; }
-	} while(uPos--)
+	} while(uPos--);
 	return (unsigned long)(it-m_vHistory.begin());
 }
 
