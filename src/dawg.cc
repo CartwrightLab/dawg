@@ -174,7 +174,7 @@ bool Execute()
 	else
 		vSeqLen.resize(vtTrees.size(), 100);
 	
-	DawgVar::Get("Frame", (int)uFrame);
+	DawgVar::Get<int>("Frame", uFrame);
 
 	vdGamma.resize(uFrame, 0.0);
 	vdIota.resize(uFrame, 0.0);
