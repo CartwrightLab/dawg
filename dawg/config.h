@@ -11,4 +11,4 @@
 #define HAVE_STDARG_H	1
 
 #define PACKAGE			"dawg"
-#define VERSION			"1.1.0"
+#define VERSION			"1.0.0 (Nov04)"

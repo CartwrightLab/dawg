@@ -189,7 +189,8 @@ void Tree::Node::Flatten(Sequence& seq) const
 
 void Tree::ProcessTree(NewickNode* pNode)
 {
-	ProcessNewickNode(pNode, m_map.find("R()()T"));
+	m_map["_R()()T"];
+	ProcessNewickNode(pNode, m_map.find("_R()()T"));
 	m_nSec++;
 }
 
@@ -209,10 +210,14 @@ void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 
 void Tree::Evolve()
 {
-	m_map.clear();
-
+	// Reset Sequences
+	for(Node::Map::iterator it=m_map.begin(); it!=m_map.end();++it)
+	{
+		it->second.m_vSections.clear();
+		it->second.m_bTouched = false;
+	}
 	// Setup Root
-	Node& rNode = m_map["R()()T"];
+	Node& rNode = m_map["_R()()T"];
 	rNode.m_bTouched = true;
 	for(vector<Sequence::DNAVec>::iterator it = m_vDNASeqs.begin();
 		it != m_vDNASeqs.end(); ++it)
@@ -220,12 +225,13 @@ void Tree::Evolve()
 		rNode.m_vSections.push_back(Sequence(*it));
 		for(unsigned int u = 0;u<it->size();++u)
 		{
-			if((*it)[u].m_dRate < 0.0)
-				(*it)[u].m_dRate = RandomRate();
-			if((*it)[u].m_nuc >= 4)
-				(*it)[u].m_nuc = RandomNuc();
+			if(rNode.m_vSections.back()[u].m_dRate < 0.0)
+				rNode.m_vSections.back()[u].m_dRate = RandomRate();
+			if(rNode.m_vSections.back()[u].m_nuc >= 4)
+				rNode.m_vSections.back()[u].m_nuc = RandomNuc();
 		}
 	}
+
 	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
 		Evolve(it->second);
 }
@@ -260,7 +266,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 	
 	// Substitutions
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
-		for(unsigned long u = 0; u < it->Length(); ++it)
+		for(unsigned long u = 0; u < it->Length(); ++u)
 		{
 			if((*it)[u].m_dRate < DBL_EPSILON)
 				continue; // Invariant Site
@@ -353,6 +359,12 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Setup Scale
 	m_dScale = dScale;
 
+	// Setup Cumulative Frequencies
+	m_dNucCumFreqs[0] = pFreqs[0];
+	m_dNucCumFreqs[1] = m_dNucCumFreqs[0]+pFreqs[1];
+	m_dNucCumFreqs[2] = m_dNucCumFreqs[0]+pFreqs[2];
+	m_dNucCumFreqs[3] = 1.0;
+
 	// Setup Symetric Matrix
 	Matrix44 matQ(Matrix44::s_Zero);
 	matQ(0,1) = matQ(1,0) = pSubs[0]; //A-C
@@ -400,7 +412,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_matU.Scale(m_matU, vecD);
 
 	m_dLambdaIns = rIns.dLambda;
-	if(rIns.ssModel == "NB")
+	if(m_dLambdaIns < DBL_EPSILON)
+		m_pInsertionModel.release();
+	else if(rIns.ssModel == "NB")
 	{
 		try {m_pInsertionModel.reset(new NegBnModel(rIns.vdModel));}
 			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
@@ -412,7 +426,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	}
 
 	m_dLambdaDel = rDel.dLambda;
-	if(rDel.ssModel == "NB")
+	if(m_dLambdaDel < DBL_EPSILON)
+		m_pDeletionModel.release();
+	else if(rDel.ssModel == "NB")
 	{
 		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}
 			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
@@ -425,7 +441,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_funcRateIns.m = m_dLambdaIns;
 	m_funcRateIns.b = m_dLambdaIns;
 	m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
-	m_funcRateSum.b = m_dLambdaIns+m_dLambdaDel*(m_pDeletionModel->MeanSize()-1.0);
+	m_funcRateSum.b = m_dLambdaIns+m_dLambdaDel*( (m_pDeletionModel.get()) ? m_pDeletionModel->MeanSize()-1.0 : 0.0);
 	return true;
 }
 
@@ -451,54 +467,11 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<in
 	if(vRates.size())
 	{
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
-		{
 			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
 				m_vDNASeqs[u][v].m_dRate = vRates[u][v];
-		}
 	}
 	return true;
 }
-
-//bool Tree::SetupRoot(const std::vector<std::string> &vData, const std::vector<double> &vRates)
-//{
-//	Node & rNode = m_map["R()()T"];
-//	rNode.m_bTouched = true;
-//	for(vector<string>::const_iterator cit = vData.begin();
-//		cit != vData.end(); ++cit)
-//	{
-//		Sequence::DNAVec dna;
-//		for(unsigned int j=0;j<cit->length();++j)
-//		{
-//			Nucleotide base = RandomNucleotide();
-//			base.m_nuc = CharToNuc(cit->at(j));
-//			if(!vRates.empty())	
-//				base.m_dRate = vRates[j];
-//			dna.push_back(base);
-//		}
-//		rNode.m_vSections.push_back(Sequence(dna));
-//	}
-//	return true;
-//}
-//
-//bool Tree::SetupRoot(const std::vector<int> &vData, const std::vector<double> &vRates)
-//{
-//	Node & rNode = m_map["R()()T"];
-//	rNode.m_bTouched = true;
-//	for(vector<int>::const_iterator cit = vData.begin();
-//		cit != vData.end(); ++cit)
-//	{
-//		Sequence::DNAVec dna;
-//		for(int j=0;j<*cit;++j)
-//		{
-//			Nucleotide base = RandomNucleotide();
-//			if(!vRates.empty())	
-//				base.m_dRate = vRates[j];
-//			dna.push_back(base);
-//		}
-//		rNode.m_vSections.push_back(Sequence(dna));
-//	}
-//	return true;
-//}
 
 Nucleotide::Nuc Tree::RandomNuc() const
 {
@@ -569,13 +542,13 @@ void Tree::Align(Alignment &aln) const
 					else if( it->at(uCol) != '+' && it->at(uCol) != '=')
 						it->insert(it->begin()+uCol, 1, '-');
 				}
-				cit = vHisTable.end();
+				cit = vHisTable.end()-1;
 			}
 		}
 	}
 	unsigned int u = 0;
 	for(Node::Map::const_iterator cit = m_map.begin();
-		cit != m_map.end(); ++cit)
+		cit != m_map.end(); ++cit, ++u)
 	{
 		Sequence::HistoryVec& his = vHisTable[u];
 		Sequence::DNAVec &dna = vDnaTable[u];

@@ -161,7 +161,7 @@ bool Execute()
 			nTotalSeqLen += *cit;
 	}
 	else
-		vSeqLen.resize(100, vtTrees.size());
+		vSeqLen.resize(vtTrees.size(), 100);
 
 	DawgVar *pVar = DawgVar::GetVar("Rates");
 	if(pVar != NULL && pVar->Size())
@@ -331,9 +331,11 @@ bool Execute()
 	paramsDel.dLambda = dLambda[1];
 	paramsDel.vdModel = vdDelModel;
 	
-	myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		dGamma, dIota, dScale);
-	myTree.SetupRoot(vSeqs, vSeqLen, vvdRates);
+	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
+		dGamma, dIota, dScale))
+		return DawgError("Bad evolution parameters");
+	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
+		return DawgError("Bad root parameters");
 	
    	if(ssBlock.empty() && !ssBlockFile.empty())
 	{
@@ -361,12 +363,23 @@ bool Execute()
 	else
 		return DawgError("Unable to open \"%s\" for output.", ssFile.c_str());
 	DawgIniOutput(*pOut);
-	
+
 	while(nReps--)
 	{
-
+		
 		//Evolve
 		myTree.Evolve();
+		//Temp Area
+		//for(Tree::Node::Map::const_iterator cit = myTree.GetMap().begin(); cit != myTree.GetMap().end(); ++cit)
+		//{
+		//	cout << cit->first << endl;
+		//	for(Sequence::HistoryVec::const_iterator dit = cit->second.m_vSections[0].History().begin();
+		//		dit != cit->second.m_vSections[0].History().end(); ++dit)
+		//		cout << *dit;
+		//	cout << endl;
+		//}
+		//cout << "END" << endl;
+		//End
 
 		//SaveOutput
 		Tree::Alignment aln;
