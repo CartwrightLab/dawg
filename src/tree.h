@@ -99,7 +99,7 @@ public:
 
 	Tree() : m_nSec(0), m_uWidth(1){}
 	
-	inline unsigned long FrameTrim(unsigned long u) { return u - u%m_uFrame; }
+	inline unsigned long BlockTrim(unsigned long u) { return u - u%m_uWidth; }
 
 	void Evolve();
 	void ProcessTree(NewickNode* pNode);

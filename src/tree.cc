@@ -524,7 +524,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<in
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
 			Sequence::DNAVec dna(cit->size(), Nucleotide(5, -1.0));
-			for(unsigned int u=0; u< FrameTrim(cit->size()); ++u)
+			for(unsigned int u=0; u< BlockTrim(cit->size()); ++u)
 				dna[u].m_nuc = CharToNuc(cit->at(u));
 			m_vDNASeqs.push_back(dna);
 		}
@@ -532,7 +532,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<in
 	else
 	{
 		for(vector<int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence::DNAVec(FrameTrim(*cit), Nucleotide(5, -1.0)));
+			m_vDNASeqs.push_back(Sequence::DNAVec(BlockTrim(*cit), Nucleotide(5, -1.0)));
 	}
 	if(vRates.size())
 	{

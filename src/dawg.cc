@@ -156,7 +156,7 @@ bool Execute()
 	if(!DawgVar::GetVector("Tree", vtTrees))
 		return DawgError("No trees specified.");
 
-	if(DawgVar::GetVector("Sequence", vSeqs))
+	if(DawgVar::GetVector("Sequence", vssSeqs))
 	{
 		if(vssSeqs.size() < vtTrees.size())
 			return DawgError("\"Sequence\" and \"Tree\" must have the same size.");
@@ -167,7 +167,7 @@ bool Execute()
 	{
 		if(vuSeqLen.size() < vtTrees.size())
 			return DawgError("\"Length\" and \"Tree\" must have the same size.");
-		for(vector<unsigned long>::const_iterator cit = vSueqLen.begin(); cit != vuSeqLen.end(); ++cit)
+		for(vector<unsigned long>::const_iterator cit = vuSeqLen.begin(); cit != vuSeqLen.end(); ++cit)
 			uTotalSeqLen += *cit;
 	}
 	else
@@ -314,7 +314,7 @@ bool Execute()
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
 		uWidth, vdGamma, vdIota, vdScale, dTreeScale ))
 		return DawgError("Bad evolution parameters");
-	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
+	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
 	
    	if(!ssNexusCode.empty())
@@ -332,7 +332,7 @@ bool Execute()
 	else
 		return DawgError("Unknown file format, \"%s\".");
 	
-	SetFormat(fmt, nReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
+	SetFormat(fmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
 	
 	ostream* pOut;
 	ofstream ofOut;
