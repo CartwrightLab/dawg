@@ -171,9 +171,9 @@ unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_ite
 		// Randomly allocate uSize among the sections
 		vector<unsigned long> vTemp;
 		vTemp.push_back(0);
-		vTemp.push_back(nFrame*rand_ulong(uSize/nFrame));
+		vTemp.push_back(m_uWidth*rand_ulong(uSize/m_uWidth));
 		for(vector<Sequence>::iterator jt = it; jt != m_vSections.end() && jt->Length(); ++jt)
-			vTemp.push_back(nFrame*rand_ulong(uSize/nFrame));
+			vTemp.push_back(m_uWidth*rand_ulong(uSize/m_uWidth));
 		vTemp.push_back(uSize);
 		sort(vTemp.begin(), vTemp.end());
 		unsigned long uTemp = it->Insert(uPos, itBegin+vTemp[0], itBegin+vTemp[1]);
@@ -301,7 +301,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		for(unsigned long u = 0; u < it->Length(); ++u)
 		{
 			// Total Evolution Rate for the position
-			double dTemp = dTime*(*it)[u].m_dRate*m_vdScale[u%m_uFrame];
+			double dTemp = dTime*(*it)[u].m_dRate*m_vdScale[u%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			if(dTemp != m_dOldTime)
