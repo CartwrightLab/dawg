@@ -146,6 +146,7 @@ bool Execute()
 	string ssBlock;
 
 	bool bGapSingle = false;
+	int nFrame = 1;
 
 	// Ready Variables
 
@@ -222,6 +223,7 @@ bool Execute()
 		return DawgError("\"Freqs\" specified incorrectly.");
 	
 	DawgVar::Get("GapSingleChar", bGapSingle);
+	DawgVar::Get("Frame", nFrame);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
 	if(nRes == 1)
@@ -339,7 +341,7 @@ bool Execute()
 	paramsDel.vdModel = vdDelModel;
 	
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		dGamma, dIota, dScale))
+		dGamma, dIota, dScale, nFrame))
 		return DawgError("Bad evolution parameters");
 	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
 		return DawgError("Bad root parameters");

@@ -313,16 +313,19 @@ void Tree::Evolve(Node &rNode, double dTime)
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
 			//Insertion
-			Sequence::DNAVec dna(m_pInsertionModel->RandSize());
+			unsigned long ul = m_uFrame*m_pInsertionModel->RandSize();
+			unsigned long uPos = m_uFrame*rand_ulong(uLength/m_uFrame);
+			Sequence::DNAVec dna(ul);
 			for(Sequence::DNAVec::iterator it = dna.begin(); it != dna.end(); ++it)
 				*it = RandomNucleotide();
-			uLength += rNode.Insert(rand_ulong(uLength), dna.begin(), dna.end() );
+			uLength += rNode.Insert(uPos, dna.begin(), dna.end() );
 		}
 		else
 		{
 			//Deletion
-			unsigned long ul = m_pDeletionModel->RandSize();
-			uLength -= rNode.Delete(rand_ulong(uLength+ul-1), ul);
+			unsigned long ul = m_uFrame*m_pDeletionModel->RandSize();
+			unsigned long uPos = m_uFrame*rand_ulong((uLength+ul-1)/m_uFrame);
+			uLength -= rNode.Delete(uPos, ul);
 		}
 		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
@@ -332,7 +335,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-	double dGamma, double dIota, double dScale)
+	double dGamma, double dIota, double dScale, int nFrame)
 {
 	// Verifiy Parameters
 	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
@@ -353,7 +356,12 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", dIota);
 	if(dScale <= 0.0)
 		return DawgError("Scale must be positive.");
-	
+	if(nFrame <= 0)
+		return DawgError("Frame must be positive.");
+
+	// Setup Frame
+	m_nFrame = nFrame;
+
 	// Setup Rate Parameters
 	m_dGamma = dGamma;
 	m_dIota = dIota;

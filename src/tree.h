@@ -86,7 +86,7 @@ public:
 	
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-		double dGamma, double dIota, double dScale);
+		double dGamma, double dIota, double dScale, int nFrame);
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
 		const std::vector<std::vector<double> > &vRates);
 
@@ -133,6 +133,8 @@ private:
 	double m_dLambdaDel;
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
+
+	int m_nFrame;
 };
 
 inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
