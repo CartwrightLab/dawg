@@ -71,32 +71,30 @@ unsigned long Sequence::GapPos(unsigned long uPos) const
 	return v;
 }
 
-bool Sequence::Insert(unsigned long uPos, unsigned long uSize)
+unsigned long Sequence::Insert(unsigned long uPos, unsigned long uSize)
 {
-	if(uSize == 0)
-		return true;
-	if(uPos > m_vDNA.size())
-		return false;
+	if(uSize == 0 || uPos > m_vDNA.size())
+		return 0;
 	m_vHistory.insert(m_vHistory.begin()+GapPos(uPos), uSize, '+');
 	vector<Nucleotide> seq(uSize);
 	generate(seq.begin(), seq.end(), Nucleotide::Rand);
 	m_vDNA.insert(m_vDNA.begin()+uPos, seq.begin(), seq.end());
-	return true;
+	return uSize;
 }
 
-bool Sequence::Delete(unsigned long uPos, unsigned long uSize)
+unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 {
 	if(uSize == 0)
-		return true;
+		return 0;
 	uPos++;
 	unsigned long uStart = (uSize < uPos)? uPos-uSize : 0u;
 	unsigned long uEnd = (m_vDNA.size() > uPos) ? uPos : m_vDNA.size();
-
+	
 	m_vDNA.erase(m_vDNA.begin()+uStart, m_vDNA.begin()+uEnd);
 
-	uSize = uEnd-uStart;
+	unsigned long uTemp = uSize = uEnd-uStart;
 	uPos = GapPos(uStart);
-	while(uSize)
+	while(uTemp)
 	{
 		switch(m_vHistory[uPos])
 		{
@@ -105,16 +103,16 @@ bool Sequence::Delete(unsigned long uPos, unsigned long uSize)
 			break;
 		case '+':
 			m_vHistory[uPos] = '=';
-			uSize--;
+			uTemp--;
 			break;
 		default:
 			m_vHistory[uPos] = '-';
-			uSize--;
+			uTemp--;
 			break;
 		};
 		uPos++;
 	}
-	return true;
+	return uSize;
 }
 
 
@@ -130,20 +128,17 @@ unsigned long Tree::Node::SeqLength() const
 	return uRet;
 }
 
-bool Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
+unsigned long Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 {
 	if(uSize == 0)
-		return true;	
+		return 0;	
 	vector<Sequence>::iterator it;
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
 			uPos -= it->Length();
 	if( it == m_vSections.end())
-		return false;
-	if(uPos < it->Length())
-	{
-		if(!it->Insert(uPos, uSize))
-			return false;
-	}
+		return 0;
+	else if(uPos < it->Length())
+		return it->Insert(uPos, uSize);
 	else
 	{
 		// Insertion occurs at a gap between sections
@@ -155,66 +150,57 @@ bool Tree::Node::Insert(unsigned long uPos, unsigned long uSize)
 			vTemp.push_back(rand_ulong(uSize));
 		vTemp.push_back(uSize);
 		sort(vTemp.begin(), vTemp.end());
-		it->Insert(uPos, vTemp[1]-vTemp[0]);
+		unsigned long uTemp = it->Insert(uPos, vTemp[1]-vTemp[0]);
 		int i=1;
 		for(vector<Sequence>::iterator jt = it+1; jt != m_vSections.end() && jt->Length(); ++jt, ++i)
-			jt->Insert(0, vTemp[i+1]-vTemp[i]);
+			uTemp += jt->Insert(0, vTemp[i+1]-vTemp[i]);
+		return uTemp;
 	}
-	return true;
 }
 
-bool Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
+unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
 {
 	if(uSize == 0)
-		return true;
+		return 0;
 	vector<Sequence>::iterator it;
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
 			uPos -= it->Length();
 	if( it == m_vSections.end())
-		return false;
-	it->Delete(uPos, uSize);
-	return true;
+		return 0;
+	return it->Delete(uPos, uSize);
 }
 
 ////////////////////////////////////////////////////////////
 //  class Tree
 ////////////////////////////////////////////////////////////
 
-//void Tree::Process(Node* pNode)
-//{
-//	ProcessNode(pNode);
-//	m_nSec++;
-//}
-//
-//void Tree::ProcessNode(Node* pNode)
-//{
-//	static vector<Map::iterator> vStack;
-//
-//	if(pNode->m_pSib.get())
-//		ProcessNode(pNode->m_pSib.get());
-//
-//	Section sec;
-//	sec.dBranchLen = pNode->m_dLen;
-//	if(vStack.empty())
-//		sec.itAncestor = m_map.end();
-//	else
-//		sec.itAncestor = vStack.back();
-//	node& rn = m_map[pNode->m_csLabel];
-//	for(node::const_iterator it = rn.begin(); it != rn.end(); ++it)
-//	{
-//		if(sec.itAncestor == it->itAncestor)
-//			sec.dBranchLen = it->dBranchLen;
-//	}
-//	rn.resize(m_nSec+1, Section(0.0, m_map.end()));
-//	rn[m_nSec] = sec;
-//			
-//	if(pNode->m_pSub.get())
-//	{
-//		vStack.push_back(m_map.find(pNode->m_csLabel));
-//		ProcessNode(pNode->m_pSub.get());
-//		vStack.pop_back();
-//	}
-//}
+void Tree::ProcessTree(NewickNode* pNode)
+{
+	ProcessNewickNode(pNode);
+	m_nSec++;
+}
+
+void Tree::ProcessNewickNode(NewickNode* pNode)
+{
+	// NOT THREAD SAFE!!!!!!
+	static vector<Node::Handle> vStack;
+
+	if(pNode->m_pSib.get())
+		ProcessNewickNode(pNode->m_pSib.get());
+	
+	Node::Handle hAnc = (vStack.size()) ? vStack.back() : m_map.end();
+	Node& node = m_map[pNode->m_ssLabel];
+	node.m_mBranchLens[hAnc] = pNode->m_dLen;
+	node.m_vAncestors.resize(m_nSec+1, m_map.end());
+	node.m_vAncestors[m_nSec] = hAnc;
+			
+	if(pNode->m_pSub.get())
+	{
+		vStack.push_back(m_map.find(pNode->m_ssLabel));
+		ProcessNewickNode(pNode->m_pSub.get());
+		vStack.pop_back();
+	}
+}
 
 void Tree::Evolve(Node &rNode, double dTime)
 {
@@ -261,7 +247,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return;
 
 	unsigned long uLength = rNode.SeqLength();
-	double dLength = (double)dLength;
+	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
 	double dt = rand_exp(dW);
 	while(dt <= dTime)
@@ -269,16 +255,15 @@ void Tree::Evolve(Node &rNode, double dTime)
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
 			//Insertion
-			rNode.Insert(rand_ulong(uLength), m_pInsertionModel->RandSize());
+			uLength += rNode.Insert(rand_ulong(uLength), m_pInsertionModel->RandSize());
 		}
 		else
 		{
 			//Deletion
 			unsigned long ul = m_pDeletionModel->RandSize();
-			rNode.Delete(rand_ulong(uLength+ul-1), ul);
+			uLength -= rNode.Delete(rand_ulong(uLength+ul-1), ul);
 		}
-		uLength = rNode.SeqLength();
-		dLength = (double)dLength;
+		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
 		dt += rand_exp(dW);
 	}

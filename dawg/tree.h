@@ -16,8 +16,8 @@ public:
 
 	unsigned long GapPos(unsigned long uPos) const;
 	
-	bool Insert(unsigned long uPos, unsigned long uSize);
-	bool Delete(unsigned long uPos, unsigned long uSize);
+	unsigned long Insert(unsigned long uPos, unsigned long uSize);
+	unsigned long Delete(unsigned long uPos, unsigned long uSize);
 
 	// Access the dna sequence
 	Nucleotide& operator [](unsigned long uPos) { return m_vDNA[uPos]; }
@@ -56,8 +56,8 @@ public:
 		bool m_bTouched;
 		Node() : m_bTouched(false) { }
 		unsigned long SeqLength() const;
-		bool Insert(unsigned long uPos, unsigned long uSize);
-		bool Delete(unsigned long uPos, unsigned long uSize);
+		unsigned long Insert(unsigned long uPos, unsigned long uSize);
+		unsigned long Delete(unsigned long uPos, unsigned long uSize);
 	};
 	
 	bool SetupSubst(double pFreqs[], double pSubs[]);
@@ -66,12 +66,12 @@ public:
 	Tree() : m_nSec(0) {}
 	
 	void Evolve();
-	void Process(NewickNode* pNode);
+	void ProcessTree(NewickNode* pNode);
 	
 	const Node::Map& GetMap() const { return m_map; }
 
 protected:
-	void ProcessNode(NewickNode* pNode);
+	void ProcessNewickNode(NewickNode* pNode);
 	//void Touch(node& rNode);
 	void Evolve(Node &rNode, double dTime);
 
@@ -98,6 +98,11 @@ private:
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
 };
+
+bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
+{
+	return &*A < &*B;
+}
 
 class Nucleotide
 {
