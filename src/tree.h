@@ -88,7 +88,7 @@ public:
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		int nFrame, const std::vector<double> &vdGamma,
-		const std::vector<double> &vdIota, const std::vector<double> &vdScale);
+		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<int> &vData,
 		const std::vector<std::vector<double> > &vRates);
 
@@ -122,6 +122,8 @@ private:
 	std::vector<double> m_vdScale;
 	std::vector<double> m_vdGamma;
 	std::vector<double> m_vdIota;
+
+	double m_dTreeScale;
 
 	double m_dOldTime;
 	double m_dFreqs[4];

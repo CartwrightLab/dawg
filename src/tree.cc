@@ -281,7 +281,7 @@ void Tree::Evolve(Node &rNode)
 			// Copy ancestor to temporary location
 			mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
 			// Evolve temporary location
-			Evolve(mapSeqs[rNode.m_vAncestors[a]], rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
+			Evolve(mapSeqs[rNode.m_vAncestors[a]], m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
 		}
 		// Assemble final sequence
 		rNode.m_vSections.push_back(mapSeqs[rNode.m_vAncestors[a]].m_vSections[a]);
@@ -298,9 +298,10 @@ void Tree::Evolve(Node &rNode, double dTime)
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
 		for(unsigned long u = 0; u < it->Length(); ++u)
 		{
-			if((*it)[u].m_dRate < DBL_EPSILON)
+			// Total Evolution Rate for the position
+			double dTemp = dTime*(*it)[u].m_dRate*m_vdScale[u%m_uFrame];
+			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
-			double dTemp = dTime*(*it)[u].m_dRate;
 			if(dTemp != m_dOldTime)
 			{
 				m_dOldTime = dTemp;
@@ -367,7 +368,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		unsigned long uFrame,
 		const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota,
-		const std::vector<double> &vdScale )
+		const std::vector<double> &vdScale,
+		double dTreeScale)
 {
 	// Verifiy Parameters
 	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
@@ -406,7 +408,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		if(*cit <= 0.0)
 			return DawgError("Invalid Scale, \"%f\". Scale must be positive.", *cit);
 	}
-
+	if(dTreeScale <= 0.0)
+		return DawgError("Invalid TreeScale, \"%f\". TreeScale must be positive.", dTreeScale);
 
 	// Setup Frame
 	m_uFrame = uFrame;
@@ -417,6 +420,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 
 	// Setup Scale
 	m_vdScale = vdScale;
+
+	// Setup TreeScale
+	m_dTreeScale = dTreeScale;
 
 	// Setup Cumulative Frequencies
 	m_dNucCumFreqs[0] = pFreqs[0];
@@ -441,11 +447,15 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	matQ.Scale(matQ, vecF);
 
 	// Scale such that the total rate of substitution is equal to one
+	double dX = 0.0;
+	for(int i=0;i<m_dIota.size();++i)
+		dX -= (1.0-m_dIota[i])*m_dScale[i]);
+	dX = m_dIota.size()/dX;
 	matQ(0,0) = -(matQ(0,1)+matQ(0,2)+matQ(0,3));
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
 	matQ(3,3) = -(matQ(3,0)+matQ(3,1)+matQ(3,2));
-	matQ.Scale(matQ, -1.0/((vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
+	matQ.Scale(matQ, dX/((vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
 		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3))));
 	
 	// Store Scaled Q Matrix

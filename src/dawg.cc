@@ -124,7 +124,9 @@ bool Execute()
 	vector<int> vSeqLen;
 	vector<string> vSeqs;
 	int nTotalSeqLen = 0, nTotalRateLen = 0;
-	double dGamma = 0.0, dIota = 0.0;
+	
+	vector<double> vdGamma, vdIota, vdScale;
+
 	double dNucFreq[4] = {0.25,0.25,0.25,0.25};
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 	vector<double> vdParams;
@@ -132,13 +134,13 @@ bool Execute()
 	string ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
 
 	double dLambda[2] = {0.0, 0.0};
-	//vector<double> vdInsModel;
-	//vector<double> vdDelModel;
 	vector<double> vdGapModel[2];
 
 	vector<NewickNode*> vtTrees;
-	double		  dScale = 1.0;
+	double	dTreeScale = 1.0;
 	vector<int>   vnSeed;
+
+
 
 	string ssFile = "-";
 	FileFormat fmt = FASTA;
@@ -147,7 +149,7 @@ bool Execute()
 	string ssBlock;
 
 	bool bGapSingle = false, bGapPlus = false;
-	int nFrame = 1;
+	unsigned long uFrame = 1;
 	int nRes;
 
 	// Ready Variables
@@ -171,6 +173,12 @@ bool Execute()
 	}
 	else
 		vSeqLen.resize(vtTrees.size(), 100);
+	
+	DawgVar::Get("Frame", (int)uFrame);
+
+	vdGamma.resize(uFrame, 0.0);
+	vdIota.resize(uFrame, 0.0);
+	vdScale.resize(uFrame, 1.0);
 
 	vvdRates.resize(vtTrees.size());
 	if(DawgVar::GetMatrix("Rates", &vvdRates[0], vvdRates.size()))
@@ -188,13 +196,20 @@ bool Execute()
 	DawgVar::GetVector("Seed", vnSeed);
 	DawgVar::Get("Model", ssModel);
 	DawgVar::GetVector("Params", vdParams);
-	if(!DawgVar::Get("Gamma", dGamma)) // Coef of Variation
+	if(!DawgVar::GetVector("Gamma", vdGamma)) // Coef of Variation
 	{
-		if(DawgVar::Get("Alpha", dGamma))  // Shape parameter
-			dGamma = 1.0/dGamma;
+		if(DawgVar::Get("Alpha", vdGamma))  // Shape parameter
+		{
+			for(vector<double>::iterator it = vdGamma.begin();
+				it != vdGamma.end(); ++it)
+			{
+				*it = 1.0 / *it;
+			}
+		}
 	}
-	DawgVar::Get("Iota", dIota);
-	DawgVar::Get("Scale", dScale); // make a vector (?)
+	DawgVar::GetVector("Iota", vdGamma);
+	DawgVar::GetVector("Scale", vdScale);
+	DawgVar::Get("TreeScale", dTreeScale);
 	DawgVar::GetArray("GapModel", ssGapModel, 2);
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
 	if(nRes > 0 && nRes < 4)
@@ -202,7 +217,6 @@ bool Execute()
 	
 	DawgVar::Get("GapSingleChar", bGapSingle);
 	DawgVar::Get("GapPlus", bGapPlus);
-	DawgVar::Get("Frame", nFrame);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
 	if(nRes)
@@ -305,7 +319,7 @@ bool Execute()
 	paramsDel.vdModel = vdGapModel[1];
 	
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		dGamma, dIota, dScale, nFrame))
+		nFrame, vdGamma, vdIota, vdScale, dTreeScale ))
 		return DawgError("Bad evolution parameters");
 	if(!myTree.SetupRoot(vSeqs, vSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
