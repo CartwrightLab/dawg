@@ -19,6 +19,7 @@ AC_CHECK_PROG(DIFF, diff, diff)
 AC_LANG_PUSH(C++)
 
 dnl Checks for libraries.
+AC_CHECK_LIB(stdc++, main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -42,7 +43,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getpid _getpid copysign _copysign])
 dnl AC_CHECK_FUNCS([floor pow sqrt])
 
-AX_CREATE_STDINT_H
 AX_CXXFLAGS_WARN_ALL
 AX_CFLAGS_WARN_ALL
 
@@ -52,7 +52,8 @@ case "$CXX" in
  *)
 	;;
 esac
- 
+
+AX_CREATE_STDINT_H
 
 AC_LANG_POP(C++)
 

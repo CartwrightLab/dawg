@@ -113,7 +113,7 @@ public:
 	template<class T>
 	Vec::size_type GetArray(T ar[], Vec::size_type uSize, bool bExpand=true)
 	{
-		Vec::size_type uMax = min(uSize, Size());
+		Vec::size_type uMax = std::min(uSize, Size());
 		Vec::size_type u = 0;
 		// read uMax elements from vector
 		for(; u<uMax; u++)
@@ -156,7 +156,7 @@ public:
 		if(Size() == 0)
 			return 0;
 		Vec::size_type u = 0;
-		Vec::size_type uMax = min(uSize, Size());
+		Vec::size_type uMax = std::min(uSize, Size());
 
 		// Check to see if it is a double vector
 		// not 100% accurate
