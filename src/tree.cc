@@ -45,7 +45,7 @@ Sequence::Sequence()
 
 }
 
-Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), 'R')
+Sequence::Sequence(const DNAVec &dna) : m_vDNA(dna), m_vHistory(dna.size(), '.')
 {
 
 }
@@ -572,7 +572,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 					if(uCol >= it->size())
 						it->resize(uCol+1, (*cit)[uCol]);
 					else if(!IsIns((*it)[uCol]))
-						it->insert(it->begin()+uCol, 1, (*cit)[uCol]);
+						it->insert(it->begin()+uCol, (*cit)[uCol]);
 					else if((*it)[uCol] == 'I' || (*it)[uCol] == 'i')
 						(*it)[uCol] = '*';
 				}
@@ -596,20 +596,20 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 			case '*':
 				ss[uh] = NucToChar(dna[ud++].m_nuc);
 				break;
+			case 'J':
 			case 'D':
 				break;
+			case 'j':
 			case 'd':
 				if(bGapSingleChar) 
 					ss[uh] = '?';
 				break;
-			case 'J':
 			case 'I':
 				ss[uh] = (bGapPlus) ? '+' : '-';
 				break;
-			case 'j':
 			case 'i':
 				ss[uh] = (bGapSingleChar) ? '?' :
-							(bGapPlus) ? '+' : '-';
+							((bGapPlus) ? '+' : '-');
 				break;
 			};
 		}
