@@ -344,9 +344,9 @@ void Tree::Evolve(Node &rNode, double dTime)
 			//Insertion
 			unsigned long ul = m_uFrame*m_pInsertionModel->RandSize();
 			unsigned long uPos = m_uFrame*rand_ulong(uLength/m_uFrame);
-			Sequence::DNAVec dna(ul);
-			for(Sequence::DNAVec::iterator it = dna.begin(); it != dna.end(); ++it)
-				*it = RandomNucleotide();
+			Sequence::DNAVec dna;
+			for(unsigned int uc = 0; uc < ul; ++ul)
+				dna.push_back(RandomNucleotide(uc));
 			uLength += rNode.Insert(uPos, dna.begin(), dna.end(), m_uFrame );
 		}
 		else
@@ -448,9 +448,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 
 	// Scale such that the total rate of substitution is equal to one
 	double dX = 0.0;
-	for(int i=0;i<m_dIota.size();++i)
-		dX -= (1.0-m_dIota[i])*m_dScale[i]);
-	dX = m_dIota.size()/dX;
+	for(int i=0;i<m_vdIota.size();++i)
+		dX -= (1.0-m_vdIota[i])*m_vdScale[i]);
+	dX = m_vdIota.size()/dX;
 	matQ(0,0) = -(matQ(0,1)+matQ(0,2)+matQ(0,3));
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
