@@ -334,7 +334,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return;
 
 	unsigned long uLength = rNode.SeqLength();
-	double dLength = (double)uLength;
+	double dLength = (double)uLength/m_uFrame;
 	double dW = 1.0/m_funcRateSum(dLength);
 	double dt = rand_exp(dW);
 	while(dt <= dTime)
@@ -356,7 +356,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			unsigned long uPos = m_uFrame*rand_ulong((uLength+ul)/m_uFrame-1)+m_uFrame-1;
 			uLength -= rNode.Delete(uPos, ul, m_uFrame);
 		}
-		dLength = (double)uLength;
+		dLength = (double)uLength/m_uFrame;
 		dW = 1.0/m_funcRateSum(dLength);
 		dt += rand_exp(dW);
 	}
