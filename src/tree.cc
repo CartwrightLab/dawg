@@ -154,7 +154,9 @@ Tree::Node::const_iterator Tree::Node::SeqPos(unsigned long uPos) const
 			break;
 		uPos -= itA->SeqLength();
 	}
-	Sequence::const_iterator itB = (itA != m_vSections.end()) ? itA->SeqPos(uPos) : NULL;
+	Sequence::const_iterator itB;
+	if(itA != m_vSections.end())
+		itB = itA->SeqPos(uPos);
 	return const_iterator(itA,itB);
 }
 
