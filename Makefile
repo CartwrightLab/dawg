@@ -37,9 +37,9 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	depcomp install-sh missing
+	config/depcomp config/install-sh config/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -69,13 +69,13 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/reed/dawg-unix/missing --run aclocal-1.9
+ACLOCAL = ${SHELL} /home/reed/dawg-unix/config/missing --run aclocal-1.9
 AMDEP_FALSE = #
 AMDEP_TRUE = 
-AMTAR = ${SHELL} /home/reed/dawg-unix/missing --run tar
-AUTOCONF = ${SHELL} /home/reed/dawg-unix/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/reed/dawg-unix/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/reed/dawg-unix/missing --run automake-1.9
+AMTAR = ${SHELL} /home/reed/dawg-unix/config/missing --run tar
+AUTOCONF = ${SHELL} /home/reed/dawg-unix/config/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/reed/dawg-unix/config/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/reed/dawg-unix/config/missing --run automake-1.9
 AWK = nawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -88,6 +88,7 @@ CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DIFF = diff
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
@@ -104,14 +105,14 @@ LEX_OUTPUT_ROOT = lex.yy
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/reed/dawg-unix/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/reed/dawg-unix/config/missing --run makeinfo
 OBJEXT = o
 PACKAGE = dawg
-PACKAGE_BUGREPORT = 
-PACKAGE_NAME = 
-PACKAGE_STRING = 
-PACKAGE_TARNAME = 
-PACKAGE_VERSION = 
+PACKAGE_BUGREPORT = rac@uga.edu
+PACKAGE_NAME = dawg
+PACKAGE_STRING = dawg 1.0.0
+PACKAGE_TARNAME = dawg
+PACKAGE_VERSION = 1.0.0
 PATH_SEPARATOR = :
 SET_MAKE = 
 SHELL = /bin/bash
@@ -137,7 +138,7 @@ exec_prefix = ${prefix}
 host_alias = 
 includedir = ${prefix}/include
 infodir = ${prefix}/info
-install_sh = /home/reed/dawg-unix/install-sh
+install_sh = /home/reed/dawg-unix/config/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localstatedir = ${prefix}/var
@@ -330,6 +331,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
+	$(mkdir_p) $(distdir)/config
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

@@ -1,21 +1,23 @@
-AC_PREREQ(2.53)
-AC_INIT(src/dawg.cpp)
+AC_INIT(dawg, 1.0.0, rac@uga.edu)
+AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([src/dawg.cc])
+AC_PREREQ(2.59)
+AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
-AM_INIT_AUTOMAKE(dawg, 1.0.0)
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AM_PROG_LEX
+AC_PROG_CPP
 AC_PROG_YACC
+AM_PROG_LEX
+AC_CHECK_PROG(DIFF, diff, diff)
 
 # Checks for libraries.
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h])
+AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

@@ -1,1 +1,1 @@
-EXTRA_DIST = example0.fud example1.fud
+dist_pkgdata_DATA = example0.fud example1.fud
