@@ -199,67 +199,30 @@ void FilterLowerCase(string& ss)
 }
 
 // DNA -> Protein
-char g_csAminoAcid[] = "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSS*CWCLFLF";
+const char g_csAminoAcid[] = "KNNKTTTTIIIMRSSRQHHQPPPPLLLLRRRR*YY*SSSSLFFL*CCWEDDEAAAAVVVVGGGG"; 
 
 void FilterTranslate(string& ss)
 {
 	string::iterator it = ss.begin();
-
-	for(string::const_iterator cit = ss.begin(); *cit;)
+	string::const_iterator cit = ss.begin();
+	while(*cit)
 	{
-		
-		int i = 0;
-		switch(*cit++)
+		if(*cit < 'A')
 		{
-		case 'A':
-			break;
-		case 'C':
-			i |= 0x10;
-			break;
-		case 'G':
-			i |= 0x20;
-			break;
-		case 'T':
-			i |= 0x30;
-			break;
-		case '-':
-			*it++ = '-';
-			cit+=2;
-			continue;
-		case '+':
-			*it++ = '+';
-			cit+=2;
-			continue;
-		case '=':
-			*it++ = '=';
-			cit+=2;
-			continue;
+			*it++ = *cit;
+			cit += 3;
 		}
-		switch(*cit++)
-		{ 
-		case 'C':
-			i |= 0x4;
-			break;
-		case 'G':
-			i |= 0x8;
-			break;
-		case 'T':
-			i |= 0xC;
-			break;
-		}
-		switch(*cit++)
+		else
 		{
-		case 'C':
-			i |= 0x1;
-			break;
-		case 'G':
-			i |= 0x2;
-			break;
-		case 'T':
-			i |= 0x3;
-			break;
+			// ACGT/acgt -> 0132
+			// can be improved but requires endian-aware code
+
+			unsigned int x = ((*cit++)&6u) << 3;
+			x |= ((*cit++)&6u) << 1;
+			x |= ((*cit++)&6u) >> 1;
+			// Lookup letter from codon number
+			*it++ = g_csAminoAcid[x];
 		}
-		*it++ = g_csAminoAcid[i];
 	}
 	ss.resize(ss.size()/3);
 }

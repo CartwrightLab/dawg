@@ -549,8 +549,18 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	if(vRates.size())
 	{
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
+		{
+			double dTemp = 0.0;
 			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
+			{
 				m_vDNASeqs[u][v].m_dRate = vRates[u][v];
+				dTemp += vRates[u][v];
+
+			}
+			// Scale the Expected Rate to 1.0
+			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
+				m_vDNASeqs[u][v].m_dRate /= dTemp;
+		}
 	}
 	return true;
 }
