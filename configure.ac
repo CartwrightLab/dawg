@@ -1,4 +1,4 @@
-AC_INIT(dawg, 1.0.0-rc1, rac@uga.edu)
+AC_INIT(dawg, 1.0.0-rc2, rac@uga.edu)
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.59)

@@ -3,7 +3,7 @@ COMMAND LINE USAGE
   -s: process files serially
   -c: process files combined together
   -u: unbuffered output
-  -v: display verison information
+  -v: display version information
   -h: display help information
   -?: same as -h
 
@@ -13,7 +13,7 @@ FILE FORMAT
   be a string, number, boolean, tree, or vector of values.
 
   string:  "[char-sequence]"
-	   <<EOF [several lines] EOF
+           <<EOF [several lines] EOF
   number:  [sign]digits[.digits][(e|E)[sign]digits]
   boolean: true|false
   tree:    Newick Format
@@ -36,10 +36,12 @@ OPTIONS
   GapModel       VS  models of indel formation: NB|User
   Lambda         VN  rates of indel formation
   GapParams      VN  parameter for the indel model
+  Frame          N   size of frame to restrict indels to
   Reps           N   number of data sets to output
   File           S   output file 
   Format         S   output format: Fasta|Nexus|Phylip
   GapSingleChar  B   output gaps as a single character
+  GapPlus        B   distinguish insertions from deletions
   NexusBlock     S   text to include between datasets in Nexus format
   NexusBlockFile S   file to read the Nexus block from
   Seed           VN  PRNG seed

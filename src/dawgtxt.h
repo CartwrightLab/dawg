@@ -3,7 +3,7 @@
 "  -s: process files serially\n" \
 "  -c: process files combined together\n" \
 "  -u: unbuffered output\n" \
-"  -v: display verison information\n" \
+"  -v: display version information\n" \
 "  -h: display help information\n" \
 "  -?: same as -h\n" \
 "\n" \
@@ -13,7 +13,7 @@
 "  be a string, number, boolean, tree, or vector of values.\n" \
 "\n" \
 "  string:  \"[char-sequence]\"\n" \
-"	   <<EOF [several lines] EOF\n" \
+"           <<EOF [several lines] EOF\n" \
 "  number:  [sign]digits[.digits][(e|E)[sign]digits]\n" \
 "  boolean: true|false\n" \
 "  tree:    Newick Format\n" \
@@ -36,10 +36,12 @@
 "  GapModel       VS  models of indel formation: NB|User\n" \
 "  Lambda         VN  rates of indel formation\n" \
 "  GapParams      VN  parameter for the indel model\n" \
+"  Frame          N   size of frame to restrict indels to\n" \
 "  Reps           N   number of data sets to output\n" \
 "  File           S   output file \n" \
 "  Format         S   output format: Fasta|Nexus|Phylip\n" \
 "  GapSingleChar  B   output gaps as a single character\n" \
+"  GapPlus        B   distinguish insertions from deletions\n" \
 "  NexusBlock     S   text to include between datasets in Nexus format\n" \
 "  NexusBlockFile S   file to read the Nexus block from\n" \
 "  Seed           VN  PRNG seed\n" \

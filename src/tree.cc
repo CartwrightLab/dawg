@@ -102,9 +102,7 @@ unsigned long Sequence::Insert(unsigned long uPos, DNAVec::const_iterator itBegi
 		return 0;
 	m_vDNA.insert(m_vDNA.begin()+uPos, itBegin, itEnd);
 	uPos = HisPos(uPos);
-	if(uSize > 1)
-		m_vHistory.insert(m_vHistory.begin()+uPos, uSize-1, 'i');
-	m_vHistory.insert(m_vHistory.begin()+uPos, 'I');
+	m_vHistory.insert(m_vHistory.begin()+uPos, uSize, 'i');
 	return uSize;
 }
 
@@ -121,11 +119,10 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 	uPos = HisPos(uStart);
 	
 	//delete uTemp nucleotides in the history starting at uPos
-	m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'D' : 'J';
-	for(unsigned long u = uEnd-uStart-1; u; u--)
+	for(unsigned long u = uEnd-uStart; u; u--)
 	{
-		do {uPos++;} while(IsDel(m_vHistory[uPos]));
 		m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
+		do {uPos++;} while(IsDel(m_vHistory[uPos]));
 	}
 	return uEnd-uStart;
 }
@@ -153,14 +150,15 @@ unsigned long Tree::Node::SeqLength() const
 	return uRet;
 }
 
-unsigned long Tree::Node::Insert(unsigned long uPos,
-			Sequence::DNAVec::const_iterator itBegin, Sequence::DNAVec::const_iterator itEnd)
+unsigned long Tree::Node::Insert(unsigned long uPos, Sequence::DNAVec::const_iterator itBegin,
+			Sequence::DNAVec::const_iterator itEnd, int nFrame)
 {
 	unsigned long uSize = (unsigned long)(itEnd-itBegin);
 
 	if(uSize == 0)
 		return 0;	
 	vector<Sequence>::iterator it;
+	// find the section belonging to uPos
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
 			uPos -= it->Length();
 	if( it == m_vSections.end())
@@ -173,9 +171,9 @@ unsigned long Tree::Node::Insert(unsigned long uPos,
 		// Randomly allocate uSize among the sections
 		vector<unsigned long> vTemp;
 		vTemp.push_back(0);
-		vTemp.push_back(rand_ulong(uSize));
+		vTemp.push_back(nFrame*rand_ulong(uSize/nFrame));
 		for(vector<Sequence>::iterator jt = it; jt != m_vSections.end() && jt->Length(); ++jt)
-			vTemp.push_back(rand_ulong(uSize));
+			vTemp.push_back(nFrame*rand_ulong(uSize/nFrame));
 		vTemp.push_back(uSize);
 		sort(vTemp.begin(), vTemp.end());
 		unsigned long uTemp = it->Insert(uPos, itBegin+vTemp[0], itBegin+vTemp[1]);
@@ -186,16 +184,25 @@ unsigned long Tree::Node::Insert(unsigned long uPos,
 	}
 }
 
-unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize)
+unsigned long Tree::Node::Delete(unsigned long uPos, unsigned long uSize, int nFrame)
 {
 	if(uSize == 0)
 		return 0;
 	vector<Sequence>::iterator it;
+	// find the first section
 	for(it = m_vSections.begin(); it != m_vSections.end() && uPos > it->Length(); ++it)
 			uPos -= it->Length();
 	if( it == m_vSections.end())
 		return 0;
-	return it->Delete(uPos, uSize);
+	unsigned long u = it->Delete(uPos, uSize);
+	unsigned long uTemp = u;
+	while(u < uSize && ++it != m_vSections.end())
+	{
+		uSize -= u;
+		u = it->Delete(nFrame-1, uSize);
+		uTemp += u;
+	}
+	return uTemp;
 }
 
 void Tree::Node::Flatten(Sequence& seq) const
@@ -339,14 +346,14 @@ void Tree::Evolve(Node &rNode, double dTime)
 			Sequence::DNAVec dna(ul);
 			for(Sequence::DNAVec::iterator it = dna.begin(); it != dna.end(); ++it)
 				*it = RandomNucleotide();
-			uLength += rNode.Insert(uPos, dna.begin(), dna.end() );
+			uLength += rNode.Insert(uPos, dna.begin(), dna.end(), m_nFrame );
 		}
 		else
 		{
 			//Deletion
 			unsigned long ul = m_nFrame*m_pDeletionModel->RandSize();
 			unsigned long uPos = m_nFrame*rand_ulong((uLength+ul)/m_nFrame-1)+m_nFrame-1;
-			uLength -= rNode.Delete(uPos, ul);
+			uLength -= rNode.Delete(uPos, ul, m_nFrame);
 		}
 		dLength = (double)uLength;
 		dW = 1.0/m_funcRateSum(dLength);
@@ -485,7 +492,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<in
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
 			Sequence::DNAVec dna(cit->size(), Nucleotide(5, -1.0));
-			for(unsigned int u=0; u< cit->size(); ++u)
+			for(unsigned int u=0; u< FrameTrim(cit->size()); ++u)
 				dna[u].m_nuc = CharToNuc(cit->at(u));
 			m_vDNASeqs.push_back(dna);
 		}
@@ -493,7 +500,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<in
 	else
 	{
 		for(vector<int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence::DNAVec(*cit, Nucleotide(5, -1.0)));
+			m_vDNASeqs.push_back(Sequence::DNAVec(FrameTrim(*cit), Nucleotide(5, -1.0)));
 	}
 	if(vRates.size())
 	{
@@ -540,9 +547,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 		cit->second.Flatten(s);
 		vHisTable.push_back(s.History());
 		vDnaTable.push_back(s.DNA());
-		aln[cit->first] = string(vHisTable.back().begin(), vHisTable.back().end());
 	}
-	return;
 
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
@@ -562,14 +567,15 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 			bGo = true;
 			if(IsIns((*cit)[uCol]))
 			{
+				char ch = (*cit)[uCol];
 				for(vector<Sequence::HistoryVec>::iterator it = vHisTable.begin();
 					it != vHisTable.end(); ++it)
 				{
 					if(uCol >= it->size())
-						it->resize(uCol+1, (*cit)[uCol]);
+						it->resize(uCol+1, ch);
 					else if(!IsIns((*it)[uCol]))
-						it->insert(it->begin()+uCol, (*cit)[uCol]);
-					else if((*it)[uCol] == 'I' || (*it)[uCol] == 'i')
+						it->insert(it->begin()+uCol, ch);
+					else if((*it)[uCol] == 'i')
 						(*it)[uCol] = '*';
 				}
 				cit = vHisTable.end()-1;
@@ -584,6 +590,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 		Sequence::DNAVec &dna = vDnaTable[u];
 		string& ss = aln[cit->first];
 		ss.resize(his.size(), '-');
+		bool bInGap = false;
 		for(unsigned int uh = 0, ud=0; uh < his.size(); ++uh)
 		{
 			switch(his[uh])
@@ -591,21 +598,20 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar) const
 			case '.':
 			case '*':
 				ss[uh] = NucToChar(dna[ud++].m_nuc);
-				break;
-			case 'J':
-			case 'D':
+				bInGap = false;
 				break;
 			case 'j':
 			case 'd':
-				if(bGapSingleChar) 
+				if(bGapSingleChar && bInGap)
 					ss[uh] = '?';
-				break;
-			case 'I':
-				ss[uh] = (bGapPlus) ? '+' : '-';
+				bInGap = true;
 				break;
 			case 'i':
-				ss[uh] = (bGapSingleChar) ? '?' :
-							((bGapPlus) ? '+' : '-');
+				if(bGapSingleChar && bInGap)
+					ss[uh] = '?';
+				else if(bGapPlus)
+					ss[uh] = '+';
+				bInGap = true;
 				break;
 			};
 		}

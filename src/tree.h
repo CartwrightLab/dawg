@@ -78,8 +78,9 @@ public:
 		unsigned long SeqLength() const;
 		unsigned long Insert(unsigned long uPos,
 			Sequence::DNAVec::const_iterator itBegin,
-			Sequence::DNAVec::const_iterator itEnd);
-		unsigned long Delete(unsigned long uPos, unsigned long uSize);
+			Sequence::DNAVec::const_iterator itEnd,
+			int nFrame);
+		unsigned long Delete(unsigned long uPos, unsigned long uSize, int nFrame);
 		void Flatten(Sequence& seq) const;
 	};
 	typedef std::map<std::string, std::string> Alignment;
@@ -96,6 +97,8 @@ public:
 
 	Tree() : m_nSec(0), m_nFrame(1){}
 	
+	inline unsigned long FrameTrim(unsigned long u) { return u - u%m_nFrame; }
+
 	void Evolve();
 	void ProcessTree(NewickNode* pNode);
 	
