@@ -125,7 +125,7 @@ unsigned long Sequence::Delete(unsigned long uPos, unsigned long uSize)
 	m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'D' : 'J';
 	for(unsigned long u = uEnd-uStart-1; u; u--)
 	{
-		do {uPos++} while(IsDel(m_vHistory[uPos]));
+		do {uPos++;} while(IsDel(m_vHistory[uPos]));
 		m_vHistory[uPos] = (m_vHistory[uPos] == '.') ? 'd' : 'j';
 	}
 	return uEnd-uStart;
