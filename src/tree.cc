@@ -84,10 +84,14 @@ inline bool IsIns(char ch)
 unsigned long Sequence::HisPos(unsigned long uPos) const
 {
 	vector<char>::const_iterator it=m_vHistory.begin();
-	do {
+	// Skip deletions in the history
+	while(IsDel(*it)) {++it;}
+	while(uPos--)
+	{
+		++it;
 		// Skip deletions in the history
-		while(IsDel(*it)) { it++; }
-	} while(uPos--);
+		while(IsDel(*it)) {++it;}
+	}
 	return (unsigned long)(it-m_vHistory.begin());
 }
 
