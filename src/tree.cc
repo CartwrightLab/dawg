@@ -177,13 +177,20 @@ void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 		ProcessNewickNode(pNode->m_pSib.get(), hAnc);
 
 	Node& node = m_map[pNode->m_ssLabel];
-	node.m_ssName = pNode->m_ssLabel;
 	node.m_mBranchLens[hAnc] = pNode->m_dLen;
 	node.m_vAncestors.resize(m_nSec+1, m_map.end());
 	node.m_vAncestors[m_nSec] = hAnc;
-			
+
+	if(node.m_ssName.empty() && !pNode->m_pSub.get())
+		m_vTips.push_back(pNode->m_ssLabel);
+
+	if(node.m_ssName.empty())
+		node.m_ssName = pNode->m_ssLabel;
+
 	if(pNode->m_pSub.get())
-		ProcessNewickNode(pNode->m_pSub.get(), m_map.find(pNode->m_ssLabel));
+		ProcessNewickNode(pNode->m_pSub.get(), m_map.find(node.m_ssName));
+	
+
 }
 
 void Tree::Evolve()
@@ -210,8 +217,8 @@ void Tree::Evolve()
 				(*it)[u].m_ucNuc = RandomBase();
 		}
 	}
-	for(Node::Handle it = m_map.begin(); it != m_map.end(); ++it)
-		Evolve(it->second);
+	for(vector<string>::const_iterator cit = m_vTips.begin(); cit != m_vTips.end(); ++cit)
+		Evolve(m_map[*cit]);
 }
 
 void Tree::Evolve(Node &rNode)
@@ -482,11 +489,14 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		try {m_pInsertionModel.reset(new PowerModel(rIns.vdModel));}
 			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
 	}
-	else
+	else if(rIns.ssModel == "US")
 	{
 		try {m_pInsertionModel.reset(new UserModel(rIns.vdModel));}
 			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
 	}
+	else
+		return DawgError("Unknown insertion model: \"%s\".", rDel.ssModel.c_str());
+
 
 	m_dLambdaDel = rDel.dLambda;
 	if(m_dLambdaDel < DBL_EPSILON)
@@ -496,16 +506,19 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}
 			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
 	}
-	else if(rIns.ssModel == "PL")
+	else if(rDel.ssModel == "PL")
 	{
 		try {m_pDeletionModel.reset(new PowerModel(rDel.vdModel));}
 			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
 	}
-	else
+	else if(rDel.ssModel == "US")
 	{
 		try {m_pDeletionModel.reset(new UserModel(rDel.vdModel));}
 			catch(...) {return DawgError("Deletion model parameters not specified correctly.");}
-	}    
+	}
+	else
+		return DawgError("Unknown deletion model: \"%s\".", rDel.ssModel.c_str());
+
 	m_funcRateIns.m = m_dLambdaIns;
 	m_funcRateIns.b = m_dLambdaIns;
 	m_funcRateSum.m = m_dLambdaDel+m_dLambdaIns;
@@ -573,7 +586,7 @@ void Tree::Align(Alignment &aln, bool bGapPlus, bool bGapSingleChar, bool bLower
 	vector<string> vNames;
 	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit)
 	{
-		vNames.push_back(cit->first);
+		vNames.push_back(cit->second.m_ssName);
 		Sequence s;
 		cit->second.Flatten(s);
 		vTable.push_back(s);

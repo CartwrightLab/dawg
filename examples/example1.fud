@@ -21,11 +21,10 @@ Freqs  = {0.20, 0.30, 0.30, 0.20}
 Reps = 10
 
 #Output information
-File = "example1.nex"
+File = "example1.poo.nex"
 Format = "Nexus"
-NexusBlock = <<EOF
+NexusCode = <<EOF
 Begin Paup;
-set cr=parsimony;
-hsearch;
+  hsearch;
 End;
 EOF

@@ -164,6 +164,7 @@ private:
 	int m_nSec;
 	std::vector< Sequence > m_vDNASeqs;
 	Node::Map m_map;
+	std::vector<std::string> m_vTips;
 
 	unsigned long m_uWidth;
 	std::vector<double> m_vdScale;

@@ -7,6 +7,8 @@
 "  -h: display help information\n" \
 "  -?: same as -h\n" \
 "\n" \
+"  Dawg will read stdin if filename is \"-\".\n" \
+"\n" \
 "FILE FORMAT\n" \
 "  The file format takes a series of statements in the form of\n" \
 "  \"name = value,\" where \"name\" is alphanumeric and value can\n" \
@@ -23,26 +25,27 @@
 "  Name          Type            Description\n" \
 "--------------------------------------------------------------------------\n" \
 "  Tree           VT  phylogeny\n" \
-"  Scale          N   coefficient to scale branch lengths by\n" \
+"  TreeScale      N   coefficient to scale branch lengths by\n" \
 "  Sequence       VS  root sequences \n" \
 "  Length         VN  length of generated root sequences\n" \
 "  Rates          VVN rate of evolution of each root nucleotide\n" \
 "  Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN\n" \
-"  Freqs          VD  nucleotide (ACGT) frequencies \n" \
+"  Freqs          VN  nucleotide (ACGT) frequencies \n" \
 "  Params         VN  parameters for the model of evolution\n" \
-"  Gamma          N   coefficient of variance for rate heterogenity\n" \
-"  Alpha          N   shape parameter\n" \
-"  Iota           N   proportion of invariant sites\n" \
-"  GapModel       VS  models of indel formation: NB|User\n" \
+"  Width          N   block width for indels and recombination\n" \
+"  Scale          VN  block position scales\n" \
+"  Gamma          VN  coefficients of variance for rate heterogenity\n" \
+"  Alpha          VN  shape parameters\n" \
+"  Iota           VN  proportions of invariant sites\n" \
+"  GapModel       VS  models of indel formation: NB|PL|US\n" \
 "  Lambda         VN  rates of indel formation\n" \
 "  GapParams      VN  parameter for the indel model\n" \
-"  Frame          N   size of frame to restrict indels to\n" \
 "  Reps           N   number of data sets to output\n" \
 "  File           S   output file \n" \
 "  Format         S   output format: Fasta|Nexus|Phylip\n" \
 "  GapSingleChar  B   output gaps as a single character\n" \
-"  GapPlus        B   distinguish insertions from deletions\n" \
-"  NexusBlock     S   text to include between datasets in Nexus format\n" \
-"  NexusBlockFile S   file to read the Nexus block from\n" \
-"  Seed           VN  PRNG seed\n" \
+"  GapPlus        B   distinguish insertions from deletions in alignment\n" \
+"  LowerCase      B   output sequences in lowercase\n" \
+"  NexusCode      S   text or file to include between datasets in Nexus format\n" \
+"  Seed           VN  PRNG seed (integers)\n" \
 

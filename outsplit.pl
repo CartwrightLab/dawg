@@ -3,10 +3,13 @@
 #
 # outsplit.pl is used to extract sequences from Fasta and Phylip files
 # 
-# usage perl -w outsplit.pl <file> <id>
+# usage: perl -w outsplit.pl <file> <id>
 #
 # if <id> is "all" it it creates a directory and
 # creates a new file for each alignment
+#
+# Distributed under the same license as DAWG
+#
 
 use strict;
 use File::Basename;

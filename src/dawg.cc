@@ -131,10 +131,12 @@ bool Execute()
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 	vector<double> vdParams;
 	vector< vector<double> > vvdRates;
-	string ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
+	string ssModel = "JC", ssGapModel[2] = {"US", "US"};
 
 	double dLambda[2] = {0.0, 0.0};
 	vector<double> vdGapModel[2];
+	vdGapModel[0].push_back(1.0);
+	vdGapModel[1].push_back(1.0);
 
 	vector<NewickNode*> vtTrees;
 	double	dTreeScale = 1.0;
@@ -303,7 +305,7 @@ bool Execute()
 		dRevParams[0] = dRevParams[2] = dRevParams[3] = dRevParams[5] = vdParams[2];
 	}
 	else
-		return DawgError("Unknown Model, \"%s\"", ssModel.c_str());
+		return DawgError("Unknown substitution model, \"%s\".", ssModel.c_str());
 	
 	IndelModel::Params paramsDel, paramsIns;
 	paramsIns.ssModel = ssGapModel[0];

@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 
-# lambda.pl v1.0 - An estimator for DAWG's lambda
-# Copyright (2004) Reed A. Cartwright.  All rights reserved.
+# lambda.pl v1.1 - An estimator for DAWG's lambda
+# Copyright (2004-2005) Reed A. Cartwright.  All rights reserved.
 #
 # Usage: perl lambda.pl [treefile] [fastafile]
 #
@@ -80,6 +80,8 @@ foreach(keys(%gaps))
 }
 my $avgG = $suml/$numgaps-1.0;
 
+my $gapclasses = keys(%gapsizes);
+
 my %model = ();
 
 #geometric model
@@ -134,7 +136,7 @@ foreach my $r(3..$maxgap)
 $model{NegBin} = $rmodel{$r_ll};
 
 # truncated power-law
-my @gs = (sort(keys(%gapsizes)))[0..4];
+my @gs = (sort(keys(%gapsizes)))[0..(($gapclasses >4) ? 4 : $gapclasses-1)];
 
 my $sx = 0.0;
 my $sx2 = 0.0;
@@ -143,6 +145,7 @@ my $sy = 0.0;
 my $n = @gs;
 foreach(@gs)
 {
+	next unless(defined($_));
 	my $x = log($_);
 	my $y = log($gapsizes{$_}/$numgaps);
 	$sx += $x;

@@ -7,6 +7,8 @@ COMMAND LINE USAGE
   -h: display help information
   -?: same as -h
 
+  Dawg will read stdin if filename is "-".
+
 FILE FORMAT
   The file format takes a series of statements in the form of
   "name = value," where "name" is alphanumeric and value can
@@ -23,25 +25,26 @@ OPTIONS
   Name          Type            Description
 --------------------------------------------------------------------------
   Tree           VT  phylogeny
-  Scale          N   coefficient to scale branch lengths by
+  TreeScale      N   coefficient to scale branch lengths by
   Sequence       VS  root sequences 
   Length         VN  length of generated root sequences
   Rates          VVN rate of evolution of each root nucleotide
   Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
-  Freqs          VD  nucleotide (ACGT) frequencies 
+  Freqs          VN  nucleotide (ACGT) frequencies 
   Params         VN  parameters for the model of evolution
-  Gamma          N   coefficient of variance for rate heterogenity
-  Alpha          N   shape parameter
-  Iota           N   proportion of invariant sites
-  GapModel       VS  models of indel formation: NB|User
+  Width          N   block width for indels and recombination
+  Scale          VN  block position scales
+  Gamma          VN  coefficients of variance for rate heterogenity
+  Alpha          VN  shape parameters
+  Iota           VN  proportions of invariant sites
+  GapModel       VS  models of indel formation: NB|PL|US
   Lambda         VN  rates of indel formation
   GapParams      VN  parameter for the indel model
-  Frame          N   size of frame to restrict indels to
   Reps           N   number of data sets to output
   File           S   output file 
   Format         S   output format: Fasta|Nexus|Phylip
   GapSingleChar  B   output gaps as a single character
-  GapPlus        B   distinguish insertions from deletions
-  NexusBlock     S   text to include between datasets in Nexus format
-  NexusBlockFile S   file to read the Nexus block from
-  Seed           VN  PRNG seed
+  GapPlus        B   distinguish insertions from deletions in alignment
+  LowerCase      B   output sequences in lowercase
+  NexusCode      S   text or file to include between datasets in Nexus format
+  Seed           VN  PRNG seed (integers)

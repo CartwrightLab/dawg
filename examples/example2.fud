@@ -7,7 +7,7 @@ Length = 300
 Lambda = 0.1
 
 # Use the user defined gap model
-GapModel = {"User"}
+GapModel = {"US"}
 
 GapParams =
 {
