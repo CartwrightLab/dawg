@@ -86,7 +86,7 @@ SPACE [ \t\r\v\f]
 
 "<<"{IDWORD}{SPACE}+"\n" {
 	yytext += 2;
-	for(int i=0;!isspace(yytext+i);++i) { }
+	for(int i=0;!isspace(*(yytext+i));++i) { }
 	yytext[i] = '\n';
 	yytext[i+1] = '\0';
 	
@@ -98,7 +98,7 @@ SPACE [ \t\r\v\f]
 		ssTemp += c;
 		if(c == '\n')
 		{
-			if(sTemp == yytext)
+			if(ssTemp == yytext)
 				break;
 			yylval.pss->append(ssTemp);
 			ssTemp.clear();
