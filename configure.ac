@@ -7,23 +7,25 @@ AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
 
-# Checks for programs.
+dnl Checks for programs.
+AC_PROG_CXXCPP
+AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_CC
-AC_PROG_CPP
 AC_PROG_YACC
 AM_PROG_LEX
 AC_CHECK_PROG(DIFF, diff, diff)
 
 AC_LANG_PUSH(C++)
 
-# Checks for libraries.
+dnl Checks for libraries.
 
-# Checks for header files.
+dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h stdtypes.h process.h])
+AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h process.h])
 
-# Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
@@ -32,13 +34,18 @@ AC_C_BIGENDIAN
 dnl AC_CXX_MEMBER_TEMPLATES_OUTSIDE_CLASS
 dnl AC_CXX_MEMBER_TEMPLATES
 
-# Checks for library functions.
+dnl Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([getpid _getpid copysign _copysign])
 dnl AC_CHECK_FUNCS([floor pow sqrt])
+
+AX_CREATE_STDINT_H
+AX_CXXFLAGS_WARN_ALL_ANSI
+AX_CFLAGS_WARN_ALL_ANSI
+AX_CFLAGS_AIX_OPTION(-qweaksymbol)
 
 AC_LANG_POP(C++)
 

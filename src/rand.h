@@ -23,11 +23,7 @@
 #	include <float.h>
 #endif
 
-#ifdef HAVE_STDTYPES_H
-#	include <stdtypes.h>
-#else
-typedef unsigned int uint32_t;
-#endif
+#include "_stdint.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #	include <sys/types.h>
