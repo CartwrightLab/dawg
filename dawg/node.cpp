@@ -1,10 +1,21 @@
 #include "node.h"
+#include "dawg.h"
+#include "rand.h"
+
+#include <float.h>
+#include <math.h>
+
+#include <algorithm>
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////
 //  class Node
 ////////////////////////////////////////////////////////////
+
+double Node::s_dScale;
+IndelProcessor Node::s_procIndel;
+SubstProcessor Node::s_procSubst;
 
 string Node::ToString() const
 {
@@ -13,12 +24,12 @@ string Node::ToString() const
 	{
 		ssTemp += '(';
 		ssTemp += m_pChild->ToString();
-		Node* p = m_pChild->m_pSib;
+		Node* p = m_pChild->m_pSib.get();
 		while(p)
 		{
 			ssTemp += ',';
 			ssTemp += p->ToString();
-			p = p->m_pSib;
+			p = p->m_pSib.get();
 		}
 		ssTemp += ')';
 	}
@@ -48,14 +59,14 @@ void Node::EvolveSeq()
 
 void Node::Evolve()
 {
-	if(m_pSib != NULL)
+	if(m_pSib.get() != NULL)
 	{
 		m_pSib->m_seq = m_seq;
 		m_pSib->m_ssGaps = m_ssGaps;
 		m_pSib->Evolve();
 	}
 	EvolveSeq();
-	if(m_pChild != NULL)
+	if(m_pChild.get() != NULL)
 	{
 		m_pChild->m_seq = m_seq;
 		m_pChild->m_ssGaps = m_ssGaps;
@@ -92,11 +103,13 @@ void Node::Insert(unsigned int uPos, unsigned int uSize)
 void Node::Delete(unsigned int uPos, unsigned int uSize)
 {
 	//assert(uPos <= m_seq.size());
-	if(uPos+uSize > m_seq.size())
-		uSize = m_seq.size()-uPos;
-	m_seq.erase(m_seq.begin()+uPos, m_seq.begin()+uPos+uSize);
+	unsigned int uStart = (uSize < uPos+1u)? 1u+uPos-uSize : 0u;
+	unsigned int uEnd = (m_seq.size() > uPos+1u) ? uPos+1u : m_seq.size();
 
-	uPos = GapPos(uPos);
+	m_seq.erase(m_seq.begin()+uStart, m_seq.begin()+uEnd);
+
+	uSize = uEnd-uStart;
+	uPos = GapPos(uStart);
 	while(uSize)
 	{
 		switch(m_ssGaps[uPos])
@@ -121,10 +134,20 @@ void Node::Delete(unsigned int uPos, unsigned int uSize)
 //  class Nucleotide
 ////////////////////////////////////////////////////////////
 
+double Nucleotide::s_dNucCumFreqs[4] = {0.25, 0.50, 0.75, 1.0};
+double Nucleotide::s_dNucFreqs[4] = {0.25, 0.25, 0.25, 0.25};
+double Nucleotide::s_dGamma = 0.0;
+double Nucleotide::s_dIota = 0.0;
+
 bool Nucleotide::Setup(double pFreqs[], double dG, double dI)
 {
 	s_dGamma = dG;
 	s_dIota = dI;
+	if(s_dGamma < 0.0)
+		return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", s_dGamma);
+	else if(0.0 > s_dIota || s_dIota > 1.0)
+		return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", s_dIota);
+
 	if(pFreqs[0] < 0 || pFreqs[1] < 0 || pFreqs[2] < 0 || pFreqs[3] < 0)
 		return DawgError("Nucleotide frequences need to be positive.");
 	memcpy(s_dNucFreqs, pFreqs, 4*sizeof(double));
@@ -150,7 +173,7 @@ Nucleotide Nucleotide::Rand()
 	else
 		n = 3; // T
 
-	if(s_dIota > DBL_EPSILON && rand_bool(g_dIota))
+	if(s_dIota > DBL_EPSILON && rand_bool(s_dIota))
 		d = 0.0;  // Site Invariant
 	else if(s_dGamma > DBL_EPSILON)
 		d = rand_gamma1(s_dGamma); // Gamma with mean 1.0 and var of g_dGamma

@@ -8,16 +8,11 @@
 
 bool SubstProcessor::Setup(double pFreqs[], double pSubs[])
 {
-	if(pFreqs[0] < 0 || pFreqs[1] < 0 || pFreqs[2] < 0 || pFreqs[3] < 0)
+	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
 		return DawgError("Nucleotide frequences need to be positive.");
-	memcpy(m_dFreqs, pFreqs, 4*sizeof(double));
-	m_dNucCumFreqs[0] = pFreqs[0];
-	m_dNucCumFreqs[1] = pFreqs[1]+m_dNucCumFreqs[0];
-	m_dNucCumFreqs[2] = pFreqs[2]+m_dNucCumFreqs[1];
-	m_dNucCumFreqs[3] = 1.0;
-	if(m_dNucCumFreqs[0] > 1.0 || m_dNucCumFreqs[1] > 1.0 || m_dNucCumFreqs[2] > 1.0)
-		return DawgError("Nucleotide frequences need to sum to 1.");
-	
+	pFreqs[3] = 1.0-pFreqs[0]-pFreqs[1]-pFreqs[2];
+	if( pFreqs[3] < 0.0 )
+		return DawgError("Nucleotide frequencies need to sum to 1.0.");
 	if(pSubs[0] < 0.0 || pSubs[1] < 0.0 || pSubs[2] < 0.0
 		|| pSubs[3] < 0.0 || pSubs[4] < 0.0 || pSubs[5] < 0.0)
 		return DawgError("Substitution rates need to be positive.");

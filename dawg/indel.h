@@ -1,11 +1,12 @@
 #ifndef DAWG_INDEL_H
-
-#include "dawg.h"
+#define DAWG_INDEL_H
 
 #include <string>
 #include <vector>
 #include <memory>
 #include <functional>
+
+class Node;
 
 class IndelModel
 {

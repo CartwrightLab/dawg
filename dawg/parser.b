@@ -127,7 +127,7 @@ node:
 LPARTH nodeseq RPARTH label COLON NUM
 {
 	$$ = new Node($4, $2);
-	$$->SetLength($6);
+	$$->BranchLength($6);
 	delete[] $4;	
 }
 
@@ -140,7 +140,7 @@ LPARTH nodeseq RPARTH label COLON NUM
 | LPARTH nodeseq RPARTH COLON NUM
 {
 	$$ = new Node("", $2);
-	$$->SetLength($5);
+	$$->BranchLength($5);
 }
 
 | LPARTH nodeseq RPARTH
@@ -151,7 +151,7 @@ LPARTH nodeseq RPARTH label COLON NUM
 | label COLON NUM
 {
 	$$ = new Node($1);
-	$$->SetLength($3);
+	$$->BranchLength($3);
 	delete[] $1;		
 }
 

@@ -4,15 +4,13 @@
 // Error Warning: Does not check for circular includes.
 
 #include "dawg.h"
-#include <vector>
-#include <iostream>
+#include "parser.h"
+
 #include <math.h>
 #include <float.h>
 
-// depending on your version of bison include one of the following files
-// Makefile should be updated accordingly
-//#include "parser.cpp.h"
-#include "parser.hpp"
+#include <vector>
+#include <iostream>
 
 
 #pragma warning(disable: 4127 4244)
@@ -60,9 +58,7 @@ LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 
 %%
 
-[-+]?{DIGIT}+([eE][+-]?{DIGIT}+)?  |
-[-+]?{DIGIT}+"."{DIGIT}*([eE][+-]?{DIGIT}+)? |
-[-+]?"."{DIGIT}+([eE][+-]?{DIGIT}+)? {
+[-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)? {
 	yylval.d = atof(yytext);
 	return NUM;
 }
@@ -77,17 +73,17 @@ LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 	return BOOL;
 }
 
+{IDWORD} {
+	size_t t = strlen(yytext);
+	yylval.cs = strcpy(new char[t+1],yytext);
+	return ID;
+}
+
 {STR} {
 	size_t t = strlen(yytext);
 	yytext[t-1] = '\0';
 	yylval.cs = strcpy(new char[t],yytext+1);
 	return STRING;
-}
-
-{IDWORD} {
-	size_t t = strlen(yytext);
-	yylval.cs = strcpy(new char[t+1],yytext);
-	return ID;
 }
 
 "." {

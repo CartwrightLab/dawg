@@ -5,6 +5,9 @@
 #include <vector>
 #include <memory>
 
+#include "indel.h"
+#include "subst.h"
+
 class Nucleotide;
 typedef std::vector<Nucleotide> Seq;
 
@@ -14,25 +17,25 @@ public:
 	Node(const char* csName = "", Node * pChild = NULL) : m_ssLabel(csName),
 		m_pChild(pChild), m_pSib(NULL), m_dBranchLength(0.0) { }
 
-	bool IsTaxon() const { return m_pChild == NULL; }
-	bool IsClade() const { return m_pChild != NULL; }
+	bool IsTaxon() const { return m_pChild.get() == NULL; }
+	bool IsClade() const { return m_pChild.get() != NULL; }
 
 	void AddChild(Node* pNode)
 	{
 		pNode->m_pSib = m_pChild;
-		m_pChild = pNode;
+		m_pChild.reset(pNode);
 	}
 	bool IsChild(Node* pNode)
 	{
-		Node *p = m_pChild;
+		Node *p = m_pChild.get();
 		while(p != pNode && p)
-			p = p->m_pSib;
+			p = p->m_pSib.get();
 		return p != NULL;
 	}
 	void AddSib(Node* pNode)
 	{
 		pNode->m_pSib = m_pSib;
-		m_pSib = pNode;
+		m_pSib.reset(pNode);
 	}
 	
 	const std::string& Label() const { return m_ssLabel; }
@@ -45,8 +48,8 @@ public:
 	const Seq& Sequence() const { return m_seq; }
 	Seq& Sequence() { return m_seq; }
 
-	const Node *Child() const {return m_pChild; }
-	const Node *Sibling() const {return m_pSib; }
+	const Node *Child() const {return m_pChild.get(); }
+	const Node *Sibling() const {return m_pSib.get(); }
 
 	void Evolve();
 
@@ -60,7 +63,7 @@ public:
 	static double Scale() { return s_dScale; }
 	
 	static IndelProcessor s_procIndel;
-	static SubstProcessor s_procSubst
+	static SubstProcessor s_procSubst;
 
 protected:
 	std::auto_ptr<Node> m_pSib;
@@ -95,10 +98,10 @@ public:
 	static bool Setup(double pFreqs[], double dG, double dI);
 
 protected:
-	static s_dNucCumFreqs[4];
-	static s_dNucFreqs[4];
-	static s_dGamma;
-	static s_dIota;
+	static double s_dNucCumFreqs[4];
+	static double s_dNucFreqs[4];
+	static double s_dGamma;
+	static double s_dIota;
 };
 
 inline Nucleotide::Nuc CharToNuc(char ch)

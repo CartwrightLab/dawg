@@ -1,6 +1,7 @@
 // dawg.cpp
 
 #include "dawg.h"
+#include "node.h"
 
 #include <time.h>
 #include <float.h>
@@ -143,7 +144,7 @@ bool Execute()
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 	vector<double> vdParams;
 	vector<double> vdRates;
-	string ssSeq, ssModel = "JC", ssGapModel = "NB";
+	string ssSeq, ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
 
 	double dLambda[2] = {0.0, 0.0};
 	vector<double> vdInsModel;
@@ -193,10 +194,12 @@ bool Execute()
 			dGamma = 1.0/dGamma;
 	}
 	DawgVar::Get("Iota", dIota);
-	DawgVar::Get("GapModel", ssGapModel);
 	DawgVar::Get("Scale", dScale); // make a vector (?)
+	int nRes = DawgVar::GetArray("GapModel", ssGapModel, 2);
+	if(nRes >0 && nRes < 2)
+		ssGapModel[2] = ssGapModel[1];
 
-	int nRes = DawgVar::GetArray("Freqs", dNucFreq, 4);
+	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4);
 	if(nRes > 0 && nRes < 4)
 		return DawgError("\"Freqs\" specified incorrectly.");
 	
@@ -204,7 +207,7 @@ bool Execute()
 	
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
 	if(nRes == 1)
-		dLambda[0] = dLambda[1] = 0.5*dLambda[0];
+		dLambda[1] = dLambda[0];
 	DawgVar* pVar = DawgVar::GetVar("GapParams");
 	if(pVar == NULL || pVar->Size() == 0)
 	{
@@ -305,33 +308,25 @@ bool Execute()
 	else
 		return DawgError("Unknown Model, \"%s\"", ssModel.c_str());
 
-	if(!EvoRevParams(dNucFreq, dRevParams))
+	if(!Node::s_procSubst.Setup(dNucFreq, dRevParams))
 		return DawgError("Invalid substitution model parameters.");
 	
-	if(!EvoRateParams(dGamma, dIota))
+	if(!Nucleotide::Setup(dNucFreq, dGamma, dIota))
 		return DawgError("Invalid G+I rates");
 	
-	if(!EvoScaleTrees(dScale))
-		return DawgError("Invalid scaling parameter");
-
-	if(dLambda[0]+dLambda[1] < DBL_EPSILON)
-		{ }
-	else if(ssGapModel == "NB")
-	{
-		if(vdInsModel.size() < 2 || vdDelModel.size() < 2 ||
-		   !EvoIndelNegBn(dLambda[0], (unsigned int)vdInsModel[0], vdInsModel[1],
-						dLambda[1], (unsigned int)vdDelModel[0], vdDelModel[1]))
-			return DawgError("Invalid Negative Binomial Gap Model parameter(s)");
-	}
-	else if(ssGapModel == "User")
-	{
-		if(vdInsModel.empty() || vdDelModel.empty() ||
-		   !EvoIndelUser(dLambda[0], &(vdInsModel[0]), vdInsModel.size(),
-				dLambda[1], &(vdDelModel[0]), vdDelModel.size()))
-			return DawgError("Invalid User Gap Model parameter(s)");
-	}
-	else
-		return DawgError("Unknown Gap Model, \"%s\"", ssGapModel.c_str());
+	//if(!Node::Scale(dScale))
+	//	return DawgError("Invalid scaling parameter");
+	Node::Scale(dScale);
+	
+	IndelModel::Params paramsDel, paramsIns;
+	paramsIns.ssModel = ssGapModel[0];
+	paramsIns.dLambda = dLambda[0];
+	paramsIns.vdModel = vdInsModel;
+	paramsDel.ssModel = ssGapModel[1];
+	paramsDel.dLambda = dLambda[1];
+	paramsDel.vdModel = vdDelModel;
+	if(!Node::s_procIndel.Setup(paramsIns, paramsDel))
+	
 	
    	if(ssBlock.empty() && !ssBlockFile.empty())
 	{

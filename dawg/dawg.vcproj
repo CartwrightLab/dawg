@@ -143,6 +143,9 @@
 				RelativePath=".\indel.cpp">
 			</File>
 			<File
+				RelativePath=".\lexer.cpp">
+			</File>
+			<File
 				RelativePath="lexer.fl">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -189,9 +192,13 @@
 						Name="VCCustomBuildTool"
 						Description="Creating Parser. . ."
 						CommandLine="bison -d $(InputFileName) -o $(InputName).cpp
+move /Y $(InputName).hpp $(InputName).h
 "
-						Outputs="$(InputName).cpp;$(InputName).hpp"/>
+						Outputs="$(InputName).cpp;$(InputName).h"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\parser.cpp">
 			</File>
 			<File
 				RelativePath="rand.cpp">
@@ -219,6 +226,9 @@
 				RelativePath=".\node.h">
 			</File>
 			<File
+				RelativePath=".\parser.h">
+			</File>
+			<File
 				RelativePath="rand.h">
 			</File>
 			<File
@@ -229,6 +239,9 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		</Filter>
+		<File
+			RelativePath=".\example1.fud">
+		</File>
 		<File
 			RelativePath="readme.txt">
 		</File>

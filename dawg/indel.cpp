@@ -2,6 +2,9 @@
 #include "dawg.h"
 #include "rand.h"
 
+#include <float.h>
+#include <math.h>
+
 using namespace std;
 
 // rate of del: lambda*length+lambda*(E(size)-1)
@@ -90,7 +93,7 @@ NegBnModel::NegBnModel(const vector<double>& vdModel)
 	m_dQ = vdModel[1];
 	if(m_uR == 0)
 		throw(DawgError("Negative Binomial Model requires R > 0."));
-	if(0.0 < m_dQ || m_dQ > 1.0)
+	if(0.0 > m_dQ || m_dQ > 1.0)
 		throw(DawgError("Negative Binomial Model requires that Q be a a probability."));
 }
 unsigned long NegBnModel::RandSize() const
