@@ -165,3 +165,4 @@ inline char NucToChar(Nucleotide::Nuc n)
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln);
 
 #endif //DAWG_TREE_H
+

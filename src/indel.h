@@ -66,3 +66,4 @@ protected:
 };
 
 #endif // DAWG_INDEL_H
+

@@ -153,3 +153,4 @@ public:
 };
 
 #endif //DAWG_VAR_H
+

@@ -38,7 +38,7 @@ void DawgIniOutput(ostream& os)
 	if(g_fileFormat == NEXUS)
 	{
 		os << "#NEXUS" << endl << "[Created by DAWG Version " << VERSION << endl << endl;
-		os << EvoDescription() << ']' << endl;
+		os << /*EvoDescription() <<*/ ']' << endl;
 	}
 }
 
