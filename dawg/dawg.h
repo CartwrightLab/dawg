@@ -76,7 +76,7 @@ class Node
 {
 public:
 	Node(const char* csName = "", Node * pChild = NULL) : m_ssLabel(csName),
-		m_pChild(pChild), m_pSib(NULL), m_dLength(0.0) { }
+		m_pChild(pChild), m_pSib(NULL), m_dBranchLength(0.0) { }
 	virtual ~Node();
 
 	bool IsTaxon() const { return m_pChild == NULL; }
@@ -100,9 +100,9 @@ public:
 		m_pSib = pNode;
 	}
 	
-	double Length() const { return m_dLength; }
+	double BranchLength() const { return m_dBranchLength; }
 	const std::string& Label() const { return m_ssLabel; }
-	void SetLength(double d) { m_dLength = d; }
+	void SetBranchLength(double d) { m_dLength = d; }
 
 	std::string ToString() const;
 
@@ -124,7 +124,7 @@ public:
 protected:
 	Node* m_pSib;
 	Node* m_pChild;
-	double m_dLength;
+	double m_dBranchLength;
 	std::string m_ssLabel;
 
 	Seq m_seq;
@@ -135,6 +135,9 @@ private:
 	Node& operator=(const Node&);
 
 	friend void PrintTreeSeq(Node* pTree);
+
+	void EvolveSeq();
+	void MakeIndel();
 };
 
 class DawgVar

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <functional>
 #include "rand.h"
 #include "matrix.h"
 
@@ -15,6 +16,17 @@
 using namespace std;
 
 //void PrintMatrix(const SPMatrix& mat);
+
+class LinearFunc : public unary_function<double, double>
+{
+public:
+	result_type operator()( argument_type x) { return m*x+b; }
+	argument_type m;
+	argument_type b;
+};
+
+// rate of del: lambda*length+lambda*(E(size)-1)
+// rate of ins: lambda*length+lambda
 
 double g_dGamma = 0.0;  // The parameter of the Gamma distribution with mean 1
 double g_dIota = 0.0;   // The probability that a site is invariant
@@ -331,7 +343,7 @@ void MakeIndel(Node* pNode)
 void EvolveSeq(Node* pNode)
 {
 	Seq& rSeq = pNode->Sequence();
-	double dLen = fabs(g_dScale*pNode->Length());
+	double dLen = fabs(g_dScale*pNode->BranchLength());
 	if(dLen < DBL_EPSILON)
 		return; // Nothing to evolve
 	
