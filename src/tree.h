@@ -50,31 +50,9 @@ public:
 	inline bool IsDeletion() const { return ((m_ucNuc & MaskDel) == MaskDel); }
 	inline bool IsInsertion() const { return ((m_ucNuc & MaskIns) == MaskIns); }
 
-	bool FromChar(char ch)
-	{
-		switch(ch&0xDF)
-		{
-		case 'A':
-			m_ucNuc = NumAdenine;
-			return true;
-		case 'C':
-			m_ucNuc = NumCytosine;
-			return true;
-		case 'G':
-			m_ucNuc = NumGuanine;
-			return true;
-		case 'T':
-			m_ucNuc = NumThymine;
-			return true;
-		}
-		return false;
-	}
-	inline char ToChar() const
-	{
-		static const char csNuc[]	= "ACGT";
-		static const char csType[]	= " +-=";
-		return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
-	}
+	bool FromChar(char ch);
+	char ToChar() const;
+
 };
 
 class Sequence : public std::vector<Nucleotide>

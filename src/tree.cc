@@ -109,6 +109,32 @@ void Sequence::ToString(std::string &ss) const
 		ss.push_back(cit->ToChar());
 }
 
+bool Nucleotide::FromChar(char ch)
+{
+	switch(ch&0xDF)
+	{
+	case 'A':
+		m_ucNuc = NumAdenine;
+		return true;
+	case 'C':
+		m_ucNuc = NumCytosine;
+		return true;
+	case 'G':
+		m_ucNuc = NumGuanine;
+		return true;
+	case 'T':
+		m_ucNuc = NumThymine;
+		return true;
+	}
+	return false;
+}
+char Nucleotide::ToChar() const
+{
+	static const char csNuc[]	= "ACGT";
+	static const char csType[]	= " +-=";
+	return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
+}
+
 
 ////////////////////////////////////////////////////////////
 //  class Tree::Node
