@@ -30,9 +30,6 @@
    and to 0 otherwise. */
 #define HAVE_REALLOC 1
 
-/* Define to 1 if you have the `sqrt' function. */
-/* #undef HAVE_SQRT */
-
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
 

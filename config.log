@@ -692,9 +692,9 @@ configure:5753: $? = 0
 configure:5765: result: yes
 configure:5772: checking for _doprnt
 configure:5829: gcc -o conftest -g -O2   conftest.c  >&5
-/var/tmp//cciLLlmw.o(.text+0x14): In function `main':
+/var/tmp//ccIofnXS.o(.text+0x14): In function `main':
 /home/reed/dawg-unix/conftest.c:82: undefined reference to `_doprnt'
-/var/tmp//cciLLlmw.o(.data+0x0):/home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
+/var/tmp//ccIofnXS.o(.data+0x0):/home/reed/dawg-unix/conftest.c:81: undefined reference to `_doprnt'
 configure:5835: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
@@ -783,130 +783,36 @@ configure: failed program was:
 |   return 0;
 | }
 configure:5860: result: no
-configure:5878: checking for sqrt
-configure:5935: gcc -o conftest -g -O2   conftest.c  >&5
-conftest.c:66: warning: conflicting types for built-in function 'sqrt'
-/var/tmp//ccPTw3mf.o(.text+0x14): In function `main':
-/home/reed/dawg-unix/conftest.c:82: undefined reference to `sqrt'
-/var/tmp//ccPTw3mf.o(.data+0x0):/home/reed/dawg-unix/conftest.c:81: undefined reference to `sqrt'
-configure:5941: $? = 1
-configure: failed program was:
-| /* confdefs.h.  */
-| 
-| #define PACKAGE_NAME "dawg"
-| #define PACKAGE_TARNAME "dawg"
-| #define PACKAGE_VERSION "1.0.0-rc1"
-| #define PACKAGE_STRING "dawg 1.0.0-rc1"
-| #define PACKAGE_BUGREPORT "rac@uga.edu"
-| #define PACKAGE "dawg"
-| #define VERSION "1.0.0-rc1"
-| #ifdef __cplusplus
-| extern "C" void std::exit (int) throw (); using std::exit;
-| #endif
-| #define YYTEXT_POINTER 1
-| #define STDC_HEADERS 1
-| #define HAVE_SYS_TYPES_H 1
-| #define HAVE_SYS_STAT_H 1
-| #define HAVE_STDLIB_H 1
-| #define HAVE_STRING_H 1
-| #define HAVE_MEMORY_H 1
-| #define HAVE_STRINGS_H 1
-| #define HAVE_INTTYPES_H 1
-| #define HAVE_STDINT_H 1
-| #define HAVE_UNISTD_H 1
-| #define HAVE_TIME_H 1
-| #define HAVE_FLOAT_H 1
-| #define HAVE_STDIO_H 1
-| #define HAVE_UNISTD_H 1
-| #define HAVE_MATH_H 1
-| #define HAVE_ASSERT_H 1
-| #define HAVE_STDARG_H 1
-| #define HAVE_STDDEF_H 1
-| #define HAVE__BOOL 1
-| #define HAVE_STDBOOL_H 1
-| #define HAVE_STDLIB_H 1
-| #define HAVE_MALLOC 1
-| #define HAVE_STDLIB_H 1
-| #define HAVE_REALLOC 1
-| #define PROTOTYPES 1
-| #define __PROTOTYPES 1
-| #define HAVE_VPRINTF 1
-| /* end confdefs.h.  */
-| /* Define sqrt to an innocuous variant, in case <limits.h> declares sqrt.
-|    For example, HP-UX 11i <limits.h> declares gettimeofday.  */
-| #define sqrt innocuous_sqrt
-| 
-| /* System header to define __stub macros and hopefully few prototypes,
-|     which can conflict with char sqrt (); below.
-|     Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
-|     <limits.h> exists even on freestanding compilers.  */
-| 
-| #ifdef __STDC__
-| # include <limits.h>
-| #else
-| # include <assert.h>
-| #endif
-| 
-| #undef sqrt
-| 
-| /* Override any gcc2 internal prototype to avoid an error.  */
-| #ifdef __cplusplus
-| extern "C"
-| {
-| #endif
-| /* We use char because int might match the return type of a gcc2
-|    builtin and then its argument prototype would still apply.  */
-| char sqrt ();
-| /* The GNU C library defines this for functions which it implements
-|     to always fail with ENOSYS.  Some functions are actually named
-|     something starting with __ and the normal name is an alias.  */
-| #if defined (__stub_sqrt) || defined (__stub___sqrt)
-| choke me
-| #else
-| char (*f) () = sqrt;
-| #endif
-| #ifdef __cplusplus
-| }
-| #endif
-| 
-| int
-| main ()
-| {
-| return f != sqrt;
-|   ;
-|   return 0;
-| }
-configure:5966: result: no
-configure:5986: checking whether MMX assembly is suported
-configure:5992: gcc -c -g -O2  conftest.c >&5
-configure:5998: $? = 0
-configure:6002: test -z 
+configure:5884: checking whether MMX assembly is suported
+configure:5890: gcc -c -g -O2  conftest.c >&5
+configure:5896: $? = 0
+configure:5900: test -z 
 			 || test ! -s conftest.err
-configure:6005: $? = 0
-configure:6008: test -s conftest.o
-configure:6011: $? = 0
-configure:6013: result: yes
-configure:6020: checking CFLAGS for gcc -mmmx
-configure:6053: gcc -c -g -O2 -pedantic  -mmmx  conftest.c >&5
-configure:6059: $? = 0
-configure:6063: test -z 
+configure:5903: $? = 0
+configure:5906: test -s conftest.o
+configure:5909: $? = 0
+configure:5911: result: yes
+configure:5918: checking CFLAGS for gcc -mmmx
+configure:5951: gcc -c -g -O2 -pedantic  -mmmx  conftest.c >&5
+configure:5957: $? = 0
+configure:5961: test -z 
 			 || test ! -s conftest.err
-configure:6066: $? = 0
-configure:6069: test -s conftest.o
-configure:6072: $? = 0
-configure:6091: result: -mmmx
-configure:6103: : CFLAGS="$CFLAGS $ac_cv_cflags_gcc_option__mmmx"
-configure:6106: $? = 0
-configure:6113: checking for mmintrin.h
-configure:6131: gcc -c -g -O2 -mmmx  conftest.c >&5
-configure:6137: $? = 0
-configure:6141: test -z 
+configure:5964: $? = 0
+configure:5967: test -s conftest.o
+configure:5970: $? = 0
+configure:5989: result: -mmmx
+configure:6001: : CFLAGS="$CFLAGS $ac_cv_cflags_gcc_option__mmmx"
+configure:6004: $? = 0
+configure:6011: checking for mmintrin.h
+configure:6029: gcc -c -g -O2 -mmmx  conftest.c >&5
+configure:6035: $? = 0
+configure:6039: test -z 
 			 || test ! -s conftest.err
-configure:6144: $? = 0
-configure:6147: test -s conftest.o
-configure:6150: $? = 0
-configure:6152: result: yes
-configure:6299: creating ./config.status
+configure:6042: $? = 0
+configure:6045: test -s conftest.o
+configure:6048: $? = 0
+configure:6050: result: yes
+configure:6197: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -968,7 +874,6 @@ ac_cv_func__doprnt=no
 ac_cv_func_malloc_0_nonnull=yes
 ac_cv_func_realloc_0_nonnull=yes
 ac_cv_func_setvbuf_reversed=no
-ac_cv_func_sqrt=no
 ac_cv_func_vprintf=yes
 ac_cv_header_assert_h=yes
 ac_cv_header_float_h=yes
