@@ -956,7 +956,7 @@ configure:5893: checking for function prototypes
 configure:5896: result: yes
 configure:5913: checking whether setvbuf arguments are reversed
 configure:5938: g++ -o conftest -g -O2   conftest.cc  >&5
-/var/tmp//ccmIQL14.o(.text+0x1b): In function `main':
+/var/tmp//ccoWzC59.o(.text+0x1b): In function `main':
 /home/reed/dawg-unix/conftest.cc:48: undefined reference to `setvbuf(__sFILE*, int, char*, unsigned int)'
 configure:5944: $? = 1
 configure: failed program was:
@@ -1023,9 +1023,9 @@ configure:6155: $? = 0
 configure:6167: result: yes
 configure:6174: checking for _doprnt
 configure:6231: g++ -o conftest -g -O2   conftest.cc  >&5
-/var/tmp//ccigG127.o(.text+0x14): In function `main':
+/var/tmp//ccdrxXJc.o(.text+0x14): In function `main':
 /home/reed/dawg-unix/conftest.cc:82: undefined reference to `_doprnt'
-/var/tmp//ccigG127.o(.data+0x0):/home/reed/dawg-unix/conftest.cc:81: undefined reference to `_doprnt'
+/var/tmp//ccdrxXJc.o(.data+0x0):/home/reed/dawg-unix/conftest.cc:81: undefined reference to `_doprnt'
 configure:6237: $? = 1
 configure: failed program was:
 | /* confdefs.h.  */
@@ -1155,6 +1155,7 @@ config.status:713: creating examples/Makefile
 config.status:713: creating tests/Makefile
 config.status:713: creating doc/Makefile
 config.status:817: creating config.h
+config.status:963: config.h is unchanged
 config.status:1143: executing depfiles commands
 
 ## ---------------- ##

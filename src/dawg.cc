@@ -132,14 +132,15 @@ bool Execute()
 	string ssModel = "JC", ssGapModel[2] = {"NB", "NB"};
 
 	double dLambda[2] = {0.0, 0.0};
-	vector<double> vdInsModel;
-	vector<double> vdDelModel;
+	//vector<double> vdInsModel;
+	//vector<double> vdDelModel;
+	vector<double> vdGapModel[2];
 
 	vector<NewickNode*> vtTrees;
 	double		  dScale = 1.0;
 	vector<int>   vnSeed;
 
-	string ssFile;
+	string ssFile = "-";
 	FileFormat fmt = FASTA;
 	string ssFormat;
 	string ssBlockFile;
@@ -147,6 +148,7 @@ bool Execute()
 
 	bool bGapSingle = false, bGapPlus = false;
 	int nFrame = 1;
+	int nRes;
 
 	// Ready Variables
 
@@ -170,38 +172,17 @@ bool Execute()
 	else
 		vSeqLen.resize(vtTrees.size(), 100);
 
-	DawgVar *pVar = DawgVar::GetVar("Rates");
-	if(pVar != NULL && pVar->Size())
+	vvdRates.resize(vtTrees.size());
+	if(DawgVar::GetMatrix("Rates", &vvdRates[0], vvdRates.size()))
 	{
-		double dTemp;
-		vvdRates.resize(pVar->Size());
-		if(pVar->IsType(DawgVar::tyVector))
-		{
-			if(pVar->GetAt(0).IsType(DawgVar::tyVector))
-			{
-				// Assume Matrix
-				for(unsigned int u=0; u<pVar->Size(); ++u)
-					pVar->GetAt(u).GetVector(vvdRates[u]);
-			}
-			else
-			{
-				// Assume Vector
-				if(!pVar->GetVector(vvdRates[0]))
-					return DawgError("Error reading \"Rates\" vector.");
-			}
-		}
-		else if(pVar->Get(dTemp))
-		{
-			vvdRates[0].push_back(dTemp);
-		}
-		else
-			return DawgError("Error reading \"Rates\" vector.");
 		for(vector< vector<double> >::const_iterator cit = vvdRates.begin();
 			cit != vvdRates.end(); ++cit)
 			nTotalRateLen += cit->size();
+		if(nTotalRateLen > 0 && nTotalRateLen < nTotalSeqLen)
+			return DawgError("\"Rates\" vector is too small");
 	}
-	if(vvdRates.size() > 0 && nTotalRateLen < nTotalSeqLen)
-		return DawgError("\"Rates\" vector is too small");
+	else
+		vvdRates.clear();
 
     DawgVar::Get("Reps", nReps);
 	DawgVar::GetVector("Seed", vnSeed);
@@ -214,11 +195,8 @@ bool Execute()
 	}
 	DawgVar::Get("Iota", dIota);
 	DawgVar::Get("Scale", dScale); // make a vector (?)
-	int nRes = DawgVar::GetArray("GapModel", ssGapModel, 2);
-	if(nRes >0 && nRes < 2)
-		ssGapModel[1] = ssGapModel[0];
-
-	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4);
+	DawgVar::GetArray("GapModel", ssGapModel, 2);
+	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
 	if(nRes > 0 && nRes < 4)
 		return DawgError("\"Freqs\" specified incorrectly.");
 	
@@ -227,30 +205,14 @@ bool Execute()
 	DawgVar::Get("Frame", nFrame);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2);
-	if(nRes == 1)
-		dLambda[1] = dLambda[0];
-	pVar = DawgVar::GetVar("GapParams");
-	if(pVar == NULL || pVar->Size() == 0)
+	if(nRes)
 	{
-		if(nRes)
+		nRes = DawgVar::GetMatrix("GapParams", vdGapModel, 2);
+		if(nRes == 0)
 			return DawgError("\"GapParams\" must be specified if \"Lambda\" is.");
 	}
-	else if((*pVar)[0].IsType(DawgVar::tyVector))
-	{
-		(*pVar)[0].GetVector(vdInsModel);
-		if(pVar->Size() == 1)
-			vdDelModel = vdInsModel;
-		else
-			(*pVar)[1].GetVector(vdDelModel);
-	}
-	else
-	{
-		pVar->GetVector(vdInsModel);
-		vdDelModel = vdInsModel;
-	}
 
-	if(!DawgVar::Get("File", ssFile))
-		ssFile = "-";
+	DawgVar::Get("File", ssFile);
 	DawgVar::Get("Format", ssFormat);
 	if(!DawgVar::Get("NexusBlock", ssBlock))
 		DawgVar::Get("NexusBlockFile", ssBlockFile);
@@ -275,7 +237,7 @@ bool Execute()
 	if(ssModel == "GTR")
 	{
 		if(vdParams.size() < 6)
-			return DawgError("REV model requires at least 6 numerical parameters.");
+			return DawgError("GTR model requires at least 6 numerical parameters.");
 		for(int i=0;i<6;i++)
 			dRevParams[i] = vdParams[i];
 	}
@@ -336,10 +298,11 @@ bool Execute()
 	IndelModel::Params paramsDel, paramsIns;
 	paramsIns.ssModel = ssGapModel[0];
 	paramsIns.dLambda = dLambda[0];
-	paramsIns.vdModel = vdInsModel;
+	paramsIns.vdModel = vdGapModel[0];
+
 	paramsDel.ssModel = ssGapModel[1];
 	paramsDel.dLambda = dLambda[1];
-	paramsDel.vdModel = vdDelModel;
+	paramsDel.vdModel = vdGapModel[1];
 	
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
 		dGamma, dIota, dScale, nFrame))

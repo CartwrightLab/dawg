@@ -98,7 +98,7 @@ public:
 		return ( pVar != NULL && pVar->Get(r) );
 	}
 	template<class T>
-	Vec::size_type GetArray(T ar[], Vec::size_type uSize)
+	Vec::size_type GetArray(T ar[], Vec::size_type uSize, bool bExpand=true)
 	{
 		Vec::size_type uMax = min(uSize, Size());
 		Vec::size_type u = 0;
@@ -106,6 +106,10 @@ public:
 		{
 			if(!GetAt(u).Get(ar[u]))
 				return u;
+		}
+		for(; bExpand && u<uSize; u++)
+		{
+			ar[u] = ar[0];
 		}
 		return u;		
 	}
@@ -124,12 +128,36 @@ public:
 		return true;
 	}
 	template< class T >
-	static Vec::size_type GetArray( const std::string &ssKey,  T ar[], Vec::size_type uSize)
+	Vec::size_type GetMatrix(std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
+	{
+		if(Size() == 0)
+			return 0;
+		Vec::size_type u = 0;
+		Vec::size_type uMax = min(uSize, Size());
+
+		//Check to see if it is a Matrix
+		if(GetAt(0).IsType(tyVector))
+		{
+			for(;u<uMax;++u)
+				GetAt(u).GetVector(ar[u]);
+		}
+		else
+		{
+			GetVector(ar[0]);
+			u = 1;
+		}
+		for(; bExpand && u<uSize; u++)
+			ar[u] = ar[0];
+		return u;
+	}
+
+	template< class T >
+	static Vec::size_type GetArray( const std::string &ssKey,  T ar[], Vec::size_type uSize, bool bExpand=true)
 	{
 		DawgVar* pVar = GetVar(ssKey);
 		if(pVar == NULL)
 			return 0;
-		return pVar->GetArray(ar, uSize);
+		return pVar->GetArray(ar, uSize, bExpand);
 	}
 	template<class T>
 	static bool GetVector( const std::string &ssKey, std::vector<T> &rVec)
@@ -138,6 +166,14 @@ public:
 		if(pVar == NULL)
 			return false;
 		return pVar->GetVector(rVec);
+	}
+	template<class T>
+	static Vec::size_type GetMatrix(const std::string &ssKey,  std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
+	{
+		DawgVar* pVar = GetVar(ssKey);
+		if(pVar == NULL)
+			return 0;
+		return pVar->GetMatrix(ar, uSize, bExpand);
 	}
 
 };

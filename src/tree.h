@@ -165,7 +165,7 @@ inline Nucleotide::Nuc CharToNuc(char ch)
 
 inline char NucToChar(Nucleotide::Nuc n)
 {
-	static char cs[] = "ACGT-?";
+	char cs[] = "ACGT-?";
 	return (n > 4) ? '?' : cs[n];
 }
 
