@@ -1,10 +1,33 @@
+DAWG VERSION 1.0.0 - DNA ASSEMBLY WITH GAPS
+
 Copyright (C) (2005) Reed A. Cartwright - All rights reserved.
 
-DAWG is an application that will simulate nucleotide evolution with gaps.
+DESCRIPTION
+
+Dawg is an application that will simulate nucleotide evolution with gaps.
+
+CONTACT
+
+rac@uga.edu or reed@scit.us
+
+LICENSE
 
 See COPYING for license information.
 
+INSTALLATION
+
 See INSTALL for installation instructions.
+
+DOWNLOAD
+
+Dawg 1.0.0 can be downloaded from <http://www.genetics.uga.edu/sw/>, all
+later versions can be downloaded from the development page for Dawg,
+<http://scit.us/dawg/>.
+
+MAILING LIST
+
+To participate in the development of Dawg you can subscribe to the mailing
+list at <http://scit.us/mailman/listinfo/dawg>.  
 
 EXAMPLES
   example0.dawg - minimal
