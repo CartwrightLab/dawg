@@ -51,4 +51,3 @@ OPTIONS
   Translate      B   translate outputed sequences to amino acids
   NexusCode      S   text or file to include between datasets in Nexus format
   Seed           VN  PRNG seed (integers)
-
