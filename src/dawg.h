@@ -7,6 +7,20 @@
 #	include "config.h"
 #endif
 
+#ifndef HAVE_GETPID
+#	ifdef HAVE__GETPID
+#		define getpid _getpid
+#	endif
+#endif
+
+#if !HAVE_MALLOC
+void *rpl_malloc(size_t n);
+#endif
+
+#if !HAVE_REALLOC
+void *rpl_realloc(void *p, size_t n);
+#endif
+
 #pragma warning(disable: 4702)
 
 #include <vector>
@@ -77,19 +91,5 @@ public:
 	void operator ( ) ( const Type& elem ) {m_Sum += elem;}
     operator Type() const { return m_Sum; }
 };
-
-#ifndef HAVE_GETPID
-#	ifdef HAVE__GETPID
-#		define getpid _getpid
-#	endif
-#endif
-
-#if !HAVE_MALLOC
-void *rpl_malloc(size_t n);
-#endif
-
-#if !HAVE_REALLOC
-void *rpl_realloc(void *p, size_t n);
-#endif
 
 #endif
