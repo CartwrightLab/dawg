@@ -238,10 +238,6 @@ move /Y $(InputName).hpp $(InputName).h
 				RelativePath=".\var.h">
 			</File>
 		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
-		</Filter>
 		<File
 			RelativePath=".\example1.fud">
 		</File>
