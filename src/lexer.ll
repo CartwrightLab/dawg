@@ -51,11 +51,6 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 
 %%
 
-{NUMBER} {
-	yylval.d = atof(yytext);
-	return NUM;
-}
-
 [Ff]"alse" {
 	yylval.b = false;
 	return BOOL;
@@ -70,6 +65,11 @@ NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 	strncpy(yylval.cs, yytext, 1023);
 	yylval.cs[1023] = '\0';
 	return ID;
+}
+
+{NUMBER} {
+	yylval.d = atof(yytext);
+	return NUM;
 }
 
 {STR} {
