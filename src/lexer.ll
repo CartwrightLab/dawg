@@ -1,7 +1,5 @@
 %{
-// cmd: "flex -t -CF lexer.fl > lexer.cpp"
-//
-// Error Warning: Does not check for circular includes.
+// lexer.ll - Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)
 
 #include "dawg.h"
 #include "var.h"
@@ -45,10 +43,10 @@ bool Parse(const char* cs)
 
 DIGIT  [0-9]
 IDWORD [A-Za-z][A-Za-z_0-9]*
-STR    \"[^\"\n]*\"
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 SPACE [ \t\r\v\f]
+STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 %x tree
 %x tostr
@@ -60,12 +58,12 @@ SPACE [ \t\r\v\f]
 	return yytext[0];
 }
 
-[Ff]"alse" {
+[Ff]alse {
 	yylval.b = false;
 	return BOOL;
 }
 
-[Tt]"rue" {
+[Tt]rue {
 	yylval.b = true;
 	return BOOL;
 }
@@ -86,7 +84,7 @@ SPACE [ \t\r\v\f]
 	return STRING;
 }
 
-"<<"{IDWORD}{SPACE}*"\n" {
+"<<"{IDWORD}{SPACE}*\n {
 	yytext += 2;
 
 	int s;
@@ -121,10 +119,9 @@ SPACE [ \t\r\v\f]
 	return STRING;
 }
 
-"#"[^\n]* {
-}
-
-"/""/"[^\n]* {
+"#"[^\n]* | 
+"//"[^\n]* {
+	// Comments
 }
 
 "(" {
