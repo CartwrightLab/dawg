@@ -78,6 +78,13 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return NUM;
 }
 
+\"\n(.*\n)*\"\n {
+	yytext[strlen(yytext)-3] = '\0';
+	yylval.pss = new string(yytext+2);
+	return STRING;
+}
+
+
 {STR} {
 	yytext[strlen(yytext)-1] = '\0';
 	yylval.pss = new string(yytext+1);
