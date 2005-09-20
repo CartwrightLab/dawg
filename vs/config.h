@@ -24,12 +24,12 @@
 #define PACKAGE "dawg"
 #define PACKAGE_BUGREPORT "http://scit.us/dawg/"
 #define PACKAGE_NAME "dawg"
-#define PACKAGE_STRING "dawg 1.1.0"
+#define PACKAGE_STRING "dawg current"
 #define PACKAGE_TARNAME "dawg"
-#define PACKAGE_VERSION "1.1.0"
+#define PACKAGE_VERSION "current"
 
 #define PROTOTYPES 1
 #define STDC_HEADERS 1
-#define VERSION "1.1.0"
+#define VERSION "current"
 #define YYTEXT_POINTER 1
 #define __PROTOTYPES 1

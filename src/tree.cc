@@ -396,19 +396,20 @@ void Tree::Evolve(Node &rNode, double dTime)
 			// Deletion
 			// Draw random size and random pos and rearrange
 			Sequence::size_type ul = m_pDeletionModel->RandSize();
-			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-1))+1u;
-			Sequence::size_type uB = (ul >= uPos) ? 0u : uPos - ul;
-			Sequence::size_type uSize = (uPos > uLength) ? uLength : uPos;
-			uSize -= uB;
-			uSize *= m_uWidth;
+			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-2));
+			Sequence::size_type uB = max(ul-1, uPos); 
+			Sequence::size_type uSize = min(ul-1+uLength, uPos+ul)-uB;
+			uB -= (ul-1);
 			uB *= m_uWidth;
+			uSize *= m_uWidth;
 			// Find deletion point
 			Node::iterator itPos = rNode.SeqPos(uB);
-			uSize -= itPos.first->Deletion(itPos.second, uSize);
+			Sequence::size_type uTemp = uSize;
+			uTemp -= itPos.first->Deletion(itPos.second, uTemp);
 			// Delete uSize nucleotides begin sensitive to gaps that overlap sections
 			for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
-				uSize -= itPos.first->Deletion(itPos.first->begin(), uSize);
-			uLength -= (ul*m_uWidth - uSize)/m_uWidth;
+				uTemp -= itPos.first->Deletion(itPos.first->begin(), uTemp);
+			uLength -= (uSize-uTemp)/m_uWidth;
 		}
 		// update length
 		dLength = (double)uLength;
