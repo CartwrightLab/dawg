@@ -8,3 +8,5 @@ Lambda = 0.1
 GapModel = "NB"
 GapParams = {1,0.5}
 Seed = 1000
+Format = "Fasta"
+
