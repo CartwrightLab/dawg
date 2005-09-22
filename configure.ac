@@ -1,5 +1,5 @@
 m4_define([dawg_rev], [m4_esyscmd([svnversion -n .])])
-AC_INIT([dawg], [current-rdawg_rev()], [http://scit.us/projects/dawg/])
+AC_INIT([dawg], [current-r]dawg_rev(), [http://scit.us/projects/dawg/])
 AC_CONFIG_SRCDIR([src/dawg.h])
 AC_CONFIG_AUX_DIR([config])
 AC_PREREQ(2.56)
