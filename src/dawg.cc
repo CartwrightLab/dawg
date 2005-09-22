@@ -167,8 +167,8 @@ bool Execute()
 	vector<unsigned int>   vuSeed;
 
 	string ssFile = "-";
-	unsigned int uFmt = FormatFasta;
-	string ssFormat = "Fasta";
+	unsigned int uFmt = FormatClustal;
+	string ssFormat = "Clustal";
 	string ssNexusCode;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
