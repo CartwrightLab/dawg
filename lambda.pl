@@ -229,7 +229,7 @@ my $x = 1;
 foreach my $xm (@xsqbins)
 {
 	my $bc = 0;
-	for(;$x<$xm;++$x) {$bc += $gapnum[$x-1];}
+	for(;$x<$xm && $x<=$maxgap;++$x) {$bc += $gapnum[$x-1];}
 	push(@xsq_ob, $bc);
 }
 
@@ -262,7 +262,7 @@ my @xsq_ex = ();
 foreach my $xm (@xsqbins)
 {
 	my $bc = 0;
-	for(;$x<$xm;++$x) {$bc += ((1.0-$q) * $q**($x-1.0));}
+	for(;$x<$xm && $x<=$maxgap;++$x) {$bc += ((1.0-$q) * $q**($x-1.0));}
 	push(@xsq_ex, $numgaps*$bc);
 }
 
@@ -335,7 +335,7 @@ else
 	foreach my $xm (@xsqbins)
 	{
 		my $bc = 0;
-		for(;$x<$xm;++$x) {$bc += $x**-$a/$b;}
+		for(;$x<$xm && $x<=$maxgap;++$x) {$bc += $x**-$a/$b;}
 		push(@xsq_ex, $numgaps*$bc);
 	}
 	
@@ -358,8 +358,14 @@ print "\nLambda Estimate is $lambda.\n";
 print "\nAverage Gap Size is ", $avgG + 1.0, ".\n";
 print "\nGap Size Distribution:\n";
 print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
-print "\nChi-Squared Bins:\n\t";
-print join("\n\t", @xsq_ob);
+print "\nChi-Squared Bins:\n";
+my $xi = 1;
+foreach(@xsq_ob)
+{
+	print "\t$xi-";
+	$xi*=2;
+	print $xi-1, "\t$_\n";
+}
 print "\nEstimated Models\n";
 foreach my $k (sort(keys(%model)))
 {
