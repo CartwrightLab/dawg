@@ -2,5 +2,5 @@
 
 aclocal \
 && autoheader \
-&& automake --gnu --add-missing \
+&& automake --gnu --add-missing --warning=none \
 && autoconf -f 
