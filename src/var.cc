@@ -60,9 +60,14 @@ bool DawgVar::Get(unsigned int &ruVar ) const
 
 bool DawgVar::Get(bool &rbVar ) const
 {
-	if(!IsType(tyBool))
+	if(IsType(tyBool))
+		rbVar = GetBool();
+	else if(IsType(tyNumber))
+		rbVar = (bool)(unsigned int)GetNumber();
+	else if(IsType(tyString))
+		rbVar = (GetString() == "True" || GetString() == "true");
+	else
 		return false;
-	rbVar = GetBool();
 	return true;
 }
 
