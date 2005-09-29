@@ -679,7 +679,7 @@ void Tree::Align(Alignment &aln) const
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 	
-	// States: Quit (0), Del/Root (1), Ins (2)
+	// States: Quit (0), Del/Root (1), Ins (2), InsDel (3)
 	unsigned char uState = 1;
 	// Go through each column, adding gaps where neccessary
 	for(unsigned int uCol = 0; uState; uCol++)
@@ -691,16 +691,30 @@ void Tree::Align(Alignment &aln) const
 		{
 			if(uCol >= cit->size())
 				continue;
-			// Nucleotide exists clear quit
-			uState = 1;
-			if((*cit)[uCol].IsInsertion())
+			if(uState == 0)
+				uState = 1;	// Nucleotide exists clear quit
+			if((*cit)[uCol].IsType(Nucleotide::TypeIns))
 			{
 				// Gaps need to be added mark and break
 				uState = 2;
 				break;
 			}
+			else if((*cit)[uCol].IsType(Nucleotide::TypeDelIns))
+			{
+				uState = 3;
+			}
 		}
-		if(uState == 2)
+		if(uState == 3)
+		{
+			for(vector<Sequence>::iterator it = vTable.begin();
+				it != vTable.end(); ++it)
+			{
+				if(uCol < it->size() && (*it)[uCol].GetType() == Nucleotide::TypeDelIns)
+					it->erase(it->begin()+uCol);
+			}
+			uCol--;
+		}
+		else if(uState == 2)
 		{
 			// Add gaps where neccessary
 			for(vector<Sequence>::iterator it = vTable.begin();
@@ -723,7 +737,6 @@ void Tree::Align(Alignment &aln) const
 				else
 					// Add gap to end of sequence
 					it->resize(uCol+1, Nucleotide(Nucleotide::TypeIns, 1.0));
-
 			}
 		}
 	}
