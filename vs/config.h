@@ -24,14 +24,14 @@
 #define HAVE__SNPRINTF 1
 
 #define PACKAGE "dawg"
-#define PACKAGE_BUGREPORT "http://scit.us/dawg/"
+#define PACKAGE_BUGREPORT "http://scit.us/projects/dawg/"
 #define PACKAGE_NAME "dawg"
-#define PACKAGE_STRING "dawg current"
+#define PACKAGE_STRING "dawg current-rVS"
 #define PACKAGE_TARNAME "dawg"
-#define PACKAGE_VERSION "current"
+#define PACKAGE_VERSION "current-rVS"
 
 #define PROTOTYPES 1
 #define STDC_HEADERS 1
-#define VERSION "current"
+#define VERSION "current-rVS"
 #define YYTEXT_POINTER 1
 #define __PROTOTYPES 1

@@ -247,6 +247,9 @@ move  /Y &quot;$(InputName).hh&quot; &quot;$(InputName).h&quot;
 				RelativePath="..\src\dawg.h">
 			</File>
 			<File
+				RelativePath="..\src\dawgnotice.h">
+			</File>
+			<File
 				RelativePath="..\src\dawgtxt.h">
 			</File>
 			<File

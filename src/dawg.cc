@@ -1,4 +1,20 @@
-// dawg.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+/*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
+    Copyright (C) 2004-2005  Reed A. Cartwright
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include "dawg.h"
 #include "tree.h"
@@ -12,6 +28,11 @@
 // Help Information
 char g_csDawgTxt[] =
 #include "dawgtxt.h"
+;
+
+// Notice
+char g_csDawgNotice[] = 
+#include "dawgnotice.h"
 ;
 
 using namespace std;
@@ -86,15 +107,17 @@ int main(int argc, char* argv[])
 			g_bReportErrors = false;
 			g_bReportWarnings = false;
 			break;
-			// Enable Errors
+		// Enable Errors
 		case 'e':
 		case 'E':
 			g_bReportErrors = true;
 			break;
+		// Enable Warnings
 		case 'w':
 		case 'W':
 			g_bReportWarnings = true;
 			break;
+		// Output Override
 		case 'o':
 		case 'O':
 			g_csOutput = optarg;
@@ -117,7 +140,8 @@ int main(int argc, char* argv[])
 		{
 			cout << PACKAGE_STRING << endl 
 				<< "DNA Assembly With Gaps" << endl
-				<< "Copyright (C) 2005 Reed A. Cartwright (all rights reserved)" << endl
+				<< "Copyright (C) 2004-2005 Reed A. Cartwright" << endl << endl
+				<< g_csDawgNotice << endl
 				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << "." << endl << endl;
 		}
 		if(bUsage)
