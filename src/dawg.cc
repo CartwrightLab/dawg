@@ -363,13 +363,13 @@ bool Execute()
 	}
 
 	// Output Format
-	if(ssFormat == "Fasta")
+	if(ssFormat == "Fasta" || ssFormat == "fas")
 		uFmt = FormatFasta;
-	else if(ssFormat == "Nexus")
+	else if(ssFormat == "Nexus" || ssFormat == "nex")
 		uFmt = FormatNexus;
-	else if(ssFormat == "Phylip")
+	else if(ssFormat == "Phylip" || ssFormat == "phy")
 		uFmt = FormatPhylip;
-	else if(ssFormat == "Clustal")
+	else if(ssFormat == "Clustal" || ssFormat == "aln")
 		uFmt = FormatClustal;
 	else
 		return DawgError("Unknown file format, \"%s\".");
