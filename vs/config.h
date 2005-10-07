@@ -16,6 +16,7 @@
 #define HAVE_TIME_H 1
 #define HAVE_SYSTYPES_H 1
 #define HAVE_SYSSTAT_H 1
+#define HAVE_GETOPT_H 1
 
 #define HAVE_VPRINTF 1
 #define HAVE__GETPID 1

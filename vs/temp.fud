@@ -1,18 +1,15 @@
 Length = 200
 Tree = (A:0.5,B:0.5)R;
-#Format = ""
-#File = "temp.aln"
-File = "aln:-"
-File ?= "fas:-"
+File = "out.aln"
 
 [Out.Block]
-Head = "%s"
-Tail = "tail"
+#Head = "%s"
+#Tail = "tail"
 Before = "[Dataset %r/%R]"
-After = "after"
+#After = "after"
 
 [Out]
-Subst = false
+Subst = true
 
 []
 Reps = 4

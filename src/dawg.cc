@@ -5,6 +5,10 @@
 #include "rand.h"
 #include "var.h"
 
+#ifdef HAVE_GETOPT_H
+#	include <getopt.h>
+#endif
+
 // Help Information
 char g_csDawgTxt[] =
 #include "dawgtxt.h"
@@ -18,6 +22,8 @@ bool Execute();
 bool g_bReportErrors = true;
 bool g_bReportWarnings = true;
 
+const char *g_csOutput = NULL;
+
 int main(int argc, char* argv[])
 {
 	bool bSerial = true;
@@ -28,81 +34,82 @@ int main(int argc, char* argv[])
 	bool bOk = true;
 
 	//Parse Aruments
-	int i=1;
-	for(;i<argc;++i)
+	int ch;
+
+	while((ch = getopt(argc, argv, "sScCvVhHuUbBqQeEwWo:O:")) != -1)
 	{
-		char* pch = argv[i];
-		if( *pch != '-' || *(pch+1) == '\0')
-			break;
-		while(*++pch)
+		switch(ch)
 		{
-			switch(*pch)
-			{
-				//Serial Mode
-				case 's':
-				case 'S':
-					bSerial = true;  
-					break;
-				//Combined Mode
-				case 'c':
-				case 'C':
-					bSerial = false; 
-					break;
-				// Version Information
-				case 'v':
-				case 'V':
-					bVersion = true;
-					break;
-				// Help Information
-				case '?':
-				case 'h':
-				case 'H':
-					bVersion = true;
-					bUsage = true;
-					break;
-				// Unbuffered Output
-				case 'u':
-				case 'U':
-					#ifdef SETVBUF_REVERSED
-					setvbuf(stdout, _IONBF, NULL, 0);
-					#else
-					setvbuf(stdout, NULL, _IONBF, 0);
-					#endif
-					break;
-				// Buffered Output
-				case 'b':
-				case 'B':
-					#ifdef SETVBUF_REVERSED
-					setvbuf(stdout, _IOFBF, NULL, BUFSIZ);
-					#else
-					setvbuf(stdout, NULL, _IOFBF, BUFSIZ);
-					#endif
-					break;
-				// Disable Errors and Warnings
-				case 'q':
-				case 'Q':
-					g_bReportErrors = false;
-					g_bReportWarnings = false;
-					break;
-					// Enable Errors
-				case 'e':
-				case 'E':
-					g_bReportErrors = true;
-					break;
-				case 'w':
-				case 'W':
-					g_bReportWarnings = true;
-					break;
-				// Error Reporting
-				default:
-					DawgError("Unreconized switch, \"%c\"", *pch);
-					bOk = false;
-					bUsage = true;
-					bVersion = true;
-					break;
-			};
+		//Serial Mode
+		case 's':
+		case 'S':
+			bSerial = true;  
+			break;
+		//Combined Mode
+		case 'c':
+		case 'C':
+			bSerial = false; 
+			break;
+		// Version Information
+		case 'v':
+		case 'V':
+			bVersion = true;
+			break;
+		// Help Information
+		case '?':
+		case 'h':
+		case 'H':
+			bVersion = true;
+			bUsage = true;
+			break;
+		// Unbuffered Output
+		case 'u':
+		case 'U':
+			#ifdef SETVBUF_REVERSED
+			setvbuf(stdout, _IONBF, NULL, 0);
+			#else
+			setvbuf(stdout, NULL, _IONBF, 0);
+			#endif
+			break;
+		// Buffered Output
+		case 'b':
+		case 'B':
+			#ifdef SETVBUF_REVERSED
+			setvbuf(stdout, _IOFBF, NULL, BUFSIZ);
+			#else
+			setvbuf(stdout, NULL, _IOFBF, BUFSIZ);
+			#endif
+			break;
+		// Disable Errors and Warnings
+		case 'q':
+		case 'Q':
+			g_bReportErrors = false;
+			g_bReportWarnings = false;
+			break;
+			// Enable Errors
+		case 'e':
+		case 'E':
+			g_bReportErrors = true;
+			break;
+		case 'w':
+		case 'W':
+			g_bReportWarnings = true;
+			break;
+		case 'o':
+		case 'O':
+			g_csOutput = optarg;
+			break;
+		// Error Reporting
+		default:
+			DawgError("Unreconized switch, \"%c\"", ch);
+			bOk = false;
+			bUsage = true;
+			bVersion = true;
+			break;
 		}
 	}
+    argc -= optind;
+    argv += optind;
 	// Print Version and/or Usage Information and exit
 	if(bVersion || bUsage)
 	{
@@ -124,7 +131,9 @@ int main(int argc, char* argv[])
 	if(bSerial)
 	{
 		// Process files in serial mode
-		for(;i<argc;++i)
+		if(argc > 1)
+			g_csOutput = NULL; // disable output override
+		for(int i=0;i<argc;++i)
 		{
 			if(Parse(argv[i]))
 			{
@@ -139,7 +148,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		// Process files in combined mode
-		for(;i<argc;++i)
+		for(int i=0;i<argc;++i)
 		{
 			if(!Parse(argv[i]))
 				bOk = DawgError("Parsing of \"%s\" failed.", argv[i]);
@@ -429,16 +438,31 @@ bool Execute()
 				ssFormat = "Clustal";
 		}
 	}
+	// Override output
+	if(g_csOutput != NULL)
+	{
+		ssFile = g_csOutput;
+		string::size_type pos = ssFile.find_first_of(':');
+		if( pos != string::npos)
+			ssFormat = ssFile.substr(0, pos);
+		else
+		{
+			pos = ssFile.find_last_of('.');
+			if(pos != string::npos)
+				ssFormat = ssFile.substr(pos+1);
+		}
+	}
 	if(ssFormat == "Fasta" || ssFormat == "fas")
 		uFmt = FormatFasta;
 	else if(ssFormat == "Nexus" || ssFormat == "nex")
 		uFmt = FormatNexus;
 	else if(ssFormat == "Phylip" || ssFormat == "phy")
 		uFmt = FormatPhylip;
-	else if(ssFormat == "Clustal" || ssFormat == "aln")
+	else if(ssFormat == "Clustal" || ssFormat == "aln"
+		|| ssFormat == "poo" || ssFormat == "txt" || ssFormat == "out")
 		uFmt = FormatClustal;
 	else
-		return DawgError("Unknown file format, \"%s\".");
+		return DawgError("Unknown file format, \"%s\".", ssFormat.c_str());
 
 	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
 		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail), bOutSubst);

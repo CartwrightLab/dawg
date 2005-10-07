@@ -157,6 +157,9 @@
 				FileType="0">
 			</File>
 			<File
+				RelativePath=".\getopt.c">
+			</File>
+			<File
 				RelativePath="..\src\indel.cc"
 				FileType="0">
 			</File>

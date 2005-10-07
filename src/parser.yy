@@ -1,5 +1,5 @@
 %{
-// parser.yy - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// parser.yy - Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)
 
 #include "dawg.h"
 #include "var.h"
