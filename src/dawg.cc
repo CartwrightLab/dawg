@@ -168,7 +168,7 @@ bool Execute()
 
 	string ssFile = "-";
 	unsigned int uFmt = FormatClustal;
-	string ssFormat = "Clustal";
+	string ssFormat = "";
 	string ssNexusCode;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
@@ -363,6 +363,20 @@ bool Execute()
 	}
 
 	// Output Format
+	if(ssFormat == "")
+	{
+		string::size_type pos = ssFile.find_first_of(':');
+		if( pos != string::npos)
+			ssFormat = ssFile.substr(0, pos);
+		else
+		{
+			pos = ssFile.find_last_of('.');
+			if(pos != string::npos)
+				ssFormat = ssFile.substr(pos+1);
+			else
+				ssFormat = "Clustal";
+		}
+	}
 	if(ssFormat == "Fasta" || ssFormat == "fas")
 		uFmt = FormatFasta;
 	else if(ssFormat == "Nexus" || ssFormat == "nex")
@@ -394,6 +408,10 @@ bool Execute()
 	// setup output location
 	ostream* pOut;
 	ofstream ofOut;
+	string::size_type pos = ssFile.find_first_of(':');
+	if( pos != string::npos)
+		ssFile.erase(0, pos+1);
+
 	if(ssFile == "-" || ssFile.empty())
 		pOut = &cout;
 	else

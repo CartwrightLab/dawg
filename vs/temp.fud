@@ -1,10 +1,5 @@
-Length = 1000
-Tree = (A:0.5,B:0.5,C:0.5,D:0.5,E:0.5)R;
-Lambda = 0.2
-Format = "Clustal"
-File = "temp.aln"
-File = "-"
-GapParams = {1.5,500}
-Reps = 1
-GapModel = "PL"
-GapPlus = true
+Length = 200
+Tree = (A:0.5,B:0.5)R;
+#Format = ""
+#File = "temp.aln"
+File = "nex:-"

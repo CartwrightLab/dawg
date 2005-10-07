@@ -60,6 +60,7 @@ string g_ssSection("");
 
 input:
 	/* empty */
+| input '\n'
 | input statement '\n'
 ;
 
