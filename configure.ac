@@ -28,7 +28,7 @@ AC_CHECK_LIB(unwind, main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h process.h])
+AC_CHECK_HEADERS([time.h float.h stdio.h unistd.h math.h assert.h stdarg.h stddef.h process.h getopt.h])
 
 
 dnl Checks for typedefs, structures, and compiler characteristics.
