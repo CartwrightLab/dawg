@@ -60,12 +60,12 @@ string g_ssSection("");
 
 input:
 	/* empty */
-| input statement
+| input statement '\n'
 ;
 
 statement:
 END
-| ID '=' dvar '\n' { DawgVar::SetVar(g_ssSection+*$1, $3); delete $1; }
+| ID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3); delete $1; }
 | '[' ID ']' { g_ssSection = *$2+"."; delete $2; }
 ;
 
