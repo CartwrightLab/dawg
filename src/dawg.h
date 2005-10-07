@@ -70,7 +70,8 @@ bool DawgWarn(const char* csErr, ...);  //always returns false
 
 bool SetFormat(unsigned int fmt, int nNum,
 			   const char* csHead, const char* csBefore,
-			   const char* csAfter, const char* csTail);
+			   const char* csAfter, const char* csTail,
+			   bool bSubst);
 void DawgIniOutput(std::ostream& os);
 void DawgFinOutput(std::ostream& os);
 

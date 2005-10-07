@@ -196,6 +196,7 @@ bool Execute()
 	string ssOutBlockBefore = "";
 	string ssOutBlockAfter = "";
 	string ssOutBlockTail = "";
+	bool bOutSubst = true;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
 	unsigned int uWidth = 1;
@@ -288,6 +289,7 @@ bool Execute()
 	DawgVar::Get("Out.Block.Before", ssOutBlockBefore);
 	DawgVar::Get("Out.Block.After", ssOutBlockAfter);
 	DawgVar::Get("Out.Block.Tail", ssOutBlockTail);
+	DawgVar::Get("Out.Subst", bOutSubst);
 
 	// Setup Model Parameters from Variables
 
@@ -439,7 +441,7 @@ bool Execute()
 		return DawgError("Unknown file format, \"%s\".");
 
 	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
-		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail));
+		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail), bOutSubst);
 	
 	// Check translate parameter
 	if(bTranslate && uWidth != 3)

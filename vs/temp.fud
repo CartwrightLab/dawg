@@ -6,10 +6,13 @@ File = "aln:-"
 File ?= "fas:-"
 
 [Out.Block]
-Head = "head"
+Head = "%s"
 Tail = "tail"
-Before = "before"
+Before = "[Dataset %r/%R]"
 After = "after"
+
+[Out]
+Subst = false
 
 []
 Reps = 4

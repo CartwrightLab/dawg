@@ -18,11 +18,13 @@ const char *g_csAfter = NULL;
 const char *g_csTail = NULL;
 int			g_nDataSet = 0;
 int			g_nDataSetNum = 1;
+bool		g_bSubst = true;
 
 // Reset Format
 bool SetFormat(unsigned int fmt, int nNum,
 			   const char* csHead, const char* csBefore,
-			   const char* csAfter, const char* csTail)
+			   const char* csAfter, const char* csTail,
+			   bool bSubst)
 {
 	g_fileFormat = fmt;
 	g_csHead = csHead;
@@ -31,7 +33,45 @@ bool SetFormat(unsigned int fmt, int nNum,
 	g_csTail = csTail;
 	g_nDataSet = 0;
 	g_nDataSetNum = nNum;
+	g_bSubst = bSubst;
 	return true;
+}
+
+string Subst(const char* cs)
+{
+	if(!g_bSubst)
+		return cs;
+	string ss = "";
+	char csBuffer[64] = "";
+	const char *cs1 = cs;
+	const char *cs2 = strchr(cs1, '%');
+	while(cs2 != NULL)
+	{
+		ss.append(cs1, cs2-cs1);
+		switch(cs2[1])
+		{
+		case 'r':
+			ss.append(itoa(g_nDataSet, csBuffer, 10));
+			cs1 = cs2+2;
+			break;
+		case 'R':
+			ss.append(itoa(g_nDataSetNum, csBuffer, 10));
+			cs1 = cs2+2;
+			break;
+		case '%':
+			ss.append("%");
+			cs1 = cs2+2;
+			break;
+		default:
+			ss.append("%");
+			cs1 = cs2+1;
+			break;
+		}
+
+		cs2 = strchr(cs1, '%');
+	}
+	ss.append(cs1);
+	return ss;
 }
 
 // Initialize Output for formats that need it
@@ -47,25 +87,23 @@ void DawgIniOutput(ostream& os)
 		break;
 	}
 	if(g_csHead != NULL)
-		os << g_csHead << endl;
+		os << Subst(g_csHead) << endl;
 }
 
 // Finalize Output
 void DawgFinOutput(ostream& os)
 {
 	if(g_csTail != NULL)
-		os << g_csTail << endl;
+		os << Subst(g_csTail) << endl;
 }
 
 
 // Save alignment to output stream
 bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags)
 {
-	// Print DataSet number if multiple sequences will be returned
-	if(g_nDataSetNum > 1)
-		rFile << "[DataSet " << ++g_nDataSet << ']' << endl;
+	g_nDataSet++;
 	if(g_csBefore != NULL)
-		rFile << g_csBefore << endl;
+		rFile << Subst(g_csBefore) << endl;
 	// Filter sequences to a local alignment, applying format modifiers
 	Tree::Alignment alnLocal;
 	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
@@ -89,7 +127,7 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFla
 			PrintSequencesFasta(rFile, alnLocal, uFlags);
 	};
 	if(g_csAfter != NULL)
-		rFile << g_csAfter << endl;
+		rFile << Subst(g_csAfter) << endl;
 	return true;
 }
 
