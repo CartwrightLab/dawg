@@ -158,6 +158,11 @@ inline unsigned int rand_seed()
 	return (u = u*1664525u + 1013904223u);
 }
 
+inline const char * SS2CS(const string& ss)
+{
+	return ss.empty() ? NULL : ss.c_str();
+}
+
 // Execute the Dawg process based on the current configuration
 bool Execute()
 {
@@ -187,7 +192,10 @@ bool Execute()
 	string ssFile = "-";
 	unsigned int uFmt = FormatClustal;
 	string ssFormat = "";
-	string ssNexusCode;
+	string ssOutBlockHead = "";
+	string ssOutBlockBefore = "";
+	string ssOutBlockAfter = "";
+	string ssOutBlockTail = "";
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
 	unsigned int uWidth = 1;
@@ -273,7 +281,13 @@ bool Execute()
 
 	DawgVar::Get("File", ssFile);
 	DawgVar::Get("Format", ssFormat);
-	DawgVar::Get("NexusCode", ssNexusCode);
+    if(DawgVar::Get("NexusCode", ssOutBlockAfter))
+		DawgWarn("NexusCode is depreciated.  Use Out.Block.* instead.");
+	
+	DawgVar::Get("Out.Block.Head", ssOutBlockHead);
+	DawgVar::Get("Out.Block.Before", ssOutBlockBefore);
+	DawgVar::Get("Out.Block.After", ssOutBlockAfter);
+	DawgVar::Get("Out.Block.Tail", ssOutBlockTail);
 
 	// Setup Model Parameters from Variables
 
@@ -372,12 +386,30 @@ bool Execute()
 	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
 	
-	// Read NexusCode from file if neccessary
-   	if(!ssNexusCode.empty())
+	// Read Out.Block.* from file if neccessary
+   	if(!ssOutBlockHead.empty())
 	{
-		ifstream iFile(ssNexusCode.c_str());
+		ifstream iFile(ssOutBlockHead.c_str());
 		if(iFile.is_open())
-			getline(iFile, ssNexusCode, '\0');
+			getline(iFile, ssOutBlockHead, '\0');
+	}
+   	if(!ssOutBlockBefore.empty())
+	{
+		ifstream iFile(ssOutBlockBefore.c_str());
+		if(iFile.is_open())
+			getline(iFile, ssOutBlockBefore, '\0');
+	}
+   	if(!ssOutBlockAfter.empty())
+	{
+		ifstream iFile(ssOutBlockAfter.c_str());
+		if(iFile.is_open())
+			getline(iFile, ssOutBlockAfter, '\0');
+	}
+   	if(!ssOutBlockTail.empty())
+	{
+		ifstream iFile(ssOutBlockTail.c_str());
+		if(iFile.is_open())
+			getline(iFile, ssOutBlockTail, '\0');
 	}
 
 	// Output Format
@@ -405,8 +437,9 @@ bool Execute()
 		uFmt = FormatClustal;
 	else
 		return DawgError("Unknown file format, \"%s\".");
-	
-	SetFormat(uFmt, uReps, ssNexusCode.empty() ? NULL : ssNexusCode.c_str());
+
+	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
+		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail));
 	
 	// Check translate parameter
 	if(bTranslate && uWidth != 3)
@@ -453,6 +486,8 @@ bool Execute()
 		if(!SaveAlignment(*pOut, aln, uOutFlags))
 			return DawgError("Error saving alignment.");
 	}
+
+	DawgFinOutput(*pOut);
 
 	return true;
 }

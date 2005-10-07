@@ -12,15 +12,23 @@ void PrintSequencesPhylip( ostream &os, const Tree::Alignment& aln, unsigned int
 void PrintSequencesClustal(ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
 
 unsigned int g_fileFormat = FormatFasta;
-const char *g_csBlock = NULL;
+const char *g_csHead = NULL;
+const char *g_csBefore = NULL;
+const char *g_csAfter = NULL;
+const char *g_csTail = NULL;
 int			g_nDataSet = 0;
 int			g_nDataSetNum = 1;
 
 // Reset Format
-bool SetFormat(unsigned int fmt, int nNum, const char* csBlock)
+bool SetFormat(unsigned int fmt, int nNum,
+			   const char* csHead, const char* csBefore,
+			   const char* csAfter, const char* csTail)
 {
 	g_fileFormat = fmt;
-	g_csBlock = csBlock;
+	g_csHead = csHead;
+	g_csBefore = csBefore;
+	g_csAfter = csAfter;
+	g_csTail = csTail;
 	g_nDataSet = 0;
 	g_nDataSetNum = nNum;
 	return true;
@@ -38,7 +46,17 @@ void DawgIniOutput(ostream& os)
 		os << "CLUSTAL multiple sequence alignment (Created by " << PACKAGE_STRING << ")" << endl << endl << endl;
 		break;
 	}
+	if(g_csHead != NULL)
+		os << g_csHead << endl;
 }
+
+// Finalize Output
+void DawgFinOutput(ostream& os)
+{
+	if(g_csTail != NULL)
+		os << g_csTail << endl;
+}
+
 
 // Save alignment to output stream
 bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags)
@@ -46,7 +64,8 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFla
 	// Print DataSet number if multiple sequences will be returned
 	if(g_nDataSetNum > 1)
 		rFile << "[DataSet " << ++g_nDataSet << ']' << endl;
-
+	if(g_csBefore != NULL)
+		rFile << g_csBefore << endl;
 	// Filter sequences to a local alignment, applying format modifiers
 	Tree::Alignment alnLocal;
 	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
@@ -69,6 +88,8 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFla
 		default:
 			PrintSequencesFasta(rFile, alnLocal, uFlags);
 	};
+	if(g_csAfter != NULL)
+		rFile << g_csAfter << endl;
 	return true;
 }
 
@@ -116,10 +137,6 @@ void PrintSequencesNexus(ostream &os, const Tree::Alignment& aln, unsigned int u
 
 	// Close data block
 	os << ';' << endl << "END;" << endl << endl;
-	
-	// Add Nexus Code Block if it exists
-	if(g_csBlock)
-		os << g_csBlock << endl << endl;
 }
 
 // Phylip Non-Interleaved Output

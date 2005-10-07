@@ -68,8 +68,11 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 bool DawgError(const char* csErr, ...);  //always returns false
 bool DawgWarn(const char* csErr, ...);  //always returns false
 
-bool SetFormat(unsigned int fmt, int nNum, const char* csBlock);
+bool SetFormat(unsigned int fmt, int nNum,
+			   const char* csHead, const char* csBefore,
+			   const char* csAfter, const char* csTail);
 void DawgIniOutput(std::ostream& os);
+void DawgFinOutput(std::ostream& os);
 
 // File Formats
 const unsigned int FormatFasta = 0;

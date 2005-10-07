@@ -72,7 +72,8 @@ endl:
 ;
 
 statement:
-'[' ID ']' { g_ssSection = *$2+"."; delete $2; }
+'['']' { g_ssSection = ""; }
+| '[' ID ']' { g_ssSection = *$2+"."; delete $2; }
 | ID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 0); delete $1; }
 | ID '?' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 1); delete $1; }
 | ID '+' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 2); delete $1; }

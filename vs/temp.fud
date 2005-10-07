@@ -3,14 +3,13 @@ Tree = (A:0.5,B:0.5)R;
 #Format = ""
 #File = "temp.aln"
 File = "aln:-"
-File += "fas:-"
-Out.Block.Head = ""
-Out.Block.Tail = ""
-Out.Block.Before  = ""
-Out.Block.After = ""
+File ?= "fas:-"
 
 [Out.Block]
-Head = ""
-Tail = ""
-Before = ""
-After = ""
+Head = "head"
+Tail = "tail"
+Before = "before"
+After = "after"
+
+[]
+Reps = 4

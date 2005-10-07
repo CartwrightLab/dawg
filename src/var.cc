@@ -76,7 +76,7 @@ bool DawgVar::Get(bool &rbVar ) const
 	if(IsType(tyBool))
 		rbVar = GetBool();
 	else if(IsType(tyNumber))
-		rbVar = (bool)(unsigned int)GetNumber();
+		rbVar = ((unsigned int)GetNumber() != 0);
 	else if(IsType(tyString))
 		rbVar = (GetString() == "True" || GetString() == "true");
 	else

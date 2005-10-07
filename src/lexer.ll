@@ -43,7 +43,7 @@ bool Parse(const char* cs)
 %option noyywrap
 
 DIGIT  [0-9]
-IDWORD [A-Za-z][A-Za-z_0-9]*
+IDWORD [A-Za-z][A-Za-z_0-9.]*
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 SPACE [ \t\r\v\f]
