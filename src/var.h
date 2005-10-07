@@ -27,7 +27,7 @@ public:
 	// Variable Retreival / Setting
 	static MapSsToVar& GetMap();
 	static DawgVar* GetVar(const std::string &ssKey);
-	static void		SetVar(const std::string &ssKey, DawgVar* pVar);
+	static void		SetVar(const std::string &ssKey, DawgVar* pVar, int nMode = 0);
 	static void		ClearMap();
 	
 	// General Routines

@@ -29,9 +29,22 @@ DawgVar* DawgVar::GetVar(const std::string &ssKey)
 	return (it != GetMap().end()) ? it->second : NULL;
 }
 
-void DawgVar::SetVar(const std::string &ssKey, DawgVar* pVar)
+void DawgVar::SetVar(const std::string &ssKey, DawgVar* pVar, int nMode)
 {
-	GetMap()[ssKey] = pVar;
+	DawgVar *p = GetVar(ssKey);
+	if(nMode == 1)
+	{
+		if(p == NULL)
+			GetMap()[ssKey] = pVar;
+		else if(pVar != NULL)
+			delete pVar;
+	}
+	else
+	{
+		if(p != NULL)
+			delete p;
+		GetMap()[ssKey] = pVar;
+	} 
 }
 
 bool DawgVar::Get( double &rdVar ) const

@@ -2,4 +2,5 @@ Length = 200
 Tree = (A:0.5,B:0.5)R;
 #Format = ""
 #File = "temp.aln"
-File = "nex:-"
+File = "aln:-"
+File += "fas:-"

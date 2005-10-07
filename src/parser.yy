@@ -35,6 +35,8 @@ string g_ssSection("");
 %token <pss> ID
 %token <b>  BOOL
 %token <ch> EQ		'='
+%token <ch> QEQ		'?'
+%token <ch> AEQ		'+'
 %token <ch> LBRACE	'{'
 %token <ch> RBRACE	'}'
 %token <ch> LPARTH	'('
@@ -60,14 +62,20 @@ string g_ssSection("");
 
 input:
 	/* empty */
-| input '\n'
-| input statement '\n'
+| input endl
+| input statement endl
+;
+
+endl:
+'\n'
+| END
 ;
 
 statement:
-END
-| ID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3); delete $1; }
-| '[' ID ']' { g_ssSection = *$2+"."; delete $2; }
+'[' ID ']' { g_ssSection = *$2+"."; delete $2; }
+| ID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 0); delete $1; }
+| ID '?' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 1); delete $1; }
+| ID '+' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 2); delete $1; }
 ;
 
 dvar:

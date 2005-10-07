@@ -13,6 +13,7 @@ struct State
 } g_state;
 
 bool g_bParseOkay = true;
+bool g_bTerminate = false;
 
 void yyerror (char *s)
 {
@@ -58,12 +59,17 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return yytext[0];
 }
 
-[Ff]alse {
+[?+]"=" {
+	yylval.ch = yytext[0];
+	return yytext[0];
+}
+
+[Ff][Aa][Ll][Ss][Ee] {
 	yylval.b = false;
 	return BOOL;
 }
 
-[Tt]rue {
+[Tt][Rr][Uu][Ee] {
 	yylval.b = true;
 	return BOOL;
 }
@@ -163,7 +169,9 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 <tree>"[".+"]" { }
 
 <*><<EOF>> {
-	yyterminate();
+	if(g_bTerminate)
+		yyterminate();
+	g_bTerminate = true;
 	return END;
 }
 
