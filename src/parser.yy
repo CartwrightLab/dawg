@@ -12,6 +12,9 @@ int yylex(void);
 void yyerror (char *s);
 
 using namespace std;
+
+string g_ssSection("");
+
 %}
 
 %union {
@@ -37,6 +40,9 @@ using namespace std;
 %token <ch> LPARTH	'('
 %token <ch> RPARTH	')'
 %token <ch> TO		'<'
+%token <ch> LBRACKET '['
+%token <ch> RBRACKET ']'
+%token <ch> ENDL	 '\n'
 %token <ch> UNKNOWN
 %token      END
 
@@ -59,7 +65,8 @@ input:
 
 statement:
 END
-| ID '=' dvar { DawgVar::SetVar(*$1, $3); delete $1; }
+| ID '=' dvar '\n' { DawgVar::SetVar(g_ssSection+*$1, $3); delete $1; }
+| '[' ID ']' { g_ssSection = *$2+"."; delete $2; }
 ;
 
 dvar:

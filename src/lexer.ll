@@ -53,7 +53,7 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 %%
 
-[=\{\}] {
+[=\{\}\[\]] {
 	yylval.ch = yytext[0];
 	return yytext[0];
 }
@@ -165,6 +165,12 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 <*><<EOF>> {
 	yyterminate();
 	return END;
+}
+
+\n {
+	g_state.nLine++;
+	yylval.ch = yytext[0];
+	return yytext[0];
 }
 
 ";" { }
