@@ -45,7 +45,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([getpid _getpid copysign _copysign])
+AC_CHECK_FUNCS([getpid _getpid copysign _copysign snprintf _snprintf])
 dnl AC_CHECK_FUNCS([floor pow sqrt])
 
 AX_CXXFLAGS_WARN_ALL

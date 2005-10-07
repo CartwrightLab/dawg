@@ -19,7 +19,8 @@
 
 #define HAVE_VPRINTF 1
 #define HAVE__GETPID 1
-#define HAVE__COPYSIGN
+#define HAVE__COPYSIGN 1
+#define HAVE__SNPRINTF 1
 
 #define PACKAGE "dawg"
 #define PACKAGE_BUGREPORT "http://scit.us/dawg/"
