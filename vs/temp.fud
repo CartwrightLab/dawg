@@ -4,3 +4,13 @@ Tree = (A:0.5,B:0.5)R;
 #File = "temp.aln"
 File = "aln:-"
 File += "fas:-"
+Out.Block.Head = ""
+Out.Block.Tail = ""
+Out.Block.Before  = ""
+Out.Block.After = ""
+
+[Out.Block]
+Head = ""
+Tail = ""
+Before = ""
+After = ""

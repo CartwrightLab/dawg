@@ -66,6 +66,7 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
+bool DawgWarn(const char* csErr, ...);  //always returns false
 
 bool SetFormat(unsigned int fmt, int nNum, const char* csBlock);
 void DawgIniOutput(std::ostream& os);

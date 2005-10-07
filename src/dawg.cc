@@ -15,6 +15,9 @@ using namespace std;
 bool Parse(const char* cs);
 bool Execute();
 
+bool g_bReportErrors = true;
+bool g_bReportWarnings = true;
+
 int main(int argc, char* argv[])
 {
 	bool bSerial = true;
@@ -74,6 +77,21 @@ int main(int argc, char* argv[])
 					#else
 					setvbuf(stdout, NULL, _IOFBF, BUFSIZ);
 					#endif
+					break;
+				// Disable Errors and Warnings
+				case 'q':
+				case 'Q':
+					g_bReportErrors = false;
+					g_bReportWarnings = false;
+					break;
+					// Enable Errors
+				case 'e':
+				case 'E':
+					g_bReportErrors = true;
+					break;
+				case 'w':
+				case 'W':
+					g_bReportWarnings = true;
 					break;
 				// Error Reporting
 				default:
@@ -442,7 +460,28 @@ bool Execute()
 // Error Reporting Routine
 bool DawgError(const char* csErr, ...)
 {
+	if(!g_bReportErrors)
+		return false;
 	fprintf(stderr, "Error: ");
+	va_list args;
+	va_start(args, csErr);
+#if defined(HAVE_VPRINTF)
+	vfprintf(stderr, csErr, args);
+#elif defined(HAVE_DOPRNT)
+	_doprnt(csErr, args, stderr);
+#else
+	fprintf(stderr, "%s", csErr);
+#endif
+	va_end(args);
+	fprintf(stderr, "\n");
+	return false;
+}
+
+bool DawgWarn(const char* csErr, ...)
+{
+	if(!g_bReportWarnings)
+		return false;
+	fprintf(stderr, "Warning: ");
 	va_list args;
 	va_start(args, csErr);
 #if defined(HAVE_VPRINTF)
