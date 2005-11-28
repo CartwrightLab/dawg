@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 
-# lambda.pl v1.1 - An estimator for DAWG's lambda
+# lambda.pl v1.2 - An estimator for DAWG's lambda
 # Copyright (2004-2005) Reed A. Cartwright.  All rights reserved.
 #
 # Usage: perl lambda.pl [treefile] [fastafile]
@@ -9,6 +9,10 @@
 #
 
 use strict;
+
+# options
+my $user_dist = 0; # change to 1 to enable the display of the US gap distribution
+my $chisq_bins = 0; # change to 1 to see the chisq bins
 
 # Table for Zipf Estimation [1.01..3.0 by 0.01]
 my $ZetaTableS = 1.01;
@@ -168,9 +172,10 @@ while(<>)
 		$tree .= $_;
 	}
 	#check to see if the line is a fasta sequence name
-	elsif(m/^>\s*(.+)\s*/)
+	elsif(/^>\s*(.+)\s*/)
 	{
 		$seqname = $1;
+		$seqs{$seqname} ||= '';
 	}
 	#append the line to the sequence
 	else
@@ -192,7 +197,13 @@ my $avgL = 0;
 #find unique gaps and count the ungapped length of the sequences
 foreach(@table)
 {
-	$gaps{$-[0], $+[0]} = 1 while($_ =~ m/-+/g);
+	while(/(-+)/g)
+	{
+		my $m = $1;
+		my $e = pos;
+		my $b = $e-length($m);
+		$gaps{$b, $e} = 1;
+	}
 	$avgL += tr/ACGTacgt//;
 }
 #find average length
@@ -345,41 +356,67 @@ else
 		$df += 1;
 		$xsq += ($xsq_ob[$_]-$xsq_ex[$_])**2/$xsq_ex[$_];
 	}
-	$df -= 2;	
+	$df -= 2;
+	my $avgLi = int($abgL);
 	$model{PowerLaw} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df,
-			XSQ => $xsq, Params => {a => $a, z => $plmle}};
+			XSQ => $xsq, Params => {a => $a, z => $plmle}, text => "GapModel = \"PL\"\nGapParams = {$a, $avgLi}"};
 }
 
 #output
-print "Total Len is $totlen.\n";
-print "Number of gaps is $numgaps.\n";
-print "Average Length is $avgL.\n";
-print "\nLambda Estimate is $lambda.\n";
-print "\nAverage Gap Size is ", $avgG + 1.0, ".\n";
-print "\nGap Size Distribution:\n";
-print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
-print "\nChi-Squared Bins:\n";
-my $xi = 1;
-foreach(@xsq_ob)
+if($user_dist)
 {
-	print "\t$xi-";
-	$xi*=2;
-	print $xi-1, "\t$_\n";
+	print "\nGap Size Distribution:\n";
+	print join("\t", $_, $gapsizes{$_} || 0, ($gapsizes{$_} || 0)/$numgaps), "\n" foreach(1..$maxgap);
 }
-print "\nEstimated Models\n";
+if($chisq_bins)
+{
+	print "\nChi-Squared Bins:\n";
+	my $xi = 1;
+	foreach(@xsq_ob)
+	{
+		print "\t$xi-";
+		$xi*=2;
+		print $xi-1, "\t$_\n";
+	}
+}
+print "Tree = $tree\n";
+print "# Total Len is $totlen.\n";
+print "# Average Length is $avgL.\n";
+print "Length = $avgL.\n";
+print "\n# Lambda Estimate is $lambda.\n";
+print "Lambda = $lambda\n";
+print "\n# Number of gaps is $numgaps.\n";
+print "# Average Gap Size is ", $avgG + 1.0, ".\n";
+
+print "\n# Estimated Models\n";
+
 foreach my $k (sort(keys(%model)))
 {
-	print "$k:\n\t";
+	print "# $k:\n#    ";
 	my @par = ();
 	foreach my $p (sort(keys(%{$model{$k}->{Params}})))
 	{
 		push(@par, "$p = $model{$k}->{Params}->{$p}");
 	}
 	print join(', ', @par), "\n";
-	print "\tLogLik = $model{$k}->{LL}\n";
-	print "\tAIC    = $model{$k}->{AIC}\n";
-	print "\tBIC    = $model{$k}->{BIC}\n";
-	print "\tXSQ    = $model{$k}->{XSQ} ($model{$k}->{DF} df)\n";
+	print "#    LogLik = $model{$k}->{LL}\n";
+	print "#    AIC    = $model{$k}->{AIC}\n";
+	print "#    BIC    = $model{$k}->{BIC}\n";
+	print "#    XSQ    = $model{$k}->{XSQ} ($model{$k}->{DF} df)\n";
+	my $text = $model{$k}->{text};
+	$text =~ s/^/\# /m;
+	print $text, "\n";
 }
+
+my $k_ll;
+
+foreach my $k(keys %model))
+{
+	$k_ll = $k if( !(defined $k_ll) || $model{$k_ll}->{LL} < $model{$k}->{LL});
+}
+
+print "\n# Most Likly Model\n";
+print $model{$k_ll}->text, "\n";
+
 
 
