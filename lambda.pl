@@ -291,8 +291,17 @@ for(0..$#xsq_ex)
 	$xsq += ($xsq_ob[$_]-$xsq_ex[$_])**2/$xsq_ex[$_];
 }
 $df -= 2;
+#calculate rsq
+my @L1 = ();
+my @L2 = ();
+while(my($g,$n) = each(%gapsizes))
+{
+	push(@L1, log($n) - log($numgaps));
+	push(@L2, log(1-$q)+log($q)*($g-1));
+}
+my $r = rsq([@L1],[@L2]);
 
-$model{Geometric} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {'q' => $q}, text => "GapModel = \"NB\"\nGapParams = {1, $q}", f => 'f(x) = (1-q)*q^(x-1)'};
+$model{Geometric} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {'q' => $q}, text => "GapModel = \"NB\"\nGapParams = {1, $q}", f => 'f(x) = (1-q)*q^(x-1)', RSQ => $r};
 
 # Zipf's Power-Law Model
 my $plmle = 0;
@@ -314,13 +323,13 @@ if($i == 0)
 	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA',
 			XSQ => 'NA', text => '',
 		Params => {a => '<'.$ZetaTableS, z => $plmle},
-		f => 'f(x) = x^(-a)/Zeta(a)'};
+		f => 'f(x) = x^(-a)/Zeta(a)', RSQ => 'NA'};
 }
 elsif($i == @ZetaRatioTable)
 {
 	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA', XSQ => 'NA', test => '',
 		Params => {a => '<'.$ZetaTableS+$ZetaTableI*@ZetaRatioTable, z => $plmle},
-	f => 'f(x) = x^(-a)/Zeta(a)'};
+	f => 'f(x) = x^(-a)/Zeta(a)', RSQ => 'NA'};
 	
 }
 else
@@ -335,7 +344,7 @@ else
 	my $b = $y1+($plmle-$x1)*($y2-$y1)/($x2-$x1);
 	$LL = 0;
 	$LL += log($_) * $gapsizes{$_} foreach(keys(%gapsizes));
-	$LL = -$numgaps*log($b) - $a*$LL;
+	$LL = -$numgaps * log($b) - $a * $LL;
 	$bic = -2*$LL+log($numgaps)*2.0;
 	$df = $gapclasses-2;
 	$aic = -2*$LL+2*1.0;
@@ -367,11 +376,19 @@ else
 		$xsq += ($xsq_ob[$_]-$xsq_ex[$_])**2/$xsq_ex[$_];
 	}
 	$df -= 2;
+	@L1 = ();
+	@L2 = ();
+	while(my($g,$n) = each(%gapsizes))
+	{
+		push(@L1, log($n) - log($numgaps));
+		push(@L2, -$a * log($g) - log($b));
+	}
+	$r = rsq([@L1],[@L2]);
 	my $avgLi = int($avgL);
 	$model{PowerLaw} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df,
 			XSQ => $xsq, Params => {a => $a, z => $plmle},
 			text => "GapModel = \"PL\"\nGapParams = {$a, $avgLi}",
-			f => 'f(x) = x^(-a)/Zeta(a)'};
+			f => 'f(x) = x^(-a)/Zeta(a)', RSQ => $r};
 }
 
 #output
@@ -411,10 +428,11 @@ foreach my $k (sort(keys(%model)))
 		push(@par, "$p = $model{$k}->{Params}->{$p}");
 	}
 	print join(', ', @par), "\n";
-	print "#    LogLik = $model{$k}->{LL}\n";
-	print "#    AIC    = $model{$k}->{AIC}\n";
-	print "#    BIC    = $model{$k}->{BIC}\n";
-	print "#    XSQ    = $model{$k}->{XSQ} ($model{$k}->{DF} df)\n";
+	print "#    LogLik     = $model{$k}->{LL}\n";
+	print "#    AIC        = $model{$k}->{AIC}\n";
+	print "#    BIC        = $model{$k}->{BIC}\n";
+	print "#    Xsq        = $model{$k}->{XSQ} ($model{$k}->{DF} df)\n";
+	#print "#    Rsq of Log = $model{$k}->{RSQ}\n";
 	my $text = $model{$k}->{text};
 	$text =~ s/^/# /mg;
 	print $text, "\n";
@@ -427,8 +445,27 @@ foreach my $k(keys %model)
 	$k_ll = $k if( !(defined $k_ll) || $model{$k_ll}->{LL} < $model{$k}->{LL});
 }
 
-print "\n# Most Likly Model\n";
+print "\n# Most Likely Model\n";
 print $model{$k_ll}->{text}, "\n";
+
+sub rsq
+{
+	my ($rO, $rE) = @_;
+	my @obs = @$rO;
+	my @est = @$rE;
+	my $m = 0.0;
+	my $m2 = 0.0;
+	my $SSe = 0.0;
+	for my $i (0..$#obs)
+	{
+		$SSe += ($obs[$i] - $est[$i])*($obs[$i] - $est[$i]);
+		$m += $obs[$i];
+		$m2 += $obs[$i]*$obs[$i];
+	}
+	return 1.0 - $SSe/($m2-$m*$m/@obs);
+	
+}
+
 
 
 
