@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 
-# lambda.pl v1.2 - An estimator for DAWG's lambda
+# lambda.pl $Rev$ - An estimator for Dawg's lambda
 # Copyright (2004-2005) Reed A. Cartwright.  All rights reserved.
 #
 # Usage: perl lambda.pl [treefile] [fastafile]
@@ -197,11 +197,18 @@ my $avgL = 0;
 #find unique gaps and count the ungapped length of the sequences
 foreach(@table)
 {
-	while(/(-+)/g)
+	while(/([-=]+)/g)
 	{
 		my $m = $1;
 		my $e = pos;
-		my $b = $e-length($m);
+		my $b = $e - length($m);
+		$gaps{$b, $e} = 1;
+	}
+	while(/([+=]+)/g)
+	{
+		my $m = $1;
+		my $e = pos;
+		my $b = $e - length($m);
 		$gaps{$b, $e} = 1;
 	}
 	$avgL += tr/ACGTacgt//;
@@ -285,7 +292,7 @@ for(0..$#xsq_ex)
 }
 $df -= 2;
 
-$model{Geometric} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {q => $q}};
+$model{Geometric} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df, XSQ => $xsq, Params => {'q' => $q}, text => "GapModel = \"NB\"\nGapParams = {1, $q}", f => 'f(x) = (1-q)*q^(x-1)'};
 
 # Zipf's Power-Law Model
 my $plmle = 0;
@@ -304,13 +311,16 @@ while($i < @ZetaRatioTable && $ZetaRatioTable[$i] < $plmle)
 #if $i == 0, undefined
 if($i == 0)
 {
-	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA', XSQ => 'NA', 
-		Params => {a => '<'.$ZetaTableS, z => $plmle}};
+	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA',
+			XSQ => 'NA', text => '',
+		Params => {a => '<'.$ZetaTableS, z => $plmle},
+		f => 'f(x) = x^(-a)/Zeta(a)'};
 }
 elsif($i == @ZetaRatioTable)
 {
-	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA', XSQ => 'NA',
-		Params => {a => '<'.$ZetaTableS+$ZetaTableI*@ZetaRatioTable, z => $plmle}};
+	$model{PowerLaw} = {AIC => 'NA', BIC => 'NA', LL => 'NA', DF => 'NA', XSQ => 'NA', test => '',
+		Params => {a => '<'.$ZetaTableS+$ZetaTableI*@ZetaRatioTable, z => $plmle},
+	f => 'f(x) = x^(-a)/Zeta(a)'};
 	
 }
 else
@@ -357,9 +367,11 @@ else
 		$xsq += ($xsq_ob[$_]-$xsq_ex[$_])**2/$xsq_ex[$_];
 	}
 	$df -= 2;
-	my $avgLi = int($abgL);
+	my $avgLi = int($avgL);
 	$model{PowerLaw} = {AIC => $aic, BIC => $bic, LL => $LL, DF => $df,
-			XSQ => $xsq, Params => {a => $a, z => $plmle}, text => "GapModel = \"PL\"\nGapParams = {$a, $avgLi}"};
+			XSQ => $xsq, Params => {a => $a, z => $plmle},
+			text => "GapModel = \"PL\"\nGapParams = {$a, $avgLi}",
+			f => 'f(x) = x^(-a)/Zeta(a)'};
 }
 
 #output
@@ -379,9 +391,9 @@ if($chisq_bins)
 		print $xi-1, "\t$_\n";
 	}
 }
+print "# Total Tree Length is $totlen.\n";
 print "Tree = $tree\n";
-print "# Total Len is $totlen.\n";
-print "# Average Length is $avgL.\n";
+print "\n# Average Sequence Length is $avgL.\n";
 print "Length = $avgL.\n";
 print "\n# Lambda Estimate is $lambda.\n";
 print "Lambda = $lambda\n";
@@ -392,7 +404,7 @@ print "\n# Estimated Models\n";
 
 foreach my $k (sort(keys(%model)))
 {
-	print "# $k:\n#    ";
+	print "# $k:\n#    $model{$k}->{f}\n#    ";
 	my @par = ();
 	foreach my $p (sort(keys(%{$model{$k}->{Params}})))
 	{
@@ -404,19 +416,19 @@ foreach my $k (sort(keys(%model)))
 	print "#    BIC    = $model{$k}->{BIC}\n";
 	print "#    XSQ    = $model{$k}->{XSQ} ($model{$k}->{DF} df)\n";
 	my $text = $model{$k}->{text};
-	$text =~ s/^/\# /m;
+	$text =~ s/^/# /mg;
 	print $text, "\n";
 }
 
 my $k_ll;
 
-foreach my $k(keys %model))
+foreach my $k(keys %model)
 {
 	$k_ll = $k if( !(defined $k_ll) || $model{$k_ll}->{LL} < $model{$k}->{LL});
 }
 
 print "\n# Most Likly Model\n";
-print $model{$k_ll}->text, "\n";
+print $model{$k_ll}->{text}, "\n";
 
 
 
