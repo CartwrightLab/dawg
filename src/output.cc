@@ -3,12 +3,6 @@
 #include "dawg.h"
 #include "var.h"
 
-#ifndef HAVE_SNPRINTF
-#	ifdef HAVE__SNPRINTF
-#		define snprintf _snprintf
-#	endif
-#endif
-
 using namespace std;
 
 void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags);
@@ -57,12 +51,12 @@ string Subst(const char* cs)
 		switch(cs2[1])
 		{
 		case 'r':
-			snprintf(csBuffer, 64, "%d", g_nDataSet);
+			_snprintf(csBuffer, 64, "%d", g_nDataSet);
 			ss.append(csBuffer);
 			cs1 = cs2+2;
 			break;
 		case 'R':
-			snprintf(csBuffer, 64, "%d", g_nDataSetNum);
+			_snprintf(csBuffer, 64, "%d", g_nDataSetNum);
 			ss.append(csBuffer);
 			cs1 = cs2+2;
 			break;

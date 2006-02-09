@@ -15,6 +15,10 @@ using namespace std;
 
 string g_ssSection("");
 
+#ifdef _MSC_VER
+#	pragma warning(disable: 4065 4244 4127 4102)
+#endif
+
 %}
 
 %union {

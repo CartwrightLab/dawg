@@ -17,11 +17,15 @@
 #define HAVE_SYSTYPES_H 1
 #define HAVE_SYSSTAT_H 1
 #define HAVE_GETOPT_H 1
-
 #define HAVE_VPRINTF 1
-#define HAVE__GETPID 1
-#define HAVE__COPYSIGN 1
-#define HAVE__SNPRINTF 1
+
+#if _MSC_VER >= 1400
+#	define HAVE__GETPID 1
+#else
+#	define HAVE_GETPID 1
+#	define HAVE__COPYSIGN 1
+#endif
+
 
 #define PACKAGE "dawg"
 #define PACKAGE_BUGREPORT "http://scit.us/projects/dawg/"

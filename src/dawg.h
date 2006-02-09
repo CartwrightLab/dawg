@@ -7,10 +7,8 @@
 #	include "config.h"
 #endif
 
-#ifndef HAVE_GETPID
-#	ifdef HAVE__GETPID
-#		define getpid _getpid
-#	endif
+#if !defined(HAVE__COPYSIGN) && defined(HAVE__COPYSIGN)
+#		define _copysign copysign
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -29,17 +27,32 @@ extern "C" void *rpl_malloc(size_t n);
 extern "C" void *rpl_realloc(void *p, size_t n);
 #endif
 
+#ifdef HAVE_STDIO_H
+#	include <stdio.h>
+#endif
+
+#if _MSC_VER >= 1400
+#	define	_snprintf _snprintf_s
+#elif !defined(HAVE__SNPRINTF) && defined(HAVE_SNPRINTF)
+#	define _snprintf snprintf
+#endif
+
+#ifdef HAVE_PROCESS_H
+#	include <process.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#	include <unistd.h>
+#endif
+
+#if !defined(HAVE__GETPID) && defined(HAVE_GETPID)
+#	define _getpid getpid
+#endif
+
 #ifdef HAVE_TIME_H
 #	include <time.h>
 #endif
 #ifdef HAVE_FLOAT_H
 #	include <float.h>
-#endif
-#ifdef HAVE_STDIO_H
-#	include <stdio.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#	include <unistd.h>
 #endif
 #ifdef HAVE_MATH_H
 #	include <math.h>
@@ -50,9 +63,7 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #ifdef HAVE_STDARG_H
 #	include <stdarg.h>
 #endif
-#ifdef HAVE_PROCESS_H
-#	include <process.h>
-#endif
+
 
 #include <vector>
 #include <string>

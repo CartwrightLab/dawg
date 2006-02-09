@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 // based off of NR's randqd1
 inline unsigned int rand_seed()
 {
-	static unsigned int u = (unsigned int)(time(NULL)+3*getpid());
+	static unsigned int u = (unsigned int)(time(NULL)+3*_getpid());
 	return (u = u*1664525u + 1013904223u);
 }
 

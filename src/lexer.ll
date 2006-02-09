@@ -24,7 +24,18 @@ void yyerror (char *s)
 int yyparse (void);
 bool Parse(const char* cs)
 {
-	FILE* stream = (cs==NULL || !strcmp(cs, "-")) ? stdin : fopen(cs, "r");
+	FILE* stream;
+	if(cs==NULL || !strcmp(cs, "-"))
+		stream = stdin;
+	else
+	{
+#if _MSC_VER >= 1400
+		if(fopen_s(&stream, cs, "r"))
+			stream = NULL;
+#else	
+		stream = fopen(cs, "r");
+#endif
+	}
 	if(stream == NULL)
 		return false;
 	g_state.nLine = 1;
@@ -36,6 +47,14 @@ bool Parse(const char* cs)
 		fclose(stream);
 	return g_bParseOkay;
 }
+
+#ifdef _MSC_VER
+#	pragma warning(disable: 4127 4244 4267 )
+#	if _MSC_VER >= 1400
+#		define isatty _isatty
+#		define fileno _fileno	
+#	endif
+#endif
 
 %}
 
