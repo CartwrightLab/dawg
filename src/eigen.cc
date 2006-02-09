@@ -47,7 +47,7 @@ void JacobiRot44(int p, int q, Matrix44& a, Matrix44& v) // q > p
 		dTan = 1.0;
 	else
 		dTan = 1.0/(fabs(dTheta)+sqrt(dTheta*dTheta+1.0));
-	dTan = _copysign(dTan, dTheta);
+	dTan = copysign(dTan, dTheta);
 	double dCos = 1.0/sqrt(dTan*dTan+1.0);
 	double dSin = dCos*dTan;
 	double dTau = dSin/(1.0+dCos);

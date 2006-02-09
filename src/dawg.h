@@ -7,8 +7,8 @@
 #	include "config.h"
 #endif
 
-#if !defined(HAVE__COPYSIGN) && defined(HAVE__COPYSIGN)
-#		define _copysign copysign
+#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
+#		define copysign _copysign
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -32,9 +32,9 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #endif
 
 #if _MSC_VER >= 1400
-#	define	_snprintf _snprintf_s
-#elif !defined(HAVE__SNPRINTF) && defined(HAVE_SNPRINTF)
-#	define _snprintf snprintf
+#	define	snprintf _snprintf_s
+#elif !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
+#	define snprintf _snprintf
 #endif
 
 #ifdef HAVE_PROCESS_H
@@ -44,8 +44,8 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #	include <unistd.h>
 #endif
 
-#if !defined(HAVE__GETPID) && defined(HAVE_GETPID)
-#	define _getpid getpid
+#if !defined(HAVE_GETPID) && defined(HAVE__GETPID)
+#	define getpid _getpid
 #endif
 
 #ifdef HAVE_TIME_H

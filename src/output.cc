@@ -51,12 +51,12 @@ string Subst(const char* cs)
 		switch(cs2[1])
 		{
 		case 'r':
-			_snprintf(csBuffer, 64, "%d", g_nDataSet);
+			snprintf(csBuffer, 64, "%d", g_nDataSet);
 			ss.append(csBuffer);
 			cs1 = cs2+2;
 			break;
 		case 'R':
-			_snprintf(csBuffer, 64, "%d", g_nDataSetNum);
+			snprintf(csBuffer, 64, "%d", g_nDataSetNum);
 			ss.append(csBuffer);
 			cs1 = cs2+2;
 			break;

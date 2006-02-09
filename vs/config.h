@@ -23,9 +23,9 @@
 #	define HAVE__GETPID 1
 #else
 #	define HAVE_GETPID 1
-#	define HAVE__COPYSIGN 1
 #endif
 
+#define HAVE__COPYSIGN 1
 
 #define PACKAGE "dawg"
 #define PACKAGE_BUGREPORT "http://scit.us/projects/dawg/"
