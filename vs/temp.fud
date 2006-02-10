@@ -14,7 +14,13 @@ multiline
 text block
 """
 
-#Tail = "tail"
+Tail =
+'''
+This is a sample
+multiline
+text block
+'''
+
 Before = "[Dataset %r/%R]"
 #After = "after"
 

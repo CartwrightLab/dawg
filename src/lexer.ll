@@ -133,16 +133,30 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return STRING;
 }
 
-<INITIAL>"\"\"\"" {
+<INITIAL>"\"\"\""\n? {
 	yylval.ch = yytext[0];
+	g_state.nLine++;
 	BEGIN(quote);
-	return BQUOTE;
+	return DQUOTE;
 }
 
-<quote>"\"\"\"" {
+<quote>\n?"\"\"\"" {
+	yylval.ch = yytext[0];
+	g_state.nLine++;
+	BEGIN(INITIAL);
+	return DQUOTE;
+}
+
+<INITIAL>"\'\'\'" {
+	yylval.ch = yytext[0];
+	BEGIN(quote);
+	return SQUOTE;
+}
+
+<quote>"\'\'\'" {
 	yylval.ch = yytext[0];
 	BEGIN(INITIAL);
-	return EQUOTE;
+	return SQUOTE;
 }
 
 <quote>\n {

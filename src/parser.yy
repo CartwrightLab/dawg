@@ -51,8 +51,8 @@ string g_ssSection("");
 %token <ch> LBRACKET '['
 %token <ch> RBRACKET ']'
 %token <ch> ENDL	 '\n'
-%token <ch> BQUOTE	
-%token <ch> EQUOTE	
+%token <ch> SQUOTE	
+%token <ch> DQUOTE	
 %token <ch> UNKNOWN
 %token      END
 
@@ -119,7 +119,8 @@ nodeseq node { $$ = $2; $$->m_pSib.reset($1); }
 ;
 
 qstring:
-BQUOTE chseq EQUOTE { $$ = $2; }
+DQUOTE chseq DQUOTE { $$ = $2; }
+| SQUOTE chseq SQUOTE { $$ = $2; }
 ;
 
 chseq:
