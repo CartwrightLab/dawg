@@ -165,6 +165,10 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return CHAR;
 }
 
+<quote>\r {
+	//ignore
+}
+
 <quote>. {
 	yylval.ch = yytext[0];
 	return CHAR;
