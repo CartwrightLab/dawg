@@ -84,7 +84,7 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return yytext[0];
 }
 
-"]"\s*$ {
+"]"\s*\r?$ {
 	yylval.ch = '[';
 	return yytext[0];
 }
