@@ -62,19 +62,30 @@ bool Parse(const char* cs)
 %option noyywrap
 
 DIGIT  [0-9]
+SPACE [ \t\r\v\f]
+BIDWORD ^{SPACE}*[A-Za-z][A-Za-z_0-9.]*
 IDWORD [A-Za-z][A-Za-z_0-9.]*
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
-SPACE [ \t\r\v\f]
 STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 %x tree
-%x tostr
+%x quote
 
 %%
 
-[=\{\}\[\]] {
+[=\{\}] {
 	yylval.ch = yytext[0];
+	return yytext[0];
+}
+
+^\s*"[" {
+	yylval.ch = '[';
+	return yytext[0];
+}
+
+"]"\s*$ {
+	yylval.ch = '[';
 	return yytext[0];
 }
 
@@ -93,10 +104,16 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return BOOL;
 }
 
+{BIDWORD} {
+	yylval.pss = new string(yytext+strspn(yytext, " \t\r\v\f"));
+	return BID;
+}
+
 {IDWORD} {
 	yylval.pss = new string(yytext);
 	return ID;
 }
+
 
 {NUMBER} {
 	yylval.d = atof(yytext);
@@ -116,9 +133,32 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return STRING;
 }
 
+<INITIAL>"\"\"\"" {
+	yylval.ch = yytext[0];
+	BEGIN(quote);
+	return BQUOTE;
+}
+
+<quote>"\"\"\"" {
+	yylval.ch = yytext[0];
+	BEGIN(INITIAL);
+	return EQUOTE;
+}
+
+<quote>\n {
+	yylval.ch = yytext[0];
+	g_state.nLine++;
+	return CHAR;
+}
+
+<quote>. {
+	yylval.ch = yytext[0];
+	return CHAR;
+}
+
 "<<"{IDWORD}{SPACE}*\n {
 	yytext += 2;
-
+	g_state.nLine++;
 	int s;
 	for(s=0;!isspace(yytext[s]);++s) { }
 	yytext[s] = '\0';
@@ -151,8 +191,8 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return STRING;
 }
 
-"#"[^\n]* | 
-"//"[^\n]* {
+"#".* | 
+"//".* {
 	// Comments
 }
 
@@ -174,7 +214,6 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return LENGTH;
 }
 
-
 <tree>{STR} {
 	yytext[strlen(yytext)-1] = '\0';
 	yylval.pss = new string(yytext+1);
@@ -188,16 +227,10 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 <tree>"[".+"]" { }
 
 <*><<EOF>> {
-	if(g_bTerminate)
+	//if(g_bTerminate)
 		yyterminate();
-	g_bTerminate = true;
+	//g_bTerminate = true;
 	return END;
-}
-
-\n {
-	g_state.nLine++;
-	yylval.ch = yytext[0];
-	return yytext[0];
 }
 
 ";" { }

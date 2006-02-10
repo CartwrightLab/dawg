@@ -16,7 +16,7 @@ using namespace std;
 string g_ssSection("");
 
 #ifdef _MSC_VER
-#	pragma warning(disable: 4065 4244 4127 4102)
+#	pragma warning(disable: 4065 4244 4127 4102 4706)
 #endif
 
 %}
@@ -36,8 +36,10 @@ string g_ssSection("");
 %token <d>  LENGTH
 %token <pss> STRING
 %token <pss> LABEL
+%token <pss> BID
 %token <pss> ID
 %token <b>  BOOL
+%token <ch> CHAR
 %token <ch> EQ		'='
 %token <ch> QEQ		'?'
 %token <ch> AEQ		'+'
@@ -49,6 +51,8 @@ string g_ssSection("");
 %token <ch> LBRACKET '['
 %token <ch> RBRACKET ']'
 %token <ch> ENDL	 '\n'
+%token <ch> BQUOTE	
+%token <ch> EQUOTE	
 %token <ch> UNKNOWN
 %token      END
 
@@ -58,6 +62,8 @@ string g_ssSection("");
 %type <pnode> tree
 %type <pnode> nodeseq
 %type <pnode> node
+%type <pss>	 chseq
+%type <pss>  qstring 
 
 
 %expect 1
@@ -66,21 +72,15 @@ string g_ssSection("");
 
 input:
 	/* empty */
-| input endl
-| input statement endl
-;
-
-endl:
-'\n'
-| END
+| input statement
 ;
 
 statement:
 '['']' { g_ssSection = ""; }
 | '[' ID ']' { g_ssSection = *$2+"."; delete $2; }
-| ID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 0); delete $1; }
-| ID '?' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 1); delete $1; }
-| ID '+' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 2); delete $1; }
+| BID '=' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 0); delete $1; }
+| BID '?' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 1); delete $1; }
+| BID '+' dvar { DawgVar::SetVar(g_ssSection+*$1, $3, 2); delete $1; }
 ;
 
 dvar:
@@ -88,6 +88,7 @@ dvar:
 | NUM { $$= new DawgVar($1); }
 | BOOL { $$= new DawgVar($1); }
 | STRING {	$$ = new DawgVar(*$1); delete $1; }
+| qstring { $$ = new DawgVar(*$1); delete $1; }
 | tree { $$ = new DawgVar($1); }
 ;
 
@@ -115,6 +116,15 @@ node:
 nodeseq:
 nodeseq node { $$ = $2; $$->m_pSib.reset($1); }
 | node
+;
+
+qstring:
+BQUOTE chseq EQUOTE { $$ = $2; }
+;
+
+chseq:
+CHAR { $$ = new string(1, $1); }
+| chseq CHAR { $1->append(1, $2); $$ = $1; }
 ;
 
 %%

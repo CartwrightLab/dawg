@@ -1,9 +1,19 @@
-Length = 200
-Tree = (A:0.5,B:0.5)R;
-File = "out.aln"
+   Length = 60
+Array = { 1, 
+2
+}
+Tree = (A:0.5,
+		B:0.5)R;
+#File = "out.aln"
 
 [Out.Block]
-#Head = "%s"
+Head =
+"""
+This is a sample
+multiline
+text block
+"""
+
 #Tail = "tail"
 Before = "[Dataset %r/%R]"
 #After = "after"
@@ -12,4 +22,4 @@ Before = "[Dataset %r/%R]"
 Subst = true
 
 []
-Reps = 4
+Reps = 1
