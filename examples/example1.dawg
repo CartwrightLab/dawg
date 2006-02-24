@@ -21,10 +21,11 @@ Freqs  = {0.20, 0.30, 0.30, 0.20}
 Reps = 10
 
 #Output information
-File = "example1.nexus"
+File = "example1.nex"
 Format = "Nexus"
-NexusCode = <<EOF
+Out.Block.After =
+"""
 Begin Paup;
   hsearch;
 End;
-EOF
+"""
