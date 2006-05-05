@@ -1,31 +1,5 @@
-   Length = 60
-Array = { 1, 
-2
-}
-Tree = (A:0.5,
-		B:0.5)R;
-#File = "out.aln"
-
-[Out.Block]
-Head =
-"""
-This is a sample
-multiline
-text block
-"""
-
-Tail =
-'''
-This is a sample
-multiline
-text block
-'''
-
-Before = "[Dataset %r/%R]"
-#After = "after"
-
 [Out]
-Subst = true
-
+[.Block]
+Head = "Test"
 []
-Reps = 1
+Tree = (A)R;
