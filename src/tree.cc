@@ -207,22 +207,22 @@ void Tree::ProcessTree(NewickNode* pNode)
 	// Construct the ur-root node if it doesn't exist
 	m_map["_R()()T"];
 	// process the newick tree beginning at its root
-	ProcessNewickNode(pNode, m_map.find("_R()()T"));
+	ProcessNewickNode(pNode, "_R()()T");
 	// increase number of sections
 	m_nSec++;
 }
 
-void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
+void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 {
 	// Process all sibs of the Newick Node
 	if(pNode->m_pSib.get())
-		ProcessNewickNode(pNode->m_pSib.get(), hAnc);
+		ProcessNewickNode(pNode->m_pSib.get(), ssAnc);
 	
 	// Get a reference to this node and set up parameters
 	Node& node = m_map[pNode->m_ssLabel];
-	node.m_mBranchLens[hAnc] = pNode->m_dLen;
-	node.m_vAncestors.resize(m_nSec+1, m_map.end());
-	node.m_vAncestors[m_nSec] = hAnc;
+	node.m_mBranchLens[ssAnc] = pNode->m_dLen;
+	node.m_vAncestors.resize(m_nSec+1, ssAnc);
+	//node.m_vAncestors[m_nSec] = ssAnc;
 	
 	// add node to tips if it is a tip and hasn't been accessed yet
 	if(node.m_ssName.empty() && !pNode->m_pSub.get())
@@ -234,9 +234,7 @@ void Tree::ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc)
 	
 	// Process children
 	if(pNode->m_pSub.get())
-		ProcessNewickNode(pNode->m_pSub.get(), m_map.find(node.m_ssName));
-	
-
+		ProcessNewickNode(pNode->m_pSub.get(), node.m_ssName);
 }
 
 // Evolve the sequences in the tree
@@ -279,21 +277,24 @@ void Tree::Evolve(Node &rNode)
 		return;
 	rNode.m_bTouched = true;
 	// Temporary Sequences
-	map<Node::Handle, Node> mapSeqs;
+	map<string, Node> mapSeqs;
 	// Evolve ancestors and assemble
-	for(vector<Node::Handle>::size_type a = 0; a < rNode.m_vAncestors.size(); ++a)
+	for(vector<string>::size_type a = 0; a < rNode.m_vAncestors.size(); ++a)
 	{
-		if(mapSeqs.find(rNode.m_vAncestors[a]) == mapSeqs.end())
+		string &ssA = rNode.m_vAncestors[a];
+		if(mapSeqs.find(ssA) == mapSeqs.end())
 		{
 			// Touch Ancestor, make sure it exists
-			Evolve(rNode.m_vAncestors[a]->second);
+			Node &aNode = m_map[ssA];
+			Evolve(aNode);
+			
 			// Copy ancestor to temporary location
-			mapSeqs[rNode.m_vAncestors[a]] = rNode.m_vAncestors[a]->second;
+			mapSeqs[ssA] = aNode;
 			// Evolve temporary location
-			Evolve(mapSeqs[rNode.m_vAncestors[a]], m_dTreeScale*rNode.m_mBranchLens[rNode.m_vAncestors[a]]);
+			Evolve(mapSeqs[ssA], m_dTreeScale*rNode.m_mBranchLens[ssA]);
 		}
 		// Assemble final sequence
-		rNode.m_vSections.push_back(mapSeqs[rNode.m_vAncestors[a]].m_vSections[a]);
+		rNode.m_vSections.push_back(mapSeqs[ssA].m_vSections[a]);
 	}
 }
 

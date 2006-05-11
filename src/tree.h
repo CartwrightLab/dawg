@@ -95,11 +95,10 @@ public:
 	{
 	public:
 		typedef std::map<std::string, Tree::Node> Map;
-		typedef Map::iterator Handle;
 		
 		std::vector<Sequence> m_vSections;
-		std::vector<Handle> m_vAncestors;
-		std::map<Handle, double> m_mBranchLens;
+		std::vector<std::string> m_vAncestors;
+		std::map<std::string, double> m_mBranchLens;
 		std::string m_ssName;
 		bool m_bTouched;
 
@@ -146,6 +145,15 @@ public:
 
 	// Add a recombination section to the tree
 	void ProcessTree(NewickNode* pNode);
+
+	template<class itTree>
+	void ProcessTree(itTree itB, itTree itE)
+	{
+		m_nSec = 0;
+		m_map.clear();
+		for(itTree it = itB; it!=itE; it++)
+			ProcessTree(*it);
+	}
 	
 	const Node::Map& GetMap() const { return m_map; }
 	
@@ -153,7 +161,7 @@ public:
 	void Align(Alignment &aln) const;
 
 protected:
-	void ProcessNewickNode(NewickNode* pNode, Node::Handle hAnc);
+	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
 	void Evolve(Node &rNode, double dTime);
 	void Evolve(Node &rNode);
 
@@ -192,11 +200,12 @@ bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int
 
 namespace std {
 
+/*
 inline bool operator < (const Tree::Node::Handle & A, const Tree::Node::Handle & B)
 {
 	return &*A < &*B;
 }
-
+*/
 }
 
 #endif //DAWG_TREE_H

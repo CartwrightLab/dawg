@@ -336,8 +336,7 @@ bool Execute()
 	
 	// Setup recombinant tree
 	Tree myTree;
-	for(vector<NewickNode*>::const_iterator treeit = vtTrees.begin(); treeit != vtTrees.end(); ++treeit)
-		myTree.ProcessTree(*treeit);
+	myTree.ProcessTree(vtTrees.begin(), vtTrees.end());
 
 	// Construct substitution matrices
 	if(ssModel == "GTR")
