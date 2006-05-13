@@ -1,0 +1,253 @@
+Seq.Sequence:
+  Type: String
+  Dims: -1
+  Text: sequence for the root node
+  Alias: Sequence
+  Default: $T(1,"")
+  
+Seq.Tree:
+  Type: Tree
+  Dims: -1
+  Text: phylogeny
+  Alias: Tree
+
+Seq.TreeScale:
+  Type: Number
+  Dims: -1
+  Text: coefficient to scale branch lengths by
+  Alias: TreeScale
+  Default: $T(1,1.0)
+
+Seq.Length:
+  Type: NumberInt
+  Dims: -1
+  Text: length of generated root sequences
+  Alias: Length
+  Default: $T(1,300)
+  
+Seq.Rates:
+  Type: Number
+  Dims: [-1, -1]
+  Text: rate of evolution of each root nucleotide
+  Alias: Rates
+  Default: $T()
+  
+Seq.Reps:
+  Type: Number
+  Dims: 1
+  Text: number of alignments to simulate
+  Alias: Reps
+  Default: 1
+
+Seq.Seed:
+  Type: NumberUint
+  Dims: -1
+  Text: random number seed
+  Alias: Seed
+  Default: $T(1,0)
+  
+Sub.Freqs:
+  Type: Number
+  Dims: 4
+  Text: nucleotide (ACGT) frequencies
+  Alias: Freqs
+  Default: [ 0.25, 0.25, 0.25, 0.25]
+  
+Sub.Model:
+  Type: String
+  Dims: 1
+  Text: "model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN"
+  Alias: Model
+  Default: '"JC"'
+
+Sub.Params:
+  Type: Number
+  Dims: 6
+  Text: parameters for the model of evolution
+  Alias: Params
+  Default: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+Sub.Alpha:
+  Type: Number
+  Dims: -1
+  Text: shape parameters
+  Alias: Alpha
+  Default: $T()
+
+Sub.Gamma:
+  Type: Number
+  Dims: -1
+  Text: coefficients of variance for rate heterogenity
+  Alias: Gamma
+  Default: $T()
+
+Sub.Iota:
+  Type: Number
+  Dims: -1
+  Text: proportions of invariant sites
+  Alias: Iota
+  Default: $T()
+
+Sub.Scale:
+  Type: Number
+  Dims: -1
+  Text: block position scales
+  Alias: Scale
+  Default: $T()
+
+Sub.CodonWidth:
+  Type: NumberInt
+  Dims: 1
+  Text: block width for indels and recombination
+  Alias: [Nuc.Width, Width]
+  Default: 1
+  
+Ind.Model:
+  Type: String
+  Dims: 2
+  Text: 
+  Alias: GapModel 
+  Default: ['"PL"', '"PL"']
+
+Ind.Lambda:
+  Type: Number
+  Dims: 2
+  Text: 
+  Alias: Lambda
+  Default: [0.0, 0.0]
+  
+Ind.Params:
+  Type: Number
+  Dims: [-1, -1]
+  Text:
+  Alias: GapParams
+  PreDefault: ""
+  Default: | $X
+    static double dIndParamsDefault[2] = {1.5, 1000};
+    $$ = $T(2, std::vector<double>(dIndParamsDefault, dIndParamsDefault+2));
+  Weight: -1
+  
+Ind.Del.Model:
+  Type: String
+  Dims: 1
+  Text: 
+  Alias: 
+  Default: '"PL"'
+
+Ind.Del.Lambda:
+  Type: Number
+  Dims: 1
+  Text:
+  Alias:
+  Default: 0.0
+
+Ind.Del.Params:
+  Type: Number
+  Dims: -1
+  Text:
+  Alias:
+  Default: $T(dIndParamsDefault, dIndParamsDefault+2)
+
+Ind.Ins.Model:
+  Type: String
+  Dims: 1
+  Text: 
+  Alias: 
+  Default: '"PL"'
+
+Ind.Ins.Lambda:
+  Type: Number
+  Dims: 1
+  Text:
+  Alias:
+  Default: 0.0
+
+Ind.Ins.Params:
+  Type: Number
+  Dims: -1
+  Text:
+  Alias:
+  Default: $T(dIndParamsDefault, dIndParamsDefault+2)
+
+Out.File:
+  Type: String
+  Dims: 1
+  Text:
+  Alias:
+  Default: '"-"'
+
+Out.Format:
+  Type: String
+  Dims: 1
+  Text:
+  Alias:
+  Default: '"Clustal"'
+
+Out.Block.Head:
+  Type: StringOrFile
+  Dims: 1
+  Text:
+  Alias:
+  Default: '""'
+
+Out.Block.Before:
+  Type: StringOrFile
+  Dims: 1
+  Text:
+  Alias:
+  Default: '""'
+
+Out.Block.After:
+  Type: StringOrFile
+  Dims: 1
+  Text:
+  Alias: NexusCode
+  Default: '""'
+
+
+Out.Block.Tail:
+  Type: StringOrFile
+  Dims: 1
+  Text:
+  Alias:
+  Default: '""'
+
+Out.Replace:
+  Type: Boolean
+  Dims: 1
+  Text:
+  Alias: Out.Subst
+  Default: false
+
+
+Out.Seq.GapSingleChar:
+  Type: Boolean
+  Dims: 1
+  Text:
+  Alias: GapSingleChar
+  Default: false
+
+
+Out.Seq.GapPlus:
+  Type: Boolean
+  Dims: 1
+  Text:
+  Alias: GapPlus
+  Default: false
+
+
+Out.Seq.LowerCase:
+  Type: Boolean
+  Dims: 1
+  Text:
+  Alias: LowerCase
+  Default: false
+
+
+Out.Seq.Translate:
+  Type: Boolean
+  Dims: 1
+  Text:
+  Alias: Translate
+  Default: false
+

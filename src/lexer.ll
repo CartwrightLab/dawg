@@ -6,47 +6,11 @@
 #include "parser.h"
 
 using namespace std;
-struct State
-{
-	int    nLine;	
-	string ssFile;
-} g_state;
 
-bool g_bParseOkay = true;
 bool g_bTerminate = false;
-
-void yyerror (char *s)
-{
-	g_bParseOkay = false;
-	cerr << "ALERT: " << s << " in " << g_state.ssFile << " at line " << g_state.nLine;
-	cerr << ": \"" << yytext << "\"." << endl;
-}
-int yyparse (void);
-bool Parse(const char* cs)
-{
-	FILE* stream;
-	if(cs==NULL || !strcmp(cs, "-"))
-		stream = stdin;
-	else
-	{
-#if _MSC_VER >= 1400
-		if(fopen_s(&stream, cs, "r"))
-			stream = NULL;
-#else	
-		stream = fopen(cs, "r");
-#endif
-	}
-	if(stream == NULL)
-		return false;
-	g_state.nLine = 1;
-	g_state.ssFile = (cs==NULL || !strcmp(cs, "-")) ? "stdin" : cs;
-	yyin = stream;
-	g_bParseOkay = true;
-	yyparse();
-	if(cs!=NULL)
-		fclose(stream);
-	return g_bParseOkay;
-}
+bool g_bParseOkay = true;
+size_t g_uLine = 1; 
+VarDB *g_pDB = NULL;
 
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127 4244 4267 )
@@ -56,6 +20,29 @@ bool Parse(const char* cs)
 #	endif
 #endif
 
+int yyparse();
+
+bool RunParser(FILE *fin, VarDB *db)
+{
+	g_pDB = db;
+	yyin = fin;
+	g_bParseOkay = true;
+	g_bTerminate = false;
+	g_uLine = 1;
+	yyparse();
+	g_pDB = NULL;
+	yyin = NULL;
+	
+	return g_bParseOkay;
+}
+
+void yyerror (char *s)
+{
+	g_bParseOkay = false;
+	g_pDB->ParseError(s, g_uLine, yytext);
+
+}
+
 %}
 
 %option nounput
@@ -64,7 +51,7 @@ bool Parse(const char* cs)
 DIGIT  [0-9]
 SPACE [ \t\r\v\f]
 BIDWORD ^{SPACE}*[A-Za-z][A-Za-z_0-9.]*
-IDWORD [A-Za-z][A-Za-z_0-9.]*
+IDWORD [A-Za-z.][A-Za-z_0-9.]*
 LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
 NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
 STR  \"[^\"\n]*\"|\'[^\'\n]*\'
@@ -94,23 +81,23 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	return yytext[0];
 }
 
-[Ff][Aa][Ll][Ss][Ee] {
+[Ff][Aa][Ll][Ss][Ee]|[Nn][Oo]|[Nn]|[Ff] {
 	yylval.b = false;
 	return BOOL;
 }
 
-[Tt][Rr][Uu][Ee] {
+[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]|[Tt]|[Yy] {
 	yylval.b = true;
 	return BOOL;
 }
 
 {BIDWORD} {
-	yylval.pss = new string(yytext+strspn(yytext, " \t\r\v\f"));
+	yylval.cs = strdup(yytext+strspn(yytext, " \t\r\v\f"));
 	return BID;
 }
 
 {IDWORD} {
-	yylval.pss = new string(yytext);
+	yylval.cs = strdup(yytext);
 	return ID;
 }
 
@@ -122,27 +109,27 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 \"\n(.*\n)*\"\n {
 	yytext[strlen(yytext)-3] = '\0';
-	yylval.pss = new string(yytext+2);
+	yylval.cs = strdup(yytext+2);
 	return STRING;
 }
 
 
 {STR} {
 	yytext[strlen(yytext)-1] = '\0';
-	yylval.pss = new string(yytext+1);
+	yylval.cs = strdup(yytext+1);
 	return STRING;
 }
 
 <INITIAL>"\"\"\""\n? {
 	yylval.ch = yytext[0];
-	g_state.nLine++;
+	g_uLine++;
 	BEGIN(quote);
 	return DQUOTE;
 }
 
 <quote>\n?"\"\"\"" {
 	yylval.ch = yytext[0];
-	g_state.nLine++;
+	g_uLine++;
 	BEGIN(INITIAL);
 	return DQUOTE;
 }
@@ -161,7 +148,7 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 <quote>\n {
 	yylval.ch = yytext[0];
-	g_state.nLine++;
+	g_uLine++;
 	return CHAR;
 }
 
@@ -172,41 +159,6 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 <quote>. {
 	yylval.ch = yytext[0];
 	return CHAR;
-}
-
-"<<"{IDWORD}{SPACE}*\n {
-	yytext += 2;
-	g_state.nLine++;
-	int s;
-	for(s=0;!isspace(yytext[s]);++s) { }
-	yytext[s] = '\0';
-	
-	yylval.pss = new string;
-	string ssTemp;
-	string ssEnd(yytext);
-	while(1)
-	{
-		int c = yyinput();
-		if(c == '\r')
-			continue;
-		if(c == '\n' || c == EOF)
-		{
-			g_state.nLine++;
-			if(ssTemp == ssEnd)
-				break;
-			yylval.pss->append(ssTemp);
-			yylval.pss->append("\n");
-			ssTemp.clear();
-		}
-		else
-		{
-			ssTemp += c;
-		}
-		
-		if(c == EOF)
-			return UNKNOWN;
-	}
-	return STRING;
 }
 
 "#".* | 
@@ -234,12 +186,12 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 
 <tree>{STR} {
 	yytext[strlen(yytext)-1] = '\0';
-	yylval.pss = new string(yytext+1);
+	yylval.cs = strdup(yytext+1);
 	return LABEL;
 }
 
 <tree>{LABELCH}+ {
-	yylval.pss = new string(yytext);
+	yylval.cs = strdup(yytext);
 	return LABEL;	
 }
 <tree>"[".+"]" { }
@@ -248,7 +200,7 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 	//if(g_bTerminate)
 		yyterminate();
 	//g_bTerminate = true;
-	return END;
+	//return END;
 }
 
 ";" { }
@@ -256,7 +208,7 @@ STR  \"[^\"\n]*\"|\'[^\'\n]*\'
 <*>[, \t\r\v\f]+ { }
 
 <*>\n {
-	g_state.nLine++;
+	g_uLine++;
 }
 
 <*>. {

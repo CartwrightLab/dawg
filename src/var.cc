@@ -1,185 +1,66 @@
-// var.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// var.cc - Copyright (C) 2006 Reed A. Cartwright (all rights reserved)
 
 #include "dawg.h"
 #include "var.h"
 
 using namespace std;
 
-DawgVar::~DawgVar()
+Variable* VarDB::GetVar(const Key &k)
 {
-	Unset();
+	Map::iterator it = m_map.find(k);
+	return (it != m_map.end()) ? it->second : NULL;
 }
 
-void DawgVar::ClearMap()
+const Variable* VarDB::GetVar(const Key &k) const
 {
-	for(MapSsToVar::iterator it = GetMap().begin(); it != GetMap().end(); ++it)
-			delete it->second;
-	GetMap().clear();
+	Map::const_iterator it = m_map.find(k);
+	return (it != m_map.end()) ? it->second : NULL;
 }
 
-MapSsToVar& DawgVar::GetMap()
+
+// nMode: =, ?=, +=
+void VarDB::SetVar(const Key& k, Variable *v, int nMode)
 {
-	static MapSsToVar s_map;
-	return s_map;
+	if(nMode == 0)
+		m_map[k] = v;
+	else if(nMode == 1 && GetVar(k) == NULL)
+		m_map[k] = v;
 }
 
-DawgVar* DawgVar::GetVar(const std::string &ssKey)
-{
-	MapSsToVar::iterator it = GetMap().find(ssKey);
-	return (it != GetMap().end()) ? it->second : NULL;
-}
+// from lexer.ll
+bool RunParser(FILE *fin, VarDB *db);
 
-void DawgVar::SetVar(const std::string &ssKey, DawgVar* pVar, int nMode)
+bool VarDB::Parse(const char* cs)
 {
-	DawgVar *p = GetVar(ssKey);
-	if(nMode == 1)
+	FILE* stream;
+	bool bFile = false;
+	if(cs == NULL || strcmp(cs, "-") == 0)
 	{
-		if(p == NULL)
-			GetMap()[ssKey] = pVar;
-		else if(pVar != NULL)
-			delete pVar;
+		stream = stdin;
+		m_csParsedFile = "stdin";
 	}
 	else
 	{
-		if(p != NULL)
-			delete p;
-		GetMap()[ssKey] = pVar;
-	} 
-}
-
-bool DawgVar::Get( double &rdVar ) const
-{
-	if(!IsType(tyNumber))
-		return false;
-	rdVar = GetNumber();
-	return true;
-}
-
-bool DawgVar::Get( int &rnVar ) const
-{
-	if(!IsType(tyNumber))
-		return false;
-	rnVar = (int)GetNumber();
-	return true;
-}
-
-bool DawgVar::Get(unsigned int &ruVar ) const
-{
-	if(!IsType(tyNumber))
-		return false;
-	ruVar = (unsigned int)GetNumber();
-	return true;
-}
-
-bool DawgVar::Get(bool &rbVar ) const
-{
-	if(IsType(tyBool))
-		rbVar = GetBool();
-	else if(IsType(tyNumber))
-		rbVar = ((unsigned int)GetNumber() != 0);
-	else if(IsType(tyString))
-		rbVar = (GetString() == "True" || GetString() == "true");
-	else
-		return false;
-	return true;
-}
-
-bool DawgVar::Get(std::string &rssVar ) const
-{
-	if(!IsType(tyString))
-		return false;
-	rssVar = GetString();
-	return true;
-}
-
-bool DawgVar::Get(const Vec *&rVec) const
-{
-	if(!IsType(tyVector))
-		return false;
-	rVec = GetVector();
-	return true;
-}
-
-void DawgVar::Unset()
-{
-	switch(GetType())
-	{
-		case tyString:
-			delete m_pssData; break;
-		case tyVector:
-			delete m_pvData;  break;
-		case tyTree:
-			delete m_ptrData; break;
-		case tyNone:
-		case tyBool:
-		case tyNumber:
-			break;
+#if _MSC_VER >= 1400
+		if(fopen_s(&stream, cs, "r"))
+			stream = NULL;
+#else	
+		stream = fopen(cs, "r");
+#endif
+		m_csParsedFile = cs;
+		bFile = true;
 	}
-	m_tyType = tyNone;
-}
-
-void DawgVar::Set(double dVar )
-{
-	Unset();
-	m_tyType = tyNumber;
-	m_dData = dVar;
-}
-
-void DawgVar::Set(int nVar )
-{
-	Unset();
-	m_tyType = tyNumber;
-	m_dData = (double)nVar;
-}
-
-void DawgVar::Set(unsigned int uVar )
-{
-	Unset();
-	m_tyType = tyNumber;
-	m_dData = (double)uVar;
-}
-
-void DawgVar::Set(bool bVar )
-{
-	Unset();
-	m_tyType = tyBool;
-	m_bData = bVar;
-}
-
-void DawgVar::Set(const std::string &rssVar )
-{
-	Unset();
-	m_tyType = tyString;
-	m_pssData = new string(rssVar);
-}
-
-void DawgVar::Set(const Vec *pVec)
-{
-	Unset();
-	m_tyType = tyVector;
-	m_pvData = pVec;
-}
-
-bool DawgVar::Get(NewickNode *&rTree) const
-{
-	if(!IsType(tyTree))
+	if(stream == NULL)
 		return false;
-	rTree = GetTree();
-	return true;
-}
-void DawgVar::Set(NewickNode *pTree)
-{
-	Unset();
-	m_tyType = tyTree;
-	m_ptrData = pTree;
+	bool ret = RunParser(stream, this);
+	if(bFile)
+		fclose(stream);
+	return ret;
 }
 
-DawgVar::Vec::size_type DawgVar::Size()
+bool VarDB::ParseError(const char *csMsg, size_t uLine, const char *csText)
 {
-	switch(m_tyType)
-	{
-		case tyVector:  return m_pvData->size();
-		case tyNone:	return 0;
-		default:		return 1;
-	};
+	cerr << "ALERT: " << csMsg << " in " << m_csParsedFile << " at line " << uLine;
+	cerr << ": \"" << csText << "\"." << endl;
+	return false;
 }

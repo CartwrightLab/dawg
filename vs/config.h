@@ -20,9 +20,12 @@
 #define HAVE_VPRINTF 1
 
 #if _MSC_VER >= 1400
+#	define _CRT_SECURE_NO_DEPRECATE
 #	define HAVE__GETPID 1
+#	define HAVE__STRDUP 1
 #else
 #	define HAVE_GETPID 1
+#	define HAVE_STRDUP 1
 #endif
 
 #define HAVE__COPYSIGN 1

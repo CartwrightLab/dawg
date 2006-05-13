@@ -24,7 +24,9 @@ AC_CHECK_LIB(gcc, main)
 AC_CHECK_LIB(cxa, main)
 AC_CHECK_LIB(cprts, main)
 AC_CHECK_LIB(unwind, main)
-
+AC_CHECK_LIB(m,main)
+AC_CHECK_LIB(gslcblas,main)
+AC_CHECK_LIB(gsl,main)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -45,7 +47,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([getpid _getpid copysign _copysign snprintf _snprintf])
+AC_CHECK_FUNCS([getpid _getpid copysign _copysign snprintf _snprintf strdup _strdup])
 dnl AC_CHECK_FUNCS([floor pow sqrt])
 
 AX_CXXFLAGS_WARN_ALL

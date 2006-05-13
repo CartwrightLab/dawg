@@ -138,7 +138,7 @@
 				ForceConformanceInForLoopScope="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -262,6 +262,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\model.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\output.cc"
 				>
 			</File>
@@ -330,11 +334,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\dawgvar.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\gslmm.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\indel.h"
 				>
 			</File>
 			<File
 				RelativePath="..\src\matrix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\model.h"
 				>
 			</File>
 			<File

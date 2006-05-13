@@ -1,229 +1,170 @@
-// var.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
-
+// var.h - Copyright (C) 2006 Reed A. Cartwright (all rights reserved)
 #ifndef DAWG_VAR_H
 #define DAWG_VAR_H
 
 #include "dawg.h"
 #include "tree.h"
 
-class MapSsToVar;
-
-// DawgVar is a variant representing the input variables
-class DawgVar
+class Variable
 {
 public:
-	typedef std::vector<DawgVar*> Vec;
+	typedef std::vector< Variable*> vector_t;
 
-	enum Type { tyNone, tyBool, tyNumber, tyString, tyVector, tyTree};
+	Variable() { }
+	virtual ~Variable() { }
 
-	DawgVar() : m_tyType(tyNone) { }
-	virtual ~DawgVar();
-	
-	// Type Routines
-	Type GetType() const { return m_tyType; }
-	bool IsType(Type ty) const { return m_tyType == ty; }
-	void Unset();
+	virtual const char* Type() const { return "Null"; }
 
-	// Variable Retreival / Setting
-	static MapSsToVar& GetMap();
-	static DawgVar* GetVar(const std::string &ssKey);
-	static void		SetVar(const std::string &ssKey, DawgVar* pVar, int nMode = 0);
-	static void		ClearMap();
-	
-	// General Routines
+	virtual size_t Length() const { return 0; }
+	virtual Variable* At(size_t /*pos*/) {return this;}
+	virtual const Variable* At(size_t /*pos*/) const { return this;}
+	virtual void Append(const Variable * /*v*/) {};
 
-	// Size returns
-	//   0 if tyNone
-	//   1 if tyBool, tyNumber, tyString, tyTree
-	//   z if tyVector, where z is the length of the vector
-	Vec::size_type Size();
+	virtual size_t To(int &/*v*/) const { return 0; }
+	virtual size_t To(unsigned int &/*v*/) const { return 0; }
+	virtual size_t To(double &/*v*/) const { return 0; }
+	virtual size_t To(std::string &/*v*/) const { return 0; }
+	virtual size_t To(NewickNode* &/*v*/) const { return 0; }
+	virtual size_t To(bool &/*v*/) const { return 0; }
 
-	// Number Routines
-	explicit DawgVar(double dVar) : m_tyType(tyNumber), m_dData(dVar) { }
-	double		GetNumber() const { return m_dData; }
-	bool		Get(double &rdVar ) const;
-	void		Set(double dVar );
-	bool		Get(int &rnVar ) const;
-	void		Set(int nVar );
-	bool		Get(unsigned int &ruVar ) const;
-	void		Set(unsigned int uVar );
-	
-	// Bool Routines
-	explicit DawgVar(bool bVar) : m_tyType(tyBool), m_bData(bVar) { }
-	bool		GetBool() const { return m_bData; }
-	bool		Get(bool &rbVar ) const;
-	void		Set(bool bVar );
-
- 	// String Routines
-	explicit DawgVar(const std::string &rssVar) : m_tyType(tyString)
-		{ m_pssData = new std::string(rssVar); }
-	const std::string&	GetString() const { return *m_pssData; }
-	bool				Get(std::string &rssVar ) const;
-	void				Set(const std::string &rssVar );
-	
-	// Vector Routines
-	explicit DawgVar(const Vec *p) : m_tyType(tyVector)
-		{ m_pvData = p; }
-	const Vec*	GetVector() const { return m_pvData; }
-	bool		Get(const Vec *&rVec) const;
-	void		Set(const Vec* rVec);
-
-	DawgVar& GetAt(Vec::size_type uIndex)
-		{ return IsType(tyVector) ? *(*m_pvData)[uIndex] : *this; }
-	const DawgVar& GetAt(Vec::size_type uIndex) const
-		{ return IsType(tyVector) ? *(*m_pvData)[uIndex] : *this; }
-	DawgVar& operator[](Vec::size_type uIndex)
-		{ return GetAt(uIndex); }
-	const DawgVar& operator[](Vec::size_type uIndex) const
-		{ return GetAt(uIndex); }
-	
-	// Tree Routines
-	explicit DawgVar(NewickNode* p) : m_tyType(tyTree), m_ptrData(p) { }
-	NewickNode*	GetTree() const { return m_ptrData; }
-	bool		Get(NewickNode *&rTree) const;
-	void		Set(NewickNode *pTree);
+	template<class T, size_t sz>
+	size_t To(T (&t)[sz]) const
+	{
+		size_t i;
+		for(i = 0; i < sz; ++i)
+			if(!At(i)->To(t[i]))
+				return i;
+		return i;
+	}
+	template<class T>
+	size_t To(std::vector<T> &t) const
+	{
+		size_t i;
+		size_t sz = Length();
+		if(sz == 0)
+			return 0;
+		t.resize(sz);
+		for(i = 0; i < sz; ++i)
+			if(!At(i)->To(t[i]))
+				return i;
+		return i;
+	}
 
 protected:
-	Type m_tyType;
-	union
-	{
-		double m_dData;
-		bool   m_bData;
-		const Vec*   m_pvData;
-		const std::string* m_pssData;
-		NewickNode*  m_ptrData;
-	};
-private:
-	DawgVar(const DawgVar& var);
-	DawgVar& operator = (const DawgVar& var);
-
-public:
-	// Templates
-
-	// Get the value of Key and place it in R
-	template<class T>
-	static bool Get(const std::string &ssKey, T &r)
-	{
-		DawgVar *pVar = GetVar(ssKey);
-		return ( pVar != NULL && pVar->Get(r) );
-	}
-
-	// Get as array filling in values as neccessary.
-	// An array has a set length.
-	template<class T>
-	Vec::size_type GetArray(T ar[], Vec::size_type uSize, bool bExpand=true)
-	{
-		Vec::size_type uMax = std::min(uSize, Size());
-		Vec::size_type u = 0;
-		// read uMax elements from vector
-		for(; u<uMax; u++)
-		{
-			// stop if element is of wrong type
-			if(!GetAt(u).Get(ar[u]))
-				return u;
-		}
-		// fill-in additional elements with the first one
-		for(; bExpand && u<uSize; u++)
-		{
-			ar[u] = ar[0];
-		}
-		// return number of elements set
-		return u;		
-	}
-	
-	// Get as vector.
-	// A vector has a variable length.
-	template<class T>
-	bool GetVector(std::vector<T> &rVec)
-	{
-		T tTemp;
-		rVec.clear();
-		// read each element in vector, stoping if of wrong type
-		for(Vec::size_type u = 0; u<Size(); u++)
-		{
-			if(!GetAt(u).Get(tTemp))
-				return false;
-			rVec.push_back(tTemp);
-		}
-		return true;
-	}
-
-	// Get as matrix, filling in rows as neccessary
-	// A matrix is an array of vectors.
-	template< class T >
-	Vec::size_type GetMatrix(std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
-	{
-		if(Size() == 0)
-			return 0;
-		Vec::size_type u = 0;
-		Vec::size_type uMax = std::min(uSize, Size());
-
-		// Check to see if it is a double vector
-		// not 100% accurate
-		if(GetAt(0).IsType(tyVector))
-		{
-			// read rows
-			for(;u<uMax;++u)
-			{
-				if(!GetAt(u).GetVector(ar[u]))
-					return u;
-			}
-		}
-		else
-		{
-			// if single vector, read values into the first row
-			if(!GetVector(ar[0]))
-				return 0;
-			u = 1;
-		}
-		// fill-in rows as neccessary
-		for(; bExpand && u<uSize; u++)
-			ar[u] = ar[0];
-		return u;
-	}
-	
-	// Get Key as Array
-	template< class T >
-	static Vec::size_type GetArray( const std::string &ssKey,  T ar[], Vec::size_type uSize, bool bExpand=true)
-	{
-		DawgVar* pVar = GetVar(ssKey);
-		if(pVar == NULL)
-			return 0;
-		return pVar->GetArray(ar, uSize, bExpand);
-	}
-	// Get Key as Vector
-	template<class T>
-	static bool GetVector( const std::string &ssKey, std::vector<T> &rVec)
-	{
-		DawgVar* pVar = GetVar(ssKey);
-		if(pVar == NULL)
-			return false;
-		return pVar->GetVector(rVec);
-	}
-	// Get Key as Matrix
-	template<class T>
-	static Vec::size_type GetMatrix(const std::string &ssKey,  std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
-	{
-		DawgVar* pVar = GetVar(ssKey);
-		if(pVar == NULL)
-			return 0;
-		return pVar->GetMatrix(ar, uSize, bExpand);
-	}
 
 };
 
-// A map class that will delete pointers upon destruction
-class MapSsToVar : public std::map<std::string, DawgVar*>
+class ScalarVar : public Variable
 {
-public:	
-	virtual ~MapSsToVar()
-	{
-		for(iterator it = begin(); it != end(); ++it)
-			if(it->second)
-				delete it->second;
-		clear();
+public:
+	ScalarVar() { }
+	virtual size_t length() const { return 1; }
+	virtual const char* Type() const { return "Scalar"; }
+
+};
+
+class StringVar : public ScalarVar
+{
+public:
+	StringVar(const std::string& ssVal) : m_ssVal(ssVal) { }
+	StringVar(const char *cs) : m_ssVal(cs) { }
+	virtual size_t To(std::string &v) const { v = m_ssVal; return 1; }
+	virtual const char* Type() const { return "String"; }
+
+protected:
+	std::string m_ssVal;	
+};
+
+class NumberVar : public ScalarVar
+{
+public:
+	NumberVar(double dVal) : m_dVal(dVal) { }	
+	virtual size_t To(double &v) const { v = m_dVal; return 1; }
+	virtual size_t To(int &v) const { v = static_cast<int>(m_dVal); return 1; }
+	virtual size_t To(unsigned int &v) const { v = static_cast<unsigned int>(m_dVal); return 1; }
+	virtual size_t To(bool &v) const { v = (static_cast<int>(m_dVal) != 0); return 1; }
+	virtual const char* Type() const { return "Number"; }
+
+protected:
+	double m_dVal;
+};
+
+class BooleanVar : public ScalarVar
+{
+public:
+	BooleanVar(bool bVal) : m_bVal(bVal) { }
+	virtual size_t To(bool &v) { v = m_bVal; return 1; }
+	virtual const char* Type() const { return "Boolean"; }
+
+protected:
+	bool m_bVal;	
+};
+
+class TreeVar : public ScalarVar
+{
+public:
+	TreeVar(NewickNode *p) : m_tree(p) { }
+	virtual size_t To(NewickNode *&v) { v = m_tree.get(); return 1; }
+	virtual const char* Type() const { return "Tree"; }
+
+protected:
+	std::auto_ptr<NewickNode> m_tree;
+};
+
+template<class T> void do_delete(T t) { delete t;}
+
+class VectorVar : public Variable
+{
+public:
+	VectorVar(const Variable::vector_t &vVal) : m_vVal(vVal) { }
+	VectorVar(const Variable::vector_t::value_type &v) : m_vVal(1, v) { }
+
+	virtual const char* Type() const { return "Vector"; }
+
+	virtual ~VectorVar() {
+		std::for_each(m_vVal.begin(), m_vVal.end(), do_delete<Variable*>);
 	}
+
+	virtual size_t Length() const { return m_vVal.size(); }
+	virtual Variable* At(size_t pos) {return m_vVal.at(pos%Length());}
+	virtual const Variable* At(size_t pos) const { return m_vVal.at(pos%Length());}
+	virtual void Append(Variable *v)
+	{
+		m_vVal.push_back(v);
+	}
+
+protected:
+	Variable::vector_t m_vVal;
+};
+
+class VarDB
+{
+public:
+	typedef std::string Key;
+	typedef std::map<Key, Variable*> Map;
+
+	const Variable* GetVar(const Key &k) const;
+	Variable* GetVar(const Key &k);
+	
+	void SetVar(const Key &k, Variable *v, int nMode = 0);
+
+	template<class T>
+	size_t Get(const Key &k, T &v) const {
+		const Variable *p = GetVar(k);
+		if(p == NULL)
+			return 0;
+		return p->To(v);
+	}
+
+	bool Parse(const char *cs);
+
+protected:
+	Map m_map;
+
+	//Parser Varables
+	bool ParseError(const char *csMsg, size_t uLine, const char *csText);
+	const char *m_csParsedFile;
+	friend void yyerror (char *s);
 };
 
 #endif //DAWG_VAR_H
-

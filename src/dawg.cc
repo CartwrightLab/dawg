@@ -1,5 +1,5 @@
 /*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
-    Copyright (C) 2004-2005  Reed A. Cartwright
+    Copyright (C) 2004-2006  Reed A. Cartwright
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -579,3 +579,10 @@ bool DawgWarn(const char* csErr, ...)
 	fprintf(stderr, "\n");
 	return false;
 }
+
+/*
+void DawgErrorGSL(const char *reason, const char *file, int line, int gsl_errno)
+{
+	DawgError("GSL Error: %s (%s at %s:%d)", reason, gsl_strerror(gsl_errno), file, line);
+}
+*/

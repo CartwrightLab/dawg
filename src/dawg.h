@@ -7,10 +7,6 @@
 #	include "config.h"
 #endif
 
-#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
-#		define copysign _copysign
-#endif
-
 #ifdef HAVE_SYS_TYPES_H
 #	include <sys/types.h>
 #endif
@@ -30,24 +26,15 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #ifdef HAVE_STDIO_H
 #	include <stdio.h>
 #endif
-
-#if _MSC_VER >= 1400
-#	define	snprintf _snprintf_s
-#elif !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
-#	define snprintf _snprintf
-#endif
-
 #ifdef HAVE_PROCESS_H
 #	include <process.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #	include <unistd.h>
 #endif
-
-#if !defined(HAVE_GETPID) && defined(HAVE__GETPID)
-#	define getpid _getpid
+#ifdef HAVE_STRING_H
+#	include <string.h>
 #endif
-
 #ifdef HAVE_TIME_H
 #	include <time.h>
 #endif
@@ -64,7 +51,6 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #	include <stdarg.h>
 #endif
 
-
 #include <vector>
 #include <string>
 #include <fstream>
@@ -75,9 +61,29 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #include <map>
 #include <functional>
 
+#if !defined(HAVE_GETPID) && defined(HAVE__GETPID)
+#	define getpid _getpid
+#endif
+
+#if !defined(HAVE_STRDUP) && defined(HAVE__STRDUP)
+#	define strdup _strdup
+#endif
+
+#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
+#		define copysign _copysign
+#endif
+
+#if _MSC_VER >= 1400
+#	define	snprintf _snprintf_s
+#elif !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
+#	define snprintf _snprintf
+#endif
+
+
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
 bool DawgWarn(const char* csErr, ...);  //always returns false
+void DawgErrorGSL(const char *reason, const char *file, int line, int gsl_errno);
 
 bool SetFormat(unsigned int fmt, int nNum,
 			   const char* csHead, const char* csBefore,
