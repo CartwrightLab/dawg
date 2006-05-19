@@ -11,6 +11,33 @@ namespace ublas = boost::numeric::ublas;
 
 namespace Dawg {
 
+class SubstModel
+{
+public:
+	typedef size_t index_type;
+	SubstModel() : dOldTime(1.0) { }
+	void UpdateSubMatrix(double dTime);
+	
+	bool Create(const std::string &model,
+				const double &s[6],
+				const double &f[4],
+				const std::vector<double> &iota,
+				const std::vector<double> & scale);
+	
+	bool Create(const std::vector<double> &f, const std::vector<double> &s,
+				const std::vector<double> &iota, const std::vector<double> &scale);
+				
+	index_type Subst(index_type p, double dTime);
+	
+protected:
+	ublas::matrix<double> matP;
+	double dOldTime;
+
+	ublas::matrix<double> matU;
+	ublas::matrix<double> matV;
+	ublas::vector<double> vecE;
+};
+
 class Model
 {
 public:
@@ -21,15 +48,8 @@ public:
 	bool Run();
 
 protected:
-	void UpdateSubMatrix(double dTime);
-	ublas::matrix<double> matP;
-	double dOldTime;
-
-	ublas::matrix<double> matGTR;
-	ublas::matrix<double> matU;
-	ublas::matrix<double> matV;
-	ublas::vector<double> vecE;
-
+	SubstModel modSubst;
+	
 	double dSubFreqs[4];
 	double dSubFreqsCum[4];
 
@@ -37,6 +57,7 @@ protected:
 	std::vector<double> dSubIota;
 	std::vector<double> dSubScale;
 	std::vector<double> dSubGamma;
+
 };
 
 } // namespace dawg
