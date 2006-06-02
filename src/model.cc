@@ -24,10 +24,77 @@ bool EigenSymmv(ublas::matrix<double> &A, ublas::vector<double> &E, ublas::matri
 	return (status != 0);
 }
 
-bool Dawg::SubstModel::Create(const std::string &model, const double &s[6], const double &f[4],
+bool Dawg::SubstModel::Create(const std::string &model, const std::vector<double> &f, const std::vector<double> &s,
 				const std::vector<double> &iota, const std::vector<double> & scale)
 {
-	return true;
+	std::vector<double> freqs(4, 0.25);	
+	std::vector<double> rates(6, 1.0);
+	if(model == "JC")
+	{
+		// do nothing
+	}
+	else if(model == "GTR")
+	{
+		if(f.size() < 4 || s.size() < 6)
+			return DawgError("GTR model requires 4 frequencies and 6 numerical parameters.");
+		freqs = f;
+		rates = s;
+	}
+	else if(model == "K2P")
+	{
+		if(s.size() < 2)
+			return DawgError("K2P model requires 2 numerical parameters.");
+		rates[4] = rates[1] = s[0];
+		rates[0] = rates[2] = rates[3] = rates[5] = s[1];
+	}
+	else if(model == "K3P")
+	{
+		if(s.size() < 2)
+			return DawgError("K2P model requires 3 numerical parameters.");
+		rates[4] = rates[1] = s[0];
+		rates[2] = rates[3] = s[1];
+		rates[0] = rates[5] = s[2];
+
+	}
+	else if(model == "HKY")
+	{
+		if(f.size() < 4 || s.size() < 1)
+			return DawgError("HKY model requires 4 frequencies and 1 numerical parameter.");
+		freqs = f;
+		rates[4] = rates[1] = s[0];
+		rates[0] = rates[2] = rates[3] = rates[5] = 1.0;
+
+	}
+	else if(model == "F81")
+	{
+		if(f.size() < 4)
+			return DawgError("F81 model requires 4 frequencies.");
+		freqs = f;
+	}
+	else if(model == "F84")
+	{
+		if(f.size() < 4 && s.size() < 1)
+			return DawgError("F84 model requires 4 frequencies and 1 numerical parameter.");
+		freqs = f;
+		rates[1] = 1.0 + s[0]/(f[0]+f[2]);
+		rates[4] = 1.0 + s[0]/(f[1]+f[3]);
+		rates[0] = rates[2] = rates[3] = rates[5] = 1.0;
+
+	}
+	else if(model == "TN")
+	{
+		if(vdParams.size() < 3)
+			return DawgError("TN model requires 4 frequencies and 3 numerical parameters.");
+		freqs = f;
+		rates[1] = s[0];
+		rates[4] = s[1];
+		rates[0] = rates[2] = rates[3] = rates[5] = s[2];
+	}
+	else
+	{
+		return DawgError("Unknown substitution model, \"%s\".", model.c_str());
+	}
+	return Create(freqs, rates, iota, scale);	
 }
 
 bool Dawg::SubstModel::Create(const std::vector<double> &f, const std::vector<double> &s,

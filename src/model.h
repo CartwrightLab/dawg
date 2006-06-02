@@ -19,10 +19,10 @@ public:
 	void UpdateSubMatrix(double dTime);
 	
 	bool Create(const std::string &model,
-				const double &s[6],
-				const double &f[4],
+				const std::vector<double> &f,
+				const std::vector<double> &s
 				const std::vector<double> &iota,
-				const std::vector<double> & scale);
+				const std::vector<double> &scale);
 	
 	bool Create(const std::vector<double> &f, const std::vector<double> &s,
 				const std::vector<double> &iota, const std::vector<double> &scale);
