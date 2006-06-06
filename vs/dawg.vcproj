@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\indelmodel.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\lexer.cc"
 				>
 			</File>
@@ -300,6 +304,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\sequence.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\src\substmodel.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\src\tree.cc"
 				>
 			</File>
@@ -346,6 +358,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\indelmodel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\matrix.h"
 				>
 			</File>
@@ -359,6 +375,14 @@
 			</File>
 			<File
 				RelativePath="..\src\rand.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sequence.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\substmodel.h"
 				>
 			</File>
 			<File

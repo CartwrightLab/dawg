@@ -2,6 +2,8 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dawg", "dawg.vcproj", "{523579F8-2C8F-4503-A435-277A76350A36}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{88D5B73A-753F-41EC-9F6F-F3986A3252C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -12,6 +14,10 @@ Global
 		{523579F8-2C8F-4503-A435-277A76350A36}.Debug|Win32.Build.0 = Debug|Win32
 		{523579F8-2C8F-4503-A435-277A76350A36}.Release|Win32.ActiveCfg = Release|Win32
 		{523579F8-2C8F-4503-A435-277A76350A36}.Release|Win32.Build.0 = Release|Win32
+		{88D5B73A-753F-41EC-9F6F-F3986A3252C8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{88D5B73A-753F-41EC-9F6F-F3986A3252C8}.Debug|Win32.Build.0 = Debug|Win32
+		{88D5B73A-753F-41EC-9F6F-F3986A3252C8}.Release|Win32.ActiveCfg = Release|Win32
+		{88D5B73A-753F-41EC-9F6F-F3986A3252C8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
