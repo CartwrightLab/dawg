@@ -188,3 +188,10 @@ Dawg::SubstModel::base_type Dawg::SubstModel::Subst(base_type uCurr)
 	for(u=0; u < N-1 && d >= matP(uCurr, u); ++u) { }
 	return u;
 }
+
+void Dawg::SubstModel::Process(Dawg::Sequence &seq, double dTime)
+{
+	for(Dawg::Sequence::pos_type u = 0; u < seq.Length(); ++u)
+		seq.Residue(u).first = Subst(seq.Base(u), dTime*seq.Rate(u));
+}
+

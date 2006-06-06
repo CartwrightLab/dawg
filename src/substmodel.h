@@ -18,6 +18,8 @@ public:
 
 	bool Create(const std::vector<double> &vdFreqs, const std::vector<double> &vdParams);
 	void UpdateSubMatrix(double dTime);
+	
+	void Process(Sequence &seq, double dTime);
 
 	base_type Subst(base_type uCurr);
 	base_type Subst(base_type uCurr, double dTime)
