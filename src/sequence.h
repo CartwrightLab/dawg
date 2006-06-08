@@ -2,6 +2,7 @@
 #define DAWG_SEQUENCE_H
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include "rand.h"
 
 namespace ublas = boost::numeric::ublas;
 
@@ -40,6 +41,19 @@ protected:
 	std::string ssAln;
 	std::vector<pos_type> vuSeqSections;
 	std::vector<pos_type> vuAlnSections;
+};
+
+class SequenceFactory
+{
+public:
+	SequenceFactory() : rand_rate(g_rng, gammaiota_distribution<>()) ,
+		rand_base(g_rng, discrete_distribution<Sequence::pos_type>()) { }
+
+	void operator()(Sequence& seq, Sequence::pos_type uLen);
+
+protected:
+	boost::variate_generator<DawgRng&, gammaiota_distribution<> > rand_rate;
+	boost::variate_generator<DawgRng&, discrete_distribution<Sequence::pos_type> > rand_base;
 };
 
 }; // namespace Dawg

@@ -12,12 +12,86 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/gamma_distribution.hpp>
 #include <boost/random/geometric_distribution.hpp>
+#include <boost/random/exponential_distribution.hpp>
+#include <boost/random/bernoulli_distribution.hpp>
+#include <boost/random/uniform_smallint.hpp>
 #include <vector>
 
 typedef boost::mt19937 DawgRng;
 
 extern DawgRng g_rng;
 extern boost::uniform_01<DawgRng, double> g_randReal01;
+
+inline double rand_real()
+{
+	boost::uniform_01<DawgRng, double> r(g_rng);
+	return r();
+}
+
+inline unsigned int rand_uint(unsigned int uMax)
+{
+	boost::variate_generator<DawgRng&, boost::uniform_smallint<unsigned int> > r(g_rng, boost::uniform_smallint<unsigned int>(0, uMax));
+	return r();
+}
+
+inline double rand_exp(double dRate)
+{
+	boost::variate_generator<DawgRng&, boost::exponential_distribution<> > r(g_rng, boost::exponential_distribution<>(dRate));
+	return r();
+}
+
+inline bool rand_bool(double dP)
+{
+	boost::variate_generator<DawgRng&, boost::bernoulli_distribution<> > r(g_rng, boost::bernoulli_distribution<>(dP));
+	return r();
+}
+
+
+// mean 1 and variance (1+gamma)/(1-iota)
+template<class RealType = double>
+class gammaiota_distribution
+{
+public:
+	typedef RealType input_type;
+	typedef RealType result_type;
+
+	gammaiota_distribution(result_type g = result_type(0),
+		result_type i = result_type(0)) : 
+			_alpha(g), _iota(i), _iota_dist(_iota), _gamma_dist(_alpha)
+	{
+		init();
+	}
+
+	template<class Engine>
+	result_type operator()(Engine& eng)
+	{
+		if(_iota != result_type(0) && _iota_dist(eng))
+			return result_type(0);
+		if(_gamma != result_type(0) )
+			return _beta*_gamma_dist(eng);
+		return result_type(1);
+	}
+
+	void reset() { }
+
+	const input_type& iota() const { return _iota; }
+	const input_type& alpha() const { return _alpha; }
+
+
+protected:
+	void init()
+	{
+		_beta = input_type(1)/(_alpha*(input_type(1)-_iota));
+	}
+
+private:
+	input_type _iota;
+	input_type _alpha;
+	input_type _beta;
+
+	boost::gamma_distribution<RealType> _gamma_dist;
+	boost::bernoulli_distribution<RealType> _iota_dist;
+};
 
 template<class IntType = int, class RealType = double>
 class discrete_distribution
@@ -28,7 +102,7 @@ public:
 	typedef std::vector<input_type> storage_type;
 	typedef typename storage_type::const_iterator const_iterator;
 	
-	discrete_distribution() : _P { }
+	discrete_distribution() { }
 
 	template<class It>
 	discrete_distribution(const It& first, const It& last) : _P(first, last) { }
@@ -82,14 +156,13 @@ public:
 		} while(eng()*x*(t-one)*_b > t*(_b-one));
 		return static_cast<result_type>(x);
 	}
-	input_type alpha() const { return _alpha; }
+	const input_type& alpha() const { return _alpha; }
 
-protected:
+private:
 	void init()
 	{
 		_b = pow(input_type(2), _alpha-input_type(1));
 	}
-private:
 	input_type _alpha;
 	input_type _b;
 };
@@ -105,7 +178,6 @@ public:
 		const result_type& m = result_type(-1) ) : base_type(alpha), _max(m)
 	{
 		assert(alpha > input_type(1) && (m == result_type(-1) || m >= result_type(1)));
-		init();
 	}
 	
 	void reset() { base_type::reset(); }
@@ -121,11 +193,8 @@ public:
 		return u;
 	}
 
-protected:
-	void init()
-	{
-		base_type::init();
-	}
+	const result_type& max() const { return _max; }
+
 private:
 	result_type _max;
 };
