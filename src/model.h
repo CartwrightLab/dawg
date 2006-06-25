@@ -11,14 +11,6 @@ namespace ublas = boost::numeric::ublas;
 
 namespace Dawg {
 
-class IndelModel
-{
-public:
-	IndelModel();
-
-	bool Create(const std::string& ssModel, const std::vector<double> &vdParams);
-};
-
 class Model
 {
 public:
@@ -36,7 +28,6 @@ protected:
 
 	double dSubParams[6];
 	std::vector<double> dSubIota;
-	std::vector<double> dSubScale;
 	std::vector<double> dSubGamma;
 
 };

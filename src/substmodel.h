@@ -6,7 +6,6 @@
 
 #include "sequence.h"
 
-//namespace ublas = boost::numeric::ublas;
 
 namespace Dawg {
 

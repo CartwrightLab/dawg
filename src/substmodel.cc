@@ -18,7 +18,7 @@ bool EigenSymmv(ublas::matrix<double> &A, ublas::vector<double> &E, ublas::matri
 	//gsl_eigen_symmv_sort(&E_view.vector, &V_view.matrix, GSL_EIGEN_SORT_ABS_ASC);
 	gsl_eigen_symmv_free(w);
 	gsl_set_error_handler(handler);
-	return (status != 0);
+	return (status == 0);
 }
 
 //bool Dawg::SubstModel::Create(const std::string &model, const std::vector<double> &f, const std::vector<double> &s,
@@ -118,7 +118,7 @@ bool Dawg::SubstModel::Create(const std::vector<double> &vdFreqs, const std::vec
 	double dY = 0.0;
 	ublas::matrix<double> matQ(ublas::zero_matrix<double>(N,N));
 	size_t x = 0;
-	for(ublas::matrix<double>::size_type i = 0; i < N-1; ++i)
+	for(ublas::matrix<double>::size_type i = 0; i < N; ++i)
 	{
 		for(ublas::matrix<double>::size_type j = i+1; j < N; ++j, ++x)
 		{

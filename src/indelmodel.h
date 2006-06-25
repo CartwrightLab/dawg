@@ -6,51 +6,73 @@
 
 namespace Dawg {
 
-class IndelDistribution
+template<class T>
+class Insertion : public GillespieProcessor::Element
 {
 public:
-	typedef unsigned int result_type;
-	enum Type {MOD_ZIPF, MOD_GEO, MOD_USER};
+	typedef T dist_type;
+	typedef typename T::result_type result_type;
 	
-	IndelDistribution() : m_model(MOD_ZIPF),
-		rand_zipf(g_rng, truncated_zipf_distribution<result_type>()),
-		rand_user(g_rng, discrete_distribution<result_type>()),
-		rand_geo(g_rng, boost::geometric_distribution<result_type>())
-	{ }
+	Insertion(double dLambda = 0.0, const dist_type &dist = dist_type(), 
+		const SequenceFactory &fac = SequenceFactory()) :
+		m_dLambda(dLambda), rand_len(g_rng, dist), rand_seq(fac)
+	{
+		
+	}
 
-	bool Create(Type mod, const std::vector<double> &vdParams);
+	virtual double Rate(const Sequence& seq) const
+	{
+		return m_dLambda*(seq.Length()+1);
+	}
 
-	result_type Rand();
-	result_type operator()() { return Rand(); }
+	virtual void operator()(Sequence& seq)
+	{
+		seq.Insert(rand_uint(seq.Length()), rand_seq(rand_len()));
+	}
 
 private:
-	Type m_model;
-	std::vector<double> m_vdParams;
-
-	boost::variate_generator<DawgRng&, truncated_zipf_distribution<result_type> > rand_zipf;
-	boost::variate_generator<DawgRng&, discrete_distribution<result_type> > rand_user;
-	boost::variate_generator<DawgRng&, boost::geometric_distribution<result_type> > rand_geo;
-
+	double m_dLambda;
+	boost::variate_generator<DawgRng&, dist_type> rand_len;
+	SequenceFactory rand_seq;
 };
 
-class IndelModel
+template<class T>
+class Deletion : public GillespieProcessor::Element
 {
 public:
-	IndelModel() { }
+	typedef T dist_type;
+	typedef typename T::result_type result_type;
 
-	bool Create(double dInsRate, IndelDistribution::Type modIns, const std::vector<double> &vdInsParams,
-				double dDelRate, IndelDistribution::Type modDel, const std::vector<double> &vdDelParams,
-				const SequenceFactory &seqfac);
-	
-	void Process(Sequence &seq, double dTime);
-	
+	Deletion(double dLambda = 0.0, const dist_type &dist = dist_type()) :
+		m_dLambda(dLambda), rand_len(g_rng, dist) {	}
+
+	virtual double Rate(const Sequence& seq) const
+	{
+		return m_dLambda*seq.Length();
+	}
+	virtual void operator()(Sequence& seq)
+	{
+		//do Deletion
+		Sequence::pos_type uLen, uP, uB, uE;
+		uLen = rand_len();
+		if(uLen == Sequence::pos_type(1))
+		{
+			// accelerate most common type
+			uB = rand_uint(seq.Length()-1);
+			uE = uB+1;
+		}
+		else
+		{
+			uP = rand_uint(seq.Length()+uLen-2)+1;
+			uB = std::max(uLen, uP)-uLen; 
+			uE = std::min(seq.Length(), uP);
+		}
+		seq.Delete(uB, uE);
+	}
+
 private:
-	IndelDistribution rand_ins;
-	IndelDistribution rand_del;
-	double m_dInsRate;
-	double m_dDelRate;
-
-	SequenceFactory rand_seq;
+	double m_dLambda;
+	boost::variate_generator<DawgRng&, dist_type> rand_len;
 };
 
 }

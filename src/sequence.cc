@@ -1,5 +1,14 @@
 #include "sequence.h"
 
+void Dawg::Sequence::Clear()
+{
+	rm = rmHomo;
+	vSeq.clear();
+	ssAln.clear();
+	vuSeqSections.clear();
+	vuAlnSections.clear();
+}
+
 bool Dawg::Sequence::Replace(pos_type uPos, const residue_type &uRes)
 {
 	if(uPos >= vSeq.size())
@@ -201,3 +210,47 @@ bool Dawg::Sequence::AppendSection(const Sequence& seq)
 	vuAlnSections.push_back(seq.ssAln.length());
 	return true;
 }
+
+void Dawg::SequenceFactory::operator()(Sequence& seq, Sequence::pos_type uLen)
+{
+	seq.Clear();
+	//seq.rm = (rate_dist.gamma() == 0.0 && rate.dist.iota() == 0.0) ?
+	//	Sequence::rmHomo : Sequence::rmHetro;
+	for(Sequence::pos_type u = 0; u < uLen; ++u)
+		seq.vSeq.push_back(std::make_pair(rand_base(), rand_rate()));
+}
+
+Dawg::Sequence Dawg::SequenceFactory::operator ()(Sequence::pos_type uLen)
+{
+	Sequence seq;
+	for(Sequence::pos_type u = 0; u < uLen; ++u)
+		seq.vSeq.push_back(std::make_pair(rand_base(), rand_rate()));
+	return seq;
+}
+
+void Dawg::GillespieProcessor::operator()(Sequence& seq, double dTime)
+{
+	if(m_elements.size() == 0 || dTime <= 0.0)
+		return;
+	std::vector<double> dRates(m_elements.size());
+	double dSum, dW;
+	while(1)
+	{
+		dSum = 0.0;
+		for(std::vector<double>::size_type u = 0; u < dRates.size(); ++u )
+			dRates[u] = (dSum += m_elements[u].Rate(seq));
+		dTime -= Waiting(dSum);
+		if(dTime <= 0.0)
+			break;
+		dW = Which(dSum);
+		for(std::vector<double>::size_type u = 0; u < dRates.size(); ++u )
+		{
+			if( dW < dRates[u])
+			{
+				m_elements[u](seq);
+				break;
+			}
+		}
+	}		
+}
+

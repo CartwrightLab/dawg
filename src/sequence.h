@@ -2,11 +2,14 @@
 #define DAWG_SEQUENCE_H
 
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "rand.h"
 
 namespace ublas = boost::numeric::ublas;
 
 namespace Dawg {
+
+class SequenceFactory;
 
 class Sequence
 {
@@ -27,6 +30,8 @@ public:
 	bool Insert(pos_type uPos, const Sequence& seq);
 	bool Delete(pos_type uBegin, pos_type uEnd);
 
+	void Clear();
+
 	bool CopySection(pos_type uSec, Sequence& seq) const;
 	bool AssignSection(pos_type uSec, const Sequence& seq);
 	bool AppendSection(const Sequence& seq);
@@ -41,19 +46,57 @@ protected:
 	std::string ssAln;
 	std::vector<pos_type> vuSeqSections;
 	std::vector<pos_type> vuAlnSections;
+
+	friend SequenceFactory;
 };
 
 class SequenceFactory
 {
 public:
-	SequenceFactory() : rand_rate(g_rng, gammaiota_distribution<>()) ,
-		rand_base(g_rng, discrete_distribution<Sequence::pos_type>()) { }
+	typedef discrete_distribution<Sequence::pos_type> base_dist;
+	typedef gammaiota_distribution<> rate_dist;
+
+	SequenceFactory(const base_dist &bd = base_dist(), const rate_dist &rd = rate_dist()) : 
+		rand_base(g_rng, bd), rand_rate(g_rng, rd)
+		 { }
 
 	void operator()(Sequence& seq, Sequence::pos_type uLen);
+	Sequence operator()(Sequence::pos_type uLen);
+
+	const SequenceFactory& operator=(const SequenceFactory& right)
+	{
+		if(&right == this)
+			return *this;
+		rand_base.distribution() = right.rand_base.distribution();
+		rand_rate.distribution() = right.rand_rate.distribution();
+		*this;
+	}
 
 protected:
-	boost::variate_generator<DawgRng&, gammaiota_distribution<> > rand_rate;
-	boost::variate_generator<DawgRng&, discrete_distribution<Sequence::pos_type> > rand_base;
+	boost::variate_generator<DawgRng&, base_dist > rand_base;
+	boost::variate_generator<DawgRng&, rate_dist > rand_rate;
+};
+
+class GillespieProcessor
+{
+public:
+	class Element
+	{
+	public:
+		virtual double Rate(const Sequence& /*seq*/) const { return 0.0;}
+		virtual void operator()(Sequence& /*seq*/) { }
+		void Process(Sequence & seq) { (*this)(seq); }
+	};
+	
+	void AddElement(Element* p) { m_elements.push_back(p); }
+	
+	void operator()(Sequence& seq, double dTime);
+
+private:
+	double Waiting(double d) { return rand_exp(d); }
+	double Which(double d) { return rand_real(0.0, d); }
+
+	boost::ptr_vector<Element> m_elements;
 };
 
 }; // namespace Dawg

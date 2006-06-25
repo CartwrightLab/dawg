@@ -9,6 +9,7 @@
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/gamma_distribution.hpp>
 #include <boost/random/geometric_distribution.hpp>
@@ -25,6 +26,12 @@ extern boost::uniform_01<DawgRng, double> g_randReal01;
 inline double rand_real()
 {
 	boost::uniform_01<DawgRng, double> r(g_rng);
+	return r();
+}
+
+inline double rand_real(double b, double e)
+{
+	boost::variate_generator<DawgRng&, boost::uniform_real<> > r(g_rng, boost::uniform_real<>(b, e));
 	return r();
 }
 
@@ -57,7 +64,7 @@ public:
 
 	gammaiota_distribution(result_type g = result_type(0),
 		result_type i = result_type(0)) : 
-			_alpha(g), _iota(i), _iota_dist(_iota), _gamma_dist(_alpha)
+			_gamma(g), _iota(i), _iota_dist(_iota)
 	{
 		init();
 	}
@@ -75,17 +82,23 @@ public:
 	void reset() { }
 
 	const input_type& iota() const { return _iota; }
-	const input_type& alpha() const { return _alpha; }
+	const input_type& gamma() const { return _gamma; }
 
 
 protected:
 	void init()
 	{
-		_beta = input_type(1)/(_alpha*(input_type(1)-_iota));
+		if(_gamma != result_type(0))
+		{
+			_alpha = result_type(1)/_gamma;
+			_gamma_dist = boost::gamma_distribution<RealType>(_alpha);
+			_beta = input_type(1)/(_alpha*(input_type(1)-_iota));
+		}
 	}
 
 private:
 	input_type _iota;
+	input_type _gamma;
 	input_type _alpha;
 	input_type _beta;
 
@@ -105,7 +118,10 @@ public:
 	discrete_distribution() { }
 
 	template<class It>
-	discrete_distribution(const It& first, const It& last) : _P(first, last) { }
+	discrete_distribution(const It& first, const It& last) : _P(first, last)
+	{
+		init();
+	}
 	
 	void reset() { }
 
@@ -118,12 +134,20 @@ public:
 		input_type r = eng();
 		result_type n = result_type(0);
 		for(const_iterator cit = _P.begin();
-			cit != _P.end() && r < *cit; ++cit)
+			cit != _P.end() && r >= *cit; ++cit)
 			++n;
 		return n;
 	}
 	
 private:
+	void init()
+	{
+		input_type sum = input_type(0);
+		for(storage_type::iterator it = _P.begin();
+			it != _P.end(); ++it)
+			*it = (sum += *it);
+	}
+
 	storage_type _P;
 
 };
