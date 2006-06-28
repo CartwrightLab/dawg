@@ -2,12 +2,9 @@
 #define DAWG_MODEL_H
 
 #include "dawgvar.h"
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/banded.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
-
-namespace ublas = boost::numeric::ublas;
+#include "sequence.h"
+#include "substmodel.h"
+#include "indelmodel.h"
 
 namespace Dawg {
 
@@ -20,16 +17,13 @@ public:
 	bool Create(const Dawg::Variables& var);
 	bool Run();
 
+	enum SeqType { TypeDNA, TypeRNA, TypeProtein, TypeCodon };
+
 protected:
-	SubstModel modSubst;
-	
-	double dSubFreqs[4];
-	double dSubFreqsCum[4];
+	bool SetupSubstModel(const std::string &ssModel, std::vector<double> &vdFreqs, std::vector<double> &vdParams, SeqType &tySeq);
 
-	double dSubParams[6];
-	std::vector<double> dSubIota;
-	std::vector<double> dSubGamma;
-
+	SubstModel m_modSubst;
+	GillespieProcessor m_modIndel;
 };
 
 } // namespace dawg

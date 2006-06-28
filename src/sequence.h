@@ -2,7 +2,6 @@
 #define DAWG_SEQUENCE_H
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include "rand.h"
 
 namespace ublas = boost::numeric::ublas;
@@ -15,37 +14,42 @@ class Sequence
 {
 public:
 	typedef ublas::matrix<double>::size_type base_type;
-	typedef std::pair<base_type, double> residue_type;
-	typedef std::vector<residue_type> seq_type;
-	typedef seq_type::size_type pos_type;
-	enum RateMode {rmHomo, rmHetro};
+	typedef double rate_type;
+	typedef std::vector<base_type> base_seq_type;
+	typedef std::vector<rate_type> rate_seq_type;
+	typedef std::vector<char> aln_seq_type;
+	typedef base_seq_type::size_type pos_type;
+	typedef std::vector<pos_type> section_seq_type;
 
-	pos_type Length() const { return vSeq.size(); }
-	const residue_type& Residue(pos_type uPos) const { return vSeq.at(uPos); }
-	residue_type& Residue(pos_type uPos) { return vSeq.at(uPos); }
-	base_type Base(pos_type uPos) const { return Residue(uPos).first; }
-	double Rate(pos_type uPos) const { return (rm == rmHetro) ? Residue(uPos).second : 1.0; }
-
-	bool Replace(pos_type uPos, const residue_type &uRes);
+	pos_type Length() const { return m_vBases.size(); }
+	base_type Base(pos_type uPos) const { return m_vBases[uPos]; }
+	rate_type Rate(pos_type uPos) const { return (m_vRates.size() ? m_vRates[uPos] : 1.0); }
+	
+	bool Replace(pos_type uPos, const base_type &base, const rate_type &rate);
 	bool Insert(pos_type uPos, const Sequence& seq);
 	bool Delete(pos_type uBegin, pos_type uEnd);
 
+	const aln_seq_type& Aln() const { return m_vAln; }
+
 	void Clear();
 
-	bool CopySection(pos_type uSec, Sequence& seq) const;
-	bool AssignSection(pos_type uSec, const Sequence& seq);
+	// Add seq as a new section
 	bool AppendSection(const Sequence& seq);
-	std::vector<pos_type>::size_type SectionCount() const { return vuSeqSections.size(); }
+	// Extract section as sequence
+	bool ReadSection(pos_type uSec, Sequence & seq);
+	
+	section_seq_type::size_type SectionCount() const { return m_vSeqSections.size(); }
 
 	pos_type FindSection(pos_type uPos) const;
 	pos_type SeqPosToAlnPos(pos_type uPos) const;
 
 protected:
-	RateMode rm;
-	seq_type vSeq;
-	std::string ssAln;
-	std::vector<pos_type> vuSeqSections;
-	std::vector<pos_type> vuAlnSections;
+	base_seq_type m_vBases;
+	rate_seq_type m_vRates;
+	section_seq_type m_vSeqSections;
+
+	aln_seq_type  m_vAln;
+	section_seq_type m_vAlnSections;
 
 	friend SequenceFactory;
 };
@@ -53,6 +57,13 @@ protected:
 class SequenceFactory
 {
 public:
+	enum Flags {
+		FlagDefault    = 0,
+		FlagRateHetero = 1,
+		FlagAlignment  = 2,
+		FlagSections   = 4
+	};
+
 	typedef discrete_distribution<Sequence::pos_type> base_dist;
 	typedef gammaiota_distribution<> rate_dist;
 
@@ -75,28 +86,6 @@ public:
 protected:
 	boost::variate_generator<DawgRng&, base_dist > rand_base;
 	boost::variate_generator<DawgRng&, rate_dist > rand_rate;
-};
-
-class GillespieProcessor
-{
-public:
-	class Element
-	{
-	public:
-		virtual double Rate(const Sequence& /*seq*/) const { return 0.0;}
-		virtual void operator()(Sequence& /*seq*/) { }
-		void Process(Sequence & seq) { (*this)(seq); }
-	};
-	
-	void AddElement(Element* p) { m_elements.push_back(p); }
-	
-	void operator()(Sequence& seq, double dTime);
-
-private:
-	double Waiting(double d) { return rand_exp(d); }
-	double Which(double d) { return rand_real(0.0, d); }
-
-	boost::ptr_vector<Element> m_elements;
 };
 
 }; // namespace Dawg

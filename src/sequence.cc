@@ -1,256 +1,190 @@
+//#pragma warning(disable: 4127 4512)
+
 #include "sequence.h"
 
 void Dawg::Sequence::Clear()
 {
-	rm = rmHomo;
-	vSeq.clear();
-	ssAln.clear();
-	vuSeqSections.clear();
-	vuAlnSections.clear();
+	m_vBases.clear();
+	m_vRates.clear();
+	m_vSeqSections.clear();
+	m_vAln.clear();
+	m_vAlnSections.clear();
 }
 
-bool Dawg::Sequence::Replace(pos_type uPos, const residue_type &uRes)
+bool Dawg::Sequence::Replace(pos_type uPos, const base_type &base, const rate_type &rate)
 {
-	if(uPos >= vSeq.size())
+	if(uPos >= m_vBases.size())
 		return false;
-	vSeq[uPos] = uRes;
+	m_vBases[uPos] = base;
+	if(uPos < m_vRates.size())
+		m_vRates[uPos] = rate;
 	return true;
 }
 
 bool Dawg::Sequence::Insert(pos_type uPos, const Sequence& seq)
 {
-	if(uPos > vSeq.size())
+	if(uPos > m_vBases.size())
 		return false;
-	seq_type::size_type sz = seq.vSeq.size();
-	vSeq.insert(vSeq.begin()+uPos, seq.vSeq.begin(), seq.vSeq.end());
-	if(uPos == vSeq.size())
+	pos_type sz = seq.m_vBases.size();
+	if(!m_vAln.empty())
 	{
-		if(!ssAln.empty())
-			ssAln.append(sz, '+');
-		if(!vuSeqSections.empty())
-		{
-			vuSeqSections.back() += sz;
-			if(!vuAlnSections.empty())
-				vuAlnSections.back() += sz;
-		}
-	}
-	else
-	{
-		if(!ssAln.empty())
+		if(uPos == Length())
+			m_vAln.insert(m_vAln.end(), sz, '+');
+		else
 		{
 			pos_type u = SeqPosToAlnPos(uPos);
-			ssAln.insert(u, sz, '+');
-		}
-		if(!vuSeqSections.empty())
-		{
-			pos_type u;
-			for(u = 0; uPos > vuSeqSections[u] && u < vuSeqSections.size(); ++u)
-				uPos -= vuSeqSections[u];
-			vuSeqSections[u] += sz;
-			if(!vuAlnSections.empty())
-				vuAlnSections[u] += sz;
+			m_vAln.insert(m_vAln.begin()+u, sz, '+');			
 		}
 	}
+	if(!m_vSeqSections.empty())
+	{
+		if(uPos == Length())
+		{
+			m_vSeqSections.back() += sz;
+			if(!m_vAlnSections.empty())
+				m_vAlnSections.back() += sz;
+		}
+		else
+		{
+			pos_type u;
+			for(u = 0; uPos > m_vSeqSections[u] && u < m_vSeqSections.size(); ++u)
+				uPos -= m_vSeqSections[u];
+			m_vSeqSections[u] += sz;
+			if(!m_vAlnSections.empty())
+				m_vAlnSections[u] += sz;
+		}
+	}
+	m_vBases.insert(m_vBases.begin()+uPos, seq.m_vBases.begin(), seq.m_vBases.end());
+	if(!m_vRates.empty())
+		m_vRates.insert(m_vRates.begin()+uPos, seq.m_vRates.begin(), seq.m_vRates.end());
 	return true;
 }
 
 bool Dawg::Sequence::Delete(pos_type uBegin, pos_type uEnd)
 {
-	if(uBegin > vSeq.size() || uEnd > vSeq.size() || uBegin > uEnd)
+	if(uBegin > m_vBases.size() || uEnd > m_vBases.size() || uBegin > uEnd)
 		return false;
-	vSeq.erase(vSeq.begin()+uBegin, vSeq.begin()+uEnd);
+	m_vBases.erase(m_vBases.begin()+uBegin, m_vBases.begin()+uEnd);
+	m_vRates.erase(m_vRates.begin()+uBegin, m_vRates.begin()+uEnd);
+
 	pos_type u = SeqPosToAlnPos(uBegin);
 	pos_type v = SeqPosToAlnPos(uEnd);
-	if(!ssAln.empty())
+	if(!m_vAln.empty())
 	{
 		for(pos_type p = u; p != v; ++p)
 		{
-			if(ssAln[p] == '.')
-				ssAln[p] = '-';
-			else if(ssAln[p] == '+')
-				ssAln[p] = '=';
+			if(m_vAln[p] == '.')
+				m_vAln[p] = '-';
+			else if(m_vAln[p] == '+')
+				m_vAln[p] = '=';
 		}
 	}
-	if(!vuSeqSections.empty())
+	if(!m_vSeqSections.empty())
 	{
-		for(u = 0; u < vuSeqSections.size() && uBegin > vuSeqSections[u]; ++u)
+		for(u = 0; u < m_vSeqSections.size() && uBegin > m_vSeqSections[u]; ++u)
 		{
-			uBegin -= vuSeqSections[u];
-			uEnd -= vuSeqSections[u];
+			uBegin -= m_vSeqSections[u];
+			uEnd -= m_vSeqSections[u];
 		}
-		if(u >= vuSeqSections.size())
+		if(u >= m_vSeqSections.size())
 			return false; // overflow
-		if(uEnd <= vuSeqSections[u])
-			vuSeqSections[u] -= (uEnd-uBegin);
+		if(uEnd <= m_vSeqSections[u])
+			m_vSeqSections[u] -= (uEnd-uBegin);
 		else
 		{
-			vuSeqSections[u] = uBegin;
-			uEnd -= vuSeqSections[u];
-			for(u += 1; u < vuSeqSections.size() && uEnd > vuSeqSections[u]; ++u)
+			m_vSeqSections[u] = uBegin;
+			uEnd -= m_vSeqSections[u];
+			for(u += 1; u < m_vSeqSections.size() && uEnd > m_vSeqSections[u]; ++u)
 			{
-				vuSeqSections[u] = 0;
-				uEnd -= vuSeqSections[u];
+				m_vSeqSections[u] = 0;
+				uEnd -= m_vSeqSections[u];
 			}
-			if(u >= vuSeqSections.size())
+			if(u >= m_vSeqSections.size())
 				return false; // overflow
-			vuSeqSections[u] -= uEnd;
+			m_vSeqSections[u] -= uEnd;
 		}
 	}
 	return true;
 }
 
-//Dawg::Sequence::pos_type Dawg::Sequence::FindSection(pos_type uPos) const
-//{
-//	for(pos_type u = 0; u < vuSeqSections.size(); ++u)
-//	{
-//		if(uPos < vuSeqSections[u])
-//			return u;
-//		uPos -= vuSeqSections[u];
-//	}
-//	return static_cast<pos_type>(-1);
-//}
-
- Dawg::Sequence::pos_type Dawg::Sequence::SeqPosToAlnPos(pos_type uPos) const
+Dawg::Sequence::pos_type Dawg::Sequence::SeqPosToAlnPos(pos_type uPos) const
 {
-	for(pos_type u = 0; u < ssAln.length(); ++u)
+	for(pos_type u = 0; u < m_vAln.size(); ++u)
 	{
-		char ch = ssAln[u];
+		char ch = m_vAln[u];
 		if((ch == '.' || ch == '+') && uPos-- == 0)
 			return u;
 	}
 	return static_cast<pos_type>(-1);
 }
 
-
-bool Dawg::Sequence::CopySection(pos_type uSec, Sequence& seq) const
-{
-	if(uSec >= vuSeqSections.size())
-		return false;
-	seq.rm = rm;
-	pos_type uBegin = 0;
-	for(std::vector<pos_type>::const_iterator cit = vuSeqSections.begin();
-		cit != vuSeqSections.begin()+uSec; ++cit)
-		uBegin += *cit;
-	pos_type uEnd = uBegin + vuSeqSections[uSec];
-	seq.vSeq.assign(vSeq.begin()+uBegin,vSeq.begin()+uEnd);
-	seq.vuSeqSections.assign(1, uEnd-uBegin);
-	uBegin = 0;
-	for(std::vector<pos_type>::const_iterator cit = vuAlnSections.begin();
-		cit != vuAlnSections.begin()+uSec; ++cit)
-		uBegin += *cit;
-	uEnd = uBegin + vuAlnSections[uSec];
-	seq.ssAln.assign(ssAln);
-	seq.vuAlnSections.assign(1, uEnd-uBegin);
-	return true;
-}
-
-bool Dawg::Sequence::AssignSection(pos_type uSec, const Sequence& seq)
-{
-	if(uSec >= vuSeqSections.size() || uSec >= vuAlnSections.size() )
-		return false;
-	pos_type uOldLen = vuSeqSections[uSec];
-	pos_type uNewLen = seq.vSeq.size();
-	pos_type uBegin = 0;
-	for(std::vector<pos_type>::const_iterator cit = vuSeqSections.begin();
-		cit != vuSeqSections.begin()+uSec; ++cit)
-		uBegin += *cit;
-	pos_type uEnd = uBegin + uOldLen;
-	if(uOldLen == uNewLen)
-	{
-		for(pos_type i = 0; i < uNewLen; ++i)
-			vSeq[uBegin+i] = seq.vSeq[i];
-	}
-	else if(uOldLen > uNewLen)
-	{
-		for(pos_type i = 0; i < uNewLen; ++i)
-			vSeq[uBegin+i] = seq.vSeq[i];
-		vSeq.erase(vSeq.begin()+uBegin+uNewLen, vSeq.begin()+uBegin+uOldLen);
-	}
-	else
-	{
-		for(pos_type i = 0; i < uOldLen; ++i)
-			vSeq[uBegin+i] = seq.vSeq[i];
-		vSeq.insert(vSeq.begin()+uBegin+uOldLen, seq.vSeq.begin()+uOldLen, seq.vSeq.end());
-	}
-	vuSeqSections[uSec] = uNewLen;
-
-	uOldLen = vuAlnSections[uSec];
-	uNewLen = seq.ssAln.size();
-	uBegin = 0;
-	for(std::vector<pos_type>::const_iterator cit = vuAlnSections.begin();
-		cit != vuAlnSections.begin()+uSec; ++cit)
-		uBegin += *cit;
-	uEnd = uBegin + uOldLen;
-	if(uOldLen == uNewLen)
-	{
-		for(pos_type i = 0; i < uNewLen; ++i)
-			ssAln[uBegin+i] = seq.ssAln[i];
-	}
-	else if(uOldLen > uNewLen)
-	{
-		for(pos_type i = 0; i < uNewLen; ++i)
-			ssAln[uBegin+i] = seq.ssAln[i];
-		ssAln.erase(ssAln.begin()+uBegin+uNewLen, ssAln.begin()+uBegin+uOldLen);
-	}
-	else
-	{
-		for(pos_type i = 0; i < uOldLen; ++i)
-			ssAln[uBegin+i] = seq.ssAln[i];
-		ssAln.insert(ssAln.begin()+uBegin+uOldLen, seq.ssAln.begin()+uOldLen, seq.ssAln.end());
-	}
-	vuAlnSections[uSec] = uNewLen;
-	return true;
-}
-
 bool Dawg::Sequence::AppendSection(const Sequence& seq)
 {
-	vSeq.insert(vSeq.end(), seq.vSeq.begin(), seq.vSeq.end());
-	ssAln.append(seq.ssAln);
-	vuSeqSections.push_back(seq.vSeq.size());
-	vuAlnSections.push_back(seq.ssAln.length());
+	if(m_vSeqSections.empty())
+		m_vSeqSections.push_back(m_vBases.size());
+	if(!m_vAln.empty())
+	{
+		m_vAln.insert(m_vAln.end(), seq.m_vAln.begin(), seq.m_vAln.end());
+		if(m_vAlnSections.empty())
+			m_vAlnSections.push_back(m_vAln.size());
+	}
+	m_vBases.insert(m_vBases.end(), seq.m_vBases.begin(), seq.m_vBases.end());
+	if(!m_vRates.empty())
+		m_vRates.insert(m_vRates.end(), seq.m_vRates.begin(), seq.m_vRates.end());
+	m_vSeqSections.push_back(seq.m_vBases.size());
+	if(!m_vAlnSections.empty())
+		m_vAlnSections.push_back(seq.m_vAln.size());
 	return true;
+}
+
+bool Dawg::Sequence::ReadSection(pos_type uSec, Sequence &seq)
+{
+	if(uSec >= m_vSeqSections.size())
+		return false;
+	pos_type uBegin = 0;
+	for(pos_type u = 0; u < uSec; ++u)
+		uBegin += m_vSeqSections[u];
+	pos_type uEnd = uBegin + m_vSeqSections[uSec];
+	seq.m_vBases.assign(m_vBases.begin()+uBegin, m_vBases.begin()+uEnd);
+	if(m_vRates.empty())
+		seq.m_vRates.clear();
+	else
+		seq.m_vRates.assign(m_vRates.begin()+uBegin, m_vRates.begin()+uEnd);
+	seq.m_vSeqSections.assign(1, uEnd-uBegin);
+	if(m_vAln.empty())
+	{
+		seq.m_vAln.clear();
+		seq.m_vAlnSections.clear();
+	}
+	else
+	{
+		uBegin = 0;
+		for(pos_type u = 0; u < uSec; ++u)
+			uBegin += m_vAlnSections[u];
+		uEnd = uBegin + m_vAlnSections[uSec];
+		seq.m_vAln.assign(m_vAln.begin()+uBegin, m_vAln.begin()+uEnd);
+		seq.m_vAlnSections.assign(1, uEnd-uBegin);
+	}
+
 }
 
 void Dawg::SequenceFactory::operator()(Sequence& seq, Sequence::pos_type uLen)
 {
-	seq.Clear();
-	//seq.rm = (rate_dist.gamma() == 0.0 && rate.dist.iota() == 0.0) ?
-	//	Sequence::rmHomo : Sequence::rmHetro;
-	for(Sequence::pos_type u = 0; u < uLen; ++u)
-		seq.vSeq.push_back(std::make_pair(rand_base(), rand_rate()));
+	seq.m_vBases.resize(uLen);
+	std::generate(seq.m_vBases.begin(), seq.m_vBases.end(), rand_base);
+	seq.m_vRates.resize(uLen);
+	std::generate(seq.m_vRates.begin(), seq.m_vRates.end(), rand_rate);
+	seq.m_vAln.assign(uLen, '.');
+	seq.m_vAlnSections.assign(1, uLen);
+	seq.m_vSeqSections.assign(1, uLen);
 }
 
 Dawg::Sequence Dawg::SequenceFactory::operator ()(Sequence::pos_type uLen)
 {
 	Sequence seq;
-	for(Sequence::pos_type u = 0; u < uLen; ++u)
-		seq.vSeq.push_back(std::make_pair(rand_base(), rand_rate()));
+	(*this)(seq, uLen);
 	return seq;
 }
 
-void Dawg::GillespieProcessor::operator()(Sequence& seq, double dTime)
-{
-	if(m_elements.size() == 0 || dTime <= 0.0)
-		return;
-	std::vector<double> dRates(m_elements.size());
-	double dSum, dW;
-	while(1)
-	{
-		dSum = 0.0;
-		for(std::vector<double>::size_type u = 0; u < dRates.size(); ++u )
-			dRates[u] = (dSum += m_elements[u].Rate(seq));
-		dTime -= Waiting(dSum);
-		if(dTime <= 0.0)
-			break;
-		dW = Which(dSum);
-		for(std::vector<double>::size_type u = 0; u < dRates.size(); ++u )
-		{
-			if( dW < dRates[u])
-			{
-				m_elements[u](seq);
-				break;
-			}
-		}
-	}		
-}
+
 

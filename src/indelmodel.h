@@ -4,7 +4,31 @@
 #include "rand.h"
 #include "sequence.h"
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 namespace Dawg {
+
+class GillespieProcessor
+{
+public:
+	class Element
+	{
+	public:
+		virtual double Rate(const Sequence& /*seq*/) const { return 0.0;}
+		virtual void operator()(Sequence& /*seq*/) { }
+		void Process(Sequence & seq) { (*this)(seq); }
+	};
+	
+	void AddElement(Element* p) { m_elements.push_back(p); }
+	
+	void operator()(Sequence& seq, double dTime);
+
+private:
+	double Waiting(double d) { return rand_exp(d); }
+	double Which(double d) { return rand_real(0.0, d); }
+
+	boost::ptr_vector<Element> m_elements;
+};
 
 template<class T>
 class Insertion : public GillespieProcessor::Element
