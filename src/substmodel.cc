@@ -1,7 +1,15 @@
 #include "dawg.h"
+#include "dawgvar.h"
 #include "substmodel.h"
 #include "rand.h"
 #include <gsl/gsl_eigen.h>
+
+template<class T, class A, size_t N>
+const T& assign_from_array(T& t, const A (&a)[N])
+{
+	t.assign(&a[0], &a[N]);
+	return t;
+}
 
 bool EigenSymmv(ublas::matrix<double> &A, ublas::vector<double> &E, ublas::matrix<double> &V)
 {
@@ -19,6 +27,106 @@ bool EigenSymmv(ublas::matrix<double> &A, ublas::vector<double> &E, ublas::matri
 	gsl_eigen_symmv_free(w);
 	gsl_set_error_handler(handler);
 	return (status == 0);
+}
+
+bool Dawg::SubstModel::Create(const Dawg::Variables& var)
+{
+	vector<double> vdFreqs(var.dSubFreqs);
+	vector<double> vdParams(var.dSubParams);
+
+	if(var.ssSubModel == "JC")
+	{
+		vdFreqs.assign(4, 0.25);
+		vdParams.assign(6, 1.0);
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "GTR")
+	{
+		if(vdFreqs.size() != 4 || vdParams.size() != 6)
+			return DawgError("GTR model requires 4 frequencies and 6 numerical parameters.");
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "K2P")
+	{
+		if(vdParams.size() < 2)
+			return DawgError("K2P model requires 2 numerical parameters.");
+		vdFreqs.assign(4, 0.25);
+		double dTi = vdParams[0];
+		double dTv = vdParams[1];
+		vdParams.assign(6, dTv);
+		vdParams[4] = vdParams[1] = dTi;
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "K3P")
+	{
+		if(vdParams.size() < 2)
+			return DawgError("K2P model requires 3 numerical parameters.");
+		vdFreqs.assign(4, 0.25);
+		double dTi = vdParams[0];
+		double dTv1 = vdParams[1];
+		double dTv2 = vdParams[2];
+		vdParams.assign(6, dTi);
+		vdParams[2] = vdParams[3] = dTv1;
+		vdParams[0] = vdParams[5] = dTv2;
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "HKY")
+	{
+		if(vdFreqs.size() != 4 || vdParams.size() < 1)
+			return DawgError("HKY model requires 4 frequencies and 1 numerical parameter.");
+		double dTv = vdParams[0];
+		vdParams.assign(6, 1.0);
+		vdParams[4] = vdParams[1] = dTv;
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "F81")
+	{
+		if(vdFreqs.size() != 4)
+			return DawgError("F81 model requires 4 frequencies.");
+		vdParams.assign(6, 1.0);
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "F84")
+	{
+		if(vdFreqs.size() != 4 || vdParams.size() < 1)
+			return DawgError("F84 model requires 4 frequencies and 1 numerical parameter.");
+		double dTv1 = 1.0 + vdParams[0]/(vdFreqs[0]+vdFreqs[2]);
+		double dTv4 = 1.0 + vdParams[0]/(vdFreqs[1]+vdFreqs[3]);
+		vdParams.assign(6, 1.0);
+		vdParams[1] = dTv1;
+		vdParams[4] = dTv4;
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "TN")
+	{
+		if(vdParams.size() < 3)
+			return DawgError("TN model requires 4 frequencies and 3 numerical parameters.");
+		vdFreqs.assign(4, 0.25);
+		double dTv1 = vdParams[0];
+		double dTv4 = vdParams[1];
+		double dTi = vdParams[2];
+		vdParams.assign(6, dTi);
+		vdParams[1] = dTv1;
+		vdParams[4] = dTv4;
+		m_type = TypeDNA;
+	}
+	else if(var.ssSubModel == "WAG")
+	{
+		assign_from_array(vdFreqs, freqsWAG);
+		assign_from_array(vdParams, paramsWAG);
+		m_type = TypeProtein;
+	}
+	else if(var.ssSubModel == "WAG*")
+	{
+		assign_from_array(vdFreqs, freqsWAGStar);
+		assign_from_array(vdParams, paramsWAGStar);
+		m_type = TypeProtein;
+	}
+	else
+	{
+		return DawgError("Unknown substitution model, \"%s\".", ssModel.c_str());
+	}	
+	return Create(vdFreqs, vdParams);
 }
 
 bool Dawg::SubstModel::Create(const std::vector<double> &vdFreqs, const std::vector<double> &vdParams)

@@ -17,13 +17,14 @@ public:
 	bool Create(const Dawg::Variables& var);
 	bool Run();
 
-	enum SeqType { TypeDNA, TypeRNA, TypeProtein, TypeCodon };
-
 protected:
 	bool SetupSubstModel(const std::string &ssModel, std::vector<double> &vdFreqs, std::vector<double> &vdParams, SeqType &tySeq);
+	bool SetupInsModel(const std::string &ssModel, double dLambda, const std::vector<double> &vdParams);
+	bool SetupDelModel(const std::string &ssModel, double dLambda, const std::vector<double> &vdParams);
 
 	SubstModel m_modSubst;
-	GillespieProcessor m_modIndel;
+	IndelModel m_modIndel;
+	SequenceFactory m_facSeq;
 };
 
 } // namespace dawg

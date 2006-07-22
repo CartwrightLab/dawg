@@ -370,6 +370,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\models.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\parser.h"
 				>
 			</File>

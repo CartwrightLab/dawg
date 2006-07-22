@@ -13,8 +13,11 @@ class SubstModel
 {
 public:
 	typedef Dawg::Sequence::base_type base_type;
+	enum SubstType { TypeDNA, TypeRNA, TypeProtein, TypeCodon };
+	
 	SubstModel() : dOldTime(-1.0) { }
 
+	bool Create(const Dawg::Variables& var);
 	bool Create(const std::vector<double> &vdFreqs, const std::vector<double> &vdParams);
 	void UpdateSubMatrix(double dTime);
 	
@@ -30,6 +33,7 @@ public:
 	base_type operator()(base_type uCurr) { return Subst(uCurr); }
 	
 protected:
+	SubstType m_type;
 
 	ublas::matrix<double> matP;
 	double dOldTime;

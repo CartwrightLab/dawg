@@ -5,7 +5,7 @@
 
 #include "sequence.h"
 
-void Dawg::GillespieProcessor::operator()(Sequence& seq, double dTime)
+void Dawg::IndelModel::operator()(Sequence& seq, double dTime)
 {
 	if(m_elements.size() == 0 || dTime <= 0.0)
 		return;

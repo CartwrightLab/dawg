@@ -8,7 +8,7 @@
 
 namespace Dawg {
 
-class GillespieProcessor
+class IndelModel
 {
 public:
 	class Element
@@ -19,11 +19,19 @@ public:
 		void Process(Sequence & seq) { (*this)(seq); }
 	};
 	
-	void AddElement(Element* p) { m_elements.push_back(p); }
-	
+	bool Create(const Dawg::Variables& var);
+	bool Create(Element* pIns, Element* pDel)
+	{
+		AddElement(pIns);
+		AddElement(pDel);
+		return true;
+	}
+
 	void operator()(Sequence& seq, double dTime);
 
 private:
+	void AddElement(Element* p) { m_elements.push_back(p); }
+
 	double Waiting(double d) { return rand_exp(d); }
 	double Which(double d) { return rand_real(0.0, d); }
 
@@ -31,7 +39,7 @@ private:
 };
 
 template<class T>
-class Insertion : public GillespieProcessor::Element
+class Insertion : public IndelModel::Element
 {
 public:
 	typedef T dist_type;
@@ -61,7 +69,7 @@ private:
 };
 
 template<class T>
-class Deletion : public GillespieProcessor::Element
+class Deletion : public IndelModel::Element
 {
 public:
 	typedef T dist_type;

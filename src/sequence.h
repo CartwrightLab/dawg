@@ -70,6 +70,14 @@ public:
 	SequenceFactory(const base_dist &bd = base_dist(), const rate_dist &rd = rate_dist()) : 
 		rand_base(g_rng, bd), rand_rate(g_rng, rd)
 		 { }
+	
+	bool Create(const std::vector<double> &vdFreqs, double dGamma, double dIota)
+	{
+		rand_base.distribution() = base_dist(vdFreqs.begin(), vdFreqs.end());
+		rand_rate.distribution() = rate_dist(dGamma, dIota);
+		return true;
+	}
+
 
 	void operator()(Sequence& seq, Sequence::pos_type uLen);
 	Sequence operator()(Sequence::pos_type uLen);
