@@ -1,14 +1,24 @@
-DAWG VERSION 1.0.0 - DNA ASSEMBLY WITH GAPS
+DAWG VERSION 1.1-RELEASE
 
-Copyright (C) (2005) Reed A. Cartwright - All rights reserved.
+Copyright (C) (2005-2006) Reed A. Cartwright - All rights reserved.
 
 DESCRIPTION
 
 Dawg is an application that will simulate nucleotide evolution with gaps.
 
+ABSTRACT
+
+DNA Assembly with Gaps (Dawg) is an application designed to simulate the evolution of recombinant DNA sequences in continuous time based on the robust general time reversible model with gamma and invariant rate heterogeneity and a novel length-dependent model of gap formation. The application accepts phylogenies in Newick format and can return the sequence of any node, allowing for the exact evolutionary history to be recorded at the discretion of users. Dawg records the gap history of every lineage to produce the true alignment in the output. Many options are available to allow users to customize their simulations and results.
+
+Many tools and procedures exist for reconstructing alignments and phylogenies and estimating evolutionary parameters from extant data. True phylogenies and alignments are known in very rare instances. In the absence of known data with true phylogenies, we are left with using simulations to test the accuracy of such procedures. Proper simulation of sequence evolution should involve both nucleotide substitution and indel formation. However, existing tools for simulating sequence evolution either do not include indels, like Seq-gen or evolver, or include a rather inexact model of indel formation, like Rose. I developed Dawg to fill in these gaps.
+
 CONTACT
 
-rac@uga.edu or reed@scit.us
+racartwr@ncsu.edu or reed@scit.us
+
+REFERENCE
+
+Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating Sequence Evolution. Bioinformatics 21 (Suppl. 3): iii31-iii38
 
 LICENSE
 
@@ -20,75 +30,113 @@ See INSTALL for installation instructions.
 
 DOWNLOAD
 
-Dawg 1.0.0 can be downloaded from <http://www.genetics.uga.edu/sw/>, all
-later versions can be downloaded from the development page for Dawg,
-<http://scit.us/dawg/>.
-
-MAILING LIST
-
-To participate in the development of Dawg you can subscribe to the mailing
-list at <http://scit.us/mailman/listinfo/dawg>.  
+Dawg 1.1 can be downloaded from <http://scit.us/projects/dawg/>.
 
 EXAMPLES
-  example0.dawg - minimal
-  example1.dawg - typical usage
-  example2.dawg - simple indel formation
-  example3.dawg - robust indel formation
-  example4.dawg - recombination 
+
+example0.dawg - minimal
+example1.dawg - typical usage
+example2.dawg - simple indel formation
+example3.dawg - robust indel formation
+example4.dawg - recombination 
 
 COMMAND LINE USAGE
-  dawg -[scubvh?] file1 [file2...]
+
+dawg -[scubvhqew?] [-o outputfile] file1 [file2...]  
   -s: process files serially [default]
   -c: process files combined together
   -u: unbuffered output
   -b: buffered output [default]
+  -q: disable error and warning reports (quiet)
+  -e: enable error reports [default]
+  -w: enable warning reports [default]
   -v: display version information
   -h: display help information
   -?: same as -h
+  -o outputfile: override ouput filename in the configuration file
 
   Dawg will read stdin if filename is "-".
 
 FILE FORMAT
-  The file format takes a series of statements in the form of "name = value,"
-  where "name" is alphanumeric and value can be a string, number, boolean,
-  tree, or vector of values.  A single variable is equivalent to a vector of
-  a single entry.
 
-  string:  "[char-sequence]"
-           <<EOF [several lines] EOF
-  number:  [sign]digits[.digits][(e|E)[sign]digits]
-  boolean: true|false
-  tree:    Newick Format
-  vector:  { value, value, ...}
+The file format takes a series of statements in the form of "[name]" or 
+"name = value", where "name" is alphanumeric and value can be a string,
+number, boolean, tree, or vector of values.  The former specifies a heading,
+which can simplify variable assignmnet.  A single variable is equivalent to
+a vector of a single entry.  
+
+When using headings, the following statements are equivalent:
+
+  Out.Block.Head = "A Comment"
+  Out.Block.Tail = "B Comment"
+
+  [Out.Block]
+  Head = "A Comment"
+  Tail = "B Comment"
+
+  Out.Block.Head = "A Comment"
+  [Out.Block]
+  Tail = "B Comment"
+
+  [Out.Block]
+  Head = "A Comment"
+  []
+  Out.Block.Tail = "B Comment"
+
+  [Out]
+  Block.Head = "A Comment"
+  [Out.Block]
+  Tail = "B Comment"
+
+  [Out]
+  Block.Head = "A Comment"
+  [.Block]
+  Tail = "B Comment"
+
+Values can be specivied via the following syntaxes.
+
+string:  "[char-sequence]"
+         '[char-sequence]'
+         """[multi-line char-sequence]""" (removes initial and final newlines)
+         '''[multi-line char-sequence]''' (preserves initial and final newlines)
+number:  [sign]digits[.digits][(e|E)[sign]digits]
+boolean: true|false
+tree:    Newick Format
+vector:  { value, value, ...}
 
 OPTIONS
-  Name          Type            Description
+
+  Name            Type            Description
 --------------------------------------------------------------------------
-  Tree           VT  phylogeny
-  TreeScale      N   coefficient to scale branch lengths by
-  Sequence       VS  root sequences 
-  Length         VN  length of generated root sequences
-  Rates          VVN rate of evolution of each root nucleotide
-  Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
-  Freqs          VN  nucleotide (ACGT) frequencies 
-  Params         VN  parameters for the model of evolution
-  Width          N   block width for indels and recombination
-  Scale          VN  block position scales
-  Gamma          VN  coefficients of variance for rate heterogenity
-  Alpha          VN  shape parameters
-  Iota           VN  proportions of invariant sites
-  GapModel       VS  models of indel formation: NB|PL|US
-  Lambda         VN  rates of indel formation
-  GapParams      VVN parameter for the indel model
-  Reps           N   number of data sets to output
-  File           S   output file 
-  Format         S   output format: Fasta|Nexus|Phylip|Clustal
-  GapSingleChar  B   output gaps as a single character
-  GapPlus        B   distinguish insertions from deletions in alignment
-  LowerCase      B   output sequences in lowercase
-  Translate      B   translate outputed sequences to amino acids
-  NexusCode      S   text or file to include between datasets in Nexus format
-  Seed           VN  PRNG seed (integers)
+  Tree             VT  phylogeny
+  TreeScale        N   coefficient to scale branch lengths by
+  Sequence         VS  root sequences 
+  Length           VN  length of generated root sequences
+  Rates            VVN rate of evolution of each root nucleotide
+  Model            S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
+  Freqs            VN  nucleotide (ACGT) frequencies 
+  Params           VN  parameters for the model of evolution
+  Width            N   block width for indels and recombination
+  Scale            VN  block position scales
+  Gamma            VN  coefficients of variance for rate heterogenity
+  Alpha            VN  shape parameters
+  Iota             VN  proportions of invariant sites
+  GapModel         VS  models of indel formation: NB|PL|US
+  Lambda           VN  rates of indel formation
+  GapParams        VVN parameter for the indel model
+  Reps             N   number of data sets to output
+  File             S   output file 
+  Format           S   output format: Fasta|Nexus|Phylip|Clustal
+  GapSingleChar    B   output gaps as a single character
+  GapPlus          B   distinguish insertions from deletions in alignment
+  LowerCase        B   output sequences in lowercase
+  Translate        B   translate outputed sequences to amino acids
+  Seed             VN  pseudo-random-number-generator seed (integers)
+  Out.Block.Head   S   string to insert at the start of the output
+  Out.Block.Tail   S   string to insert at the end of the output
+  Out.Block.Before S   string to insert before a sequence set in the output
+  Out.Block.After  S   string to insert after a sequence set in the output
+  Out.Subst        B   do variable subsitution in Out.Block.*
 
 DEFAULTS
 
@@ -109,6 +157,29 @@ DEFAULTS
   GapPlus = false
   LowerCase = false
   Translate = false
+  Out.Subst = true
+
+VARIABLE SUBSTITUTION
+
+If Out.Subst is true (the default), then Dawg will preform variable substitution
+in any Out.Block that it outputs.  Currently three variables are supported.
+  %r is replaced by the current dataset number
+  %R is replaced by the total dataset number
+  %% is replaced by a percent sign.
+
+OUTPUT FILE
+
+Dawg can automatically detect the format of the output file based on its extension.
+Supported extensions and their formats are:
+
+  Clustal: aln, poo, txt, out, Clustal
+  Fasta:   fas, Fasta
+  Nexus:   nex, Nexus
+  Phylip:  phy, Phylip
+
+Dawg also supports the filename format of "ext:file" to output to "file" with the
+format specified by extension "ext".  That way one can use "nex:-" to output to stdout
+in Nexus format.
 
 NOTES
 
@@ -149,9 +220,10 @@ Gamma takes precidence over Alpha.
 
 Sequence takes precidence over Length.
 
-If NexusCode is the name of a file, the code is read from that file.
+If Out.Block.* is the name of a file, the code is read from that file.
 
 The following vector parameters have a size of "Width": "Scale", "Alpha", "Gamma",
 and "Iota".  If their size is less than width then the first value in the vector
 will be used to fill in the rest of the values, e.g. "Scale = 1.0" is the same as
 "Scale = {1.0,1.0,1.0}" when "Width = 3".
+
