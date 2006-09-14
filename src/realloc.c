@@ -1,18 +1,19 @@
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#	include <config.h>
 #endif
+
+#undef realloc
+#undef malloc
 
 #ifdef HAVE_SYS_TYPES_H
 #	include <sys/types.h>
 #endif
-
 #ifdef HAVE_STDDEF_H
 #	include <stddef.h>
 #endif
-
-#undef realloc
-
-void *realloc(void *p, size_t n);
+#ifdef HAVE_STDLIB_H
+#	include <stdlib.h>
+#endif
 
 void *rpl_realloc(void *p, size_t n)
 {

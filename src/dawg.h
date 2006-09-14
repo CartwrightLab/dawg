@@ -7,24 +7,35 @@
 #	include "config.h"
 #endif
 
-#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
-#		define copysign _copysign
+#if !HAVE_MALLOC
+#	undef malloc
+#endif
+#if !HAVE_REALLOC
+#	undef realloc
 #endif
 
+#ifdef HAVE_STDLIB_H
+#	include <stdlib.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #	include <sys/types.h>
 #endif
-
 #ifdef HAVE_STDDEF_H
 #	include <stddef.h>
 #endif
 
-#if !HAVE_MALLOC
+#if HAVE_MALLOC == 0
+#	define malloc rpl_malloc
 extern "C" void *rpl_malloc(size_t n);
 #endif
 
-#if !HAVE_REALLOC
+#if HAVE_REALLOC == 0
+#	define realloc rpl_realloc
 extern "C" void *rpl_realloc(void *p, size_t n);
+#endif
+
+#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
+#		define copysign _copysign
 #endif
 
 #ifdef HAVE_STDIO_H
