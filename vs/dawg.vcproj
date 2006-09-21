@@ -251,11 +251,15 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(InputName).cc&quot;&#x0D;&#x0A;"
+						CommandLine="flex -t -CF  &quot;$(InputPath)&quot; &gt; &quot;$(InputName).cc&quot;"
 						AdditionalDependencies=""
 						Outputs="&quot;$(InputName).cc&quot;"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\malloc.c"
+				>
 			</File>
 			<File
 				RelativePath="..\src\matrix.cc"
@@ -293,6 +297,10 @@
 			</File>
 			<File
 				RelativePath="..\src\rand.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\src\realloc.c"
 				>
 			</File>
 			<File
