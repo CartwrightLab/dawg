@@ -1,2 +1,2 @@
 #!/bin/sh
-autoreconf --warnings=all --force --install -I config -I m4
+autoreconf --install -I config -I m4 $@
