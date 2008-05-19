@@ -392,7 +392,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end())/m_uWidth;
 			}
 		}
-		else
+		else if(uLength > 0)
 		{
 			// Deletion
 			// Draw random size and random pos and rearrange
