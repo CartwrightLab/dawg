@@ -112,8 +112,8 @@ const unsigned int FlagOutTranslate = 8;
 // Nucleotide Numbers
 const int NumAdenine	= 0;
 const int NumCytosine	= 1;
-const int NumThymine	= 2;
-const int NumGuanine	= 3;
+const int NumGuanine	= 2;
+const int NumThymine	= 3;
 
 template <class Type> class SumValue
 {
