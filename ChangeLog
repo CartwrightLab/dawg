@@ -1,3 +1,6 @@
+Version 1.1.2
+  * Bug fix in reading root sequence from input file
+
 Version 1.1.1
   * More bug fixes in deletion code
 
