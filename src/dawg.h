@@ -53,6 +53,7 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 
 #include <vector>
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <algorithm>
