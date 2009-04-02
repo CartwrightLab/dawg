@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		{
 			cout << PACKAGE_STRING << endl 
 				<< "DNA Assembly With Gaps" << endl
-				<< "Copyright (C) 2004-2006 Reed A. Cartwright" << endl << endl
+				<< "Copyright (C) 2004-2009 Reed A. Cartwright" << endl << endl
 				<< g_csDawgNotice << endl
 				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << "." << endl << endl;
 		}
