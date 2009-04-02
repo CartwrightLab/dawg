@@ -55,9 +55,16 @@ bool Parse(const char* cs)
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127 4244 4267 )
 #	if _MSC_VER >= 1400
-#		define isatty _isatty
 #		define fileno _fileno	
 #	endif
+extern int my_isatty YY_PROTO(( int x)) {
+#	if _MSC_VER >= 1400
+	return _isatty(x);
+#else
+	return isatty(x);
+#endif
+}
+#	define isatty my_isatty
 #endif
 
 %}

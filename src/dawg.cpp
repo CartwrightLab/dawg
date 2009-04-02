@@ -21,9 +21,7 @@
 #include "rand.h"
 #include "var.h"
 
-#ifdef HAVE_GETOPT_H
-#	include <getopt.h>
-#endif
+#include <getopt.h>
 
 // Help Information
 char g_csDawgTxt[] =

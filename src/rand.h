@@ -21,6 +21,8 @@
 
 #ifdef HAVE_STDINT_H
 #	include <stdint.h>
+#elif defined(_MSC_VER)
+#	include "compat/stdint.h"
 #endif
 
 #ifdef HAVE_SYS_TYPES_H

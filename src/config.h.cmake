@@ -4,6 +4,7 @@
 
 #cmakedefine HAVE_UNISTD_H  1
 #cmakedefine HAVE_PROCESS_H 1
+#cmakedefine HAVE_IO_H 1
 #cmakedefine HAVE_GETOPT_H  1
 #cmakedefine HAVE_STDINT_H  1
 

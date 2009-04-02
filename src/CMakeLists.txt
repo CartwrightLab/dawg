@@ -2,7 +2,6 @@ INCLUDE(CheckIncludeFile)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckLibraryExists)
 
-
 SET(BISON_GENERATE_DEFINES TRUE)
 SET(BISON_PREFIX_OUTPUTS TRUE)
 INCLUDE(CMakeUserUseBison)
@@ -22,7 +21,7 @@ IF(CMAKE_COMPILER_IS_GNUCC)
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 IF(MSVC)
@@ -52,6 +51,7 @@ ENDIF(APPLE_BUNDLE_APP)
 
 CHECK_INCLUDE_FILE(unistd.h  HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE(process.h HAVE_PROCESS_H)
+CHECK_INCLUDE_FILE(io.h HAVE_IO_H)
 CHECK_INCLUDE_FILE(getopt.h  HAVE_GETOPT_H)
 CHECK_INCLUDE_FILE(stdint.h  HAVE_STDINT_H)
 
@@ -68,14 +68,25 @@ INCLUDE_DIRECTORIES(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 BISON_FILE(parser.ypp)
 FLEX_FILE(parser.lpp)
 
-SET_SOURCE_FILES_PROPERTIES(lex.parser.cpp parser.tab.cpp PROPERTIES COMPILE_FLAGS "-I ${CMAKE_CURRENT_SOURCE_DIR}")
+SET_SOURCE_FILES_PROPERTIES(lex.parser.cpp parser.tab.cpp PROPERTIES COMPILE_FLAGS "-I \"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
+IF(NOT HAVE_UNISTD_H)
+  SET_SOURCE_FILES_PROPERTIES(lex.parser.cpp PROPERTIES COMPILE_FLAGS
+  "-I \"${CMAKE_CURRENT_SOURCE_DIR}\" -I \"${CMAKE_CURRENT_SOURCE_DIR}/compat/unistd\"")
+ENDIF(NOT HAVE_UNISTD_H)
+
+
+IF(NOT HAVE_GETOPT_H)
+  INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/compat/getopt")
+  SET(COMPAT ${COMPAT} compat/getopt/getopt.c)
+ENDIF(NOT HAVE_GETOPT_H)
 
 ADD_EXECUTABLE(dawg ${PROJ_MACOSX_BUNDLE}
   dawg.cpp eigen.cpp indel.cpp matrix.cpp output.cpp rand.cpp tree.cpp var.cpp
-  parser.lpp parser.ypp lex.parser.cpp parser.tab.cpp parser.tab.hpp 
+  parser.lpp parser.ypp lex.parser.cpp parser.tab.cpp parser.tab.hpp
   dawg.h indel.h matrix.h rand.h tree.h var.h
-  ${CMAKE_CURRENT_BINARY_DIR}/config.h
+  "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+  ${COMPAT}
   ${RES_SRCS})
 
 TARGET_LINK_LIBRARIES(dawg ${CMAKE_REQUIRED_LIBRARIES})
