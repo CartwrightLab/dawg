@@ -19,7 +19,7 @@ struct State
 bool g_bParseOkay = true;
 bool g_bTerminate = false;
 
-void yyerror (char *s)
+void yyerror (const char *s)
 {
 	g_bParseOkay = false;
 	cerr << "ALERT: " << s << " in " << g_state.ssFile << " at line " << g_state.nLine;

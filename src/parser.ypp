@@ -9,7 +9,7 @@
 extern char yytext[];
 extern FILE *yyin;
 int yylex(void);
-void yyerror (char *s);
+void yyerror (const char *s);
 
 using namespace std;
 
