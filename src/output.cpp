@@ -5,6 +5,7 @@
 
 using namespace std;
 
+void FilterAlignment(const Tree::Alignment& alnSrc, Tree::Alignment& alnDest, unsigned int uFlags);
 void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags);
 void PrintSequencesFasta(  ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
 void PrintSequencesNexus(  ostream &os, const Tree::Alignment& aln, unsigned int uFlags);
@@ -108,7 +109,8 @@ bool SaveAlignment(ostream &rFile, const Tree::Alignment& aln, unsigned int uFla
 		rFile << Subst(g_csBefore) << endl;
 	// Filter sequences to a local alignment, applying format modifiers
 	Tree::Alignment alnLocal;
-	for(Tree::Alignment::const_iterator cit = aln.begin(); cit != aln.end(); ++cit)
+	FilterAlignment(aln, alnLocal, uFlags);
+	for(Tree::Alignment::const_iterator cit = alnLocal.begin(); cit != alnLocal.end(); ++cit)
 		FilterSequence(cit->second, alnLocal[cit->first], uFlags);
 	
 	// Save Alignment in requested file format
@@ -301,4 +303,32 @@ void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags)
 
 	if(uFlags & FlagOutLowerCase)
 		FilterLowerCase(ssDest);
+}
+
+// Filter the alignment based on the flags
+void FilterAlignment(const Tree::Alignment& alnSrc, Tree::Alignment& alnDest, unsigned int uFlags)
+{
+	alnDest = alnSrc;
+	if((uFlags & FlagOutGapPlus) || (uFlags & FlagOutEmptyCol))
+		return;
+	// remove columns that contain nothing but gaps
+	Tree::Alignment::iterator it = alnDest.begin();
+	size_t len = it->second.size();
+	for(size_t u=0;u<len;++u) {
+		bool rm = true;
+		for(it = alnDest.begin(); it != alnDest.end(); ++it) {
+			char ch = it->second[u];
+			if(!(ch == '-' || ch == '=' || ch == '+')) {
+				rm = false;
+				break;
+			}
+		}
+		if(!rm)
+			continue;
+		for(it = alnDest.begin(); it != alnDest.end(); ++it) {
+			it->second.erase(u, 1);
+		}
+		--u;
+		--len;
+	}
 }

@@ -694,28 +694,14 @@ void Tree::Align(Alignment &aln) const
 				continue;
 			if(uState == 0)
 				uState = 1;	// Nucleotide exists clear quit
-			if((*cit)[uCol].IsType(Nucleotide::TypeIns))
+			if((*cit)[uCol].IsInsertion())
 			{
 				// Gaps need to be added mark and break
 				uState = 2;
 				break;
 			}
-			else if((*cit)[uCol].IsType(Nucleotide::TypeDelIns))
-			{
-				uState = 3;
-			}
 		}
-		if(uState == 3)
-		{
-			for(vector<Sequence>::iterator it = vTable.begin();
-				it != vTable.end(); ++it)
-			{
-				if(uCol < it->size() && (*it)[uCol].GetType() == Nucleotide::TypeDelIns)
-					it->erase(it->begin()+uCol);
-			}
-			uCol--;
-		}
-		else if(uState == 2)
+		if(uState == 2)
 		{
 			// Add gaps where neccessary
 			for(vector<Sequence>::iterator it = vTable.begin();

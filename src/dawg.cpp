@@ -230,6 +230,7 @@ bool Execute()
 	bool bOutSubst = true;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
+	bool bEmptyCol = false;
 	unsigned int uWidth = 1;
 	DawgVar::Vec::size_type nRes;
 
@@ -300,6 +301,7 @@ bool Execute()
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
 	DawgVar::Get("Translate", bTranslate);
+	DawgVar::Get("EmptyCol", bEmptyCol);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
 	if(nRes)
@@ -502,6 +504,8 @@ bool Execute()
 		uOutFlags |= FlagOutLowerCase;
 	if(bTranslate)
 		uOutFlags |= FlagOutTranslate;
+	if(bEmptyCol)
+		uOutFlags |= FlagOutEmptyCol;
 
 	// setup output location
 	ostream* pOut;

@@ -70,6 +70,7 @@ const unsigned int FlagOutLowerCase = 1;
 const unsigned int FlagOutGapPlus = 2;
 const unsigned int FlagOutGapSingleChar = 4;
 const unsigned int FlagOutTranslate = 8;
+const unsigned int FlagOutEmptyCol = 16;
 
 // Nucleotide Numbers
 const int NumAdenine	= 0;

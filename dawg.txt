@@ -47,6 +47,7 @@ OPTIONS
   Format         S   output format: Fasta|Nexus|Phylip|Clustal
   GapSingleChar  B   output gaps as a single character
   GapPlus        B   distinguish insertions from deletions in alignment
+  EmptyCol       B   preserve empty columns in final alignment
   LowerCase      B   output sequences in lowercase
   Translate      B   translate outputed sequences to amino acids
   NexusCode      S   text or file to include between datasets in Nexus format
