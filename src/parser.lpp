@@ -3,7 +3,11 @@
 
 #include "dawg.h"
 #include "var.h"
-#include "parser.h"
+#include "parser.tab.hpp"
+
+#define yylval parserlval
+#define yyparse parserparse
+#define yyerror parsererror
 
 using namespace std;
 struct State

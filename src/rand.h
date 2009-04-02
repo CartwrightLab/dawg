@@ -15,15 +15,13 @@
 #	define RR_1 1
 #endif
 
-#ifdef HAVE_MATH_H
-#	include <math.h>
-#endif
 
-#ifdef HAVE_FLOAT_H
-#	include <float.h>
-#endif
+#include <cmath>
+#include <cfloat>
 
-#include "_stdint.h"
+#ifdef HAVE_STDINT_H
+#	include <stdint.h>
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #	include <sys/types.h>

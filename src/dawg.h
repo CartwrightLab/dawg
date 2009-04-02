@@ -7,39 +7,8 @@
 #	include "config.h"
 #endif
 
-#if !HAVE_MALLOC
-#	undef malloc
-#endif
-#if !HAVE_REALLOC
-#	undef realloc
-#endif
-
-#ifdef HAVE_STDLIB_H
-#	include <stdlib.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#	include <sys/types.h>
-#endif
-#ifdef HAVE_STDDEF_H
-#	include <stddef.h>
-#endif
-
-#if HAVE_MALLOC == 0
-#	define malloc rpl_malloc
-extern "C" void *rpl_malloc(size_t n);
-#endif
-
-#if HAVE_REALLOC == 0
-#	define realloc rpl_realloc
-extern "C" void *rpl_realloc(void *p, size_t n);
-#endif
-
 #if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
 #		define copysign _copysign
-#endif
-
-#ifdef HAVE_STDIO_H
-#	include <stdio.h>
 #endif
 
 #if _MSC_VER >= 1400
@@ -59,22 +28,15 @@ extern "C" void *rpl_realloc(void *p, size_t n);
 #	define getpid _getpid
 #endif
 
-#ifdef HAVE_TIME_H
-#	include <time.h>
-#endif
-#ifdef HAVE_FLOAT_H
-#	include <float.h>
-#endif
-#ifdef HAVE_MATH_H
-#	include <math.h>
-#endif
-#ifdef HAVE_ASSERT_H
-#	include <assert.h>
-#endif
-#ifdef HAVE_STDARG_H
-#	include <stdarg.h>
-#endif
 
+#include <cstdlib>
+#include <cstddef>
+#include <cstdio>
+#include <ctime>
+#include <cfloat>
+#include <cmath>
+#include <cassert>
+#include <cstdarg>
 
 #include <vector>
 #include <string>
