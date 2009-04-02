@@ -7,15 +7,6 @@
 #	include "config.h"
 #endif
 
-#ifdef WORDS_BIGENDIAN
-#	define RR_0 1
-#	define RR_1 0
-#else
-#	define RR_0 0
-#	define RR_1 1
-#endif
-
-
 #include <cmath>
 #include <cfloat>
 
@@ -67,26 +58,21 @@ inline uint32_t rand_uint(uint32_t uMax)
 		return u;
 }
 
-// Draw floating point from (0.0,1.0] with 32-bit precision
-// Actual range is [RDBL_MIN, 1.0] by steps of size RDBL_MIN.
+// Draw floating point from [0.0,1.0) with 32-bit precision
 inline double rand_real()
 {
-	union { double d; uint32_t l[2];} r;
 	uint32_t u = rand_uint();
-	r.l[RR_0] =  u << 20;
-	r.l[RR_1] = (u >> 12) | 0x3FF00000;
-
-	return 2.0-r.d;
+	return (double) u*(1.0/4294967296.0);
 }
 
 // Draw from Bernolli
 inline bool rand_bool(double p)
 {
-	return (rand_real() <= p);
+	return (rand_real() < p);
 }
 
 // Draw Exponential w/ mean 1.0
-inline double rand_exp() { return -log(rand_real()); }
+inline double rand_exp() { return -log(1.0-rand_real()); }
 
 // Draw Exponential w/ mean L
 inline double rand_exp(double L) { return L*rand_exp(); }
@@ -100,7 +86,7 @@ inline double rand_gamma_small(double a)
 	do
 	{
 		p = b*rand_real();
-		if(p <= 1.0)
+		if(p < 1.0)
 		{
 			g = exp(log(p)/a);
 			r = -g;
@@ -110,7 +96,7 @@ inline double rand_gamma_small(double a)
 			g = -log((b-p)/a);
 			r = ((a-1.0)*log(g));
 		}
-	}	while(log(rand_real()) > r);
+	}	while(log(1.0-rand_real()) > r);
 
 	return g;
 }
@@ -125,9 +111,9 @@ inline double rand_gamma_big(double a)
 	double u1,u2,v,x,z,r;
 	do
 	{
-		do {u1 = rand_real(); } while(u1 == 1.0);
+		do {u1 = rand_real(); } while(u1 == 0.0);
 		u2 = rand_real();
-		v = log(1.0/u1-1.0)/aa;
+		v = log(u1/(1.0-u1))/aa;
 		x = a*exp(v);
 		z = u1*u1*u2;
 		r = b+c*v-x;
@@ -164,7 +150,7 @@ inline double rand_gamma1(double b)
 //   P(X=x)=(1-q)q^x; x <=0
 inline uint32_t rand_geometric(double q)
 {
-	return (uint32_t)(log(rand_real())/log(q));
+	return (uint32_t)(log(1.0-rand_real())/log(q));
 }
 
 // Draw from Negative Binomial(r, 1-q):
@@ -181,7 +167,7 @@ inline uint32_t rand_negbinomial(uint32_t r, double q)
 inline uint32_t rand_poisson(double lambda)
 {
 	uint32_t u = 0;
-	double d, e = exp(lambda);
+	double d, e = exp(-lambda);
 	// effecient for lambda < 12
 	d = rand_real();
 	while(d > e) {++u; d*=rand_real();}

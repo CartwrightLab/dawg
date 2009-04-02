@@ -60,7 +60,7 @@ IndelModel::size_type UserModel::RandSize() const
 	
 	// not efficient, but it gets the job done.
 	for(vector<double>::const_iterator dit = m_vSizesCum.begin();
-		dit != m_vSizesCum.end() && d > *dit; ++dit)
+		dit != m_vSizesCum.end() && d >= *dit; ++dit)
 		++ul;
 	
 	return ul;

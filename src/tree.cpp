@@ -339,11 +339,11 @@ void Tree::Evolve(Node &rNode, double dTime)
 			// get the base of the current nucleotide and pick new base
 			unsigned int uBase = jt->GetBase();
 			dTemp = rand_real();
-			if(dTemp <= m_matSubst(uBase, 0))
+			if(dTemp < m_matSubst(uBase, 0))
 				jt->SetBase(0);
-			else if(dTemp <= m_matSubst(uBase, 1))
+			else if(dTemp < m_matSubst(uBase, 1))
 				jt->SetBase(1);
-			else if(dTemp <= m_matSubst(uBase, 2))
+			else if(dTemp < m_matSubst(uBase, 2))
 				jt->SetBase(2);
 			else
 				jt->SetBase(3);
@@ -643,11 +643,11 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 unsigned char Tree::RandomBase() const
 {
 	double d = rand_real();
-	if(d <= m_dNucCumFreqs[0])
+	if(d < m_dNucCumFreqs[0])
 		return 0; // A
-	else if(d <= m_dNucCumFreqs[1])
+	else if(d < m_dNucCumFreqs[1])
 		return 1; // C
-	else if(d <= m_dNucCumFreqs[2])
+	else if(d < m_dNucCumFreqs[2])
 		return 2; // G
 	else
 		return 3; // T
