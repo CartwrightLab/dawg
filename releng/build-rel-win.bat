@@ -7,7 +7,7 @@ set CMAKE=cmake
 set SVN=svn
 set REPOS=svn://scit.us/dawg/stable
 
-set RELENG_DIR="%TEMP%\spagedi-releng.%RANDOM%"
+set RELENG_DIR="%TEMP%\dawg-releng.%RANDOM%"
 mkdir %RELENG_DIR% || exit /B 1
 
 set DEST_DIR="%CD%"
