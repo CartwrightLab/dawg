@@ -258,10 +258,10 @@ void Tree::Evolve()
 	{
 		for(unsigned int u = 0;u<it->size();++u)
 		{
-			if((*it)[u].m_dRate < 0.0)
-				(*it)[u].m_dRate = RandomRate(u);
-			if((*it)[u].m_ucNuc >= 4)
-				(*it)[u].m_ucNuc = RandomBase();
+			if((*it)[u].GetRate() < 0.0)
+				(*it)[u].SetRate(RandomRate(u));
+			if(!(*it)[u].IsType(Nucleotide::TypeRoot))
+				(*it)[u].SetNuc(RandomBase());
 		}
 	}
 	// Evolve each tip
@@ -301,9 +301,14 @@ void Tree::Evolve(Node &rNode)
 // Evolve rNode a specific time 
 void Tree::Evolve(Node &rNode, double dTime)
 {
+	static Nucleotide::data_type branchColor = 0;
+	
 	dTime = fabs(dTime);
 	if(dTime < DBL_EPSILON)
 		return; // Nothing to evolve
+	
+	//advance branch color
+	branchColor+=0xF;
 	
 	// Substitutions
 	unsigned int uNuc = 0;
@@ -315,7 +320,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			if(jt->IsDeletion())
 				continue;
 			// Total Evolution Rate for the position
-			double dTemp = dTime*jt->m_dRate*m_vdScale[uNuc%m_uWidth];
+			double dTemp = dTime*jt->GetRate()*m_vdScale[uNuc%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			// if dTemp is different from the previous one, recalculate probability matrix
@@ -376,6 +381,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
 				nuc.SetType(Nucleotide::TypeIns);
+				nuc.SetColor(branchColor);
 				seq.push_back(nuc);
 			}
 			// Find Position of Insertion
@@ -628,19 +634,21 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			double dTemp = 0.0;
 			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
 			{
-				m_vDNASeqs[u][v].m_dRate = vRates[u][v];
+				m_vDNASeqs[u][v].SetRate(vRates[u][v]);
 				dTemp += vRates[u][v];
 
 			}
 			// Scale the Expected Rate to 1.0
-			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
-				m_vDNASeqs[u][v].m_dRate /= dTemp;
+			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v) {
+				double r = m_vDNASeqs[u][v].GetRate();
+				m_vDNASeqs[u][v].SetRate(r/dTemp);
+			}
 		}
 	}
 	return true;
 }
 
-unsigned char Tree::RandomBase() const
+Nucleotide::data_type Tree::RandomBase() const
 {
 	double d = rand_real();
 	if(d < m_dNucCumFreqs[0])
@@ -681,44 +689,38 @@ void Tree::Align(Alignment &aln) const
 	// Deletion & Original Nucleotide : w/ del, original nucl
 	
 	// States: Quit (0), Del/Root (1), Ins (2), InsDel (3)
-	unsigned char uState = 1;
+	unsigned int uState = 0;
 	// Go through each column, adding gaps where neccessary
-	for(unsigned int uCol = 0; uState; uCol++)
+	for(unsigned int uCol = 0; uState != 1; uCol++)
 	{
 		// Set to quit
-		uState = 0;
+		uState = 1;
 		for(vector<Sequence>::const_iterator cit = vTable.begin();
 			cit != vTable.end(); ++cit)
 		{
 			if(uCol >= cit->size())
 				continue;
-			if(uState == 0)
-				uState = 1;	// Nucleotide exists clear quit
+			if(uState == 1)
+				uState = 2; // Nucleotide exists clear quit
 			if((*cit)[uCol].IsInsertion())
 			{
 				// Gaps need to be added mark and break
-				uState = 2;
+				uState = (*cit)[uCol].GetColor();
 				break;
 			}
 		}
-		if(uState == 2)
+		cerr << uState << endl;
+		if(uState & 2 == 0)
 		{
 			// Add gaps where neccessary
 			for(vector<Sequence>::iterator it = vTable.begin();
 				it != vTable.end(); ++it)
 			{
-				if(uCol < it->size())
-				{
-					switch((*it)[uCol].GetType())
-					{
-					case Nucleotide::TypeIns:
-						(*it)[uCol].SetType(Nucleotide::TypeRoot);
-						break;
-					case Nucleotide::TypeDelIns:
-						break;
-					default:
+				if(uCol < it->size()) {
+					if(!(*it)[uCol].IsInsertion() || (*it)[uCol].GetColor() != uState) {
 						it->insert(it->begin()+uCol, Nucleotide(Nucleotide::TypeIns, 1.0));
-						break;
+					} else if((*it)[uCol].IsType(Nucleotide::TypeIns)) {
+						(*it)[uCol].SetType(Nucleotide::TypeRoot);
 					}
 				}
 				else
