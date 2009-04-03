@@ -215,6 +215,7 @@ bool Execute()
 	vector<double> vdGapModel[2];
 	vdGapModel[0].push_back(1.0);
 	vdGapModel[1].push_back(1.0);
+	unsigned int uKeepFlank = 0;
 
 	vector<NewickNode*> vtTrees;
 	double	dTreeScale = 1.0;
@@ -230,7 +231,7 @@ bool Execute()
 	bool bOutSubst = true;
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
-	bool bEmptyCol = false;
+	bool bKeepEmpty = false;
 	unsigned int uWidth = 1;
 	DawgVar::Vec::size_type nRes;
 
@@ -301,7 +302,7 @@ bool Execute()
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
 	DawgVar::Get("Translate", bTranslate);
-	DawgVar::Get("EmptyCol", bEmptyCol);
+	DawgVar::Get("KeepEmpty", bKeepEmpty);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
 	if(nRes)
@@ -312,6 +313,7 @@ bool Execute()
 		if(nRes == 0)
 			return DawgError("\"GapParams\" must be specified if \"Lambda\" is.");
 	}
+	DawgVar::Get("KeepFlank", uKeepFlank);
 
 	DawgVar::Get("File", ssFile);
 	DawgVar::Get("Format", ssFormat);
@@ -413,7 +415,7 @@ bool Execute()
 	
 	// Initialize Evolution
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		uWidth, vdGamma, vdIota, vdScale, dTreeScale ))
+		uWidth, vdGamma, vdIota, vdScale, dTreeScale, uKeepFlank ))
 		return DawgError("Bad evolution parameters");
 
 	// Initialize Root
@@ -504,8 +506,8 @@ bool Execute()
 		uOutFlags |= FlagOutLowerCase;
 	if(bTranslate)
 		uOutFlags |= FlagOutTranslate;
-	if(bEmptyCol)
-		uOutFlags |= FlagOutEmptyCol;
+	if(bKeepEmpty)
+		uOutFlags |= FlagOutKeepEmpty;
 
 	// setup output location
 	ostream* pOut;

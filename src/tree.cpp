@@ -366,6 +366,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 	Sequence::size_type uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
+
 	// Do indels
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
 	{
@@ -406,17 +407,24 @@ void Tree::Evolve(Node &rNode, double dTime)
 			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-2));
 			Sequence::size_type uB = max(ul-1, uPos); 
 			Sequence::size_type uSize = min(ul-1+uLength, uPos+ul)-uB;
-			uB -= (ul-1);
-			uB *= m_uWidth;
-			uSize *= m_uWidth;
-			// Find deletion point
-			Node::iterator itPos = rNode.SeqPos(uB);
-			Sequence::size_type uTemp = uSize;
-			uTemp -= itPos.first->Deletion(itPos.second, uTemp);
-			// Delete uSize nucleotides begin sensitive to gaps that overlap sections
-			for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
-				uTemp -= itPos.first->Deletion(itPos.first->begin(), uTemp);
-			uLength -= (uSize-uTemp)/m_uWidth;
+			
+			// If GapLimits are on, only process deletion if it is completely inside the acceptance
+			// region as defined by the GapLimit.  Check points are at sequence positions 0-uKeepFlank and 
+			// uLength-1+uKeepFlank.  These become 0-uKeepFlank+ul-1 and uLength-1+uKeepFlank+ul-1,
+			// when shifted to "deletion space".
+			if(m_uKeepFlank == 0	|| ( (ul-1) < uPos+m_uKeepFlank && uPos < uLength-1+m_uKeepFlank ) ) {
+				uB -= (ul-1);
+				uB *= m_uWidth;
+				uSize *= m_uWidth;
+				// Find deletion point
+				Node::iterator itPos = rNode.SeqPos(uB);
+				Sequence::size_type uTemp = uSize;
+				uTemp -= itPos.first->Deletion(itPos.second, uTemp);
+				// Delete uSize nucleotides begin sensitive to gaps that overlap sections
+				for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
+					uTemp -= itPos.first->Deletion(itPos.first->begin(), uTemp);
+				uLength -= (uSize-uTemp)/m_uWidth;
+			}
 		}
 		// update length
 		dLength = (double)uLength;
@@ -433,7 +441,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota,
 		const std::vector<double> &vdScale,
-		double dTreeScale)
+		double dTreeScale,
+		int uKeepFlank)
 {
 	// Verifiy Parameters
 	if(pFreqs[0] < 0.0 || pFreqs[1] < 0.0 || pFreqs[2] < 0.0 || pFreqs[3] < 0.0)
@@ -487,6 +496,9 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 
 	// Setup TreeScale
 	m_dTreeScale = dTreeScale;
+
+	// Setup GapLimit
+	m_uKeepFlank = uKeepFlank;
 
 	// Setup Cumulative Frequencies
 	m_dNucCumFreqs[0] = pFreqs[0];

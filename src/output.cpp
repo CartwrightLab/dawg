@@ -309,7 +309,7 @@ void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags)
 void FilterAlignment(const Tree::Alignment& alnSrc, Tree::Alignment& alnDest, unsigned int uFlags)
 {
 	alnDest = alnSrc;
-	if((uFlags & FlagOutGapPlus) || (uFlags & FlagOutEmptyCol))
+	if((uFlags & FlagOutGapPlus) || (uFlags & FlagOutKeepEmpty))
 		return;
 	// remove columns that contain nothing but gaps
 	Tree::Alignment::iterator it = alnDest.begin();

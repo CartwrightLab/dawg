@@ -131,7 +131,8 @@ public:
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		unsigned int uWidth, const std::vector<double> &vdGamma,
-		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale);
+		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale,
+		int uKeepFlank);
 	
 	// Setup the root node
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vData,
@@ -204,6 +205,7 @@ private:
 	double m_dLambdaDel;
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
+	int m_uKeepFlank;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);

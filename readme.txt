@@ -1,16 +1,34 @@
-DAWG VERSION 1.1-RELEASE
+DAWG VERSION 1-STABLE
 
-Copyright (C) (2005-2006) Reed A. Cartwright - All rights reserved.
+Copyright (c) (2005-2009) Reed A. Cartwright - All rights reserved.
 
 DESCRIPTION
 
-Dawg is an application that will simulate nucleotide evolution with gaps.
+Dawg is an application that will simulate nucleotide evolution with
+gaps.
 
 ABSTRACT
 
-DNA Assembly with Gaps (Dawg) is an application designed to simulate the evolution of recombinant DNA sequences in continuous time based on the robust general time reversible model with gamma and invariant rate heterogeneity and a novel length-dependent model of gap formation. The application accepts phylogenies in Newick format and can return the sequence of any node, allowing for the exact evolutionary history to be recorded at the discretion of users. Dawg records the gap history of every lineage to produce the true alignment in the output. Many options are available to allow users to customize their simulations and results.
+DNA Assembly with Gaps (Dawg) is an application designed to simulate the
+evolution of recombinant DNA sequences in continuous time based on the
+robust general time reversible model with gamma and invariant rate
+heterogeneity and a novel length-dependent model of gap formation. The
+application accepts phylogenies in Newick format and can return the
+sequence of any node, allowing for the exact evolutionary history to be
+recorded at the discretion of users. Dawg records the gap history of
+every lineage to produce the true alignment in the output. Many options
+are available to allow users to customize their simulations and results.
 
-Many tools and procedures exist for reconstructing alignments and phylogenies and estimating evolutionary parameters from extant data. True phylogenies and alignments are known in very rare instances. In the absence of known data with true phylogenies, we are left with using simulations to test the accuracy of such procedures. Proper simulation of sequence evolution should involve both nucleotide substitution and indel formation. However, existing tools for simulating sequence evolution either do not include indels, like Seq-gen or evolver, or include a rather inexact model of indel formation, like Rose. I developed Dawg to fill in these gaps.
+Many tools and procedures exist for reconstructing alignments and
+phylogenies and estimating evolutionary parameters from extant data.
+True phylogenies and alignments are known in very rare instances. In the
+absence of known data with true phylogenies, we are left with using
+simulations to test the accuracy of such procedures. Proper simulation
+of sequence evolution should involve both nucleotide substitution and
+indel formation. However, existing tools for simulating sequence
+evolution either do not include indels, like Seq-gen or evolver, or
+include a rather inexact model of indel formation, like Rose. I
+developed Dawg to fill in these gaps.
 
 CONTACT
 
@@ -18,19 +36,45 @@ racartwr@ncsu.edu or reed@scit.us
 
 REFERENCE
 
-Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating Sequence Evolution. Bioinformatics 21 (Suppl. 3): iii31-iii38
+Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating
+Sequence Evolution. Bioinformatics 21 (Suppl. 3): iii31-iii38
 
 LICENSE
 
 See COPYING for license information.
 
-INSTALLATION
-
-See INSTALL for installation instructions.
-
 DOWNLOAD
 
-Dawg 1.1 can be downloaded from <http://scit.us/projects/dawg/>.
+Dawg can be downloaded from <http://scit.us/projects/dawg/>.
+
+INSTALLATION
+
+See Dawg's website for binary packages for Windows, Mac OSX, and other
+systems.  Alternatively, you can compile Dawg from the source.  Dawg
+requires CMake 2.6 (http://www.cmake.org/) to build it from sources.  Many
+Unix-like operating systems can install CMake through their package
+systems.  Extract the Dawg source code and issue the following commands in
+the extracted directory:
+
+    cmake .
+    make
+    make install
+
+The '-G' option to cmake is used to specify different build systems, e.g. Unix
+Makefiles versus KDevelop3 project.  The '-D' option to cmake can be used to
+set different cmake variables from the command line:
+
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .
+    make
+    make install
+
+This will build an optimized version of Dawg and install it to '/usr/bin'.
+To specify your own build flags you need to set the environment variables
+CFLAGS and LDFLAGS as neccessary.  Then specify
+
+    cmake -DCMAKE_BUILD_TYPE= .
+
+See CMake's manual for additional information.
 
 EXAMPLES
 
@@ -129,6 +173,8 @@ OPTIONS
   Format           S   output format: Fasta|Nexus|Phylip|Clustal
   GapSingleChar    B   output gaps as a single character
   GapPlus          B   distinguish insertions from deletions in alignment
+  KeepFlank        N   undeletable flanking regions N nucs from sequence
+  KeepEmpty        B   preserve empty columns in final alignment
   LowerCase        B   output sequences in lowercase
   Translate        B   translate outputed sequences to amino acids
   Seed             VN  pseudo-random-number-generator seed (integers)
