@@ -1,5 +1,4 @@
-// eigen.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
-
+// eigen.cc - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
 #endif

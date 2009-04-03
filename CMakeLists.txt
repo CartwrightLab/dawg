@@ -169,7 +169,7 @@ ENDIF(WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
 
-INSTALL(FILES copying.txt readme.txt changelog.txt install.txt DESTINATION ${CMAKE_DOC_DIR})
+INSTALL(FILES copying.txt readme.txt changelog.txt DESTINATION ${CMAKE_DOC_DIR})
 INSTALL(FILES lambda.pl outsplit.pl nexus2fasta.pl varrep.pl DESTINATION ${CMAKE_DATA_DIR})
 
 ADD_SUBDIRECTORY(src)

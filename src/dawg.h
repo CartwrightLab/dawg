@@ -1,4 +1,4 @@
-// dawg.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// dawg.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_DAWG_H
 #define DAWG_DAWG_H

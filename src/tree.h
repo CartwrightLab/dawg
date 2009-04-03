@@ -1,4 +1,4 @@
-// tree.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// tree.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_TREE_H
 #define DAWG_TREE_H

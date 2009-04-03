@@ -1,4 +1,4 @@
-// tree.cc - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// tree.cc - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #include "dawg.h"
 #include "tree.h"

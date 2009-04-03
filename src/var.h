@@ -1,4 +1,4 @@
-// var.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// var.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_VAR_H
 #define DAWG_VAR_H

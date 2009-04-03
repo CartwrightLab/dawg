@@ -1,5 +1,5 @@
 /*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
-    Copyright (C) 2004-2006  Reed A. Cartwright
+    Copyright (c) 2004-2009  Reed A. Cartwright, PhD
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

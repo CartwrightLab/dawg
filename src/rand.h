@@ -1,4 +1,4 @@
-// rand.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// rand.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_RAND_H
 #define DAWG_RAND_H
