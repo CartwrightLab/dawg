@@ -1,3 +1,7 @@
+###########################################################
+#  Dawg's Project Configuration
+#
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 SET(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -79,7 +83,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
   "\\\\.vcproj"  "\\\\.dir"  "\\\\.ncb$"  "\\\\.sln$"  "\\\\.suo$"
   "Makefile$" "\\\\.ilk"  "\\\\.pdb"
   "/releng/"
-  "${PROJ_NAME}[-]" "${PROJ_NAME}$" "${PROJ_NAME}\\\\.exe"
+  "${PROJ_NAME}[-]${PROJ_VERSION_MAJOR}" "${PROJ_NAME}$" "${PROJ_NAME}\\\\.exe"
 )
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Simulator of Sequence Evolution")
