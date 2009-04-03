@@ -709,8 +709,7 @@ void Tree::Align(Alignment &aln) const
 				break;
 			}
 		}
-		cerr << uState << endl;
-		if(uState & 2 == 0)
+		if((uState & 3) == 0)
 		{
 			// Add gaps where neccessary
 			for(vector<Sequence>::iterator it = vTable.begin();

@@ -34,7 +34,7 @@ protected:
 
 public:
 	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
-	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate(rate) { }
+	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
 
 	static const data_type MaskBase		= 0x3; // 0011
 	static const data_type MaskType		= 0xC; // 1100
