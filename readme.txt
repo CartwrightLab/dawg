@@ -34,6 +34,20 @@ CONTACT
 
 racartwr@ncsu.edu or reed@scit.us
 
+Reed A. Cartwright, PhD
+Postdoctoral Research Associate
+Department of Genetics
+Bioinformatics Research Center
+North Carolina State University
+Campus Box 7566
+Raleigh, NC 27695-7566
+
+Most work was done while I was a PhD student:
+
+Department of Genetics
+University of Georgia
+Athens, GA
+
 REFERENCE
 
 Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating
