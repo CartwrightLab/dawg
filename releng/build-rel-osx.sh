@@ -1,8 +1,14 @@
 #!/bin/sh
 
+PROJ=dawg
+PROJ_DISTS=dawg-1*
+
 MAKE=make
 CMAKE=cmake
-REPOS=svn://scit.us/dawg/stable
+REPOS=`svn info | grep URL: | perl -pe "s!^URL: (.+)/releng$!$1!"`
+
+echo 
+echo Building distributions for $REPOS ...
 
 xcode=/Xcode2.5
 xcodep=${xcode}/usr
@@ -12,11 +18,14 @@ CXXFLAGS="$CXXFLAGS -I${xcodep}/include"; export CXXFLAGS
 LDFLAGS="-L${xcodep}/lib"; export LDFLAGS
 CMAKE_OSX_SYSROOT="${xcode}/SDKs/MacOSX10.4u.sdk"; export CMAKE_OSX_SYSROOT
 
-RELENG_DIR=`mktemp -q -d -t dawg-releng`
+RELENG_DIR=`mktemp -q -d -t ${PROJ}-releng`
 if [ $? -ne 0 ]; then
         echo "$0: Can't create temp directory, exiting..."
         exit 1
 fi
+
+echo Using temp directory $RELENG_DIR ...
+echo
 
 DEST_DIR=`pwd`
 SOURCE_DIR="${RELENG_DIR}/source"
@@ -35,9 +44,13 @@ $MAKE
 $MAKE package
 $MAKE package_source
 
-mv dawg-1* $DEST_DIR
+echo
+echo Moving distribution packages ...
+
+mv -v $PROJ_DISTS $DEST_DIR
+
+echo
+echo Cleaning up ...
 
 cd $DEST_DIR
 rm -rf $RELENG_DIR
-
-
