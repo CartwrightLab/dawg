@@ -50,8 +50,8 @@ Athens, GA
 
 REFERENCE
 
-Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating
-Sequence Evolution. Bioinformatics 21 (Suppl. 3): iii31-iii38
+Cartwright, R.A. (2005) DNA Assembly With Gaps (Dawg): Simulating Sequence
+Evolution. Bioinformatics 21 (Suppl. 3): iii31-iii38
 
 LICENSE
 
@@ -84,11 +84,35 @@ set different cmake variables from the command line:
 
 This will build an optimized version of Dawg and install it to '/usr/bin'.
 To specify your own build flags you need to set the environment variables
-CFLAGS and LDFLAGS as neccessary.  Then specify
+CFLAGS and LDFLAGS as necessary.  Then specify
 
     cmake -DCMAKE_BUILD_TYPE= .
-
+    
 See CMake's manual for additional information.
+
+If you want to build the source code on Windows you will need to install Flex
+and Bison from the Gnuwin32 project <http://gnuwin32.sourceforge.net/>, and make
+sure that they are in your path.  You can then run the CMake GUI interface.  If
+you would prefer to run the command line version, then open up a command console
+through the Visual Studio tools shortcut (or similar shortcut).  This will add
+the required compiler programs to your command console environment.  After
+changing to the source code directory issue the following commands:
+
+    cmake -G "NMake Makefiles" .
+    nmake
+
+If successful, you should find dawg.exe in the "src" directory.
+
+If you are trying to compile Dawg on a UNIX machine that does not have CMake
+installed, and you can't install it from a package, then you may need to install
+it locally.  After downloading and extracting CMake in your home directory,
+change to its directory and issue the following commands.
+
+  ./configure --prefix=$HOME
+  make
+  make install
+  
+If "make" fails, try using "gmake" instead.
 
 EXAMPLES
 
@@ -119,8 +143,8 @@ FILE FORMAT
 
 The file format takes a series of statements in the form of "[name]" or 
 "name = value", where "name" is alphanumeric and value can be a string,
-number, boolean, tree, or vector of values.  The former specifies a heading,
-which can simplify variable assignmnet.  A single variable is equivalent to
+number, Boolean, tree, or vector of values.  The former specifies a heading,
+which can simplify variable assignment.  A single variable is equivalent to
 a vector of a single entry.  
 
 When using headings, the following statements are equivalent:
@@ -151,7 +175,7 @@ When using headings, the following statements are equivalent:
   [.Block]
   Tail = "B Comment"
 
-Values can be specivied via the following syntaxes.
+Values can be specified via the following syntaxes.
 
 string:  "[char-sequence]"
          '[char-sequence]'
@@ -190,13 +214,13 @@ OPTIONS
   KeepFlank        N   undeletable flanking regions N nucs from sequence
   KeepEmpty        B   preserve empty columns in final alignment
   LowerCase        B   output sequences in lowercase
-  Translate        B   translate outputed sequences to amino acids
+  Translate        B   translate outputted sequences to amino acids
   Seed             VN  pseudo-random-number-generator seed (integers)
   Out.Block.Head   S   string to insert at the start of the output
   Out.Block.Tail   S   string to insert at the end of the output
   Out.Block.Before S   string to insert before a sequence set in the output
   Out.Block.After  S   string to insert after a sequence set in the output
-  Out.Subst        B   do variable subsitution in Out.Block.*
+  Out.Subst        B   do variable substitution in Out.Block.*
 
 DEFAULTS
 
@@ -237,9 +261,9 @@ Supported extensions and their formats are:
   Nexus:   nex, Nexus
   Phylip:  phy, Phylip
 
-Dawg also supports the filename format of "ext:file" to output to "file" with the
-format specified by extension "ext".  That way one can use "nex:-" to output to stdout
-in Nexus format.
+Dawg also supports the filename format of "ext:file" to output to "file" with
+the format specified by extension "ext".  That way one can use "nex:-" to output
+to stdout in Nexus format.
 
 NOTES
 
@@ -276,9 +300,9 @@ The meaning of the GapParams vector is different for each gap model.
 To create a recombinant tree, you may need to specifically describe and label the
 inner nodes at which the recombination events occur.  See example4.dawg.
 
-Gamma takes precidence over Alpha.
+Gamma takes precedence over Alpha.
 
-Sequence takes precidence over Length.
+Sequence takes precedence over Length.
 
 If Out.Block.* is the name of a file, the code is read from that file.
 
