@@ -535,7 +535,7 @@ bool Execute()
 
 		//SaveOutput
 		Tree::Alignment aln;
-		myTree.Align(aln);
+		myTree.Align(aln, uOutFlags);
 		if(!SaveAlignment(*pOut, aln, uOutFlags))
 			return DawgError("Error saving alignment.");
 	}

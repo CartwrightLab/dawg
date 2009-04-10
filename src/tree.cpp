@@ -684,7 +684,7 @@ double Tree::RandomRate(Sequence::size_type uPos) const
 		return 1.0;
 }
 
-void Tree::Align(Alignment &aln) const
+void Tree::Align(Alignment &aln, unsigned int uFlags) const
 {
 	// construct a table of flattened sequences
 	vector<Sequence> vTable;
