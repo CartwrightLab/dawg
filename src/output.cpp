@@ -309,26 +309,4 @@ void FilterSequence(const string& ssSrc, string& ssDest, unsigned int uFlags)
 void FilterAlignment(const Tree::Alignment& alnSrc, Tree::Alignment& alnDest, unsigned int uFlags)
 {
 	alnDest = alnSrc;
-	if((uFlags & FlagOutGapPlus) || (uFlags & FlagOutKeepEmpty))
-		return;
-	// remove columns that contain nothing but gaps
-	Tree::Alignment::iterator it = alnDest.begin();
-	size_t len = it->second.size();
-	for(size_t u=0;u<len;++u) {
-		bool rm = true;
-		for(it = alnDest.begin(); it != alnDest.end(); ++it) {
-			char ch = it->second[u];
-			if(!(ch == '-' || ch == '=' || ch == '+')) {
-				rm = false;
-				break;
-			}
-		}
-		if(!rm)
-			continue;
-		for(it = alnDest.begin(); it != alnDest.end(); ++it) {
-			it->second.erase(u, 1);
-		}
-		--u;
-		--len;
-	}
 }
