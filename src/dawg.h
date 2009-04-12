@@ -66,11 +66,11 @@ const unsigned int FormatPhylip = 2;
 const unsigned int FormatClustal = 3;
 
 // Output Flags
-const unsigned int FlagOutLowerCase = 1;
-const unsigned int FlagOutGapPlus = 2;
-const unsigned int FlagOutGapSingleChar = 4;
-const unsigned int FlagOutTranslate = 8;
-const unsigned int FlagOutKeepEmpty = 16;
+const unsigned int FlagOutLowerCase     = 1;  // 00001
+const unsigned int FlagOutGapPlus       = 2;  // 00010
+const unsigned int FlagOutGapSingleChar = 4;  // 00100
+const unsigned int FlagOutTranslate     = 8;  // 01000
+const unsigned int FlagOutKeepEmpty     = 16; // 10000
 
 // Nucleotide Numbers
 const int NumAdenine	= 0;

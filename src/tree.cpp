@@ -48,12 +48,11 @@ Sequence::const_iterator Sequence::SeqPos(size_type uPos) const
 {
 	const_iterator it = begin();
 	// Skip deletions
-	while(it->IsDeletion()) {++it;}
-	while(uPos--)
-	{
+	while(it->IsDeleted()) {++it;}
+	while(uPos--) {
 		++it;
 		// Skip deletions
-		while(it->IsDeletion()) {++it;}
+		while(it->IsDeleted()) {++it;}
 	}
 	return it;
 }
@@ -62,12 +61,11 @@ Sequence::iterator Sequence::SeqPos(size_type uPos)
 {
 	iterator it = begin();
 	// Skip deletions
-	while(it->IsDeletion()) {++it;}
-	while(uPos--)
-	{
+	while(it->IsDeleted()) {++it;}
+	while(uPos--) {
 		++it;
 		// Skip deletions
-		while(it->IsDeletion()) {++it;}
+		while(it->IsDeleted()) {++it;}
 	}
 	return it;
 }
@@ -92,10 +90,10 @@ Sequence::size_type Sequence::Deletion(iterator itBegin, size_type uSize)
 	for(;uRet < uSize && itBegin != end(); ++itBegin)
 	{
 		// Skip Gaps
-		if(itBegin->IsDeletion())
+		if(itBegin->IsDeleted())
 			continue;
 		// Mark as Deleted-Root or Deleted-Insertion
-		itBegin->SetType(itBegin->GetType()|Nucleotide::TypeDel);
+		itBegin->SetType(Nucleotide::TypeDel);
 		 ++uRet;
 	}
 	m_uLength -= uRet;
@@ -137,8 +135,9 @@ bool Nucleotide::FromChar(char ch)
 char Nucleotide::ToChar() const
 {
 	static const char csNuc[]	= "ACGT";
-	static const char csType[]	= " +-=";
-	return IsType(TypeRoot) ? csNuc[GetBase()] : csType[GetType() >> 2];
+	static const char csType[]	= "-=+ ";
+
+	return IsExtant() ? csNuc[GetBase()] : csType[GetBase()];
 }
 
 
@@ -261,7 +260,7 @@ void Tree::Evolve()
 		{
 			if((*it)[u].GetRate() < 0.0)
 				(*it)[u].SetRate(RandomRate(u));
-			if(!(*it)[u].IsType(Nucleotide::TypeRoot))
+			if(!(*it)[u].IsExtant())
 				(*it)[u].SetNuc(RandomBase());
 		}
 	}
@@ -307,7 +306,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return; // Nothing to evolve
 	
 	//advance branch color
-	branchColor+=0xF;
+	branchColor += Nucleotide::ColorInc;
 	
 	// Substitutions
 	unsigned int uNuc = 0;
@@ -316,7 +315,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
 		{
 			// Skip any position that is a deletion
-			if(jt->IsDeletion())
+			if(jt->IsDeleted())
 				continue;
 			// Total Evolution Rate for the position
 			double dTemp = dTime*jt->GetRate()*m_vdScale[uNuc%m_uWidth];
@@ -380,7 +379,6 @@ void Tree::Evolve(Node &rNode, double dTime)
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
-				nuc.SetType(Nucleotide::TypeIns);
 				nuc.SetColor(branchColor);
 				seq.push_back(nuc);
 			}
@@ -733,65 +731,35 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end())
 				continue; // Sequence is done
-			switch(sit->it->GetType()) {
-				case Nucleotide::TypeRoot:
-					uState |= 1; // 0001
-					break;
-				case Nucleotide::TypeIns:
-					uColorN = sit->it->GetColor();
-					if(uColorN > uColor) {
-						uColor = uColorN;
-						uState = (uState&9) | 2; // clear and set DelIns and Ins flags
-					} else if(uColorN == uColor) {
-						uState |= 2; // 0010
-					}
-					break;
-				case Nucleotide::TypeDelIns:
-					uColorN = sit->it->GetColor();
-					if(uColorN > uColor) {
-						uColor = uColorN;
-						uState = (uState&9) | 4; // clear and set DelIns and Ins flags
-					} else if(uColorN == uColor) {
-						uState |= 4; // 0100
-					}
-					break;
-				case Nucleotide::TypeDel:
-					uState |= 8; // 1000
-					break;
-				default:
-					; //TODO: throw error?
+			uColorN = sit->it->GetColor();
+			if(uColorN > uColor) {
+				uColor = uColorN;
+				uState = (sit->it->IsExtant() ? 1 : 2);
+			} else if(uColorN == uColor) {
+				uState |= (sit->it->IsExtant() ? 1 : 2);
 			}
 		}
 		if(uState == 0) // Stop Aligning
 			break;
-		bool rmEmpty = !(uFlags & (FlagOutGapPlus|FlagOutKeepEmpty));
+		bool rmEmpty = !(uFlags & FlagOutKeepEmpty);
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end()) {
-				//special rules for endofseq
-				if((uState & 6) && !((uState & 6) == 4 && rmEmpty) )
-					sit->seqAln.push_back(Nucleotide(Nucleotide::TypeIns, 1.0));
-			} else if( uState == 8 && rmEmpty ) {
-				// remove empty columns if rmEmpty exists
-				++(sit->it);
-			} else if((uState & 6) == 4 && rmEmpty) {
-				if(sit->it->IsInsertion() && sit->it->GetColor() == uColor)
-					++(sit->it);
-			} else if(uState & 6) {
-				// Insertion?
-				if(!sit->it->IsInsertion() || sit->it->GetColor() != uColor) {
-					sit->seqAln.push_back(Nucleotide(Nucleotide::TypeIns, 1.0));
-				} else if(sit->it->IsType(Nucleotide::TypeIns)) {
-					sit->seqAln.push_back(*sit->it);
-					sit->seqAln.back().SetType(Nucleotide::TypeRoot);
-					++(sit->it);
-				} else {
-					sit->seqAln.push_back(*sit->it);
-					++(sit->it);
-				}
-			} else {
+				if(!(uState == 2 && rmEmpty))
+					sit->seqAln.push_back(Nucleotide(2|Nucleotide::TypeDel, 1.0));
+				continue;
+			} else if(uState == 2 && rmEmpty) {
+				if(sit->it->GetColor() != uColor)
+					continue;
+			} else if(sit->it->GetColor() != uColor) {
+				sit->seqAln.push_back(Nucleotide(2|Nucleotide::TypeDel, 1.0));
+				continue;
+			} else if(sit->it->IsExtant())
 				sit->seqAln.push_back(*sit->it);
-				++(sit->it);
-			}
+			else if(sit->it->GetColor() == 0)
+				sit->seqAln.push_back(Nucleotide(0|Nucleotide::TypeDel, 1.0));
+			else
+				sit->seqAln.push_back(Nucleotide(1|Nucleotide::TypeDel, 1.0));
+			++(sit->it);
 		}
 	}
 
@@ -800,5 +768,3 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		sit->seqAln.ToString(aln[sit->ssName]);
 	}
 }
-
-

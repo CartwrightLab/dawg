@@ -36,15 +36,12 @@ public:
 	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
 	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
 
-	static const data_type MaskBase		= 0x3; // 0011
-	static const data_type MaskType		= 0xC; // 1100
-	static const data_type MaskColor	= ~0xF;
-	static const data_type MaskDel		= 0x8; // 1000
-	static const data_type MaskIns		= 0x4; // 0100
-	static const data_type TypeRoot		= 0x0; // 0000
-	static const data_type TypeIns		= 0x4; // 0100
-	static const data_type TypeDel		= 0x8; // 1000
-	static const data_type TypeDelIns	= 0xC; // 1100
+	static const data_type MaskColor	= ~0x7;
+	static const data_type MaskBase		=  0x3; // 011
+	static const data_type MaskType		=  0x4; // 100
+	static const data_type TypeDel		=  0x4; // 100
+	static const data_type TypeExt      =  0x0; // 000
+	static const data_type ColorInc     =  0x8;
 	
 	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
 	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
@@ -56,8 +53,8 @@ public:
 		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType) | (ucC & MaskColor); }
 	inline void SetNuc(data_type uc) { m_ucNuc = uc; }
 	inline bool IsType(data_type uc) const { return (GetType() == uc); }
-	inline bool IsDeletion() const { return ((m_ucNuc & MaskDel) == MaskDel); }
-	inline bool IsInsertion() const { return ((m_ucNuc & MaskIns) == MaskIns); }
+	inline bool IsDeleted() const { return (GetType() == TypeDel); }
+	inline bool IsExtant()  const { return (GetType() == TypeExt); }
 
 	inline double GetRate() const { return m_dRate; }
 	inline void SetRate(double r) { m_dRate = (float)r; }
