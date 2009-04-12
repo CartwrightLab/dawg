@@ -310,4 +310,3 @@ The following vector parameters have a size of "Width": "Scale", "Alpha", "Gamma
 and "Iota".  If their size is less than width then the first value in the vector
 will be used to fill in the rest of the values, e.g. "Scale = 1.0" is the same as
 "Scale = {1.0,1.0,1.0}" when "Width = 3".
-
