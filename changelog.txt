@@ -1,10 +1,12 @@
 Version 1.2
- * Migration from Autoconf/Automake to CMake for building
+ * Migration from Autoconf/Automake to CMake for building.  Easier to develop
+   and build packages for modern operating systems.
  * Bug fix for homoplasious insertions.  In very large trees (>4000 branches)
-   the bug can still affect the output in very rare cases.
+   the bug can still affect the output in very rare cases.  Email me for instructions
+   on avoiding this limitation.
  * All empty columns in the alignment are removed by default.
  * New KeepEmpty variable to preserve empty columns.  GapPlus is true forces
-   KeepEmpty to be true
+   KeepEmpty to be true.
  * New KeepFlank option to control long deletions into flanking regions.
 
 Version 1.1.2

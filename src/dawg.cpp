@@ -501,7 +501,7 @@ bool Execute()
 	if(bGapSingle)
 		uOutFlags |= FlagOutGapSingleChar;
 	if(bGapPlus)
-		uOutFlags |= FlagOutGapPlus;
+		uOutFlags |= FlagOutGapPlus|FlagOutKeepEmpty;
 	if(bLowerCase)
 		uOutFlags |= FlagOutLowerCase;
 	if(bTranslate)
