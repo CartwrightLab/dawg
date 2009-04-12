@@ -246,6 +246,7 @@ void Tree::Evolve()
 		it->second.m_vSections.clear();
 		it->second.m_bTouched = false;
 	}
+	branchColor = 0;
 	// Setup Root
 	Node& rNode = m_map["_R()()T"];
 	rNode.m_ssName = "_R()()T";
@@ -301,8 +302,6 @@ void Tree::Evolve(Node &rNode)
 // Evolve rNode a specific time 
 void Tree::Evolve(Node &rNode, double dTime)
 {
-	static Nucleotide::data_type branchColor = 0;
-	
 	dTime = fabs(dTime);
 	if(dTime < DBL_EPSILON)
 		return; // Nothing to evolve
@@ -684,72 +683,121 @@ double Tree::RandomRate(Sequence::size_type uPos) const
 		return 1.0;
 }
 
-void Tree::Align(Alignment &aln) const
+struct AlignData {
+	AlignData(const string &name, const Sequence &s ) : ssName(name), seq(s) {
+		it = seq.begin();
+	}
+	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln) {
+		it = seq.begin()+(a.it-a.seq.begin());
+	}
+	AlignData & operator=(const AlignData &a) {
+		if(this == &a)
+			return *this;
+		ssName = a.ssName;
+		seq = a.seq;
+		seqAln = a.seqAln;
+		it = seq.begin()+(a.it-a.seq.begin());
+		return *this;
+	}
+	string ssName;
+	Sequence seq;
+	Sequence seqAln;
+	Sequence::iterator it;
+};
+
+void Tree::Align(Alignment &aln, unsigned int uFlags) const
 {
 	// construct a table of flattened sequences
-	vector<Sequence> vTable;
-	vector<string> vNames;
-	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit)
-	{
-		vNames.push_back(cit->second.m_ssName);
+	vector<AlignData> vTable;
+	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit) {
+		// Skip any sequence that begin with one of the two special characters
+		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
+			continue;
 		Sequence s;
 		cit->second.Flatten(s);
-		vTable.push_back(s);
+		vTable.push_back(AlignData(cit->second.m_ssName, s));
 	}
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 	
-	// States: Quit (0), Del/Root (1), Ins (2), InsDel (3)
-	unsigned int uState = 0;
+	// States: Quit (0), Root(1), Ins(2), InsDel(4), Del (8)
+	unsigned int uState = 1;
+	unsigned int uColor = 0;
+	unsigned int uColorN = 0;
 	// Go through each column, adding gaps where neccessary
-	for(unsigned int uCol = 0; uState != 1; uCol++)
-	{
-		// Set to quit
-		uState = 1;
-		for(vector<Sequence>::const_iterator cit = vTable.begin();
-			cit != vTable.end(); ++cit)
-		{
-			if(uCol >= cit->size())
-				continue;
-			if(uState == 1)
-				uState = 2; // Nucleotide exists clear quit
-			if((*cit)[uCol].IsInsertion())
-			{
-				// Gaps need to be added mark and break
-				uState = (*cit)[uCol].GetColor();
-				break;
+	while(uState != 0) {
+		uState = 0; // Set to quit
+		uColor = 0; // Set to lowest color
+		// Find column state(s)
+		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+			if(sit->it == sit->seq.end())
+				continue; // Sequence is done
+			switch(sit->it->GetType()) {
+				case Nucleotide::TypeRoot:
+					uState |= 1; // 0001
+					break;
+				case Nucleotide::TypeIns:
+					uColorN = sit->it->GetColor();
+					if(uColorN > uColor) {
+						uColor = uColorN;
+						uState = (uState&9) | 2; // clear and set DelIns and Ins flags
+					} else if(uColorN == uColor) {
+						uState |= 2; // 0010
+					}
+					break;
+				case Nucleotide::TypeDelIns:
+					uColorN = sit->it->GetColor();
+					if(uColorN > uColor) {
+						uColor = uColorN;
+						uState = (uState&9) | 4; // clear and set DelIns and Ins flags
+					} else if(uColorN == uColor) {
+						uState |= 4; // 0100
+					}
+					break;
+				case Nucleotide::TypeDel:
+					uState |= 8; // 1000
+					break;
+				default:
+					; //TODO: throw error?
 			}
 		}
-		if((uState & 3) == 0)
-		{
-			// Add gaps where neccessary
-			for(vector<Sequence>::iterator it = vTable.begin();
-				it != vTable.end(); ++it)
-			{
-				if(uCol < it->size()) {
-					if(!(*it)[uCol].IsInsertion() || (*it)[uCol].GetColor() != uState) {
-						it->insert(it->begin()+uCol, Nucleotide(Nucleotide::TypeIns, 1.0));
-					} else if((*it)[uCol].IsType(Nucleotide::TypeIns)) {
-						(*it)[uCol].SetType(Nucleotide::TypeRoot);
-					}
+		if(uState == 0) // Stop Aligning
+			break;
+		bool rmEmpty = !(uFlags & (FlagOutGapPlus|FlagOutKeepEmpty));
+		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+			if(sit->it == sit->seq.end()) {
+				//special rules for endofseq
+				if((uState & 6) && !((uState & 6) == 4 && rmEmpty) )
+					sit->seqAln.push_back(Nucleotide(Nucleotide::TypeIns, 1.0));
+			} else if( uState == 8 && rmEmpty ) {
+				// remove empty columns if rmEmpty exists
+				++(sit->it);
+			} else if((uState & 6) == 4 && rmEmpty) {
+				if(sit->it->IsInsertion() && sit->it->GetColor() == uColor)
+					++(sit->it);
+			} else if(uState & 6) {
+				// Insertion?
+				if(!sit->it->IsInsertion() || sit->it->GetColor() != uColor) {
+					sit->seqAln.push_back(Nucleotide(Nucleotide::TypeIns, 1.0));
+				} else if(sit->it->IsType(Nucleotide::TypeIns)) {
+					sit->seqAln.push_back(*sit->it);
+					sit->seqAln.back().SetType(Nucleotide::TypeRoot);
+					++(sit->it);
+				} else {
+					sit->seqAln.push_back(*sit->it);
+					++(sit->it);
 				}
-				else
-					// Add gap to end of sequence
-					it->resize(uCol+1, Nucleotide(Nucleotide::TypeIns, 1.0));
+			} else {
+				sit->seqAln.push_back(*sit->it);
+				++(sit->it);
 			}
 		}
 	}
 
 	// Add aligned sequences to alingment set
-	for(unsigned int u = 0; u < vNames.size(); ++u)
-	{
-		// Skip any sequence that begin with one of the two special characters
-		if(vNames[u][0] == '(' || vNames[u][0] == '_')
-			continue;
-		// Add Sequence to alignment
-		string& ss = aln[vNames[u]];
-		vTable[u].ToString(ss);
+	for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+		sit->seqAln.ToString(aln[sit->ssName]);
 	}
 }
 

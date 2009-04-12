@@ -169,7 +169,7 @@ public:
 	const Node::Map& GetMap() const { return m_map; }
 	
 	// Align sequences from the tree
-	void Align(Alignment &aln) const;
+	void Align(Alignment &aln, unsigned int uFlags=0) const;
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
@@ -206,6 +206,8 @@ private:
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
 	int m_uKeepFlank;
+
+	Nucleotide::data_type branchColor;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
