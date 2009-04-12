@@ -206,6 +206,8 @@ private:
 	LinearFunc m_funcRateIns;
 	LinearFunc m_funcRateSum;
 	int m_uKeepFlank;
+
+	Nucleotide::data_type branchColor;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);

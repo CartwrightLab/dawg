@@ -246,6 +246,7 @@ void Tree::Evolve()
 		it->second.m_vSections.clear();
 		it->second.m_bTouched = false;
 	}
+	branchColor = 0;
 	// Setup Root
 	Node& rNode = m_map["_R()()T"];
 	rNode.m_ssName = "_R()()T";
@@ -301,8 +302,6 @@ void Tree::Evolve(Node &rNode)
 // Evolve rNode a specific time 
 void Tree::Evolve(Node &rNode, double dTime)
 {
-	static Nucleotide::data_type branchColor = 0;
-	
 	dTime = fabs(dTime);
 	if(dTime < DBL_EPSILON)
 		return; // Nothing to evolve
@@ -725,6 +724,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	// States: Quit (0), Root(1), Ins(2), InsDel(4), Del (8)
 	unsigned int uState = 1;
 	unsigned int uColor = 0;
+	unsigned int uColorN = 0;
 	// Go through each column, adding gaps where neccessary
 	while(uState != 0) {
 		uState = 0; // Set to quit
@@ -734,18 +734,28 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 			if(sit->it == sit->seq.end())
 				continue; // Sequence is done
 			switch(sit->it->GetType()) {
-				case Nucleotide::TypeRoot   :
+				case Nucleotide::TypeRoot:
 					uState |= 1; // 0001
 					break;
-				case Nucleotide::TypeIns    :
-					uState |= 2; // 0010
-					uColor = std::max<unsigned int>(uColor, sit->it->GetColor());
+				case Nucleotide::TypeIns:
+					uColorN = sit->it->GetColor();
+					if(uColorN > uColor) {
+						uColor = uColorN;
+						uState = (uState&9) | 2; // clear and set DelIns and Ins flags
+					} else if(uColorN == uColor) {
+						uState |= 2; // 0010
+					}
 					break;
-				case Nucleotide::TypeDelIns :
-					uState |= 4; // 0100
-					uColor = std::max<unsigned int>(uColor, sit->it->GetColor());
+				case Nucleotide::TypeDelIns:
+					uColorN = sit->it->GetColor();
+					if(uColorN > uColor) {
+						uColor = uColorN;
+						uState = (uState&9) | 4; // clear and set DelIns and Ins flags
+					} else if(uColorN == uColor) {
+						uState |= 4; // 0100
+					}
 					break;
-				case Nucleotide::TypeDel    :
+				case Nucleotide::TypeDel:
 					uState |= 8; // 1000
 					break;
 				default:
@@ -753,15 +763,19 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 			}
 		}
 		if(uState == 0) // Stop Aligning
-			break; 
+			break;
+		bool rmEmpty = !(uFlags & (FlagOutGapPlus|FlagOutKeepEmpty));
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end()) {
 				//special rules for endofseq
-				if(uState & 6)
+				if((uState & 6) && !((uState & 6) == 4 && rmEmpty) )
 					sit->seqAln.push_back(Nucleotide(Nucleotide::TypeIns, 1.0));
-			} else if(!(uState & 3) && !(uFlags & (FlagOutGapPlus|FlagOutKeepEmpty))) {
-				// Only Deletions, and delete deletions
+			} else if( uState == 8 && rmEmpty ) {
+				// remove empty columns if rmEmpty exists
 				++(sit->it);
+			} else if((uState & 6) == 4 && rmEmpty) {
+				if(sit->it->IsInsertion() && sit->it->GetColor() == uColor)
+					++(sit->it);
 			} else if(uState & 6) {
 				// Insertion?
 				if(!sit->it->IsInsertion() || sit->it->GetColor() != uColor) {
