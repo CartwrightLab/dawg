@@ -5,20 +5,26 @@
 #include <vector>
 #include <list>
 #include <algorithm>
-
+#include <functional>
 
 class ResidueFactory
 {
 public:
 	typedef unsigned int model_type;
 	static const model_type modelDNA = 0;
-
+	static const model_type modelRNA = 1;
+	
 	struct Residue {
 		typedef unsigned char base_type;
 		typedef float rate_type;
 		
 		base_type base;
 		rate_type rate;
+		
+		Residue() { }
+		
+		Residue(base_type b, rate_type r)
+			: base(b), rate(r) { }
 	};
 
 	typedef std::vector<Residue> Block; 
@@ -28,20 +34,47 @@ public:
 	template<typename It>
 	seq_iterator operator()(It b, It e) {
 		// should speed test
-		store.push_back(Block(e-b));
-		//store.back().resize(e-b);
-		stl::transform(b, e, store.back().begin(), );
+		store.push_back(Block());
+		store.back().reserve(e-b);
+		std::transform(b, e, std::back_inserter(store.back()),
+			std::bind1st(std::mem_fun(&ResidueFactory::makeResidue), this));
+		return store.back().begin();
+	}
+
+	struct biop : public std::binary_function<char, double, Residue> {
+		biop(const ResidueFactory *o) : obj(o) { }
+		const ResidueFactory *obj;
+		Residue operator()(char ch, double d) {
+			return obj->makeResidue(ch,d);
+		}
+	};
+	template<typename It1, typename It2>
+	seq_iterator operator()(It1 b, It1 e, It2 r) {
+		store.push_back(Block());
+		store.back().reserve(e-b);
+		std::transform(b, e, r, std::back_inserter(store.back()), biop(this));
+		return store.back().begin();
 	}
 
 	inline void SetModel(model_type a) { seq_model = a; };
 	
-	Residue::base_type translate(char ch) {
+	Residue makeResidue(char ch) const {
+		return Residue(translate(ch), 1.0);
+	}
+	Residue makeResidue(char ch, double d) const {
+		return Residue(translate(ch), d);
+	}	
+	
+	Residue::base_type translate(char ch) const {
 		static Residue::base_type dna[] = {0,1,3,2};
 		
-		if(seq_model == modelDNA)
-			return dna[(ch&6u) >> 1]; // ACGT/acgt -> 0132
+		if(seq_model == modelDNA || seq_model == modelRNA)
+			return dna[(ch&6u) >> 1];
 		return ~0;
 	}
+	
+	
+	void clear() { store.clear(); }
 
 protected:
 	DataStore store;
@@ -49,66 +82,28 @@ protected:
 };
 
 template<typename ith, typename itl>
-class nested_iterator {
+class residue_iterator {
 public:
 	typedef ith high_iterator;
 	typedef itl low_iterator;
 	typedef typename low_iterator::reference reference;
 	typedef typename low_iterator::pointer pointer;
+	typedef typename low_iterator::value_type value_type;
+	typedef std::bidirectional_iterator_tag iterator_category;
 
-	typedef nested_iterator<high_iterator, low_iterator> this_type;
+	typedef residue_iterator<high_iterator, low_iterator> this_type;
 	
-	nested_iterator() {}
-	nested_iterator(high_iterator h, low_iterator l) : hit(h), lit(l) { }
-
-	this_type& operator++() {
-		if(++lit == hit->end())
-			lit = (++hit)->begin();
-		return *this;
+	residue_iterator() {}
+	residue_iterator(high_iterator h, bool b=true)
+		: hit(h), ignDel(b) {
+		for(;ignDel && hit->IsDeletion();++hit)
+			/*noop*/;
+		lit = hit->begin();
 	}
-	this_type operator++(int) {
-		this_type ret = *this;
-		++(*this);
-		return ret;
+	residue_iterator(high_iterator h, low_iterator l, bool b=true)
+		: hit(h), lit(l), ignDel(b) {
+		/* assumes consistency */
 	}
-	this_type& operator--() {
-		if(lit == hit->begin())
-			--(lit = (--hit)->end());
-		return *this;
-	}
-	this_type operator--(int) {
-		this_type ret = *this;
-		--(*this);
-		return ret;
-	}
-	bool operator==(this_type &other) {
-		return (hit==other.hit && lit == other.lit);
-	}
-
-	reference operator*() const {
-		return *lit;
-	}
-	pointer operator->() const {
-		return (&**this);
-	}
-	
-protected:
-	high_iterator hit;
-	low_iterator lit;
-};
-
-template<typename ith, typename itl>
-class nested_seq_iterator {
-public:
-	typedef ith high_iterator;
-	typedef itl low_iterator;
-	typedef typename low_iterator::reference reference;
-	typedef typename low_iterator::pointer pointer;
-
-	typedef nested_seq_iterator<high_iterator, low_iterator> this_type;
-	
-	nested_seq_iterator() {}
-	nested_seq_iterator(high_iterator h, low_iterator l) : hit(h), lit(l) { }
 
 	this_type& operator++() {
 		if(++lit == hit->end()) {
@@ -124,7 +119,7 @@ public:
 	}
 	this_type& operator--() {
 		if(lit == hit->begin()) {
-			do {--hit; } while(hit->IsDeletion());
+			do {--hit; } while(ignDel && hit->IsDeletion());
 			--(lit = hit->end());
 		}
 		return *this;
@@ -148,6 +143,7 @@ public:
 protected:
 	high_iterator hit;
 	low_iterator lit;
+	bool ignDel;
 };
 
 class Sequence2
@@ -169,15 +165,11 @@ public:
 		typedef data_type::const_iterator const_iterator;
 		typedef data_type::size_type size_type;
 		
-		static const color_type BranchAdd   = 0x4;
-		static const color_type MaskBranch	= ~0x3;
-		static const color_type MaskType	= 0x3; // 11
-		static const color_type MaskDel		= 0x2; // 10
-		static const color_type MaskIns		= 0x1; // 01
-		static const color_type TypeRoot	= 0x0; // 00
-		static const color_type TypeIns		= 0x1; // 01
-		static const color_type TypeDel		= 0x2; // 10
-		static const color_type TypeDelIns	= 0x3; // 11
+		static const color_type BranchInc   =  0x2;
+		static const color_type MaskBranch	= ~0x1;
+		static const color_type MaskType	=  0x1; // 1
+		static const color_type TypeDel		=  0x1; // 1
+		static const color_type TypeExt		=  0x0; // 0
 		
 		Part(iterator it, size_type len, color_type uT, color_type uB) :
 			itBegin(it), szLength(len), color((uT & MaskType) | (uB & MaskBranch))
@@ -195,8 +187,8 @@ public:
 		inline void SetColor(color_type u) { color = u; }
 		inline bool IsType(color_type u) const { return (GetType() == (u & MaskType)); }
 		inline bool IsBranch(color_type u) const { return (GetBranch() == (u & MaskBranch)); }
-		inline bool IsDeletion() const { return ((color & MaskDel) == MaskDel); }
-		inline bool IsInsertion() const { return ((color & MaskIns) == MaskIns); }
+		inline bool IsDeletion() const { return IsType(TypeDel); }
+		inline bool IsExtant()   const { return IsType(TypeExt); }
 		
 		inline iterator begin() { return itBegin;}
 		inline iterator end() { return itBegin+szLength; }
@@ -231,10 +223,8 @@ public:
 	};
 
 	typedef std::list<Part> Parts;
-	typedef nested_seq_iterator<Parts::iterator, Part::iterator> iterator;
-	typedef nested_seq_iterator<Parts::const_iterator, Part::const_iterator> const_iterator;
-	typedef nested_iterator<Parts::iterator, Part::iterator> aln_iterator;
-	typedef nested_iterator<Parts::const_iterator, Part::const_iterator> const_aln_iterator;
+	typedef residue_iterator<Parts::iterator, Part::iterator> iterator;
+	typedef residue_iterator<Parts::const_iterator, Part::const_iterator> const_iterator;
 	typedef Part::size_type size_type;
 
 	Sequence2() : szLength(0), szAlnLength(0) {
@@ -247,16 +237,13 @@ public:
 
 	// begin, end, and mid cycle through extant residues
 
-	inline iterator begin() {
-		Parts::iterator first = parts.begin();
-		while(first->IsDeletion()) ++first;
-		return iterator(first, first->begin());
+	inline iterator begin(bool b=true) {
+		return iterator(parts.begin(),b);
 	}
-	inline iterator end() {
-		Parts::iterator last = --parts.end();
-		return iterator(last, last->begin());
+	inline iterator end(bool b=true) {
+		return iterator(--parts.end(), b);
 	}
-	inline iterator mid(size_type pos) {
+	inline iterator mid(size_type pos, bool b=true) {
 		if(pos >= size())
 			return end();
 		Parts::iterator it = parts.begin();
@@ -267,17 +254,16 @@ public:
 				break;
 			 pos -= it->size();
 		}	
-		return iterator(it, it->begin()+pos);
+		return iterator(it, it->begin()+pos,b);
 	}
 
-	inline const_iterator begin() const {
-		return const_iterator(parts.begin(), parts.begin()->begin());
+	inline const_iterator begin(bool b=true) const {
+		return const_iterator(parts.begin(),b);
 	}
-	inline const_iterator end() const {
-		Parts::const_iterator last = --parts.end();
-		return const_iterator(last, last->begin());
+	inline const_iterator end(bool b=true) const {
+		return const_iterator(--parts.end(),b);
 	}
-	inline const_iterator mid(size_type pos) const {
+	inline const_iterator mid(size_type pos, bool b=true) const {
 		if(pos >= size())
 			return end();
 		Parts::const_iterator it = parts.begin();
@@ -288,43 +274,7 @@ public:
 				break;
 			 pos -= it->size();
 		}	
-		return const_iterator(it, it->begin()+pos);
-	}
-
-	// abegin, amid, and aend cycle through the alignment
-	inline aln_iterator abegin() {
-		Parts::iterator first = parts.begin();
-		return aln_iterator(first, first->begin());
-	}
-	inline aln_iterator aend() {
-		Parts::iterator last = --parts.end();
-		return aln_iterator(last, last->begin());
-	}
-	inline aln_iterator amid(size_type pos) {
-		if(pos >= asize())
-			return aend();
-		Parts::iterator it = parts.begin();
-		for(; pos < it->size() /*&& it != parts.end()*/; ++it) {
-			 pos -= it->size();
-		}	
-		return aln_iterator(it, it->begin()+pos);
-	}
-	inline const_aln_iterator abegin() const {
-		Parts::const_iterator first = parts.begin();
-		return const_aln_iterator(first, first->begin());
-	}
-	inline const_aln_iterator aend() const {
-		Parts::const_iterator last = --parts.end();
-		return const_aln_iterator(last, last->begin());
-	}
-	inline const_aln_iterator amid(size_type pos) const {
-		if(pos >= asize())
-			return aend();
-		Parts::const_iterator it = parts.begin();
-		for(; pos < it->size() /*&& it != parts.end()*/; ++it) {
-			 pos -= it->size();
-		}	
-		return const_aln_iterator(it, it->begin()+pos);
+		return const_iterator(it, it->begin()+pos,b);
 	}
 
 protected:
