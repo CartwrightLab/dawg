@@ -13,7 +13,9 @@ public:
 	typedef unsigned int model_type;
 	static const model_type modelDNA = 0;
 	static const model_type modelRNA = 1;
-	
+	static const model_type modelAA  = 2;
+	static const model_type modelCod = 3;
+
 	struct Residue {
 		typedef unsigned char base_type;
 		typedef float rate_type;
@@ -59,20 +61,42 @@ public:
 	inline void SetModel(model_type a) { seq_model = a; };
 	
 	Residue makeResidue(char ch) const {
-		return Residue(translate(ch), 1.0);
+		return Residue(encode(ch), 1.0);
 	}
 	Residue makeResidue(char ch, double d) const {
-		return Residue(translate(ch), d);
+		return Residue(encode(ch), d);
 	}	
 	
-	Residue::base_type translate(char ch) const {
+	Residue::base_type encode(char ch) const {
 		static Residue::base_type dna[] = {0,1,3,2};
-		
 		if(seq_model == modelDNA || seq_model == modelRNA)
 			return dna[(ch&6u) >> 1];
 		return ~0;
 	}
-	
+	char decode(Residue::base_type r) const {
+		static char dna[] = "ACGT";
+		static char rna[] = "ACGU";
+		// Include O & U, two rare amino acids
+		static char aa[] = "ACDEFGHIKLMNPQRSTVWYOU";
+		// Encode 64 possible codons using a base-64 notation
+		// b/c this function returns a single char.
+		// These can later be converted to three nucleotides or 1 amino acid
+		static char cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
+
+		switch(seq_model) {
+		case modelDNA:
+			return dna[r];
+		case modelRNA:
+			return rna[r];
+		case modelAA:
+			return aa[r];
+		case modelCod:
+			return cod[r];
+		default:
+			break;
+		}
+		return '?';
+	}
 	
 	void clear() { store.clear(); }
 
@@ -94,21 +118,25 @@ public:
 	typedef residue_iterator<high_iterator, low_iterator> this_type;
 	
 	residue_iterator() {}
-	residue_iterator(high_iterator h, bool b=true)
-		: hit(h), ignDel(b) {
-		for(;ignDel && hit->IsDeletion();++hit)
-			/*noop*/;
-		lit = hit->begin();
+	residue_iterator(high_iterator h, high_iterator e, bool b=true)
+		: hit(h), hit_end(e), ignDel(b) {
+		while(dirtyhit())
+			++hit;
+		lit = (hit != hit_end) ? hit->begin() : low_iterator();
 	}
-	residue_iterator(high_iterator h, low_iterator l, bool b=true)
-		: hit(h), lit(l), ignDel(b) {
+	residue_iterator(high_iterator h, high_iterator(e), low_iterator l, bool b=true)
+		: hit(h), hit_end(e), lit(l), ignDel(b) {
 		/* assumes consistency */
+	}
+
+	inline bool dirtyhit() {
+		return ( hit != hit_end && (hit->empty() || (ignDel && hit->IsDeletion() )));
 	}
 
 	this_type& operator++() {
 		if(++lit == hit->end()) {
-			do { ++hit; } while(hit->IsDeletion());
-			lit = hit->begin();
+			do { ++hit; } while(dirtyhit());
+			lit = (hit != hit_end) ? hit->begin() : low_iterator();
 		}
 		return *this;
 	}
@@ -119,8 +147,8 @@ public:
 	}
 	this_type& operator--() {
 		if(lit == hit->begin()) {
-			do {--hit; } while(ignDel && hit->IsDeletion());
-			--(lit = hit->end());
+			do {--hit; } while(dirtyhit());
+			lit = (hit != hit_end) ? --hit->end() : low_iterator();
 		}
 		return *this;
 	}
@@ -129,8 +157,11 @@ public:
 		--(*this);
 		return ret;
 	}
-	bool operator==(this_type &other) {
-		return (hit==other.hit && lit == other.lit);
+	bool operator==(const this_type &other) const {
+		return (hit==other.hit && (hit == hit_end || lit == other.lit));
+	}
+	bool operator!=(const this_type &other) const {
+		return !(*this == other);
 	}
 
 	reference operator*() const {
@@ -139,15 +170,18 @@ public:
 	pointer operator->() const {
 		return (&**this);
 	}
+
+	high_iterator _hit() { return hit; }
+	low_iterator _lit() { return hit; }
 	
 protected:
 	high_iterator hit;
+	high_iterator hit_end;
 	low_iterator lit;
 	bool ignDel;
 };
 
-class Sequence2
-{
+class Sequence2 {
 public:
 	// A sequence contains two important pieces of data
 	// 1. a vector of vectors of nucleotides.  This contains the raw Part data
@@ -155,8 +189,7 @@ public:
 	
 	static ResidueFactory makeSeq;
 		
-	class Part
-	{
+	class Part {
 	public:
 		typedef unsigned int color_type;
 		typedef ResidueFactory::Block data_type;
@@ -190,6 +223,8 @@ public:
 		inline bool IsDeletion() const { return IsType(TypeDel); }
 		inline bool IsExtant()   const { return IsType(TypeExt); }
 		
+		inline bool empty() const { return (szLength == 0); }
+
 		inline iterator begin() { return itBegin;}
 		inline iterator end() { return itBegin+szLength; }
 		inline iterator mid(size_type pos) {
@@ -228,8 +263,14 @@ public:
 	typedef Part::size_type size_type;
 
 	Sequence2() : szLength(0), szAlnLength(0) {
-		// Push back termination sequence
-		parts.push_back(Part(Part::iterator(), 0, 0, 0));
+	}
+
+	template<typename It1, typename It2>
+	void append(It1 b, It1 e, It2 r) {
+		ResidueFactory::seq_iterator it = makeSeq(b,e,r);
+		size_type len = e-b;
+		parts.push_back(Part(it, len, Part::TypeExt, 0));
+		szLength += len;
 	}
 
 	size_type size() const { return szLength; }
@@ -238,10 +279,10 @@ public:
 	// begin, end, and mid cycle through extant residues
 
 	inline iterator begin(bool b=true) {
-		return iterator(parts.begin(),b);
+		return iterator(parts.begin(),parts.end(),b);
 	}
 	inline iterator end(bool b=true) {
-		return iterator(--parts.end(), b);
+		return iterator(parts.end(),parts.end(),b);
 	}
 	inline iterator mid(size_type pos, bool b=true) {
 		if(pos >= size())
@@ -254,14 +295,14 @@ public:
 				break;
 			 pos -= it->size();
 		}	
-		return iterator(it, it->begin()+pos,b);
+		return iterator(it, parts.end(), it->begin()+pos,b);
 	}
 
 	inline const_iterator begin(bool b=true) const {
-		return const_iterator(parts.begin(),b);
+		return const_iterator(parts.begin(), parts.end(), b);
 	}
 	inline const_iterator end(bool b=true) const {
-		return const_iterator(--parts.end(),b);
+		return const_iterator(parts.end(),  parts.end(), b);
 	}
 	inline const_iterator mid(size_type pos, bool b=true) const {
 		if(pos >= size())
@@ -274,7 +315,7 @@ public:
 				break;
 			 pos -= it->size();
 		}	
-		return const_iterator(it, it->begin()+pos,b);
+		return const_iterator(it, parts.end(), it->begin()+pos,b);
 	}
 
 protected:
