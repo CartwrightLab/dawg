@@ -7,7 +7,7 @@
 #cmakedefine HAVE_IO_H 1
 #cmakedefine HAVE_GETOPT_H  1
 #cmakedefine HAVE_STDINT_H  1
-
+#cmakedefine HAVE_SYS_TYPES_H 1
 
 #cmakedefine HAVE_GETPID    1
 #cmakedefine HAVE__GETPID   1
