@@ -1,6 +1,6 @@
-DAWG VERSION 1-STABLE
+DAWG VERSION 1.2-RELEASE
 
-Copyright (c) (2005-2009) Reed A. Cartwright - All rights reserved.
+Copyright (c) (2004-2009) Reed A. Cartwright - All rights reserved.
 
 DESCRIPTION
 
@@ -279,26 +279,28 @@ The meaning of the "Params" vector is different for each substitution model.
 
 Parameter "Freqs" is ignored by the models "JC", "K2P", and "K3P".
 
-If "Lambda" is a single value, then it specifies the rate of indel formation, e.g.
-"Lambda = 0.1" is the same as "Lambda = {0.05, 0.05}".  The first parameter is the
-insertion rate and the second parameter is the deletion rate.
+If "Lambda" is a single value, then it specifies the rate of indel formation,
+e.g. "Lambda = 0.1" is the same as "Lambda = {0.05, 0.05}".  The first
+parameter is the insertion rate and the second parameter is the deletion rate.
 
-The first parameter of "GapModel" specifies the distribution model of insertion sizes.
-The second parameter specifies the distribution model of deletion sizes.  If only one
-parameter is given it is the model for both insertions and deletions.
+The first parameter of "GapModel" specifies the distribution model of 
+insertion sizes. The second parameter specifies the distribution model of 
+deletion sizes.  If only one parameter is given it is the model for both 
+insertions and deletions.
 
 The first parameter of "GapParams" is a vector specifying the parameters for the
-gap model of insertions.  Likewise the second parameter is a vector specifying the
-parameters for the gap model of deletions.  If "GapParams" is not a vector of vectors,
-then it specifies the vector of parameters for both insertions and deletions.
+gap model of insertions.  Likewise the second parameter is a vector specifying 
+the parameters for the gap model of deletions.  If "GapParams" is not a vector 
+of vectors, then it specifies the vector of parameters for both insertions and 
+deletions.
 
 The meaning of the GapParams vector is different for each gap model.
   US: The distribution of gap sizes.
   NB: The number of failures (r), the probability of success (q).
   PL: The rate parameter (a), the maximum gap size.
 
-To create a recombinant tree, you may need to specifically describe and label the
-inner nodes at which the recombination events occur.  See example4.dawg.
+To create a recombinant tree, you may need to specifically describe and label
+the inner nodes at which the recombination events occur.  See example4.dawg.
 
 Gamma takes precedence over Alpha.
 
@@ -306,8 +308,7 @@ Sequence takes precedence over Length.
 
 If Out.Block.* is the name of a file, the code is read from that file.
 
-The following vector parameters have a size of "Width": "Scale", "Alpha", "Gamma",
-and "Iota".  If their size is less than width then the first value in the vector
-will be used to fill in the rest of the values, e.g. "Scale = 1.0" is the same as
-"Scale = {1.0,1.0,1.0}" when "Width = 3".
-
+The following vector parameters have a size of "Width": "Scale", "Alpha", 
+"Gamma", and "Iota".  If their size is less than width then the first value in 
+the vector will be used to fill in the rest of the values, e.g. "Scale = 1.0" 
+is the same as "Scale = {1.0,1.0,1.0}" when "Width = 3".
