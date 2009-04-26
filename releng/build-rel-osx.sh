@@ -2,10 +2,9 @@
 
 PROJ=dawg
 PROJ_DISTS=dawg-1*
-
 MAKE=make
 CMAKE=cmake
-REPOS=`svn info | grep URL: | perl -pe "s!^URL: (.+)/releng$!$1!"`
+REPOS=`svn info | grep URL: | perl -pe 's!^URL: (.+)/releng$!$1!'`
 
 echo 
 echo Building distributions for $REPOS ...
