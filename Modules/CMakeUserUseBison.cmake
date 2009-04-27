@@ -51,8 +51,8 @@ IF(BISON_EXECUTABLE)
    IF(BISON_GENERATE_DEFINES)
      SET(HEADER "${CMAKE_CURRENT_BINARY_DIR}${PATH_OPT}/${HEAD}.tab${HEXT}")
 	 IF(UNIX OR NOT WIN32)
-		SET(BISON_TEST_MV && ( ( test -f "${OUTFILE}.h"
-		  && mv "${OUTFILE}.h" "${HEADER}" ) || true )
+		SET(BISON_TEST_MV && \( \( test -f "${OUTFILE}.h"
+		  && mv "${OUTFILE}.h" "${HEADER}" \) || true \)
 		  && test -f "${HEADER}"
 		)
 	 ENDIF(UNIX OR NOT WIN32)
