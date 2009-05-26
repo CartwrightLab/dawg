@@ -462,8 +462,9 @@ sub rsq
 		$m += $obs[$i];
 		$m2 += $obs[$i]*$obs[$i];
 	}
-	return 1.0 - $SSe/($m2-$m*$m/@obs);
-	
+	my $SSt = $m2-$m*$m/@obs;
+	return "NA" if($SSt == 0);
+	return 1.0 - $SSe/$SSt;
 }
 
 
