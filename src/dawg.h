@@ -37,6 +37,7 @@
 #include <cmath>
 #include <cassert>
 #include <cstdarg>
+#include <cstring>
 
 #include <vector>
 #include <string>
