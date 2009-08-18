@@ -5,7 +5,6 @@
 #include "matrix.h"
 
 #include <algorithm>
-#include <cstring>
 
 #ifdef HAVE_MEMORY_H
 #	include <memory.h>
