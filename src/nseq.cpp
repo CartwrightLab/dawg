@@ -18,8 +18,9 @@ int main(int argc, char* argv[]) {
 	
 	Sequence2 seq2;
 	seq2.append(ss.begin(),ss.end(),dd);
+	seq2.append(ss.begin(),ss.end());
 	
-	
+	cout << seq2.size() << endl;
 
 	Sequence2::iterator nit;
 	for(nit = seq2.begin(); nit != seq2.end(); ++nit)

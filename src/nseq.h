@@ -273,6 +273,14 @@ public:
 		szLength += len;
 	}
 
+	template<typename It1>
+	void append(It1 b, It1 e) {
+		ResidueFactory::seq_iterator it = makeSeq(b,e);
+		size_type len = e-b;
+		parts.push_back(Part(it, len, Part::TypeExt, 0));
+		szLength += len;
+	}
+
 	size_type size() const { return szLength; }
 	size_type asize() const { return szAlnLength; }
 
