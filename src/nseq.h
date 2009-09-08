@@ -172,7 +172,7 @@ public:
 	}
 
 	high_iterator _hit() { return hit; }
-	low_iterator _lit() { return hit; }
+	low_iterator _lit() { return lit; }
 	
 protected:
 	high_iterator hit;
@@ -247,12 +247,24 @@ public:
 			return itBegin+sz;
 		}
 		
+		inline Part split(iterator loc) {
+			Part ret;
+			if(loc == itBegin)
+				return ret;
+			ret.itBegin = loc;
+			ret.szLength = itBegin+szLength-loc;
+			ret.color = color;
+			szLength -= ret.szLength;
+			return ret;			
+		}
+			
 	protected:
 		iterator itBegin;
 		size_type szLength;
 		color_type color;
 
 	private:
+		Part() : szLength(0) { };
 		//Part(const Part &p);
 		Part & operator = (const Part &p);
 	};
@@ -280,6 +292,53 @@ public:
 		parts.push_back(Part(it, len, Part::TypeExt, 0));
 		szLength += len;
 	}
+	
+	void append(const Sequence2 &s2) {
+		parts.insert(parts.end(), s2.parts.begin(), s2.parts.end());
+		szLength += s2.size();
+	}
+	
+	void insert(size_type pos, const Sequence2 &s2) {
+		iterator it = mid(pos);
+		Parts::iterator hit = it._hit();
+		if(hit == parts.end()) {
+			parts.insert(hit, s2.parts.begin(), s2.parts.end());
+		} else {
+			Part tail = hit->split(it._lit());
+			parts.insert(++hit, s2.parts.begin(), s2.parts.end());
+			if(!tail.empty())
+				parts.insert(hit, tail);
+		}
+		szLength += s2.size();
+	}
+	
+	void remove(size_type pos, size_type len) {
+		iterator it = mid(pos);
+		Parts::iterator hit = it._hit();
+		if(hit == parts.end())
+			return; //nothing to do
+		// find start location and split if needed
+		Part tail = hit->split(it._lit());
+		if(!tail.empty()) {
+			parts.insert(++hit, tail);
+			--hit;
+		}
+		// hit now contains the first part of the deletion
+		// find the last part
+		while(hit != parts.end() && hit->size() <= len) {
+			// mark all of this part as deleted
+			hit->SetType(Part::TypeDel);
+			len -= hit->size();
+			// advance past deletions
+			do { ++hit; } while(hit->IsDeletion());
+		}
+		if(hit == parts.end() || len == 0)
+			return; // done
+		// split again
+		Part tail2 = hit->split(hit->begin()+len);
+		hit->SetType(Part::TypeDel);
+		parts.insert(++hit, tail2);
+	}
 
 	size_type size() const { return szLength; }
 	size_type asize() const { return szAlnLength; }
@@ -292,39 +351,29 @@ public:
 	inline iterator end(bool b=true) {
 		return iterator(parts.end(),parts.end(),b);
 	}
-	inline iterator mid(size_type pos, bool b=true) {
-		if(pos >= size())
-			return end();
-		Parts::iterator it = parts.begin();
-		for(; /*it != parts.end()*/; ++it) {
-			if(it->IsDeletion())
-				continue;
-			if(pos < it->size())
-				break;
-			 pos -= it->size();
-		}	
-		return iterator(it, parts.end(), it->begin()+pos,b);
-	}
-
 	inline const_iterator begin(bool b=true) const {
 		return const_iterator(parts.begin(), parts.end(), b);
 	}
 	inline const_iterator end(bool b=true) const {
 		return const_iterator(parts.end(),  parts.end(), b);
 	}
-	inline const_iterator mid(size_type pos, bool b=true) const {
+		
+	inline iterator mid(size_type pos, bool b=true) {
 		if(pos >= size())
 			return end();
-		Parts::const_iterator it = parts.begin();
-		for(; /*it != parts.end()*/; ++it) {
-			if(it->IsDeletion())
+		Parts::iterator it = parts.begin();
+		for(; it != parts.end(); ++it) {
+			if(b && it->IsDeletion())
 				continue;
 			if(pos < it->size())
 				break;
 			 pos -= it->size();
-		}	
-		return const_iterator(it, parts.end(), it->begin()+pos,b);
+		}
+		return (it == parts.end()) ? iterator(parts.end(), parts.end(),b)
+			: iterator(it, parts.end(), it->begin()+pos,b);
 	}
+	
+	const Parts& _parts() const { return parts; }
 
 protected:
 	Parts parts;
