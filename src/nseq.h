@@ -32,6 +32,7 @@ public:
 	typedef std::vector<Residue> Block; 
 	typedef std::list<Block> DataStore;
 	typedef Block::iterator seq_iterator;
+	typedef Block::const_iterator const_seq_iterator;
 	
 	template<typename It>
 	seq_iterator operator()(It b, It e) {
@@ -40,6 +41,14 @@ public:
 		store.back().reserve(e-b);
 		std::transform(b, e, std::back_inserter(store.back()),
 			std::bind1st(std::mem_fun(&ResidueFactory::makeResidue), this));
+		return store.back().begin();
+	}
+	seq_iterator operator()(seq_iterator b, seq_iterator e) {
+		store.push_back(Block(b,e));
+		return store.back().begin();
+	}
+	seq_iterator operator()(const_seq_iterator b, const_seq_iterator e) {
+		store.push_back(Block(b,e));
 		return store.back().begin();
 	}
 
@@ -65,7 +74,7 @@ public:
 	}
 	Residue makeResidue(char ch, double d) const {
 		return Residue(encode(ch), d);
-	}	
+	}
 	
 	Residue::base_type encode(char ch) const {
 		static Residue::base_type dna[] = {0,1,3,2};
@@ -196,6 +205,8 @@ public:
 		typedef data_type::value_type value_type;
 		typedef data_type::iterator iterator;
 		typedef data_type::const_iterator const_iterator;
+		typedef data_type::reference reference;
+		typedef data_type::const_reference const_reference;
 		typedef data_type::size_type size_type;
 		
 		static const color_type BranchInc   =  0x2;
@@ -206,6 +217,9 @@ public:
 		
 		Part(iterator it, size_type len, color_type uT, color_type uB) :
 			itBegin(it), szLength(len), color((uT & MaskType) | (uB & MaskBranch))
+			{ }
+		Part(iterator it, size_type len, color_type u) :
+			itBegin(it), szLength(len), color(u)
 			{ }
 		
 		inline color_type GetBranch() const { return color & MaskBranch; }
@@ -240,12 +254,6 @@ public:
 		}
 		
 		inline size_type size() const { return szLength; }
-		inline iterator shrink(size_type sz) {
-			if(sz <= szLength)
-				szLength = sz;
-			//else throw error?
-			return itBegin+sz;
-		}
 		
 		inline Part split(iterator loc) {
 			Part ret;
@@ -257,6 +265,10 @@ public:
 			szLength -= ret.szLength;
 			return ret;			
 		}
+		
+		inline Part clone() const {
+			return Part(makeSeq(begin(), end()), szLength, color);
+		}
 			
 	protected:
 		iterator itBegin;
@@ -266,7 +278,9 @@ public:
 	private:
 		Part() : szLength(0) { };
 		//Part(const Part &p);
-		Part & operator = (const Part &p);
+		//Part & operator = (const Part &p);
+		
+		friend class Sequence2;
 	};
 
 	typedef std::list<Part> Parts;
@@ -312,7 +326,7 @@ public:
 		szLength += s2.size();
 	}
 	
-	void remove(size_type pos, size_type len) {
+	void erase(size_type pos, size_type len) {
 		iterator it = mid(pos);
 		Parts::iterator hit = it._hit();
 		if(hit == parts.end())
@@ -338,6 +352,31 @@ public:
 		Part tail2 = hit->split(hit->begin()+len);
 		hit->SetType(Part::TypeDel);
 		parts.insert(++hit, tail2);
+	}
+	
+	void optimize() {
+		if(parts.empty())
+			return;
+		Parts::iterator itpp = parts.begin();
+		Parts::iterator it = itpp++;
+		while(itpp != parts.end()) {
+			if(it->end() == itpp->begin() && it->GetColor() == itpp->GetColor()) {
+				it->szLength += itpp->szLength;
+				itpp = parts.erase(itpp);
+			} else {
+				++it;
+				++itpp;
+			}
+		}
+	}
+	
+	Sequence2 clone() {
+		Sequence2 ret;
+		ret.szLength = szLength;
+		ret.szAlnLength = szAlnLength;
+		std::transform(parts.begin(), parts.end(), std::back_inserter(ret.parts),
+			std::mem_fun_ref(&Part::clone));
+		return ret;
 	}
 
 	size_type size() const { return szLength; }

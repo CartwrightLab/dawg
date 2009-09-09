@@ -29,16 +29,21 @@ int main(int argc, char* argv[]) {
 	seq2.append(ss.begin(),ss.end(),dd);
 	printseq(seq2);
 	
-	Sequence2 seq2a = seq2;
+	Sequence2 seq2a = seq2.clone();
 	printseq(seq2a);
 	
-	seq2.insert(3, seq2a);
-	seq2.insert(8, seq2a);
+	seq2.insert(3, seq2a.clone());
+	seq2.insert(8, seq2a.clone());
 	printseq(seq2);
-	seq2.remove(1, 4);
+	seq2a.begin()->base = 10;
+	printseq(seq2);
+	seq2.erase(1, 4);
 	printseq(seq2);	
-	seq2.remove(1, 4);
+	seq2.erase(1, 4);
 	printseq(seq2);
+	seq2.optimize();
+	printseq(seq2);
+
 	
 	return 0;
 }
