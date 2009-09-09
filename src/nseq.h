@@ -127,19 +127,19 @@ public:
 	typedef residue_iterator<high_iterator, low_iterator> this_type;
 	
 	residue_iterator() {}
-	residue_iterator(high_iterator h, high_iterator e, bool b=true)
-		: hit(h), hit_end(e), ignDel(b) {
+	residue_iterator(high_iterator h, high_iterator e)
+		: hit(h), hit_end(e) {
 		while(dirtyhit())
 			++hit;
 		lit = (hit != hit_end) ? hit->begin() : low_iterator();
 	}
-	residue_iterator(high_iterator h, high_iterator(e), low_iterator l, bool b=true)
-		: hit(h), hit_end(e), lit(l), ignDel(b) {
+	residue_iterator(high_iterator h, high_iterator(e), low_iterator l)
+		: hit(h), hit_end(e), lit(l) {
 		/* assumes consistency */
 	}
 
 	inline bool dirtyhit() {
-		return ( hit != hit_end && (hit->empty() || (ignDel && hit->IsDeletion() )));
+		return ( hit != hit_end && (hit->empty() || hit->IsDeletion() ));
 	}
 
 	this_type& operator++() {
@@ -187,7 +187,6 @@ protected:
 	high_iterator hit;
 	high_iterator hit_end;
 	low_iterator lit;
-	bool ignDel;
 };
 
 class Sequence2 {
@@ -288,7 +287,7 @@ public:
 	typedef residue_iterator<Parts::const_iterator, Part::const_iterator> const_iterator;
 	typedef Part::size_type size_type;
 
-	Sequence2() : szLength(0), szAlnLength(0) {
+	Sequence2() : szLength(0) {
 	}
 
 	template<typename It1, typename It2>
@@ -373,43 +372,41 @@ public:
 	Sequence2 clone() {
 		Sequence2 ret;
 		ret.szLength = szLength;
-		ret.szAlnLength = szAlnLength;
 		std::transform(parts.begin(), parts.end(), std::back_inserter(ret.parts),
 			std::mem_fun_ref(&Part::clone));
 		return ret;
 	}
 
 	size_type size() const { return szLength; }
-	size_type asize() const { return szAlnLength; }
 
 	// begin, end, and mid cycle through extant residues
 
-	inline iterator begin(bool b=true) {
-		return iterator(parts.begin(),parts.end(),b);
+	inline iterator begin() {
+		return iterator(parts.begin(),parts.end());
 	}
-	inline iterator end(bool b=true) {
-		return iterator(parts.end(),parts.end(),b);
+	inline iterator end() {
+		return iterator(parts.end(),parts.end());
 	}
-	inline const_iterator begin(bool b=true) const {
-		return const_iterator(parts.begin(), parts.end(), b);
+	inline const_iterator begin() const {
+		return const_iterator(parts.begin(), parts.end());
 	}
-	inline const_iterator end(bool b=true) const {
-		return const_iterator(parts.end(),  parts.end(), b);
+	inline const_iterator end() const {
+		return const_iterator(parts.end(),  parts.end());
 	}
 		
-	inline iterator mid(size_type pos, bool b=true) {
+	inline iterator mid(size_type pos) {
 		if(pos >= size())
 			return end();
 		Parts::iterator it = parts.begin();
 		for(; it != parts.end(); ++it) {
-			if(b && it->IsDeletion())
+			if(it->IsDeletion())
 				continue;
 			if(pos < it->size())
 				break;
 			 pos -= it->size();
 		}
-		return (it == parts.end()) ? iterator(parts.end(), parts.end(),b)
-			: iterator(it, parts.end(), it->begin()+pos,b);
+		return (it == parts.end()) ? iterator(parts.end(), parts.end())
+			: iterator(it, parts.end(), it->begin()+pos);
 	}
 	
 	const Parts& _parts() const { return parts; }
@@ -417,7 +414,6 @@ public:
 protected:
 	Parts parts;
 	size_type szLength;
-	size_type szAlnLength;
 };
 
 #endif
