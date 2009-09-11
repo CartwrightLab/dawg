@@ -189,6 +189,132 @@ protected:
 	low_iterator lit;
 };
 
+// http://www.cs.princeton.edu/courses/archive/fall08/cos226/lectures/10BalancedTrees-2x2.pdf
+
+template<class _T, class _W>
+class FingerTree {
+public:
+	class Node;
+	typedef FingerTree<_T, _W> self_type;
+	typedef Node *node_ptr;
+	typedef _T data_type;
+	typedef _W weight_type;
+
+	FingerTree() : root(NULL), the_end(NULL) {
+		the_end = new Node();
+		root = the_end;
+	}
+	~FingerTree() {
+		if(root != NULL)
+			delete root;
+	}
+	
+	node_ptr root_node() { return root; }
+	node_ptr end_node() { return the_end; }
+	
+	class Node {
+	public:		
+		Node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
+		Node() : left(NULL), right(NULL), up(NULL), val(), color(false) { }
+		~Node() {
+			if(left != NULL)
+				delete left;
+			if(right != NULL)
+				delete right;
+		}
+		node_ptr left, right, up;
+		data_type val;
+		bool color;
+		weight_type weight;
+
+		node_ptr rotate_left() {
+			node_ptr x = right;
+			right = x->left;
+			x->left = this;
+			x->color = color;
+			color = true;
+			if(up != NULL) {
+				if(up->left == this)
+					up->left = x;
+				else
+					up->right = x;
+			}
+			x->up = up;
+			up = x;
+		
+			return x;
+		}
+	
+		node_ptr rotate_right() {
+			node_ptr x = left;
+			left = x->right;
+			x->right = this;
+			x->color = color;
+			color = true;
+		
+			if(up != NULL) {
+				if(up->left == this)
+					up->left = x;
+				else
+					up->right = x;
+			}
+			x->up = up;
+			up = x;
+			return x;
+		}
+	
+		void flip_colors() {
+			color = true;
+			left->color = false;
+			right->color = false;
+		}		
+
+	};
+		
+	// insert value before node_ptr p
+	node_ptr insert(node_ptr p, const data_type &val) {
+		node_ptr x = new Node(val);
+		if(root == NULL)
+			return root = x;
+		if(p == NULL)
+			return p;
+
+		// find null link that is just to the left of p
+		if(p->left != NULL) {
+			for(p = p->left; p->right != NULL; p = p->right)
+				/*noop*/;
+			p->right = x;
+		} else {
+			p->left = x;
+		}
+		x->up = p;
+		
+		for(;;) {
+			if(is_red(p->right) && !is_red(p->left))
+				p = p->rotate_left();
+			if(is_red(p->left) && is_red(p->left->left))
+				p = p->rotate_right();
+			if(is_red(p->left) && is_red(p->right))
+				p->flip_colors();
+			if(p->up == NULL) {
+				root = p;
+				break;
+			}
+			p = p->up;
+		}
+		return x;
+	}
+			
+	
+private:
+	bool is_red(node_ptr p) const {
+		return (p != NULL && p->color == true);
+	}
+	
+	node_ptr root, the_end;
+};
+
+
 class Sequence2 {
 public:
 	// A sequence contains two important pieces of data
@@ -415,5 +541,6 @@ protected:
 	Parts parts;
 	size_type szLength;
 };
+
 
 #endif

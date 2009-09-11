@@ -19,7 +19,19 @@ void printseq(const Sequence2 &seq2) {
 	cout << endl;
 }
 
+template<class _T, class _W>
+void printnode(typename FingerTree<_T,_W>::node_ptr p) {
+	if(p == NULL)
+		return;
+	cout << "(";
+	printnode<_T,_W>(p->left);
+	cout << p->val;
+	printnode<_T,_W>(p->right);
+	cout << ")";
+}
+
 int main(int argc, char* argv[]) {
+	/*
 	string ss("ACGT");
 	double dd[] = {
 		1.0, 2.0, 3.0, 4.0,
@@ -43,8 +55,51 @@ int main(int argc, char* argv[]) {
 	printseq(seq2);
 	seq2.optimize();
 	printseq(seq2);
-
+	*/
 	
+	typedef FingerTree<int,int> FT;
+	FT tree;
+	FT::node_ptr r = tree.end_node();
+	tree.insert(r,1);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 2);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 3);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 4);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 5);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 6);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 7);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+	tree.insert(r, 8);
+	printnode<int,int>(tree.root_node());
+	cout << endl;	
+	tree.insert(r, 9);
+	printnode<int,int>(tree.root_node());
+	cout << endl;	
+	tree.insert(r, 10);
+	printnode<int,int>(tree.root_node());	
+	cout << endl;	
+	tree.insert(r, 11);
+	printnode<int,int>(tree.root_node());
+	cout << endl;	
+	tree.insert(r, 12);
+	printnode<int,int>(tree.root_node());
+	cout << endl;	
+	tree.insert(r, 13);
+	printnode<int,int>(tree.root_node());
+	cout << endl;
+				
 	return 0;
 }
 
