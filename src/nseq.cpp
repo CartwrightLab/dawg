@@ -1,8 +1,7 @@
 #include <iostream>
+#include <string>
 
 #include "nseq.h"
-
-#include <string>
 
 ResidueFactory makeSeq;
 
@@ -20,7 +19,7 @@ void printseq(const Sequence2 &seq2) {
 }
 
 template<class _T, class _W>
-void printnode(typename FingerTree<_T,_W>::node_ptr p) {
+void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {
 	if(p == NULL)
 		return;
 	cout << "(";
@@ -57,49 +56,18 @@ int main(int argc, char* argv[]) {
 	printseq(seq2);
 	*/
 	
-	typedef FingerTree<int,int> FT;
+	typedef dawg::finger_tree<int,int> FT;
 	FT tree;
-	FT::node_ptr r = tree.end_node();
-	tree.insert(r,1);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 2);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 3);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 4);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 5);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 6);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 7);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-	tree.insert(r, 8);
-	printnode<int,int>(tree.root_node());
-	cout << endl;	
-	tree.insert(r, 9);
-	printnode<int,int>(tree.root_node());
-	cout << endl;	
-	tree.insert(r, 10);
-	printnode<int,int>(tree.root_node());	
-	cout << endl;	
-	tree.insert(r, 11);
-	printnode<int,int>(tree.root_node());
-	cout << endl;	
-	tree.insert(r, 12);
-	printnode<int,int>(tree.root_node());
-	cout << endl;	
-	tree.insert(r, 13);
-	printnode<int,int>(tree.root_node());
-	cout << endl;
-				
+	for(int i=21;i<28;++i) {
+		tree.insert(tree.begin(), i);
+		printnode<int,int>(&*tree.root());
+		cout << endl;
+	}
+	for(int i=11;i<19;++i) {
+		tree.insert(tree.end(), i);
+		printnode<int,int>(&*tree.root());
+		cout << endl;
+	}
 	return 0;
 }
 

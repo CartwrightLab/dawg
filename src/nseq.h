@@ -11,19 +11,27 @@
 namespace dawg {
 // http://www.cs.princeton.edu/courses/archive/fall08/cos226/lectures/10BalancedTrees-2x2.pdf
 
+template<class _T, class _W> class finger_tree;
+
 namespace detail {
 
-template<class _T, _W>
+template<class _T, class _W>
 class finger_tree_node_iterator
 	: public std::iterator< std::bidirectional_iterator_tag,
-	                        dawg::finger_tree_node<_T, _W> >
+	                        typename dawg::finger_tree<_T, _W>::node >
 {
 public:
 	typedef finger_tree_node_iterator<_T, _W> self_type;
-	typedef std::iterator<bidirectional_iterator_tag, dawg::finger_tree_node<_T, _W> > base_type;
-	typedef dawg::finger_tree_node<_T, _W> node_type;
+	typedef typename dawg::finger_tree<_T, _W>::node node_type;
+	typedef std::iterator<std::bidirectional_iterator_tag, node_type> base_type;
 	
-	finger_tree_node_iterator() : p_node(NULL) { }
+	typedef typename base_type::value_type value_type;
+	typedef typename base_type::difference_type difference_type;
+	typedef typename base_type::pointer pointer;
+	typedef typename base_type::reference reference;
+	typedef typename base_type::iterator_category iterator_category;
+	
+	finger_tree_node_iterator() : p_node(node_type::null) { }
 	explicit finger_tree_node_iterator(pointer p) : p_node(p) { }
 	
 	reference operator*() const { return *p_node; }
@@ -66,72 +74,82 @@ protected:
 }; // namespace dawg::detail
 
 template<class _T, class _W>
-class FingerTree {
+class finger_tree {
 public:
-	class Node;
-	typedef FingerTree<_T, _W> self_type;
-	typedef Node *node_ptr;
+	typedef finger_tree<_T, _W> self_type;
+	struct node;
 	typedef _T data_type;
 	typedef _W weight_type;
+	typedef detail::finger_tree_node_iterator<_T, _W> iterator;
 
-	FingerTree() : root(NULL), the_end(NULL) {
-		the_end = new Node();
-		root = the_end;
+	finger_tree() {
+		head.up = &head;
+		head.left = &head;
+		head.right = &head;
 	}
-	~FingerTree() {
-		if(root != NULL)
-			delete root;
+	~finger_tree() {
+		if(head.up != &head)
+			delete head.up;
+		head.left = NULL;
+		head.right = NULL;
 	}
 	
-	node_ptr root_node() { return root; }
-	node_ptr end_node() { return the_end; }
+	iterator begin() {
+		return iterator(head.left);
+	}
+	iterator end() {
+		return iterator(&head);
+	}
+	iterator root() {
+		return iterator(head.up);
+	}
 	
-	class Node {
-	public:		
-		Node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
-		Node() : left(NULL), right(NULL), up(NULL), val(), color(false) { }
-		~Node() {
+	struct node {
+		typedef node* pointer;
+		
+		pointer left, right, up;
+		bool color; // red == true; black == false
+		data_type val;
+		weight_type weight;
+
+		node() : left(NULL), right(NULL), up(NULL), color(false) { }
+		node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
+		~node() {
 			if(left != NULL)
 				delete left;
 			if(right != NULL)
 				delete right;
 		}
-		node_ptr left, right, up;
-		data_type val;
-		bool color;
-		weight_type weight;
 
-		node_ptr rotate_left() {
-			node_ptr x = right;
+		pointer rotate_left() {
+			pointer x = right;
 			right = x->left;
 			x->left = this;
 			x->color = color;
 			color = true;
-			if(up != NULL) {
-				if(up->left == this)
-					up->left = x;
-				else
-					up->right = x;
-			}
+			if(up->up == this)
+				up->up = x;
+			else if(up->left == this)
+				up->left = x;
+			else
+				up->right = x;
 			x->up = up;
 			up = x;
-		
 			return x;
 		}
 	
-		node_ptr rotate_right() {
-			node_ptr x = left;
+		pointer rotate_right() {
+			pointer x = left;
 			left = x->right;
 			x->right = this;
 			x->color = color;
 			color = true;
-		
-			if(up != NULL) {
-				if(up->left == this)
-					up->left = x;
-				else
-					up->right = x;
-			}
+			if(up->up == this)
+				up->up = x;
+			else if(up->left == this)
+				up->left = x;
+			else
+				up->right = x;
 			x->up = up;
 			up = x;
 			return x;
@@ -141,51 +159,61 @@ public:
 			color = true;
 			left->color = false;
 			right->color = false;
-		}		
+		}
 
 	};
 	
-	// insert value before node_ptr p
-	node_ptr insert(node_ptr p, const data_type &val) {
-		node_ptr x = new Node(val);
-		if(root == NULL)
-			return root = x;
-		if(p == NULL)
-			return p;
+	// insert value before position in tree
+	iterator insert(iterator pos, const data_type &val) {
+		typename node::pointer p = &(*pos);
+		typename node::pointer x = new node(val);
 
 		// find null link that is just to the left of p
-		if(p->left != NULL) {
-			for(p = p->left; p->right != NULL; p = p->right)
+		// update start and end links if needed
+		// check of empty tree
+		if(begin() == end()) {
+			head.left = x;
+			head.right = x;
+			head.up = x;
+			x->color = false;
+		} else if(is_null(p->left)) {
+			p->left = x;
+			if(p == head.left)
+				head.left = x;
+		} else {
+			if(pos == end())
+				p = head.right;
+			else for(p = p->left; !is_null(p->right); p = p->right)
 				/*noop*/;
 			p->right = x;
-		} else {
-			p->left = x;
+			if(p == head.right)
+				head.right = x;
 		}
 		x->up = p;
-		
-		for(;;) {
+
+		for(; p != &head; p = p->up) {
 			if(is_red(p->right) && !is_red(p->left))
 				p = p->rotate_left();
 			if(is_red(p->left) && is_red(p->left->left))
 				p = p->rotate_right();
 			if(is_red(p->left) && is_red(p->right))
 				p->flip_colors();
-			if(p->up == NULL) {
-				root = p;
-				break;
-			}
-			p = p->up;
 		}
-		return x;
+		head.up->color = false;
+		
+		return iterator(x);
 	}
 			
 	
 private:
-	bool is_red(node_ptr p) const {
-		return (p != NULL && p->color == true);
+	inline bool is_null(typename node::pointer p) const {
+		return (p == NULL);
+	}
+	inline bool is_red(typename node::pointer p) const {
+		return (!is_null(p) && p->color == true);
 	}
 	
-	node_ptr root, the_end;
+	node head;
 };
 
 };
