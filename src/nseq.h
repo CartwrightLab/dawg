@@ -131,7 +131,7 @@ public:
 		data_type val;
 		weight_type weight;
 
-		node() : left(NULL), right(NULL), up(NULL), color(true) { }
+		node() : left(NULL), right(NULL), up(NULL), val(), color(true) { }
 		node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
 		~node() {
 			if(left != NULL)
@@ -154,6 +154,8 @@ public:
 				up->right = x;
 			x->up = up;
 			up = x;
+			if(right != NULL)
+				right->up = this;
 			return x;
 		}
 	
@@ -171,6 +173,8 @@ public:
 				up->right = x;
 			x->up = up;
 			up = x;
+			if(left != NULL)
+				left->up = this;
 			return x;
 		}
 	

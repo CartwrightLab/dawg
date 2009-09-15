@@ -24,7 +24,7 @@ void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {
 		return;
 	cout << "(";
 	printnode<_T,_W>(p->left);
-	cout << p->val;
+	cout << p->val << ((p->color) ? "r" : "b");
 	printnode<_T,_W>(p->right);
 	cout << ")";
 }
@@ -58,16 +58,35 @@ int main(int argc, char* argv[]) {
 	
 	typedef dawg::finger_tree<int,int> FT;
 	FT tree;
+	char in;
 	for(int i=21;i<28;++i) {
 		tree.insert(tree.begin(), i);
 		printnode<int,int>(&*tree.root());
 		cout << endl;
+		for(FT::iterator it = tree.begin(); it!=tree.end();++it) {
+			cout << it->val << " ";
+		}
+		for(FT::iterator it = tree.end(); it!=tree.begin();)
+			cout << (--it)->val << " ";
+		cout << endl;			
 	}
 	for(int i=11;i<19;++i) {
 		tree.insert(tree.end(), i);
 		printnode<int,int>(&*tree.root());
 		cout << endl;
 	}
+
+	for(FT::iterator it = tree.begin(); it!=tree.end();++it) {
+		cout << it->val << " " << it->up->val << " ";
+		cin.get(in);
+	}
+	cout << endl;
+
+	for(FT::iterator it = tree.end(); it!=tree.begin();)
+		cout << (--it)->val << " ";
+	cout << endl;
+
+	
 	return 0;
 }
 
