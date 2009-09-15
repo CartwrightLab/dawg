@@ -58,7 +58,7 @@ public:
 		return t;
 	}
 	self_type& operator--() {
-		if(p_node->color == true && p_node->up->up == p_node) {
+		if(p_node->up->up == p_node && p_node->color == true) {
 			p_node = p_node->right;
 		} else if(p_node->left != NULL) {
 			p_node = p_node->left;
@@ -92,6 +92,56 @@ protected:
 
 }; // namespace dawg::detail
 
+template<class _D=double, class _N=std::size_t>
+struct evo_node_weight {
+	typedef _D rate_type;
+	typedef _N size_type;
+	typedef evo_node_weight<_D,_N> self_type;
+	
+	rate_type rate;
+	size_type length;
+	
+	evo_node_weight() : rate(0), length(0) { }
+	evo_node_weight(const rate_type &r, const size_type &s) :
+		rate(r), length(s) { }
+	
+	template<class _T>
+	evo_node_weight(const _T &n) :
+		rate(n.rate()), length(n.length()) { }
+	
+	self_type operator+(const self_type &r) {
+		return self_type(rate+r.rate, length+r.length);
+	}
+	
+	self_type& operator-=(const self_type &r) {
+		rate -= r.rate;
+		length -= r.length;
+		return *this;
+	}
+	
+	bool operator<(const evo_node_weight &r) const {
+		return length < r.length;
+	}
+	
+	operator rate_type() const {
+		return rate;
+	}
+	operator size_type() const {
+		return length;
+	}
+};
+
+struct evo_node {
+	evo_node(int i) : val(i), _rate(1.0), _length(1) { }
+	evo_node() : val(0), _rate(1.0), _length(1) { }
+	
+	double rate() const { return _rate; }
+	std::size_t length() const { return _length; }
+	int val;
+	double _rate;
+	size_t _length;
+};
+
 template<class _T, class _W>
 class finger_tree {
 public:
@@ -101,7 +151,7 @@ public:
 	typedef _W weight_type;
 	typedef detail::finger_tree_node_iterator<_T, _W> iterator;
 
-	finger_tree() {
+	finger_tree() : head() {
 		head.up = &head;
 		head.left = &head;
 		head.right = &head;
@@ -131,8 +181,10 @@ public:
 		data_type val;
 		weight_type weight;
 
-		node() : left(NULL), right(NULL), up(NULL), val(), color(true) { }
-		node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
+		node() : left(NULL), right(NULL), up(NULL), color(true),
+			val(), weight()  { }
+		node(const data_type &v) : left(NULL), right(NULL), up(NULL), color(true),
+			val(v), weight(v) { }
 		~node() {
 			if(left != NULL)
 				delete left;
@@ -156,6 +208,7 @@ public:
 			up = x;
 			if(right != NULL)
 				right->up = this;
+			_update_weight();
 			return x;
 		}
 	
@@ -175,6 +228,7 @@ public:
 			up = x;
 			if(left != NULL)
 				left->up = this;
+			_update_weight();
 			return x;
 		}
 	
@@ -183,7 +237,22 @@ public:
 			left->color = false;
 			right->color = false;
 		}
-
+		
+		// recalculates the weight of this node
+		void _update_weight() {
+			weight = weight_type(val);
+			if(left != NULL)
+				weight = weight+left->weight;
+			if(right != NULL)
+				weight = weight+right->weight;
+		}
+		// update weight and propogate; should be called after
+		// any modification of val that affects the weight
+		void update_weight() {
+			_update_weight();
+			for(pointer p = up; p->up->up != p || p->color == false; p=p->up)
+				p->_update_weight();
+		}		
 	};
 	
 	// insert value before position in tree
@@ -193,7 +262,7 @@ public:
 
 		// find null link that is just to the left of p
 		// update start and end links if needed
-		// check of empty tree
+		// check for empty tree
 		if(begin() == end()) {
 			head.left = x;
 			head.right = x;
@@ -213,7 +282,8 @@ public:
 				head.right = x;
 		}
 		x->up = p;
-
+		
+		// Rebalance
 		for(; p != &head; p = p->up) {
 			if(is_red(p->right) && !is_red(p->left))
 				p = p->rotate_left();
@@ -221,13 +291,34 @@ public:
 				p = p->rotate_right();
 			if(is_red(p->left) && is_red(p->right))
 				p->flip_colors();
+			p->_update_weight();
 		}
 		head.up->color = false;
 		
 		return iterator(x);
 	}
-			
 	
+	template<class _P>
+	iterator find(const _P &pos) {
+		typename node::pointer p = head.up;
+		typedef _P cmp_type;
+		cmp_type temp = pos;
+		for(;;) {
+			if(p->left != NULL) {
+				if(temp < cmp_type(p->left->weight)) {
+					p = p->left;
+					continue;
+				}
+				temp -= cmp_type(p->left->weight);
+			}
+			if(temp < cmp_type(weight_type(p->val)))
+				break;
+			temp -= cmp_type(weight_type(p->val));
+			p = p->right;
+		}
+		return iterator(p);
+	}
+			
 private:
 	inline bool is_null(typename node::pointer p) const {
 		return (p == NULL);

@@ -24,69 +24,45 @@ void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {
 		return;
 	cout << "(";
 	printnode<_T,_W>(p->left);
-	cout << p->val << ((p->color) ? "r" : "b");
+	cout << p->val.val << ((p->color) ? "r" : "b");
 	printnode<_T,_W>(p->right);
 	cout << ")";
 }
 
+long unsigned int ul_find = 1ul;
+double d_find = 1.1;
+dawg::evo_node_weight<> w_find(1.1,1ul);
+typedef dawg::finger_tree<dawg::evo_node, dawg::evo_node_weight<> > FT;
+extern FT::iterator tit;
+FT::iterator tit;
+
 int main(int argc, char* argv[]) {
-	/*
-	string ss("ACGT");
-	double dd[] = {
-		1.0, 2.0, 3.0, 4.0,
-	};
-	
-	Sequence2 seq2;
-	seq2.append(ss.begin(),ss.end(),dd);
-	printseq(seq2);
-	
-	Sequence2 seq2a = seq2.clone();
-	printseq(seq2a);
-	
-	seq2.insert(3, seq2a.clone());
-	seq2.insert(8, seq2a.clone());
-	printseq(seq2);
-	seq2a.begin()->base = 10;
-	printseq(seq2);
-	seq2.erase(1, 4);
-	printseq(seq2);	
-	seq2.erase(1, 4);
-	printseq(seq2);
-	seq2.optimize();
-	printseq(seq2);
-	*/
-	
-	typedef dawg::finger_tree<int,int> FT;
 	FT tree;
 	char in;
-	for(int i=21;i<28;++i) {
-		tree.insert(tree.begin(), i);
-		printnode<int,int>(&*tree.root());
+
+	for(int i=0;i<256;++i) {
+		tree.insert(tree.end(), dawg::evo_node(i));
+		/*
+		printnode<dawg::evo_node,dawg::evo_node_weight<> >(&*tree.root());
 		cout << endl;
 		for(FT::iterator it = tree.begin(); it!=tree.end();++it) {
-			cout << it->val << " ";
+			cout << it->val.val << "/" << it->weight.rate << "/" << it->weight.length << " ";
 		}
-		for(FT::iterator it = tree.end(); it!=tree.begin();)
-			cout << (--it)->val << " ";
-		cout << endl;			
-	}
-	for(int i=11;i<19;++i) {
-		tree.insert(tree.end(), i);
-		printnode<int,int>(&*tree.root());
 		cout << endl;
+		*/
 	}
 
-	for(FT::iterator it = tree.begin(); it!=tree.end();++it) {
-		cout << it->val << " " << it->up->val << " ";
-		cin.get(in);
+	//for(int i=0;i<1000000000;++i) {
+	//	tit = tree.find(ul_find);
+	//}
+	//for(int i=0;i<1000000000;++i) {
+	//	tit = tree.find(d_find);
+	//}
+	for(int i=0;i<1000000000;++i) {
+		tit = tree.find(w_find);
 	}
-	cout << endl;
 
-	for(FT::iterator it = tree.end(); it!=tree.begin();)
-		cout << (--it)->val << " ";
-	cout << endl;
-
-	
+		
 	return 0;
 }
 
