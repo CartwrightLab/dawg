@@ -31,7 +31,7 @@ public:
 	typedef typename base_type::reference reference;
 	typedef typename base_type::iterator_category iterator_category;
 	
-	finger_tree_node_iterator() : p_node(node_type::null) { }
+	finger_tree_node_iterator() : p_node(NULL) { }
 	explicit finger_tree_node_iterator(pointer p) : p_node(p) { }
 	
 	reference operator*() const { return *p_node; }
@@ -39,26 +39,45 @@ public:
 	self_type& operator++() {
 		if(p_node->right != NULL) {
 			p_node = p_node->right;
-			while(p_node->left != 0)
+			while(p_node->left != NULL)
 				p_node = p_node->left;
 		} else {
 			pointer p_up = p_node->up;
-			while( p_up != NULL && p_node == p_up->right) {
+			while(p_node == p_up->right) {
 				p_node = p_up;
 				p_up = p_node->up;
 			}
-			
+			if(p_node->right != p_up)
+				p_node = p_up;
 		}
-		return *p_node;
+		return *this;
 	}
-	self_type& operator++(int) {
-		
+	self_type operator++(int) {
+		self_type t = *this;
+		++(*this);
+		return t;
 	}
 	self_type& operator--() {
-		
+		if(p_node->color == true && p_node->up->up == p_node) {
+			p_node = p_node->right;
+		} else if(p_node->left != NULL) {
+			p_node = p_node->left;
+			while(p_node->right != NULL)
+				p_node = p_node->right;
+		} else {
+			pointer p_up = p_node->up;
+			while(p_node == p_up->left) {
+				p_node = p_up;
+				p_up = p_node->up;
+			}
+			p_node = p_up;
+		}
+		return *this;
 	}
-	self_type& operator--(int) {
-		
+	self_type operator--(int) {
+		self_type t = *this;
+		--(*this);
+		return t;
 	}
 	bool operator==(const self_type& x) const {
 		return p_node == x.p_node;
@@ -112,7 +131,7 @@ public:
 		data_type val;
 		weight_type weight;
 
-		node() : left(NULL), right(NULL), up(NULL), color(false) { }
+		node() : left(NULL), right(NULL), up(NULL), color(true) { }
 		node(const data_type &v) : left(NULL), right(NULL), up(NULL), val(v), color(true) { }
 		~node() {
 			if(left != NULL)
