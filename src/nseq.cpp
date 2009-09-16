@@ -52,17 +52,11 @@ int main(int argc, char* argv[]) {
 		*/
 	}
 
-	//for(int i=0;i<1000000000;++i) {
-	//	tit = tree.find(ul_find);
-	//}
-	//for(int i=0;i<1000000000;++i) {
-	//	tit = tree.find(d_find);
-	//}
 	for(int i=0;i<1000000000;++i) {
-		tit = tree.find(w_find);
-	}
-
-		
+		//tit = tree.find(ul_find);
+		tit = tree.find(d_find);
+		//tit = tree.find(w_find);
+	}		
 	return 0;
 }
 

@@ -131,6 +131,23 @@ struct evo_node_weight {
 	}
 };
 
+template<class _D, class _N>
+bool operator<(const _N &l, const evo_node_weight<_D,_N> &w) {
+	return l < w.length;
+}
+template<class _D, class _N>
+_N& operator-=(_N &l, const evo_node_weight<_D,_N> &w) {
+	return l -= w.length;
+}
+template<class _D, class _N>
+bool operator<(const _D &r, const evo_node_weight<_D,_N> &w) {
+	return r < w.rate;
+}
+template<class _D, class _N>
+_D& operator-=(_D &r, const evo_node_weight<_D,_N> &w) {
+	return r -= w.rate;
+}
+
 struct evo_node {
 	evo_node(int i) : val(i), _rate(1.0), _length(1) { }
 	evo_node() : val(0), _rate(1.0), _length(1) { }
@@ -305,15 +322,15 @@ public:
 		cmp_type temp = pos;
 		for(;;) {
 			if(p->left != NULL) {
-				if(temp < cmp_type(p->left->weight)) {
+				if(temp < p->left->weight) {
 					p = p->left;
 					continue;
 				}
-				temp -= cmp_type(p->left->weight);
+				temp -= p->left->weight;
 			}
-			if(temp < cmp_type(weight_type(p->val)))
+			if(temp < weight_type(p->val))
 				break;
-			temp -= cmp_type(weight_type(p->val));
+			temp -= weight_type(p->val);
 			p = p->right;
 		}
 		return iterator(p);
