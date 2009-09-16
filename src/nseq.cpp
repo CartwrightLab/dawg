@@ -1,5 +1,8 @@
+#include <sys/time.h>
+
 #include <iostream>
 #include <string>
+
 
 #include "nseq.h"
 
@@ -29,34 +32,34 @@ void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {
 	cout << ")";
 }
 
-long unsigned int ul_find = 1ul;
-double d_find = 1.1;
-dawg::evo_node_weight<> w_find(1.1,1ul);
-typedef dawg::finger_tree<dawg::evo_node, dawg::evo_node_weight<> > FT;
+long unsigned int ul_find[256];
+double d_find[256];
+dawg::evo_node_weight<> w_find[256];
+typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weight<> > FT;
+//typedef dawg::finger_tree<dawg::evo_node, weight> FT;
 extern FT::iterator tit;
 FT::iterator tit;
 
 int main(int argc, char* argv[]) {
 	FT tree;
 	char in;
-
-	for(int i=0;i<256;++i) {
-		tree.insert(tree.end(), dawg::evo_node(i));
-		/*
-		printnode<dawg::evo_node,dawg::evo_node_weight<> >(&*tree.root());
-		cout << endl;
-		for(FT::iterator it = tree.begin(); it!=tree.end();++it) {
-			cout << it->val.val << "/" << it->weight.rate << "/" << it->weight.length << " ";
-		}
-		cout << endl;
-		*/
+	
+	for(int i=0;i<50;++i) {
+		tree.insert(tree.end(), dawg::residue());
+		ul_find[i] = i;
+		d_find[i] = i;
+		w_find[i] = dawg::evo_node_weight<>(i,i);
 	}
-
-	for(int i=0;i<1000000000;++i) {
-		//tit = tree.find(ul_find);
-		tit = tree.find(d_find);
-		//tit = tree.find(w_find);
-	}		
+		
+	for(int i=0;i<50;++i) {
+		tit = tree.find(ul_find[i]);
+		cout << tit->val.base() << " ";
+		tit = tree.find(d_find[i]);
+		cout << tit->val.base() << " ";
+		tit = tree.find(w_find[i]);
+		cout << tit->val.base() << endl;
+	}
+		
 	return 0;
 }
 

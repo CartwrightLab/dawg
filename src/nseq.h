@@ -92,6 +92,59 @@ protected:
 
 }; // namespace dawg::detail
 
+class residue {
+public:
+	typedef unsigned char base_type;
+	typedef float rate_type;
+	typedef unsigned int color_type;
+	typedef std::size_t size_type;
+	
+	static const color_type branch_mask	=  0x7FFFFFFF;
+	static const color_type delete_mask	=  0x80000000;
+	static const color_type delete_del	=  0x80000000;
+	static const color_type delete_ext	=  0x0;
+	
+	inline size_type base() const { return _base; }
+	
+	inline double rate() const { return _net_rate; }
+	inline std::size_t length() const { return is_deleted() ? 0 : 1; }
+	
+	inline color_type color()  const { return _color; }
+	inline void color(color_type c) { _color = c; }
+	inline void color(color_type c, bool b) {
+		_color = (c & branch_mask) | (b ? delete_del : delete_ext);
+	}
+	inline color_type branch() const { return _color & branch_mask; }
+	inline void branch(color_type u) { _color = (u & branch_mask) | (_color & ~branch_mask); }
+	
+	inline bool is_deleted() const { return (_color & delete_mask) == delete_del; }
+	inline void mark_deleted(bool b) {
+		_color = (_color & ~delete_mask) | (b ? delete_del : delete_ext);
+	}
+	inline bool is_branch(color_type u) const { return (branch() == (u & branch_mask)); }
+	
+	inline rate_type scalar() const {return _rate_scalar;}
+	inline void scalar(rate_type s) {
+		_net_rate *= s/_rate_scalar;
+		_rate_scalar = s;
+	}
+	inline void unit_rate(rate_type r) {
+		_net_rate = r*_rate_scalar;
+	}
+	residue() : _base(0), _color(0), _rate_scalar(1.0), _net_rate(1.0) { }
+	residue(base_type xbase, rate_type xscale, color_type xbranch, rate_type xrate) :
+		_base(xbase), _color(xbranch & branch_mask), _rate_scalar(xscale), _net_rate(xscale*xrate)
+	{
+		
+	}
+	
+protected:
+	base_type  _base;
+	color_type _color;
+	rate_type  _rate_scalar;
+	rate_type  _net_rate;	
+};
+
 template<class _D=double, class _N=std::size_t>
 struct evo_node_weight {
 	typedef _D rate_type;
@@ -113,6 +166,12 @@ struct evo_node_weight {
 		return self_type(rate+r.rate, length+r.length);
 	}
 	
+	self_type& operator+=(const self_type &r) {
+		rate += r.rate;
+		length += r.length;
+		return *this;
+	}
+	
 	self_type& operator-=(const self_type &r) {
 		rate -= r.rate;
 		length -= r.length;
@@ -129,34 +188,6 @@ struct evo_node_weight {
 	operator size_type() const {
 		return length;
 	}
-};
-
-template<class _D, class _N>
-bool operator<(const _N &l, const evo_node_weight<_D,_N> &w) {
-	return l < w.length;
-}
-template<class _D, class _N>
-_N& operator-=(_N &l, const evo_node_weight<_D,_N> &w) {
-	return l -= w.length;
-}
-template<class _D, class _N>
-bool operator<(const _D &r, const evo_node_weight<_D,_N> &w) {
-	return r < w.rate;
-}
-template<class _D, class _N>
-_D& operator-=(_D &r, const evo_node_weight<_D,_N> &w) {
-	return r -= w.rate;
-}
-
-struct evo_node {
-	evo_node(int i) : val(i), _rate(1.0), _length(1) { }
-	evo_node() : val(0), _rate(1.0), _length(1) { }
-	
-	double rate() const { return _rate; }
-	std::size_t length() const { return _length; }
-	int val;
-	double _rate;
-	size_t _length;
 };
 
 template<class _T, class _W>
@@ -259,9 +290,9 @@ public:
 		void _update_weight() {
 			weight = weight_type(val);
 			if(left != NULL)
-				weight = weight+left->weight;
+				weight += left->weight;
 			if(right != NULL)
-				weight = weight+right->weight;
+				weight += right->weight;
 		}
 		// update weight and propogate; should be called after
 		// any modification of val that affects the weight
@@ -322,15 +353,15 @@ public:
 		cmp_type temp = pos;
 		for(;;) {
 			if(p->left != NULL) {
-				if(temp < p->left->weight) {
+				if(temp < cmp_type(p->left->weight)) {
 					p = p->left;
 					continue;
 				}
-				temp -= p->left->weight;
+				temp -= cmp_type(p->left->weight);
 			}
-			if(temp < weight_type(p->val))
+			if(temp < cmp_type(weight_type(p->val)))
 				break;
-			temp -= weight_type(p->val);
+			temp -= cmp_type(weight_type(p->val));
 			p = p->right;
 		}
 		return iterator(p);
