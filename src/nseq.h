@@ -233,7 +233,7 @@ public:
 
 		node() : left(NULL), right(NULL), up(NULL), color(true),
 			val(), weight()  { }
-		node(const data_type &v) : left(NULL), right(NULL), up(NULL), color(true),
+		node(const data_type &v, pointer par=NULL) : left(NULL), right(NULL), up(par), color(true),
 			val(v), weight(v) { }
 		~node() {
 			if(left != NULL)
@@ -305,49 +305,55 @@ public:
 			_update_weight();
 			for(pointer p = up; p->up->up != p || p->color == false; p=p->up)
 				p->_update_weight();
-		}		
+		}	
 	};
+	
 	
 	// insert value before position in tree
 	iterator insert(iterator pos, const data_type &val) {
-		typename node::pointer p = &(*pos);
-		typename node::pointer x = new node(val);
-
-		// find null link that is just to the left of p
-		// update start and end links if needed
-		// check for empty tree
-		if(begin() == end()) {
-			head.left = x;
-			head.right = x;
-			head.up = x;
-			x->color = false;
-		} else if(is_null(p->left)) {
-			p->left = x;
-			if(p == head.left)
-				head.left = x;
-		} else {
-			if(pos == end())
-				p = head.right;
-			else for(p = p->left; !is_null(p->right); p = p->right)
-				/*noop*/;
-			p->right = x;
-			if(p == head.right)
-				head.right = x;
-		}
-		x->up = p;
+		typename node::pointer x = new node(val,NULL);
+		rebalance(attach_left(&(*pos),x));
+		return iterator(x);
+	}
 		
+	template<class It>
+	iterator insert(iterator pos, It it_begin, It it_end) {
+		if(it_begin == it_end)
+			return pos;
+		
+		// setup first position
+		typename node::pointer x = new node(*it_begin);
+		attach_left(&(*pos),x);
+		// add everything else as a linear "list"
+		typename node::pointer p = x;
+		for(++it_begin; it_begin != it_end; ++it_begin) {
+			p->right = new node(*it_begin,p);
+			p = p->right;
+		}
 		// Rebalance
-		for(; p != &head; p = p->up) {
-			if(is_red(p->right) && !is_red(p->left))
-				p = p->rotate_left();
-			if(is_red(p->left) && is_red(p->left->left))
-				p = p->rotate_right();
-			if(is_red(p->left) && is_red(p->right))
-				p->flip_colors();
-			p->_update_weight();
-		}
-		head.up->color = false;
+		rebalance(p->up);
+
+		return iterator(x);
+	}
+	
+	template<class It>
+	iterator insert2(iterator pos, It it_begin, It it_end) {
+		if(it_begin == it_end)
+			return pos;
 		
+		// setup last element
+		--it_end;
+		typename node::pointer x = new node(*(--it_end));
+		attach_left(&(*pos),x);
+		// add everything else as a linear "list"
+		typename node::pointer p = x;
+		while(it_end != it_begin) {
+			p->left = new node(*(--it_end),p);
+			p = p->left;
+		}
+		// Rebalance
+		rebalance(p->up);
+
 		return iterator(x);
 	}
 	
@@ -381,12 +387,50 @@ public:
 		return iterator(p);
 	}
 			
-private:
+protected:
 	inline bool is_null(typename node::pointer p) const {
 		return (p == NULL);
 	}
 	inline bool is_red(typename node::pointer p) const {
 		return (!is_null(p) && p->color == true);
+	}
+	
+	// Attaches the node pointed to by x to just the left of p.
+	// Returns the parent of the newly attached node
+	typename node::pointer attach_left(typename node::pointer p, typename node::pointer x) {
+		if(head.left == &head) {
+			head.left = x;
+			head.right = x;
+			head.up = x;
+			x->color = false;
+		} else if(is_null(p->left)) {
+			p->left = x;
+			if(p == head.left)
+				head.left = x;
+		} else {
+			if(p == &head)
+				p = head.right;
+			else for(p = p->left; !is_null(p->right); p = p->right)
+				/*noop*/;
+			p->right = x;
+			if(p == head.right)
+				head.right = x;
+		}
+		x->up = p;
+		return p;
+	}
+	
+	void rebalance(typename node::pointer p) {
+		for(; p != &head; p = p->up) {
+			if(is_red(p->right) && !is_red(p->left))
+				p = p->rotate_left();
+			if(is_red(p->left) && is_red(p->left->left))
+				p = p->rotate_right();
+			if(is_red(p->left) && is_red(p->right))
+				p->flip_colors();
+			p->_update_weight();
+		}
+		head.up->color = false;
 	}
 	
 	node head;
