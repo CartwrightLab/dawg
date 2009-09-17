@@ -15,7 +15,7 @@ void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {
 		return;
 	cout << "(";
 	printnode<_T,_W>(p->left);
-	cout << p->val.val << ((p->color) ? "r" : "b");
+	cout << p->val.base() << ((p->color) ? "r" : "b");
 	printnode<_T,_W>(p->right);
 	cout << ")";
 }
@@ -56,47 +56,21 @@ int main(int argc, char* argv[]) {
 	}
 	cout << endl;
 	
-	for(int i=0;i<1000;++i) {
-		store.push_back(dawg::residue(3,1.0,0,1.0));
+	srand(145);
+	for(int i=0;i<10;++i) {
+		store.push_back(dawg::residue(rand()&3,1.0,0,1.0));
+		cout << store.back().base();
 	}
-	store.push_back(dawg::residue(2,1.0,0,1.0));
-	
+	cout << endl;
 	tree.insert(tree.begin(),store.begin(),store.end());
-	tree.insert2(tree.end(),store.begin(),store.end());
 	
 	for(tit=tree.begin();tit!=tree.end();++tit)
 		cout << make_seq.decode(tit->val.base());
 	cout << endl;
-		
-	tstart = microsec_clock::local_time();
-	tend = microsec_clock::local_time();
-	cout << "Time 0: " << (tend-tstart).total_microseconds()/1e6 << endl;
 	
-	for(int ii=0;ii<5;++ii) {
-	tstart = microsec_clock::local_time();
-	for(int i=0; i<100;++i) {
-		FT t;
-		make_seq(ss.begin(),ss.end(),t);
-		tit = t.find(10ul);
-		for(int j=0; j<500;++j) {
-			t.insert2(tit, store.begin(), store.end());
-		}
-	}
-	tend = microsec_clock::local_time();
-	cout << "Time 1: " << (tend-tstart).total_microseconds()/1e6 << endl;
+	printnode<dawg::residue, dawg::evo_node_weight<> >(&(*tree.root()));
+	cout << endl;
 
-	tstart = microsec_clock::local_time();
-	for(int i=0; i<100;++i) {
-		FT t;
-		make_seq(ss.begin(),ss.end(),t);
-		tit = t.find(10ul);
-		for(int j=0; j<500;++j) {
-			t.insert(tit, store.begin(), store.end());
-		}
-	}
-	tend = microsec_clock::local_time();
-	cout << "Time 2: " << (tend-tstart).total_microseconds()/1e6 << endl;
-	}
 	return 0;
 }
 

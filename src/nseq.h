@@ -212,6 +212,28 @@ public:
 		head.left = NULL;
 		head.right = NULL;
 	}
+	finger_tree(const finger_tree &tree) : head() {
+		// tree is empty
+		if(tree.head.up == &tree.head) {
+			head.up = &head;
+			head.left = &head;
+			head.right = &head;
+			return;
+		}
+		typename node::pointer p = tree.head.up;
+		head.up = new node(*tree.head.up, &head);
+		
+		
+	}
+	
+	void clear() {
+		if(head.up == &head)
+			return;
+		delete head.up;
+		head.up = &head;
+		head.left = &head;
+		head.right = &head;		
+	}
 	
 	iterator begin() {
 		return iterator(head.left);
@@ -235,6 +257,8 @@ public:
 			val(), weight()  { }
 		node(const data_type &v, pointer par=NULL) : left(NULL), right(NULL), up(par), color(true),
 			val(v), weight(v) { }
+		node(const node &n, pointer par) : left(NULL), right(NULL), up(par),
+			color(n.color), val(n.val), weight(n.weight) { }
 		~node() {
 			if(left != NULL)
 				delete left;
@@ -322,7 +346,6 @@ public:
 			return pos;
 		
 		// setup last element
-		--it_end;
 		typename node::pointer x = new node(*(--it_end));
 		attach_left(&(*pos),x);
 		// add everything else as a linear "list"
@@ -331,6 +354,8 @@ public:
 			p->left = new node(*(--it_end),p);
 			p = p->left;
 		}
+		if(x == head.left)
+			head.left = p;
 		// Rebalance
 		rebalance(p->up);
 
@@ -366,7 +391,7 @@ public:
 		}
 		return iterator(p);
 	}
-			
+				
 protected:
 	inline bool is_null(typename node::pointer p) const {
 		return (p == NULL);
