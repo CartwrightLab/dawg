@@ -315,29 +315,9 @@ public:
 		rebalance(attach_left(&(*pos),x));
 		return iterator(x);
 	}
-		
-	template<class It>
-	iterator insert(iterator pos, It it_begin, It it_end) {
-		if(it_begin == it_end)
-			return pos;
-		
-		// setup first position
-		typename node::pointer x = new node(*it_begin);
-		attach_left(&(*pos),x);
-		// add everything else as a linear "list"
-		typename node::pointer p = x;
-		for(++it_begin; it_begin != it_end; ++it_begin) {
-			p->right = new node(*it_begin,p);
-			p = p->right;
-		}
-		// Rebalance
-		rebalance(p->up);
-
-		return iterator(x);
-	}
 	
 	template<class It>
-	iterator insert2(iterator pos, It it_begin, It it_end) {
+	iterator insert(iterator pos, It it_begin, It it_end) {
 		if(it_begin == it_end)
 			return pos;
 		
