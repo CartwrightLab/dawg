@@ -15,14 +15,13 @@ template<class _T, class _W> class finger_tree;
 
 namespace detail {
 
-template<class _T, class _W>
+template<class _T>
 class finger_tree_node_iterator
-	: public std::iterator< std::bidirectional_iterator_tag,
-	                        typename dawg::finger_tree<_T, _W>::node >
+	: public std::iterator<std::bidirectional_iterator_tag, _T>
 {
 public:
-	typedef finger_tree_node_iterator<_T, _W> self_type;
-	typedef typename dawg::finger_tree<_T, _W>::node node_type;
+	typedef finger_tree_node_iterator<_T> self_type;
+	typedef _T node_type;
 	typedef std::iterator<std::bidirectional_iterator_tag, node_type> base_type;
 	
 	typedef typename base_type::value_type value_type;
@@ -197,11 +196,14 @@ public:
 	struct node;
 	typedef _T data_type;
 	typedef _W weight_type;
-	typedef detail::finger_tree_node_iterator<_T, _W> iterator;
+	typedef typename std::size_t size_type;
+	
+	typedef detail::finger_tree_node_iterator<self_type::node> iterator;
+	typedef detail::finger_tree_node_iterator<const self_type::node> const_iterator;
 	typedef node& reference;
 	typedef const node& const_reference;
 
-	finger_tree() : head() {
+	finger_tree() : head(), _size(0) {
 		head.up = &head;
 		head.left = &head;
 		head.right = &head;
@@ -212,7 +214,8 @@ public:
 		head.left = NULL;
 		head.right = NULL;
 	}
-	finger_tree(const finger_tree &tree) : head() {
+	
+	finger_tree(const finger_tree &tree) : head(), _size(tree._size) {
 		// tree is empty
 		if(tree.head.up == &tree.head) {
 			head.up = &head;
@@ -220,10 +223,21 @@ public:
 			head.right = &head;
 			return;
 		}
-		typename node::pointer p = tree.head.up;
-		head.up = new node(*tree.head.up, &head);
-		
-		
+		clone_head(tree.head);
+	}
+	
+	finger_tree& operator=(const finger_tree &tree) {
+		if(&tree == this)
+			return *this;
+		clear();
+		if(tree.head.up == &tree.head) {
+			head.up = &head;
+			head.left = &head;
+			head.right = &head;
+			return *this;
+		}
+		clone_head(tree.head);
+		return *this;
 	}
 	
 	void clear() {
@@ -244,6 +258,17 @@ public:
 	iterator root() {
 		return iterator(head.up);
 	}
+	const_iterator begin() const {
+		return const_iterator(head.left);
+	}
+	const_iterator end() const {
+		return const_iterator(&head);
+	}
+	const_iterator root() const {
+		return const_iterator(head.up);
+	}
+	
+	inline size_type size() const { return _size; }
 	
 	struct node {
 		typedef node* pointer;
@@ -254,9 +279,9 @@ public:
 		weight_type weight;
 
 		node() : left(NULL), right(NULL), up(NULL), color(true),
-			val(), weight()  { }
-		node(const data_type &v, pointer par=NULL) : left(NULL), right(NULL), up(par), color(true),
-			val(v), weight(v) { }
+			val(), weight() { }
+		node(const data_type &v, pointer par=NULL) : left(NULL), right(NULL),
+			up(par), color(true), val(v), weight(v) { }
 		node(const node &n, pointer par) : left(NULL), right(NULL), up(par),
 			color(n.color), val(n.val), weight(n.weight) { }
 		~node() {
@@ -337,6 +362,7 @@ public:
 	iterator insert(iterator pos, const data_type &val) {
 		typename node::pointer x = new node(val,NULL);
 		rebalance(attach_left(&(*pos),x));
+		++_size;
 		return iterator(x);
 	}
 	
@@ -348,11 +374,13 @@ public:
 		// setup last element
 		typename node::pointer x = new node(*(--it_end));
 		attach_left(&(*pos),x);
+		++_size;
 		// add everything else as a linear "list"
 		typename node::pointer p = x;
 		while(it_end != it_begin) {
 			p->left = new node(*(--it_end),p);
 			p = p->left;
+			++_size;
 		}
 		if(x == head.left)
 			head.left = p;
@@ -364,6 +392,10 @@ public:
 	
 	void push_back(const data_type &val) {
 		insert(end(),val);
+	}
+	
+	void push_front(const data_type &val) {
+		insert(begin(),val);
 	}
 	
 	template<class _P>
@@ -438,7 +470,35 @@ protected:
 		head.up->color = false;
 	}
 	
+	// This will clone the structure and data of a head node
+	// pointed to by p, to the head node of this tree.
+	// Assumes that this tree is empty, and p is not.
+	void clone_head(const node &ohead) {
+		typename node::pointer p = ohead.up;
+		head.up = new node(*p, &head);
+		typename node::pointer q = head.up;
+		while(p != &ohead) {
+			if(p->left != NULL && q->left == NULL) {
+				q->left = new node(*p->left, q);
+				p = p->left;
+				q = q->left;
+			} else if(p->right != NULL && q->right == NULL) {
+				q->right = new node(*p->right, q);
+				p = p->right;
+				q = q->right;
+			} else {
+				if(p == ohead.left)
+					head.left = q;
+				if(p == ohead.right)
+					head.right = q;
+				p = p->up;
+				q = q->up;
+			}
+		}
+	}
+	
 	node head;
+	size_type _size;
 };
 
 class residue_factory {

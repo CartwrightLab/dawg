@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 	char in;
 	dawg::residue_factory make_seq;
 	
-	std::string ss = "ACGTACGTACGTACGTACGTACGTACGTACGT";
+	std::string ss = "ACGTACGACGTACGACGTACG";
 	
 	make_seq(ss.begin(),ss.end(),tree);
 	
@@ -45,17 +45,38 @@ int main(int argc, char* argv[]) {
 		d_find[i] = i;
 		w_find[i] = dawg::evo_node_weight<>(i,i);
 	}
+			
+	FT tree2(tree);
+	FT tree3;
+	tree3 = tree2;
+	
+	printnode<dawg::residue, dawg::evo_node_weight<> >(&(*tree.root()));
+	cout << endl;
+	printnode<dawg::residue, dawg::evo_node_weight<> >(&(*tree2.root()));
+	cout << endl;
+	printnode<dawg::residue, dawg::evo_node_weight<> >(&(*tree3.root()));
+	cout << endl;
 		
 	for(int i=0;i<ss.length();++i) {
 		cout << make_seq.decode(tree[ul_find[i]].base());
-//		cout << tit->val.base() << " ";
-//		tit = tree.find(d_find[i]);
-//		cout << tit->val.base() << " ";
-//		tit = tree.find(w_find[i]);
-//		cout << tit->val.base() << endl;
 	}
 	cout << endl;
+
+	for(int i=0;i<ss.length();++i) {
+		cout << make_seq.decode(tree2[ul_find[i]].base());
+	}
+	cout << endl;
+
+	for(int i=0;i<ss.length();++i) {
+		cout << make_seq.decode(tree3[ul_find[i]].base());
+	}
+	cout << endl;
+
 	
+	return 0;
+}
+
+/*
 	srand(145);
 	for(int i=0;i<10;++i) {
 		store.push_back(dawg::residue(rand()&3,1.0,0,1.0));
@@ -67,10 +88,5 @@ int main(int argc, char* argv[]) {
 	for(tit=tree.begin();tit!=tree.end();++tit)
 		cout << make_seq.decode(tit->val.base());
 	cout << endl;
-	
-	printnode<dawg::residue, dawg::evo_node_weight<> >(&(*tree.root()));
-	cout << endl;
-
-	return 0;
-}
+*/
 
