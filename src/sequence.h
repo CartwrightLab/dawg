@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DAWG_NSEQ_H
-#define DAWG_NSEQ_H
+#ifndef DAWG_SEQUENCE_H
+#define DAWG_SEQUENCE_H
 
 #include <vector>
 #include <list>
@@ -584,3 +584,4 @@ protected:
 
 
 #endif
+

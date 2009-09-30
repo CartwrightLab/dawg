@@ -44,101 +44,101 @@ void NewickNode::MakeName()
 //  class Sequence
 ////////////////////////////////////////////////////////////
 
-Sequence::const_iterator Sequence::SeqPos(size_type uPos) const
-{
-	const_iterator it = begin();
-	// Skip deletions
-	while(it->IsDeleted()) {++it;}
-	while(uPos--) {
-		++it;
-		// Skip deletions
-		while(it->IsDeleted()) {++it;}
-	}
-	return it;
-}
+//Sequence::const_iterator Sequence::SeqPos(size_type uPos) const
+//{
+//	const_iterator it = begin();
+//	// Skip deletions
+//	while(it->IsDeleted()) {++it;}
+//	while(uPos--) {
+//		++it;
+//		// Skip deletions
+//		while(it->IsDeleted()) {++it;}
+//	}
+//	return it;
+//}
 
-Sequence::iterator Sequence::SeqPos(size_type uPos)
-{
-	iterator it = begin();
-	// Skip deletions
-	while(it->IsDeleted()) {++it;}
-	while(uPos--) {
-		++it;
-		// Skip deletions
-		while(it->IsDeleted()) {++it;}
-	}
-	return it;
-}
+//Sequence::iterator Sequence::SeqPos(size_type uPos)
+//{
+//	iterator it = begin();
+//	// Skip deletions
+//	while(it->IsDeleted()) {++it;}
+//	while(uPos--) {
+//		++it;
+//		// Skip deletions
+//		while(it->IsDeleted()) {++it;}
+//	}
+//	return it;
+//}
 
-// Insert itBegin to itEnd at itPos
+//// Insert itBegin to itEnd at itPos
 
-Sequence::size_type Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
-{
-	if(itPos > end() || itPos < begin())
-		return 0;
+//Sequence::size_type Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
+//{
+//	if(itPos > end() || itPos < begin())
+//		return 0;
 
-	size_type uRet = (size_type)(itEnd-itBegin);
-	insert(itPos, itBegin, itEnd);
-	m_uLength += uRet;
-	return uRet;
-}
+//	size_type uRet = (size_type)(itEnd-itBegin);
+//	insert(itPos, itBegin, itEnd);
+//	m_uLength += uRet;
+//	return uRet;
+//}
 
-// Delete uSize nucleotides at itBegin
-Sequence::size_type Sequence::Deletion(iterator itBegin, size_type uSize)
-{
-	size_type uRet = 0;
-	for(;uRet < uSize && itBegin != end(); ++itBegin)
-	{
-		// Skip Gaps
-		if(itBegin->IsDeleted())
-			continue;
-		// Mark as Deleted-Root or Deleted-Insertion
-		itBegin->SetType(Nucleotide::TypeDel);
-		 ++uRet;
-	}
-	m_uLength -= uRet;
-	return uRet;
-}
+//// Delete uSize nucleotides at itBegin
+//Sequence::size_type Sequence::Deletion(iterator itBegin, size_type uSize)
+//{
+//	size_type uRet = 0;
+//	for(;uRet < uSize && itBegin != end(); ++itBegin)
+//	{
+//		// Skip Gaps
+//		if(itBegin->IsDeleted())
+//			continue;
+//		// Mark as Deleted-Root or Deleted-Insertion
+//		itBegin->SetType(Nucleotide::TypeDel);
+//		 ++uRet;
+//	}
+//	m_uLength -= uRet;
+//	return uRet;
+//}
 
-void Sequence::Append(const Sequence &seq)
-{
-		insert(end(), seq.begin(), seq.end());
-		m_uLength += seq.m_uLength;
-}
+//void Sequence::Append(const Sequence &seq)
+//{
+//		insert(end(), seq.begin(), seq.end());
+//		m_uLength += seq.m_uLength;
+//}
 
-void Sequence::ToString(std::string &ss) const
-{
-	ss.clear();
-	for(const_iterator cit = begin(); cit != end(); ++cit)
-		ss.push_back(cit->ToChar());
-}
+//void Sequence::ToString(std::string &ss) const
+//{
+//	ss.clear();
+//	for(const_iterator cit = begin(); cit != end(); ++cit)
+//		ss.push_back(cit->ToChar());
+//}
 
-bool Nucleotide::FromChar(char ch)
-{
-	switch(ch&0xDF)
-	{
-	case 'A':
-		m_ucNuc = NumAdenine;
-		return true;
-	case 'C':
-		m_ucNuc = NumCytosine;
-		return true;
-	case 'G':
-		m_ucNuc = NumGuanine;
-		return true;
-	case 'T':
-		m_ucNuc = NumThymine;
-		return true;
-	}
-	return false;
-}
-char Nucleotide::ToChar() const
-{
-	static const char csNuc[]	= "ACGT";
-	static const char csType[]	= "-=+ ";
+//bool Nucleotide::FromChar(char ch)
+//{
+//	switch(ch&0xDF)
+//	{
+//	case 'A':
+//		m_ucNuc = NumAdenine;
+//		return true;
+//	case 'C':
+//		m_ucNuc = NumCytosine;
+//		return true;
+//	case 'G':
+//		m_ucNuc = NumGuanine;
+//		return true;
+//	case 'T':
+//		m_ucNuc = NumThymine;
+//		return true;
+//	}
+//	return false;
+//}
+//char Nucleotide::ToChar() const
+//{
+//	static const char csNuc[]	= "ACGT";
+//	static const char csType[]	= "-=+ ";
 
-	return IsExtant() ? csNuc[GetBase()] : csType[GetBase()];
-}
+//	return IsExtant() ? csNuc[GetBase()] : csType[GetBase()];
+//}
 
 
 ////////////////////////////////////////////////////////////
@@ -146,11 +146,11 @@ char Nucleotide::ToChar() const
 ////////////////////////////////////////////////////////////
 
 // Get the total sequence length of the node
-Sequence::size_type Tree::Node::SeqLength() const
+Tree::Sequence::size_type Tree::Node::SeqLength() const
 {
 	Sequence::size_type uRet = 0;
 	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
-		uRet += it->SeqLength();
+		uRet += it->size();
 	return uRet;
 }
 

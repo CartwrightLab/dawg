@@ -7,7 +7,6 @@
 #include "nseq.h"
 
 using namespace std;
-using namespace boost::posix_time;
 
 template<class _T, class _W>
 void printnode(typename dawg::finger_tree<_T,_W>::node::pointer p) {

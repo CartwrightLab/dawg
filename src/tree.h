@@ -6,6 +6,9 @@
 #include "dawg.h"
 #include "indel.h"
 #include "matrix.h"
+#include "sequence.h"
+
+using namespace dawg;
 
 #include <list>
 
@@ -23,74 +26,74 @@ protected:
 };
 
 // A class to represent nucleotides
-class Nucleotide
-{
-public:
-	typedef unsigned short data_type;
-protected:
-	// First two bits specify base
-	// Second two bits specify type
-	data_type   m_ucNuc;
-	float m_dRate; // 0.0 means invarant
+//class Nucleotide
+//{
+//public:
+//	typedef unsigned short data_type;
+//protected:
+//	// First two bits specify base
+//	// Second two bits specify type
+//	data_type   m_ucNuc;
+//	float m_dRate; // 0.0 means invarant
 
-public:
-	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
-	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
+//public:
+//	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
+//	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
 
-	static const data_type MaskColor	= ~0x7;
-	static const data_type MaskBase		=  0x3; // 011
-	static const data_type MaskType		=  0x4; // 100
-	static const data_type TypeDel		=  0x4; // 100
-	static const data_type TypeExt      =  0x0; // 000
-	static const data_type ColorInc     =  0x8;
-	
-	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
-	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
-	inline data_type GetColor() const  { return m_ucNuc & MaskColor; }
-	inline void SetBase(data_type uc)  { m_ucNuc =  (uc & MaskBase) | (m_ucNuc & ~MaskBase); }
-	inline void SetType(data_type uc)  { m_ucNuc =  (uc & MaskType) | (m_ucNuc & ~MaskType); }
-	inline void SetColor(data_type uc) { m_ucNuc =  (uc & MaskColor) | (m_ucNuc & ~MaskColor); }
-	inline void SetNuc(data_type ucB, data_type ucT, data_type ucC)
-		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType) | (ucC & MaskColor); }
-	inline void SetNuc(data_type uc) { m_ucNuc = uc; }
-	inline bool IsType(data_type uc) const { return (GetType() == uc); }
-	inline bool IsDeleted() const { return (GetType() == TypeDel); }
-	inline bool IsExtant()  const { return (GetType() == TypeExt); }
+//	static const data_type MaskColor	= ~0x7;
+//	static const data_type MaskBase		=  0x3; // 011
+//	static const data_type MaskType		=  0x4; // 100
+//	static const data_type TypeDel		=  0x4; // 100
+//	static const data_type TypeExt      =  0x0; // 000
+//	static const data_type ColorInc     =  0x8;
+//	
+//	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
+//	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
+//	inline data_type GetColor() const  { return m_ucNuc & MaskColor; }
+//	inline void SetBase(data_type uc)  { m_ucNuc =  (uc & MaskBase) | (m_ucNuc & ~MaskBase); }
+//	inline void SetType(data_type uc)  { m_ucNuc =  (uc & MaskType) | (m_ucNuc & ~MaskType); }
+//	inline void SetColor(data_type uc) { m_ucNuc =  (uc & MaskColor) | (m_ucNuc & ~MaskColor); }
+//	inline void SetNuc(data_type ucB, data_type ucT, data_type ucC)
+//		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType) | (ucC & MaskColor); }
+//	inline void SetNuc(data_type uc) { m_ucNuc = uc; }
+//	inline bool IsType(data_type uc) const { return (GetType() == uc); }
+//	inline bool IsDeleted() const { return (GetType() == TypeDel); }
+//	inline bool IsExtant()  const { return (GetType() == TypeExt); }
 
-	inline double GetRate() const { return m_dRate; }
-	inline void SetRate(double r) { m_dRate = (float)r; }
-	
-	bool FromChar(char ch);
-	char ToChar() const;
+//	inline double GetRate() const { return m_dRate; }
+//	inline void SetRate(double r) { m_dRate = (float)r; }
+//	
+//	bool FromChar(char ch);
+//	char ToChar() const;
 
-};
+//};
 
 // A class that represent a sequence of nucleotides
-class Sequence : public std::vector<Nucleotide>
-{
-public:
-	typedef std::vector<Nucleotide> Base;
-	Sequence() : m_uLength(0) { }
-	explicit Sequence(size_type uSize) : Base(uSize, Nucleotide(0xF, -1.0))
-	{
-		m_uLength = uSize;
-	}
-	size_type SeqLength() const { return m_uLength; }
-	
-	// find the uPos-th true nucleotide (skips gaps)
-	const_iterator SeqPos(size_type uPos) const;
-	iterator SeqPos(size_type uPos);
+//class Sequence : public std::vector<Nucleotide>
+//{
+//public:
+//	typedef std::vector<Nucleotide> Base;
+//	Sequence() : m_uLength(0) { }
+//	explicit Sequence(size_type uSize) : Base(uSize, Nucleotide(0xF, -1.0))
+//	{
+//		m_uLength = uSize;
+//	}
+//	size_type SeqLength() const { return m_uLength; }
+//	
+//	// find the uPos-th true nucleotide (skips gaps)
+//	const_iterator SeqPos(size_type uPos) const;
+//	iterator SeqPos(size_type uPos);
 
-	size_type Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
-	size_type Deletion(iterator itBegin, Base::size_type uSize);
+//	size_type Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
+//	size_type Deletion(iterator itBegin, Base::size_type uSize);
 
-	void Append(const Sequence &seq);
+//	void Append(const Sequence &seq);
 
-	void ToString(std::string &ss) const;
+//	void ToString(std::string &ss) const;
 
-private:
-	size_type m_uLength;
-};
+//private:
+//	size_type m_uLength;
+//};
 
 // The recombinant tree data structure
 class Tree
@@ -101,9 +104,10 @@ public:
 	class Node
 	{
 	public:
+		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weight<> > Sequence;
+		typedef std::vector<Node::Sequence> Sections;
 		typedef std::map<std::string, Tree::Node> Map;
-		
-		std::vector<Sequence> m_vSections;
+		Sections m_vSections;
 		std::vector<std::string> m_vAncestors;
 		std::map<std::string, double> m_mBranchLens;
 		std::string m_ssName;
@@ -113,14 +117,16 @@ public:
 		void Flatten(Sequence& seq) const;
 		Sequence::size_type SeqLength() const;
 
-		typedef std::pair<std::vector<Sequence>::iterator, Sequence::iterator> iterator;
-		typedef std::pair<std::vector<Sequence>::const_iterator, Sequence::const_iterator> const_iterator;
+		typedef std::pair<Sections::iterator, Sequence::iterator> iterator;
+		typedef std::pair<Sections::const_iterator, Sequence::const_iterator> const_iterator;
 	
 		// find the uPos-th nucleotide in the node
 		// skips gaps and recognizes different sections
 		iterator SeqPos(Sequence::size_type uPos);
 		const_iterator SeqPos(Sequence::size_type uPos) const;
 	};
+	typedef Node::Sequence Sequence;
+	typedef Sequence::data_type Nucleotide;
 
 	typedef std::map<std::string, std::string> Alignment;
 	
@@ -138,10 +144,10 @@ public:
 	// Draw a random relative rate of substitution from the evolutionary parameters
 	double RandomRate(Sequence::size_type uPos) const;
 	// Draw a random base from the evolutionary parameters
-	Nucleotide::data_type RandomBase() const;
+	Nucleotide::base_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
-		{ return Nucleotide(RandomBase(), RandomRate(uPos)); }
+		{ return Nucleotide(RandomBase(), RandomRate(uPos), branchColor, 1.0); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
 	
@@ -204,7 +210,7 @@ private:
 	LinearFunc m_funcRateSum;
 	int m_uKeepFlank;
 
-	Nucleotide::data_type branchColor;
+	Nucleotide::color_type branchColor;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
