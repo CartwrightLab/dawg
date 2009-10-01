@@ -23,16 +23,16 @@ public:
 	typedef finger_tree_node_iterator<_T> self_type;
 	typedef _T node_type;
 	typedef std::iterator<std::bidirectional_iterator_tag, node_type> base_type;
-	
+
 	typedef typename base_type::value_type value_type;
 	typedef typename base_type::difference_type difference_type;
 	typedef typename base_type::pointer pointer;
 	typedef typename base_type::reference reference;
 	typedef typename base_type::iterator_category iterator_category;
-	
+
 	finger_tree_node_iterator() : p_node(NULL) { }
 	explicit finger_tree_node_iterator(pointer p) : p_node(p) { }
-	
+
 	reference operator*() const { return *p_node; }
 	pointer operator->() const { return p_node;	}
 	self_type& operator++() {
@@ -84,7 +84,7 @@ public:
 	bool operator!=(const self_type& x) const {
 		return p_node != x.p_node;
 	}
-	
+
 protected:
 	pointer p_node;
 };
@@ -97,18 +97,20 @@ public:
 	typedef float rate_type;
 	typedef unsigned int color_type;
 	typedef std::size_t size_type;
-	
-	static const color_type branch_mask	=  0x7FFFFFFF;
-	static const color_type delete_mask	=  0x80000000;
-	static const color_type delete_del	=  0x80000000;
-	static const color_type delete_ext	=  0x0;
-	
+
+	enum {
+		branch_mask = 0x7FFFFFFF,
+		delete_mask	= 0x80000000,
+		delete_del	= 0x80000000,
+		delete_ext  = 0x0
+	};
+
 	inline size_type base() const { return _base; }
 	inline void base(base_type b) { _base = b; }
-	
+
 	inline double rate() const { return _net_rate; }
 	inline std::size_t length() const { return is_deleted() ? 0 : 1; }
-	
+
 	inline color_type color()  const { return _color; }
 	inline void color(color_type c) { _color = c; }
 	inline void color(color_type c, bool b) {
@@ -116,13 +118,13 @@ public:
 	}
 	inline color_type branch() const { return _color & branch_mask; }
 	inline void branch(color_type u) { _color = (u & branch_mask) | (_color & ~branch_mask); }
-	
+
 	inline bool is_deleted() const { return (_color & delete_mask) == delete_del; }
 	inline void mark_deleted(bool b) {
 		_color = (_color & ~delete_mask) | (b ? delete_del : delete_ext);
 	}
 	inline bool is_branch(color_type u) const { return (branch() == (u & branch_mask)); }
-	
+
 	inline rate_type scalar() const {return _rate_scalar;}
 	inline void scalar(rate_type s) {
 		_net_rate *= s/_rate_scalar;
@@ -133,16 +135,17 @@ public:
 	}
 	residue() : _base(0), _color(0), _rate_scalar(1.0), _net_rate(1.0) { }
 	residue(base_type xbase, rate_type xscale, color_type xbranch, rate_type xrate, bool del=false) :
-		_base(xbase), _color((xbranch & branch_mask) | (del ? delete_del : delete_ext) ), _rate_scalar(xscale), _net_rate(xscale*xrate)
+		_base(xbase), _color((xbranch & branch_mask) | (del ? delete_del : delete_ext) ),
+		_rate_scalar(xscale), _net_rate(xscale*xrate)
 	{
-		
+
 	}
-	
+
 protected:
 	base_type  _base;
 	color_type _color;
 	rate_type  _rate_scalar;
-	rate_type  _net_rate;	
+	rate_type  _net_rate;
 };
 
 template<class _D=double, class _N=std::size_t>
@@ -150,38 +153,38 @@ struct evo_node_weight {
 	typedef _D rate_type;
 	typedef _N size_type;
 	typedef evo_node_weight<_D,_N> self_type;
-	
+
 	rate_type rate;
 	size_type length;
-	
+
 	evo_node_weight() : rate(0), length(0) { }
 	evo_node_weight(const rate_type &r, const size_type &s) :
 		rate(r), length(s) { }
-	
+
 	template<class _T>
 	evo_node_weight(const _T &n) :
 		rate(n.rate()), length(n.length()) { }
-	
+
 	self_type operator+(const self_type &r) {
 		return self_type(rate+r.rate, length+r.length);
 	}
-	
+
 	self_type& operator+=(const self_type &r) {
 		rate += r.rate;
 		length += r.length;
 		return *this;
 	}
-	
+
 	self_type& operator-=(const self_type &r) {
 		rate -= r.rate;
 		length -= r.length;
 		return *this;
 	}
-	
+
 	bool operator<(const evo_node_weight &r) const {
 		return length < r.length;
 	}
-	
+
 	operator rate_type() const {
 		return rate;
 	}
@@ -198,9 +201,9 @@ public:
 	typedef _T data_type;
 	typedef _W weight_type;
 	typedef typename std::size_t size_type;
-	
+
 	typedef detail::finger_tree_node_iterator<typename self_type::node> iterator;
-	typedef detail::finger_tree_node_iterator<typename const self_type::node> const_iterator;
+	typedef detail::finger_tree_node_iterator<const typename self_type::node> const_iterator;
 	typedef node& reference;
 	typedef const node& const_reference;
 
@@ -215,7 +218,7 @@ public:
 		head.left = NULL;
 		head.right = NULL;
 	}
-	
+
 	finger_tree(const finger_tree &tree) : head(), _size(tree._size) {
 		// tree is empty
 		if(tree.head.up == &tree.head) {
@@ -226,7 +229,7 @@ public:
 		}
 		clone_head(tree.head);
 	}
-	
+
 	finger_tree& operator=(const finger_tree &tree) {
 		if(&tree == this)
 			return *this;
@@ -240,16 +243,16 @@ public:
 		clone_head(tree.head);
 		return *this;
 	}
-	
+
 	void clear() {
 		if(head.up == &head)
 			return;
 		delete head.up;
 		head.up = &head;
 		head.left = &head;
-		head.right = &head;		
+		head.right = &head;
 	}
-	
+
 	iterator begin() {
 		return iterator(head.left);
 	}
@@ -268,12 +271,12 @@ public:
 	const_iterator root() const {
 		return const_iterator(head.up);
 	}
-	
+
 	inline size_type size() const { return _size; }
-	
+
 	struct node {
 		typedef node* pointer;
-		
+
 		pointer left, right, up;
 		bool color; // red == true; black == false
 		data_type val;
@@ -291,10 +294,10 @@ public:
 			if(right != NULL)
 				delete right;
 		}
-		
+
 		operator data_type() { return val; }
 		operator data_type() const { return val; }
-		
+
 		pointer rotate_left() {
 			pointer x = right;
 			right = x->left;
@@ -314,7 +317,7 @@ public:
 			_update_weight();
 			return x;
 		}
-	
+
 		pointer rotate_right() {
 			pointer x = left;
 			left = x->right;
@@ -334,13 +337,13 @@ public:
 			_update_weight();
 			return x;
 		}
-	
+
 		void flip_colors() {
 			color = true;
 			left->color = false;
 			right->color = false;
 		}
-		
+
 		// recalculates the weight of this node
 		void _update_weight() {
 			weight = weight_type(val);
@@ -355,10 +358,10 @@ public:
 			_update_weight();
 			for(pointer p = up; p->up->up != p || p->color == false; p=p->up)
 				p->_update_weight();
-		}	
+		}
 	};
-	
-	
+
+
 	// insert value before position in tree
 	iterator insert(iterator pos, const data_type &val) {
 		typename node::pointer x = new node(val,NULL);
@@ -366,12 +369,12 @@ public:
 		++_size;
 		return iterator(x);
 	}
-	
+
 	template<class It>
 	iterator insert(iterator pos, It it_begin, It it_end) {
 		if(it_begin == it_end)
 			return pos;
-		
+
 		// setup last element
 		typename node::pointer x = new node(*(--it_end));
 		attach_left(&(*pos),x);
@@ -394,20 +397,20 @@ public:
 	iterator insert(iterator pos, const self_type &tree) {
 		insert(pos, tree.begin(), tree.end());
 	}
-	
+
 	void push_back(const data_type &val) {
 		insert(end(),val);
 	}
-	
+
 	void push_front(const data_type &val) {
 		insert(begin(),val);
 	}
-	
+
 	template<class _P>
 	data_type operator[](const _P &pos) {
 		return find<_P>(pos)->val;
 	}
-	
+
 	template<class _P>
 	const_iterator find(const _P &pos) const {
 		typename node::pointer p = head.up;
@@ -426,15 +429,26 @@ public:
 			temp -= cmp_type(weight_type(p->val));
 			p = p->right;
 		}
-		return iterator(p);
+		return const_iterator(p);
 	}
-	
+
 	template<class _P>
 	iterator find(const _P &pos) {
 		return iterator(&*find(pos));
 	}
 
-				
+	// withdraw recede retreat
+	template<class _P>
+	const_iterator advance(const_iterator start, const _P &off) const {
+	    typename node::pointer p = start.p_node;
+	    typedef _P cmp_type;
+	    cmp_type temp = pos;
+	    for(;;) {
+
+	    }
+
+	}
+
 protected:
 	inline bool is_null(typename node::pointer p) const {
 		return (p == NULL);
@@ -442,7 +456,7 @@ protected:
 	inline bool is_red(typename node::pointer p) const {
 		return (!is_null(p) && p->color == true);
 	}
-	
+
 	// Attaches the node pointed to by x to just the left of p.
 	// Returns the parent of the newly attached node
 	typename node::pointer attach_left(typename node::pointer p, typename node::pointer x) {
@@ -467,7 +481,7 @@ protected:
 		x->up = p;
 		return p;
 	}
-	
+
 	void rebalance(typename node::pointer p) {
 		for(; p != &head; p = p->up) {
 			if(is_red(p->right) && !is_red(p->left))
@@ -480,7 +494,7 @@ protected:
 		}
 		head.up->color = false;
 	}
-	
+
 	// This will clone the structure and data of a head node
 	// pointed to by p, to the head node of this tree.
 	// Assumes that this tree is empty, and p is not.
@@ -507,7 +521,7 @@ protected:
 			}
 		}
 	}
-	
+
 	node head;
 	size_type _size;
 };
@@ -516,12 +530,12 @@ class residue_factory {
 public:
 	typedef unsigned int model_type;
 	typedef residue_factory self_type;
-	
+
 	static const model_type DNA = 0;
 	static const model_type RNA = 1;
 	static const model_type AA  = 2;
 	static const model_type CODON = 3;
-	
+
 	template<class It, class D>
 	void operator()(It b, It e, D &dest) {
 		std::transform(b, e, std::back_inserter(dest),
@@ -546,14 +560,14 @@ public:
 	*/
 
 	inline void model(model_type a) {_model = a; };
-	
+
 	residue make_residue(char ch) const {
 		return residue(encode(ch), 1.0, 0, 1.0);
 	}
 	residue make_residue(char ch, double d) const {
 		return residue(encode(ch), static_cast<residue::rate_type>(d), 0, 1.0);
 	}
-	
+
 	residue::base_type encode(char ch) const {
 		static residue::base_type dna[] = {0,1,3,2};
 		if(_model == DNA || _model == RNA)
@@ -584,7 +598,7 @@ public:
 		}
 		return '?';
 	}
-	
+
 	residue_factory() : _model(DNA) { }
 
 protected:

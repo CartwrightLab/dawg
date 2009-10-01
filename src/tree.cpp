@@ -4,6 +4,8 @@
 #include "tree.h"
 #include "rand.h"
 
+#include <algorithm>
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////
@@ -720,6 +722,16 @@ struct AlignData {
 	Sequence seq;
 	Sequence seqAln;
 	Sequence::iterator it;
+	
+	struct Printer {
+		Printer(const residue_factory &fac) : f(fac) {};
+	
+		char operator()(AlignData::Sequence::const_reference r) const {
+			static char gaps[] = "-=+";
+			return r.is_deleted() ? gaps[r.base()] : f.decode(r.base());
+		}
+		const residue_factory &f;
+	};	
 };
 
 void Tree::Align(Alignment &aln, unsigned int uFlags) const
@@ -783,15 +795,9 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	}
 
 	// Add aligned sequences to alingment set
-	struct myfunc {
-		myfunc(const residue_factory &fac) : f(fac) {};
-		char operator()(AlignData::Sequence::const_reference r) {
-			return f.decode(r.base());
-		}
-		const residue_factory &f;
-	};
 	for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
-		std::transform(sit->seqAln.begin(), sit->seqAln.begin(), std::back_inserter(aln[sit->ssName]), myfunc(make_seq));
+		transform(sit->seqAln.begin(), sit->seqAln.end(),
+			std::back_inserter(aln[sit->ssName]), AlignData::Printer(make_seq));
 	}
 }
 
