@@ -155,11 +155,11 @@ Tree::Sequence::size_type Tree::Node::SeqLength() const
 }
 
 // Flatten sections into one sequence
-void Tree::Node::Flatten(Sequence& seq) const
+void Tree::Node::Flatten(SeqBuffer& seq) const
 {
 	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
 		cit != m_vSections.end(); ++cit)
-		seq.Append(*cit);
+		seq.insert(seq.end(), cit->begin(), cit->end());
 }
 
 Tree::Node::iterator Tree::Node::SeqPos(Sequence::size_type uPos)
@@ -168,14 +168,14 @@ Tree::Node::iterator Tree::Node::SeqPos(Sequence::size_type uPos)
 	// Find section containing uPos
 	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
 	{
-		if(uPos < itA->SeqLength())
+		if(uPos < itA->root()->weight.length)
 			break;
-		uPos -= itA->SeqLength();
+		uPos -= itA->root()->weight.length;
 	}
 	// Find actual iterator of uPos
 	Sequence::iterator itB;
 	if(itA != m_vSections.end())
-		itB = itA->SeqPos(uPos);
+		itB = itA->find(uPos);
 	return iterator(itA,itB);
 }
 
@@ -185,14 +185,14 @@ Tree::Node::const_iterator Tree::Node::SeqPos(Sequence::size_type uPos) const
 	// Find section containing uPos
 	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
 	{
-		if(uPos < itA->SeqLength())
+		if(uPos < itA->root()->weight.length)
 			break;
-		uPos -= itA->SeqLength();
+		uPos -= itA->root()->weight.length;
 	}
 	// Find actual iterator of uPos
 	Sequence::const_iterator itB;
 	if(itA != m_vSections.end())
-		itB = itA->SeqPos(uPos);
+		itB = itA->find(uPos);
 	return const_iterator(itA,itB);
 }
 
@@ -258,10 +258,10 @@ void Tree::Evolve()
 	{
 		for(unsigned int u = 0;u<it->size();++u)
 		{
-			if((*it)[u].GetRate() < 0.0)
-				(*it)[u].SetRate(RandomRate(u));
-			if(!(*it)[u].IsExtant())
-				(*it)[u].SetNuc(RandomBase());
+			if((*it)[u].scalar() < 0.0)
+				(*it)[u].scalar(static_cast<residue::rate_type>(RandomRate(u)));
+			if((*it)[u].is_deleted())
+				(*it)[u].base(RandomBase());
 		}
 	}
 	// Evolve each tip
@@ -306,7 +306,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return; // Nothing to evolve
 	
 	//advance branch color
-	branchColor += Nucleotide::ColorInc;
+	++branchColor;
 	
 	// Substitutions
 	unsigned int uNuc = 0;
@@ -315,10 +315,10 @@ void Tree::Evolve(Node &rNode, double dTime)
 		for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
 		{
 			// Skip any position that is a deletion
-			if(jt->IsDeleted())
+			if(jt->val.is_deleted())
 				continue;
 			// Total Evolution Rate for the position
-			double dTemp = dTime*jt->GetRate()*m_vdScale[uNuc%m_uWidth];
+			double dTemp = dTime*jt->val.scalar()*m_vdScale[uNuc%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			// if dTemp is different from the previous one, recalculate probability matrix
@@ -340,16 +340,16 @@ void Tree::Evolve(Node &rNode, double dTime)
 				}
 			}
 			// get the base of the current nucleotide and pick new base
-			unsigned int uBase = jt->GetBase();
+			unsigned int uBase = jt->val.base();
 			dTemp = rand_real();
 			if(dTemp < m_matSubst(uBase, 0))
-				jt->SetBase(0);
+				jt->val.base(0);
 			else if(dTemp < m_matSubst(uBase, 1))
-				jt->SetBase(1);
+				jt->val.base(1);
 			else if(dTemp < m_matSubst(uBase, 2))
-				jt->SetBase(2);
+				jt->val.base(2);
 			else
-				jt->SetBase(3);
+				jt->val.base(3);
 
 			++uNuc; // Increase position
 		}
@@ -375,26 +375,24 @@ void Tree::Evolve(Node &rNode, double dTime)
 			Sequence::size_type ul = m_pInsertionModel->RandSize();
 			Sequence::size_type uPos = (Sequence::size_type)rand_uint((uint32_t)uLength); // pos is in [0,L]
 			// Construct sequence to be inserted
-			Sequence seq;
+			SeqBuffer seq;
+			seq.reserve(m_uWidth*ul);
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
-				nuc.SetColor(branchColor);
+				nuc.color(branchColor);
 				seq.push_back(nuc);
 			}
 			// Find Position of Insertion
 			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
 			if(itPos.first == rNode.m_vSections.end())
 			{
-				// Insert at end of sequence
-				uLength += rNode.m_vSections.back().Insertion(
-					rNode.m_vSections.back().end(), seq.begin(), seq.end())/m_uWidth;
+				--itPos.first;
+				itPos.second = itPos.first->end();
 			}
-			else
-			{
-				// Insert inside sequence
-				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end())/m_uWidth;
-			}
+			// Insert inside sequence
+			itPos.first->insert(itPos.second, seq.begin(), seq.end());
+			uLength += ul;
 		}
 		else if(uLength > 0)
 		{
@@ -618,46 +616,66 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	// Check to see if sequence is specified
 	if(vSeqs.size())
 	{	
+		m_vDNASeqs.assign(vSeqs.size(), Sequence());
+		SeqBuffer seq;
 		// Read sequence of each section
-		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
+		for(unsigned int u = 0; u < vSeqs.size(); ++u)
 		{
-			Sequence seq(BlockTrim((unsigned int)cit->size()));
-			for(unsigned int u=0; u<seq.size(); ++u)
-				if(!seq[u].FromChar((*cit)[u]))
-					return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
-			m_vDNASeqs.push_back(seq);
+			const string & ss = vSeqs[u];
+			unsigned int uu = BlockTrim(ss.size());
+			seq.clear();
+			make_seq(ss.begin(), ss.begin()+uu, seq);
+			m_vDNASeqs[u].insert(m_vDNASeqs[u].end(), seq.begin(), seq.end());
+
+			//for(unsigned int u=0; u<uu; ++u)
+			//	if(!seq[u].FromChar((*cit)[u]))
+			//		return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
 		}
 	}
 	else
 	{
 		// Create random sequences
-		for(vector<unsigned int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence(*cit*m_uWidth));
+		m_vDNASeqs.assign(vLens.size(), Sequence());
+		SeqBuffer seq;
+		residue res(0, -1.0, 0, 1.0);
+		res.mark_deleted(true);
+		for(unsigned int u = 0; u < vSeqs.size(); ++u)
+		{
+			seq.assign(m_uWidth*vLens[u], res);
+			m_vDNASeqs[u].insert(m_vDNASeqs[u].end(), seq.begin(), seq.end());
+		}
 	}
 	// Check to see if rates are specified
 	if(vRates.size())
 	{
 		// Read rates of each section
+		double dTemp = 0.0;
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
 		{
-			double dTemp = 0.0;
-			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v)
+			unsigned int v = 0;
+			for(Sequence::iterator it = m_vDNASeqs[u].begin();
+				it != m_vDNASeqs[u].end(); ++it)
 			{
-				m_vDNASeqs[u][v].SetRate(vRates[u][v]);
+				it->val.scalar(static_cast<residue::rate_type>(vRates[u][v]));
 				dTemp += vRates[u][v];
-
+				++v;
 			}
-			// Scale the Expected Rate to 1.0
-			for(unsigned int v=0; v < m_vDNASeqs[u].size(); ++v) {
-				double r = m_vDNASeqs[u][v].GetRate();
-				m_vDNASeqs[u][v].SetRate(r/dTemp);
+		}
+		// Scale the Expected Rate to 1.0
+		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
+		{
+			for(Sequence::iterator it = m_vDNASeqs[u].begin();
+				it != m_vDNASeqs[u].end(); ++it)
+			{
+				residue::rate_type s = it->val.scalar();
+				it->val.scalar(static_cast<residue::rate_type>(s/dTemp));
 			}
 		}
 	}
 	return true;
 }
 
-Nucleotide::data_type Tree::RandomBase() const
+Tree::Nucleotide::base_type Tree::RandomBase() const
 {
 	double d = rand_real();
 	if(d < m_dNucCumFreqs[0])
@@ -682,6 +700,7 @@ double Tree::RandomRate(Sequence::size_type uPos) const
 }
 
 struct AlignData {
+	typedef Tree::SeqBuffer Sequence;
 	AlignData(const string &name, const Sequence &s ) : ssName(name), seq(s) {
 		it = seq.begin();
 	}
@@ -711,7 +730,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		// Skip any sequence that begin with one of the two special characters
 		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
 			continue;
-		Sequence s;
+		AlignData::Sequence s;
 		cit->second.Flatten(s);
 		vTable.push_back(AlignData(cit->second.m_ssName, s));
 	}
@@ -721,22 +740,22 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	
 	// States: Quit (0), Root(1), Ins(2), InsDel(4), Del (8)
 	unsigned int uState = 1;
-	unsigned int uColor = 0;
-	unsigned int uColorN = 0;
+	unsigned int uBranch = 0;
+	unsigned int uBranchN = 0;
 	// Go through each column, adding gaps where neccessary
 	while(uState != 0) {
 		uState = 0; // Set to quit
-		uColor = 0; // Set to lowest color
+		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end())
 				continue; // Sequence is done
-			uColorN = sit->it->GetColor();
-			if(uColorN > uColor) {
-				uColor = uColorN;
-				uState = (sit->it->IsExtant() ? 1 : 2);
-			} else if(uColorN == uColor) {
-				uState |= (sit->it->IsExtant() ? 1 : 2);
+			uBranchN = sit->it->branch();
+			if(uBranchN > uBranch) {
+				uBranch = uBranchN;
+				uState = (sit->it->is_deleted() ? 2 : 1);
+			} else if(uBranchN == uBranch) {
+				uState |= (sit->it->is_deleted() ? 2 : 1);
 			}
 		}
 		if(uState == 0) // Stop Aligning
@@ -745,26 +764,34 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end()) {
 				if(!(uState == 2 && rmEmpty))
-					sit->seqAln.push_back(Nucleotide(2|Nucleotide::TypeDel, 1.0));
+					sit->seqAln.push_back(Nucleotide(2, 1.0, 0, 1.0, true));
 				continue;
 			} else if(uState == 2 && rmEmpty) {
-				if(sit->it->GetColor() != uColor)
+				if(sit->it->branch() != uBranch)
 					continue;
-			} else if(sit->it->GetColor() != uColor) {
-				sit->seqAln.push_back(Nucleotide(2|Nucleotide::TypeDel, 1.0));
+			} else if(sit->it->branch() != uBranch) {
+				sit->seqAln.push_back(Nucleotide(2, 1.0, 0, 1.0, true));
 				continue;
-			} else if(sit->it->IsExtant())
+			} else if(!sit->it->is_deleted())
 				sit->seqAln.push_back(*sit->it);
-			else if(sit->it->GetColor() == 0)
-				sit->seqAln.push_back(Nucleotide(0|Nucleotide::TypeDel, 1.0));
+			else if(sit->it->branch() == 0)
+				sit->seqAln.push_back(Nucleotide(0, 1.0, 0, 1.0, true));
 			else
-				sit->seqAln.push_back(Nucleotide(1|Nucleotide::TypeDel, 1.0));
+				sit->seqAln.push_back(Nucleotide(1, 1.0, 0, 1.0, true));
 			++(sit->it);
 		}
 	}
 
 	// Add aligned sequences to alingment set
+	struct myfunc {
+		myfunc(const residue_factory &fac) : f(fac) {};
+		char operator()(AlignData::Sequence::const_reference r) {
+			return f.decode(r.base());
+		}
+		const residue_factory &f;
+	};
 	for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
-		sit->seqAln.ToString(aln[sit->ssName]);
+		std::transform(sit->seqAln.begin(), sit->seqAln.begin(), std::back_inserter(aln[sit->ssName]), myfunc(make_seq));
 	}
 }
+

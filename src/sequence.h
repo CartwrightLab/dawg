@@ -104,6 +104,7 @@ public:
 	static const color_type delete_ext	=  0x0;
 	
 	inline size_type base() const { return _base; }
+	inline void base(base_type b) { _base = b; }
 	
 	inline double rate() const { return _net_rate; }
 	inline std::size_t length() const { return is_deleted() ? 0 : 1; }
@@ -131,8 +132,8 @@ public:
 		_net_rate = r*_rate_scalar;
 	}
 	residue() : _base(0), _color(0), _rate_scalar(1.0), _net_rate(1.0) { }
-	residue(base_type xbase, rate_type xscale, color_type xbranch, rate_type xrate) :
-		_base(xbase), _color(xbranch & branch_mask), _rate_scalar(xscale), _net_rate(xscale*xrate)
+	residue(base_type xbase, rate_type xscale, color_type xbranch, rate_type xrate, bool del=false) :
+		_base(xbase), _color((xbranch & branch_mask) | (del ? delete_del : delete_ext) ), _rate_scalar(xscale), _net_rate(xscale*xrate)
 	{
 		
 	}
@@ -198,8 +199,8 @@ public:
 	typedef _W weight_type;
 	typedef typename std::size_t size_type;
 	
-	typedef detail::finger_tree_node_iterator<self_type::node> iterator;
-	typedef detail::finger_tree_node_iterator<const self_type::node> const_iterator;
+	typedef detail::finger_tree_node_iterator<typename self_type::node> iterator;
+	typedef detail::finger_tree_node_iterator<typename const self_type::node> const_iterator;
 	typedef node& reference;
 	typedef const node& const_reference;
 
@@ -389,6 +390,10 @@ public:
 
 		return iterator(x);
 	}
+
+	iterator insert(iterator pos, const self_type &tree) {
+		insert(pos, tree.begin(), tree.end());
+	}
 	
 	void push_back(const data_type &val) {
 		insert(end(),val);
@@ -404,7 +409,7 @@ public:
 	}
 	
 	template<class _P>
-	iterator find(const _P &pos) {
+	const_iterator find(const _P &pos) const {
 		typename node::pointer p = head.up;
 		typedef _P cmp_type;
 		cmp_type temp = pos;
@@ -423,6 +428,12 @@ public:
 		}
 		return iterator(p);
 	}
+	
+	template<class _P>
+	iterator find(const _P &pos) {
+		return iterator(&*find(pos));
+	}
+
 				
 protected:
 	inline bool is_null(typename node::pointer p) const {
@@ -540,7 +551,7 @@ public:
 		return residue(encode(ch), 1.0, 0, 1.0);
 	}
 	residue make_residue(char ch, double d) const {
-		return residue(encode(ch), d, 0, 1.0);
+		return residue(encode(ch), static_cast<residue::rate_type>(d), 0, 1.0);
 	}
 	
 	residue::base_type encode(char ch) const {

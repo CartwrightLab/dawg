@@ -105,7 +105,9 @@ public:
 	{
 	public:
 		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weight<> > Sequence;
-		typedef std::vector<Node::Sequence> Sections;
+		typedef Sequence::data_type Nucleotide;
+		typedef std::vector<Nucleotide> SeqBuffer;
+		typedef std::vector<Sequence> Sections;
 		typedef std::map<std::string, Tree::Node> Map;
 		Sections m_vSections;
 		std::vector<std::string> m_vAncestors;
@@ -114,7 +116,7 @@ public:
 		bool m_bTouched;
 
 		Node() : m_bTouched(false) { }
-		void Flatten(Sequence& seq) const;
+		void Flatten(SeqBuffer& seq) const;
 		Sequence::size_type SeqLength() const;
 
 		typedef std::pair<Sections::iterator, Sequence::iterator> iterator;
@@ -126,7 +128,8 @@ public:
 		const_iterator SeqPos(Sequence::size_type uPos) const;
 	};
 	typedef Node::Sequence Sequence;
-	typedef Sequence::data_type Nucleotide;
+	typedef Node::Nucleotide Nucleotide;
+	typedef Node::SeqBuffer SeqBuffer;
 
 	typedef std::map<std::string, std::string> Alignment;
 	
@@ -147,7 +150,7 @@ public:
 	Nucleotide::base_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
-		{ return Nucleotide(RandomBase(), RandomRate(uPos), branchColor, 1.0); }
+	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate(uPos)), branchColor, 1.0); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
 	
@@ -178,6 +181,9 @@ protected:
 	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
 	void Evolve(Node &rNode, double dTime);
 	void Evolve(Node &rNode);
+
+	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
+	//size_type Deletion(Sequence::iterator itBegin, Base::size_type uSize);
 
 private:
 	int m_nSec;
@@ -211,6 +217,8 @@ private:
 	int m_uKeepFlank;
 
 	Nucleotide::color_type branchColor;
+
+	residue_factory make_seq;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
