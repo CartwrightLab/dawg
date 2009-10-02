@@ -16,5 +16,8 @@
 #cmakedefine HAVE_SNPRINTF  1
 #cmakedefine HAVE__SNPRINTF 1
 
+#cmakedefine HAVE_VFPRINTF 1
+#cmakedefine HAVE__DOPRNT 1
+
 #endif
 
