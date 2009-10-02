@@ -29,7 +29,7 @@ char g_csDawgTxt[] =
 ;
 
 // Notice
-char g_csDawgNotice[] = 
+char g_csDawgNotice[] =
 #include "dawgnotice.h"
 ;
 
@@ -62,12 +62,12 @@ int main(int argc, char* argv[])
 		//Serial Mode
 		case 's':
 		case 'S':
-			bSerial = true;  
+			bSerial = true;
 			break;
 		//Combined Mode
 		case 'c':
 		case 'C':
-			bSerial = false; 
+			bSerial = false;
 			break;
 		// Version Information
 		case 'v':
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 	{
 		if(bVersion)
 		{
-			cout << PACKAGE_STRING << endl 
+			cout << PACKAGE_STRING << endl
 				<< "DNA Assembly With Gaps" << endl
 				<< "Copyright (C) 2004-2009 Reed A. Cartwright" << endl << endl
 				<< g_csDawgNotice << endl
@@ -202,7 +202,7 @@ bool Execute()
 	vector<unsigned int> vuSeqLen;
 	vector<string> vssSeqs;
 	string::size_type uTotalSeqLen = 0, uTotalRateLen = 0;
-	
+
 	vector<double> vdGamma, vdIota, vdScale;
 
 	double dNucFreq[4] = {0.25,0.25,0.25,0.25};
@@ -256,7 +256,7 @@ bool Execute()
 	}
 	else
 		vuSeqLen.resize(vtTrees.size(), 100);
-	
+
 	DawgVar::Get("Width", uWidth);
 
 	vdGamma.resize(uWidth, 0.0);
@@ -297,7 +297,7 @@ bool Execute()
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
 	if(nRes > 0 && nRes < 4)
 		return DawgError("\"Freqs\" specified incorrectly.");
-	
+
 	DawgVar::Get("GapSingleChar", bGapSingle);
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
@@ -319,7 +319,7 @@ bool Execute()
 	DawgVar::Get("Format", ssFormat);
     if(DawgVar::Get("NexusCode", ssOutBlockAfter))
 		DawgWarn("NexusCode is depreciated.  Use Out.Block.* instead.");
-	
+
 	DawgVar::Get("Out.Block.Head", ssOutBlockHead);
 	DawgVar::Get("Out.Block.Before", ssOutBlockBefore);
 	DawgVar::Get("Out.Block.After", ssOutBlockAfter);
@@ -335,7 +335,7 @@ bool Execute()
 			vuSeed.push_back(rand_seed());
 	}
 	mt_srand(&vuSeed[0], vuSeed.size());
-	
+
 	// Setup recombinant tree
 	Tree myTree;
 	myTree.ProcessTree(vtTrees.begin(), vtTrees.end());
@@ -402,7 +402,7 @@ bool Execute()
 	}
 	else
 		return DawgError("Unknown substitution model, \"%s\".", ssModel.c_str());
-	
+
 	// Construct Indel parameters
 	IndelModel::Params paramsDel, paramsIns;
 	paramsIns.ssModel = ssGapModel[0];
@@ -412,7 +412,7 @@ bool Execute()
 	paramsDel.ssModel = ssGapModel[1];
 	paramsDel.dLambda = dLambda[1];
 	paramsDel.vdModel = vdGapModel[1];
-	
+
 	// Initialize Evolution
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
 		uWidth, vdGamma, vdIota, vdScale, dTreeScale, uKeepFlank ))
@@ -421,7 +421,7 @@ bool Execute()
 	// Initialize Root
 	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
-	
+
 	// Read Out.Block.* from file if neccessary
    	if(!ssOutBlockHead.empty())
 	{
@@ -491,11 +491,11 @@ bool Execute()
 
 	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
 		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail), bOutSubst);
-	
+
 	// Check translate parameter
 	if(bTranslate && uWidth != 3)
 		return DawgError("Translate requires a Width of 3.");
-	
+
 	// setup output flags
 	unsigned int uOutFlags = 0u;
 	if(bGapSingle)
@@ -553,9 +553,9 @@ bool DawgError(const char* csErr, ...)
 	fprintf(stderr, "Error: ");
 	va_list args;
 	va_start(args, csErr);
-#if defined(HAVE_VPRINTF)
+#if defined(HAVE_VFPRINTF)
 	vfprintf(stderr, csErr, args);
-#elif defined(HAVE_DOPRNT)
+#elif defined(HAVE__DOPRNT)
 	_doprnt(csErr, args, stderr);
 #else
 	fprintf(stderr, "%s", csErr);
@@ -572,9 +572,9 @@ bool DawgWarn(const char* csErr, ...)
 	fprintf(stderr, "Warning: ");
 	va_list args;
 	va_start(args, csErr);
-#if defined(HAVE_VPRINTF)
+#if defined(HAVE_VFPRINTF)
 	vfprintf(stderr, csErr, args);
-#elif defined(HAVE_DOPRNT)
+#elif defined(HAVE__DOPRNT)
 	_doprnt(csErr, args, stderr);
 #else
 	fprintf(stderr, "%s", csErr);
