@@ -15,12 +15,16 @@ template<class _T, class _W> class finger_tree;
 
 namespace detail {
 
-template<class _T>
+//if(_T and const _X) are same
+
+template<class _T, class _X=_T>
 class finger_tree_node_iterator
 	: public std::iterator<std::bidirectional_iterator_tag, _T>
 {
 public:
-	typedef finger_tree_node_iterator<_T> self_type;
+	typedef finger_tree_node_iterator<_T,_X> self_type;
+	// other_type exists to enable iterator -> const_iterator conversions
+	typedef finger_tree_node_iterator<_X,_X> other_type;
 	typedef _T node_type;
 	typedef std::iterator<std::bidirectional_iterator_tag, node_type> base_type;
 
@@ -32,6 +36,8 @@ public:
 
 	finger_tree_node_iterator() : p_node(NULL) { }
 	explicit finger_tree_node_iterator(pointer p) : p_node(p) { }
+
+	finger_tree_node_iterator(const other_type &o) : p_node(o.p_node) { }
 
 	reference operator*() const { return *p_node; }
 	pointer operator->() const { return p_node;	}
@@ -203,7 +209,7 @@ public:
 	typedef typename std::size_t size_type;
 
 	typedef detail::finger_tree_node_iterator<typename self_type::node> iterator;
-	typedef detail::finger_tree_node_iterator<const typename self_type::node> const_iterator;
+	typedef detail::finger_tree_node_iterator<const typename self_type::node, typename self_type::node> const_iterator;
 	typedef node& reference;
 	typedef const node& const_reference;
 
@@ -276,6 +282,7 @@ public:
 
 	struct node {
 		typedef node* pointer;
+		typedef const node* const_pointer;
 
 		pointer left, right, up;
 		bool color; // red == true; black == false
@@ -412,29 +419,18 @@ public:
 	}
 
 	template<class _P>
+	data_type operator[](const _P &pos) const {
+		return find<_P>(pos)->val;
+	}
+
+	template<class _P>
 	const_iterator find(const _P &pos) const {
-		typename node::pointer p = head.up;
-		typedef _P cmp_type;
-		cmp_type temp = pos;
-		for(;;) {
-			if(p->left != NULL) {
-				if(temp < cmp_type(p->left->weight)) {
-					p = p->left;
-					continue;
-				}
-				temp -= cmp_type(p->left->weight);
-			}
-			if(temp < cmp_type(weight_type(p->val)))
-				break;
-			temp -= cmp_type(weight_type(p->val));
-			p = p->right;
-		}
-		return const_iterator(p);
+		return const_iterator(find_node(pos));
 	}
 
 	template<class _P>
 	iterator find(const _P &pos) {
-		return iterator(&*find(pos));
+		return iterator(const_cast<typename node::pointer>(find_node(pos)));
 	}
 
 	// withdraw recede retreat
@@ -442,7 +438,7 @@ public:
 	const_iterator advance(const_iterator start, const _P &off) const {
 	    typename node::pointer p = start.p_node;
 	    typedef _P cmp_type;
-	    cmp_type temp = pos;
+	    cmp_type temp = off;
 	    for(;;) {
 
 	    }
@@ -520,6 +516,28 @@ protected:
 				q = q->up;
 			}
 		}
+	}
+
+	template<class _P>
+	typename node::const_pointer find_node(const _P &pos, typename node::const_pointer p=NULL) const {
+		typedef _P cmp_type;
+		cmp_type temp = pos;
+		if(p == NULL)
+			p = head.up;
+		for(;;) {
+			if(p->left != NULL) {
+				if(temp < cmp_type(p->left->weight)) {
+					p = p->left;
+					continue;
+				}
+				temp -= cmp_type(p->left->weight);
+			}
+			if(temp < cmp_type(weight_type(p->val)))
+				break;
+			temp -= cmp_type(weight_type(p->val));
+			p = p->right;
+		}
+		return p;
 	}
 
 	node head;
