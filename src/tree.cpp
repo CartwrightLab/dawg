@@ -37,7 +37,7 @@ void NewickNode::MakeName()
 	for(vector<const std::string*>::iterator it = v.begin()+1; it != v.end(); ++it)
 	{
 		m_ssLabel += ",";
-		m_ssLabel += **it;	
+		m_ssLabel += **it;
 	}
 	m_ssLabel += ")";
 }
@@ -218,21 +218,21 @@ void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 	// Process all sibs of the Newick Node
 	if(pNode->m_pSib.get())
 		ProcessNewickNode(pNode->m_pSib.get(), ssAnc);
-	
+
 	// Get a reference to this node and set up parameters
 	Node& node = m_map[pNode->m_ssLabel];
 	node.m_mBranchLens[ssAnc] = pNode->m_dLen;
 	node.m_vAncestors.resize(m_nSec+1, ssAnc);
 	//node.m_vAncestors[m_nSec] = ssAnc;
-	
+
 	// add node to tips if it is a tip and hasn't been accessed yet
 	if(node.m_ssName.empty() && !pNode->m_pSub.get())
 		m_vTips.push_back(pNode->m_ssLabel);
-	
+
 	// Give the node its name if it doesn't have one yet
 	if(node.m_ssName.empty())
 		node.m_ssName = pNode->m_ssLabel;
-	
+
 	// Process children
 	if(pNode->m_pSub.get())
 		ProcessNewickNode(pNode->m_pSub.get(), node.m_ssName);
@@ -258,7 +258,7 @@ void Tree::Evolve()
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
 		it != rNode.m_vSections.end(); ++it)
 	{
-		for(unsigned int u = 0;u<it->size();++u)
+		for(Sequence::weight_type::size_type u = 0;u<it->size();++u)
 		{
 			if((*it)[u].scalar() < 0.0)
 				(*it)[u].scalar(static_cast<residue::rate_type>(RandomRate(u)));
@@ -289,7 +289,7 @@ void Tree::Evolve(Node &rNode)
 			// Touch Ancestor, make sure it exists
 			Node &aNode = m_map[ssA];
 			Evolve(aNode);
-			
+
 			// Copy ancestor to temporary location
 			mapSeqs[ssA] = aNode;
 			// Evolve temporary location
@@ -300,16 +300,16 @@ void Tree::Evolve(Node &rNode)
 	}
 }
 
-// Evolve rNode a specific time 
+// Evolve rNode a specific time
 void Tree::Evolve(Node &rNode, double dTime)
 {
 	dTime = fabs(dTime);
 	if(dTime < DBL_EPSILON)
 		return; // Nothing to evolve
-	
+
 	//advance branch color
 	++branchColor;
-	
+
 	// Substitutions
 	unsigned int uNuc = 0;
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
@@ -373,7 +373,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		// insertion or deletion
 		if(rand_bool(m_funcRateIns(dLength)*dW))
 		{
-			//Insertion 
+			//Insertion
 			Sequence::size_type ul = m_pInsertionModel->RandSize();
 			Sequence::size_type uPos = (Sequence::size_type)rand_uint((uint32_t)uLength); // pos is in [0,L]
 			// Construct sequence to be inserted
@@ -402,24 +402,34 @@ void Tree::Evolve(Node &rNode, double dTime)
 			// Draw random size and random pos and rearrange
 			Sequence::size_type ul = m_pDeletionModel->RandSize();
 			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-2));
-			Sequence::size_type uB = max(ul-1, uPos); 
+			Sequence::size_type uB = max(ul-1, uPos);
 			Sequence::size_type uSize = min(ul-1+uLength, uPos+ul)-uB;
-			
+
 			// If GapLimits are on, only process deletion if it is completely inside the acceptance
-			// region as defined by the GapLimit.  Check points are at sequence positions 0-uKeepFlank and 
+			// region as defined by the GapLimit.  Check points are at sequence positions 0-uKeepFlank and
 			// uLength-1+uKeepFlank.  These become 0-uKeepFlank+ul-1 and uLength-1+uKeepFlank+ul-1,
 			// when shifted to "deletion space".
-			if(m_uKeepFlank == 0	|| ( (ul-1) < uPos+m_uKeepFlank && uPos < uLength-1+m_uKeepFlank ) ) {
+			if(m_uKeepFlank == 0 || ( (ul-1) < uPos+m_uKeepFlank && uPos < uLength-1+m_uKeepFlank ) ) {
 				uB -= (ul-1);
 				uB *= m_uWidth;
 				uSize *= m_uWidth;
 				// Find deletion point
 				Node::iterator itPos = rNode.SeqPos(uB);
 				Sequence::size_type uTemp = uSize;
-				uTemp -= itPos.first->Deletion(itPos.second, uTemp);
-				// Delete uSize nucleotides begin sensitive to gaps that overlap sections
-				for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
-					uTemp -= itPos.first->Deletion(itPos.first->begin(), uTemp);
+
+				// Delete
+				if(itPos.first != rNode.m_vSections.end()) {
+					while(uTemp--) {
+						if(itPos.second == itPos.first->end()) {
+							++itPos.first;
+							if(itPos.first == rNode.m_vSections.end())
+								break;
+							itPos.second = itPos.first->search(itPos.first->begin(), size_type(0));
+						}
+						itPos.second->val.mark_deleted(true);
+						itPos.second = itPos.first->search_and_update(itPos.second, size_type(0));
+					}
+				}
 				uLength -= (uSize-uTemp)/m_uWidth;
 			}
 		}
@@ -511,12 +521,12 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	matQ(1,2) = matQ(2,1) = pSubs[3]; //C-G
 	matQ(1,3) = matQ(3,1) = pSubs[4]; //C-T
 	matQ(2,3) = matQ(3,2) = pSubs[5]; //G-T
-	
+
 	// Store Rate Matrix
 	m_matR = matQ;
-	
+
 	// Create GTR Genetating Matrix
-	Vector4 vecF(pFreqs);	
+	Vector4 vecF(pFreqs);
 	matQ.Scale(matQ, vecF);
 
 	// Scale such that the total rate of substitution is equal to one
@@ -530,7 +540,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	matQ(3,3) = -(matQ(3,0)+matQ(3,1)+matQ(3,2));
 	matQ.Scale(matQ, dX/((vecF[0]*matQ(0,0)+vecF[1]*matQ(1,1)+
 		vecF[2]*matQ(2,2)+vecF[3]*matQ(3,3))));
-	
+
 	// Store Scaled Q Matrix
 	m_matQ = matQ;
 
@@ -552,7 +562,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_matV.Scale(vecE, m_matV);
 	m_matU.Transpose();
 	m_matU.Scale(m_matU, vecD);
-	
+
 	// Setup Indel formation model
 	// Insertion Rate
 	m_dLambdaIns = rIns.dLambda;
@@ -599,7 +609,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	}
 	else
 		return DawgError("Unknown deletion model: \"%s\".", rDel.ssModel.c_str());
-	
+
 	// Linear Functions for the Gillespie algorithm
 	m_funcRateIns.m = m_dLambdaIns;
 	m_funcRateIns.b = m_dLambdaIns;
@@ -614,10 +624,10 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 {
 	// Clear Template
 	m_vDNASeqs.clear();
-	
+
 	// Check to see if sequence is specified
 	if(vSeqs.size())
-	{	
+	{
 		m_vDNASeqs.assign(vSeqs.size(), Sequence());
 		SeqBuffer seq;
 		// Read sequence of each section
@@ -722,16 +732,16 @@ struct AlignData {
 	Sequence seq;
 	Sequence seqAln;
 	Sequence::iterator it;
-	
+
 	struct Printer {
 		Printer(const residue_factory &fac) : f(fac) {};
-	
+
 		char operator()(AlignData::Sequence::const_reference r) const {
 			static char gaps[] = "-=+";
 			return r.is_deleted() ? gaps[r.base()] : f.decode(r.base());
 		}
 		const residue_factory &f;
-	};	
+	};
 };
 
 void Tree::Align(Alignment &aln, unsigned int uFlags) const
@@ -749,7 +759,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
-	
+
 	// States: Quit (0), Root(1), Ins(2), InsDel(4), Del (8)
 	unsigned int uState = 1;
 	unsigned int uBranch = 0;

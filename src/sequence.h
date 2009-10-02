@@ -425,24 +425,27 @@ public:
 
 	template<class _P>
 	const_iterator find(const _P &pos) const {
-		return const_iterator(find_node(pos));
+		return const_iterator(find_node<_P>(pos));
 	}
 
 	template<class _P>
 	iterator find(const _P &pos) {
-		return iterator(const_cast<typename node::pointer>(find_node(pos)));
+		return iterator(const_cast<typename node::pointer>(find_node<_P>(pos)));
 	}
 
-	// withdraw recede retreat
 	template<class _P>
-	const_iterator advance(const_iterator start, const _P &off) const {
-	    typename node::pointer p = start.p_node;
-	    typedef _P cmp_type;
-	    cmp_type temp = off;
-	    for(;;) {
+	const_iterator search(const_iterator start, const _P &off) const {
+		return const_iterator(inc_node(&(*start), off));
+	}
 
-	    }
+	template<class _P>
+	iterator search(iterator start, const _P &off) {
+		return iterator(const_cast<typename node::pointer>(inc_node(&(*start), off)));
+	}
 
+	template<class _P>
+	iterator search_and_update(iterator start, const _P &off) {
+		return iterator(inc_node_and_update(&(*start), off));
 	}
 
 protected:
@@ -520,10 +523,10 @@ protected:
 
 	template<class _P>
 	typename node::const_pointer find_node(const _P &pos, typename node::const_pointer p=NULL) const {
-		typedef _P cmp_type;
-		cmp_type temp = pos;
 		if(p == NULL)
 			p = head.up;
+        typedef _P cmp_type;
+		cmp_type temp = pos;
 		for(;;) {
 			if(p->left != NULL) {
 				if(temp < cmp_type(p->left->weight)) {
@@ -539,6 +542,55 @@ protected:
 		}
 		return p;
 	}
+
+	template<class _P>
+	typename node::const_pointer inc_node(typename node::const_pointer p, const _P &pos) const {
+		typedef _P cmp_type;
+		cmp_type temp = pos;
+		for(;;) {
+			if(p == &head)
+				break;
+			if(temp < cmp_type(weight_type(p->val)))
+				break;
+			temp -= cmp_type(weight_type(p->val));
+			if(p->right != NULL) {
+				if(temp < cmp_type(p->right->weight))
+					return find_node(temp, p->right);
+				temp -= cmp_type(p->right->weight);
+			}
+			for(;p->up->right == p; p = p->up)
+				/*noop*/;
+			if(p != &head)
+				p = p->up;
+		}
+		return p;
+	}
+
+	template<class _P>
+	typename node::pointer inc_node_and_update(typename node::pointer p, const _P &pos) {
+		typedef _P cmp_type;
+		cmp_type temp = pos;
+		for(;;) {
+			if(p == &head)
+				break;
+			if(temp < cmp_type(weight_type(p->val)))
+				break;
+			temp -= cmp_type(weight_type(p->val));
+			if(p->right != NULL) {
+				if(temp < cmp_type(p->right->weight))
+					return const_cast<typename node::pointer>(find_node(temp, p->right));
+				temp -= cmp_type(p->right->weight);
+			}
+			for(;p->up->right == p; p = p->up)
+				p->_update_weight();
+			if(p != &head) {
+				p->_update_weight();
+				p = p->up;
+			}
+		}
+		return p;
+	}
+
 
 	node head;
 	size_type _size;

@@ -46,7 +46,7 @@ protected:
 //	static const data_type TypeDel		=  0x4; // 100
 //	static const data_type TypeExt      =  0x0; // 000
 //	static const data_type ColorInc     =  0x8;
-//	
+//
 //	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
 //	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
 //	inline data_type GetColor() const  { return m_ucNuc & MaskColor; }
@@ -62,7 +62,7 @@ protected:
 
 //	inline double GetRate() const { return m_dRate; }
 //	inline void SetRate(double r) { m_dRate = (float)r; }
-//	
+//
 //	bool FromChar(char ch);
 //	char ToChar() const;
 
@@ -79,7 +79,7 @@ protected:
 //		m_uLength = uSize;
 //	}
 //	size_type SeqLength() const { return m_uLength; }
-//	
+//
 //	// find the uPos-th true nucleotide (skips gaps)
 //	const_iterator SeqPos(size_type uPos) const;
 //	iterator SeqPos(size_type uPos);
@@ -121,7 +121,7 @@ public:
 
 		typedef std::pair<Sections::iterator, Sequence::iterator> iterator;
 		typedef std::pair<Sections::const_iterator, Sequence::const_iterator> const_iterator;
-	
+
 		// find the uPos-th nucleotide in the node
 		// skips gaps and recognizes different sections
 		iterator SeqPos(Sequence::size_type uPos);
@@ -130,20 +130,21 @@ public:
 	typedef Node::Sequence Sequence;
 	typedef Node::Nucleotide Nucleotide;
 	typedef Node::SeqBuffer SeqBuffer;
+	typedef Sequence::weight_type::size_type size_type;
 
 	typedef std::map<std::string, std::string> Alignment;
-	
+
 	// Setup the model of evolution
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		unsigned int uWidth, const std::vector<double> &vdGamma,
 		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale,
 		int uKeepFlank);
-	
+
 	// Setup the root node
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vData,
 		const std::vector<std::vector<double> > &vRates);
-	
+
 	// Draw a random relative rate of substitution from the evolutionary parameters
 	double RandomRate(Sequence::size_type uPos) const;
 	// Draw a random base from the evolutionary parameters
@@ -153,10 +154,10 @@ public:
 	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate(uPos)), branchColor, 1.0); }
 
 	Tree() : m_nSec(0), m_uWidth(1) {}
-	
+
 	// Trim a length to be compatible with the block width
 	inline unsigned int BlockTrim(unsigned int u) { return u - u%m_uWidth; }
-	
+
 	// Evolve the tree
 	void Evolve();
 
@@ -171,9 +172,9 @@ public:
 		for(itTree it = itB; it!=itE; it++)
 			ProcessTree(*it);
 	}
-	
+
 	const Node::Map& GetMap() const { return m_map; }
-	
+
 	// Align sequences from the tree
 	void Align(Alignment &aln, unsigned int uFlags=0) const;
 
