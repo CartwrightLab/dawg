@@ -14,8 +14,11 @@ void printnode(FT::node::pointer p) {
 	if(p == NULL)
 		return;
 	cout << "(";
-	printnode(p->left);
+	if(p->left != p)
+		printnode(p->left);
 	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
+	if(p->right != p)
+		printnode(p->left);
 	printnode(p->right);
 	cout << ")";
 }

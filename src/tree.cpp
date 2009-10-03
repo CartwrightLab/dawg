@@ -8,6 +8,28 @@
 
 using namespace std;
 
+void printnode(Tree::Sequence::node::pointer p) {
+	if(p == NULL)
+		return;
+	cout << "(";
+	printnode(p->left);
+	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
+	printnode(p->right);
+	cout << ")";
+}
+
+void printsections(const Tree::Node::Sections &x) {
+	for(Tree::Node::Sections::const_iterator cit = x.begin();
+		cit != x.end(); ++cit)
+	{
+		for(Tree::Sequence::const_iterator it = cit->begin();
+			it != cit->end(); ++ it ) {
+				cerr << it->val.base();
+			}
+	}
+
+}
+
 ////////////////////////////////////////////////////////////
 //  class NewickNode
 ////////////////////////////////////////////////////////////
@@ -649,9 +671,8 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		// Create random sequences
 		m_vDNASeqs.assign(vLens.size(), Sequence());
 		SeqBuffer seq;
-		residue res(0, -1.0, 0, 1.0);
-		res.mark_deleted(true);
-		for(unsigned int u = 0; u < vSeqs.size(); ++u)
+		residue res(0, -1.0, 0, 1.0,true);
+		for(unsigned int u = 0; u < vLens.size(); ++u)
 		{
 			seq.assign(m_uWidth*vLens[u], res);
 			m_vDNASeqs[u].insert(m_vDNASeqs[u].end(), seq.begin(), seq.end());
@@ -684,6 +705,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			}
 		}
 	}
+	printsections(m_vDNASeqs);
 	return true;
 }
 
