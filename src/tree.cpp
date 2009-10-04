@@ -263,6 +263,40 @@ void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 // Evolve the sequences in the tree
 void Tree::Evolve()
 {
+	//Tree::Sequence st;
+	//Tree::SeqBuffer sb(7);
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//st.push_back(Nucleotide());
+	//printnode(&*st.root()); cout << endl;
+	//
+	//cout << endl;
+
+	//for(int i=1;i<=7;++i) {
+	//	Tree::Sequence sx;
+	//	sx.insert(sx.end(), sb.begin(), sb.begin()+i);
+	//	printnode(&*sx.root()); cout << endl;
+	//}
+
+	//cout << endl;
+	//Tree::Sequence sx;
+	//sx.push_back(sb.front());
+	//sx.insert(sx.end(), sb.begin()+1, sb.end());
+	//printnode(&*sx.root()); cout << endl;
+	//
+	//exit(0);
+	
+	
 	// Reset Sequences
 	for(Node::Map::iterator it=m_map.begin(); it!=m_map.end();++it)
 	{
@@ -280,12 +314,14 @@ void Tree::Evolve()
 	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
 		it != rNode.m_vSections.end(); ++it)
 	{
-		for(Sequence::weight_type::size_type u = 0;u<it->size();++u)
-		{
-			if((*it)[u].scalar() < 0.0)
-				(*it)[u].scalar(static_cast<residue::rate_type>(RandomRate(u)));
-			if((*it)[u].is_deleted())
-				(*it)[u].base(RandomBase());
+		unsigned int u=0;
+		for(Sequence::iterator sit = it->begin(); sit != it->end(); sit.inc_and_update()) {
+			if(sit->val.scalar() < 0.0)
+				sit->val.scalar(static_cast<residue::rate_type>(RandomRate(u++)));
+			if(sit->val.is_deleted()) {
+				sit->val.base(RandomBase());
+				sit->val.mark_deleted(false);
+			}
 		}
 	}
 	// Evolve each tip
@@ -441,7 +477,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 
 				// Delete
 				if(itPos.first != rNode.m_vSections.end()) {
-					while(uTemp--) {
+					for(;uTemp;--uTemp) {
 						if(itPos.second == itPos.first->end()) {
 							++itPos.first;
 							if(itPos.first == rNode.m_vSections.end())
@@ -451,6 +487,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 						itPos.second->val.mark_deleted(true);
 						itPos.second = itPos.first->search_and_update(itPos.second, size_type(0));
 					}
+					itPos.second->update_weight();
 				}
 				uLength -= (uSize-uTemp)/m_uWidth;
 			}
@@ -460,6 +497,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		// new waiting time parameter
 		dW = 1.0/m_funcRateSum(dLength);
 	}
+	//printnode(&*rNode.m_vSections.front().root()); cout << endl;
 }
 
 // Setup Evolutionary parameters
@@ -705,7 +743,6 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			}
 		}
 	}
-	printsections(m_vDNASeqs);
 	return true;
 }
 

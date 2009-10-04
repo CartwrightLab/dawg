@@ -62,6 +62,25 @@ public:
 		++(*this);
 		return t;
 	}
+	self_type& inc_and_update() {
+		if(p_node->right != NULL) {
+			p_node = p_node->right;
+			while(p_node->left != NULL)
+				p_node = p_node->left;
+		} else {
+			pointer p_up = p_node->up;
+			while(p_node == p_up->right) {
+				p_node->_update_weight();
+				p_node = p_up;
+				p_up = p_node->up;
+			}
+			if(p_node->right != p_up) {
+				p_node->_update_weight();
+				p_node = p_up;
+			}
+		}
+		return *this;
+	}
 	self_type& operator--() {
 		if(p_node->up->up == p_node && p_node->color == true) {
 			p_node = p_node->right;
@@ -371,8 +390,9 @@ public:
 
 	// insert value before position in tree
 	iterator insert(iterator pos, const data_type &val) {
-		typename node::pointer x = new node(val,NULL);
+		typename node::pointer x = new node(val);
 		rebalance(attach_left(&(*pos),x));
+		head.up->color = false;
 		++_size;
 		return iterator(x);
 	}
@@ -381,25 +401,31 @@ public:
 	iterator insert(iterator pos, It it_begin, It it_end) {
 		if(it_begin == it_end)
 			return pos;
-
-		// setup last element
-		typename node::pointer x = new node(*(--it_end));
-		attach_left(&(*pos),x);
+		
+		typename node::pointer p = &(*pos);
+		typename node::pointer x = new node(*it_begin);
+		rebalance(attach_left(p,x));
 		++_size;
-		// add everything else as a linear "list"
-		typename node::pointer p = x;
-		while(it_end != it_begin) {
-			p->left = new node(*(--it_end),p);
-			p = p->left;
+		while(++it_begin != it_end) {
+			rebalance(attach_left(p,new node(*it_begin)));
 			++_size;
 		}
-		if(x == head.left)
-			head.left = p;
-		// Rebalance
-		rebalance(p->up);
-
+		head.up->color = false;
 		return iterator(x);
 	}
+
+
+	//template<class It>
+	//iterator insertx(iterator pos, It it_begin, It it_end) {
+	//	if(it_begin == it_end)
+	//		return pos;
+	//	
+	//	iterator x = insert(pos, *it_begin);
+	//	while(++it_begin != it_end) {
+	//		insert(pos, *it_begin);
+	//	}
+	//	return x;
+	//}
 
 	iterator insert(iterator pos, const self_type &tree) {
 		insert(pos, tree.begin(), tree.end());
@@ -481,8 +507,10 @@ protected:
 		return p;
 	}
 
-	void rebalance(typename node::pointer p) {
-		for(; p != &head; p = p->up) {
+	void rebalance(typename node::pointer p, typename node::pointer top=NULL) {
+		if(top == NULL)
+			top = &head;
+		for(; p != top; p = p->up) {
 			if(is_red(p->right) && !is_red(p->left))
 				p = p->rotate_left();
 			if(is_red(p->left) && is_red(p->left->left))
@@ -491,7 +519,6 @@ protected:
 				p->flip_colors();
 			p->_update_weight();
 		}
-		head.up->color = false;
 	}
 
 	// This will clone the structure and data of a head node
@@ -527,6 +554,9 @@ protected:
 			p = head.up;
         typedef _P cmp_type;
 		cmp_type temp = pos;
+		if(!(temp < cmp_type(p->weight))) {
+			return &head;
+		}
 		for(;;) {
 			if(p->left != NULL) {
 				if(temp < cmp_type(p->left->weight)) {
