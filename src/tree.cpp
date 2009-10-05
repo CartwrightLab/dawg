@@ -281,7 +281,7 @@ void Tree::Evolve()
 		it != rNode.m_vSections.end(); ++it)
 	{
 		unsigned int u=0;
-		for(Sequence::iterator sit = it->begin(); sit != it->end(); sit.inc_and_update()) {
+		for(Sequence::iterator sit = it->begin(); sit != it->end(); sit = it->inc_and_update(sit)) {
 			if(sit->val.rate_scalar() < 0.0)
 				sit->val.rate_scalar(static_cast<residue::rate_type>(RandomRate(u++)));
 			if(sit->val.is_deleted()) {
@@ -336,52 +336,73 @@ void Tree::Evolve(Node &rNode, double dTime)
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
-	// Substitutions
-	unsigned int uNuc = 0;
-	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
-	{
-		for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
-		{
-			// Skip any position that is a deletion
-			if(jt->val.is_deleted())
-				continue;
-			// Total Evolution Rate for the position
-			double dTemp = dTime*jt->val.rate_scalar()*m_vdScale[uNuc%m_uWidth];
-			if(dTemp < DBL_EPSILON)
-				continue; // Invariant Site
-			// if dTemp is different from the previous one, recalculate probability matrix
-			if(dTemp != m_dOldTime)
-			{
-				m_dOldTime = dTemp;
-				Vector4  vec;
-				vec[0] = exp(dTemp*m_vecL[0]);
-				vec[1] = exp(dTemp*m_vecL[1]);
-				vec[2] = exp(dTemp*m_vecL[2]);
-				vec[3] = exp(dTemp*m_vecL[3]);
-				Matrix44 mat; mat.Scale(vec, m_matU);
-				m_matSubst.Multiply(m_matV, mat);
-				for(Matrix44::Pos i=0;i<4;++i)
-				{
-					m_matSubst(i,1) += m_matSubst(i,0);
-					m_matSubst(i,2) += m_matSubst(i,1);
-					//m_matSubst(i,3) = 1.0;
+	for(Node::Sections::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it) {
+		double dM = 1.0/it->root()->weight.rate;
+		for(double dt = rand_exp(dM); dt <= dTime; dt += rand_exp(dM)) {
+			rate_type uPos = rate_type(dM*rand_real());
+			Sequence::iterator pit = it->find(uPos);
+			double d = rand_real();
+			int i = pit->val.base();
+			for(int j=0;j<4;++j) {
+				if(j == i) continue;
+				if(m_matTrans[i][j] < d || j == 3) {
+					pit->val.base(j);
+					break;
 				}
+				d -= m_matTrans[i][j];
 			}
-			// get the base of the current nucleotide and pick new base
-			unsigned int uBase = jt->val.base();
-			dTemp = rand_real();
-			if(dTemp < m_matSubst(uBase, 0))
-				jt->val.base(0);
-			else if(dTemp < m_matSubst(uBase, 1))
-				jt->val.base(1);
-			else if(dTemp < m_matSubst(uBase, 2))
-				jt->val.base(2);
-			else
-				jt->val.base(3);
-
-			++uNuc; // Increase position
+			it->update_weight(pit);
+			dM = 1.0/it->root()->weight.rate;
 		}
 	}
+
+	// Substitutions
+//	unsigned int uNuc = 0;
+//	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
+//	{
+//		//for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
+//		for(Sequence::iterator jt = it->find(size_type(0)); jt != it->end(); jt = it->search(jt,size_type(1)))
+//		{
+//			// Skip any position that is a deletion
+//			//if(jt->val.is_deleted())
+//			//	continue;
+//			// Total Evolution Rate for the position
+//			double dTemp = dTime*jt->val.rate_scalar()*m_vdScale[uNuc%m_uWidth];
+//			if(dTemp < DBL_EPSILON)
+//				continue; // Invariant Site
+//			// if dTemp is different from the previous one, recalculate probability matrix
+//			if(dTemp != m_dOldTime)
+//			{
+//				m_dOldTime = dTemp;
+//				Vector4  vec;
+//				vec[0] = exp(dTemp*m_vecL[0]);
+//				vec[1] = exp(dTemp*m_vecL[1]);
+//				vec[2] = exp(dTemp*m_vecL[2]);
+//				vec[3] = exp(dTemp*m_vecL[3]);
+//				Matrix44 mat; mat.Scale(vec, m_matU);
+//				m_matSubst.Multiply(m_matV, mat);
+//				for(Matrix44::Pos i=0;i<4;++i)
+//				{
+//					m_matSubst(i,1) += m_matSubst(i,0);
+//					m_matSubst(i,2) += m_matSubst(i,1);
+//					//m_matSubst(i,3) = 1.0;
+//				}
+//			}
+//			// get the base of the current nucleotide and pick new base
+//			unsigned int uBase = jt->val.base();
+//			dTemp = rand_real();
+//			if(dTemp < m_matSubst(uBase, 0))
+//				jt->val.base(0);
+//			else if(dTemp < m_matSubst(uBase, 1))
+//				jt->val.base(1);
+//			else if(dTemp < m_matSubst(uBase, 2))
+//				jt->val.base(2);
+//			else
+//				jt->val.base(3);
+//
+//			++uNuc; // Increase position
+//		}
+//	}
 	// Indel formation via Gillespie Algorithm
 
 	// Check whether Indels are off
@@ -455,7 +476,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 						itPos.second->val.mark_deleted(true);
 						itPos.second = itPos.first->search_and_update(itPos.second, size_type(0));
 					}
-					itPos.second->update_weight();
+					itPos.first->update_weight(itPos.second);
 				}
 				uLength -= (uSize-uTemp)/m_uWidth;
 			}
@@ -574,6 +595,30 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 
 	// Store Scaled Q Matrix
 	m_matQ = matQ;
+
+	// Construct Transition Prob Matrix
+	m_matTrans = m_matQ;
+	m_matTrans(0,0) = -m_matTrans(0,0);
+	m_matTrans(1,1) = -m_matTrans(1,1);
+	m_matTrans(2,2) = -m_matTrans(2,2);
+	m_matTrans(3,3) = -m_matTrans(3,3);
+
+	m_matTrans(0,1) /= m_matTrans(0,0);
+	m_matTrans(0,2) /= m_matTrans(0,0);
+	m_matTrans(0,3) /= m_matTrans(0,0);
+
+	m_matTrans(1,0) /= m_matTrans(1,1);
+	m_matTrans(1,2) /= m_matTrans(1,1);
+	m_matTrans(1,3) /= m_matTrans(1,1);
+
+	m_matTrans(2,0) /= m_matTrans(2,2);
+	m_matTrans(2,1) /= m_matTrans(2,2);
+	m_matTrans(2,3) /= m_matTrans(2,2);
+
+	m_matTrans(3,0) /= m_matTrans(3,3);
+	m_matTrans(3,1) /= m_matTrans(3,3);
+	m_matTrans(3,2) /= m_matTrans(3,3);
+
 
 	// Make Q a symetric matrix again
 	Vector4 vecD, vecE;  //D*E=I
@@ -743,7 +788,7 @@ double Tree::RandomRate(size_type uPos) const
 
 struct AlignData {
 	typedef Tree::SeqBuffer Sequence;
-	AlignData(const string &name, const Sequence &s ) : ssName(name), seq(s) {
+	AlignData(const string ss) : ssName(ss) {
 		it = seq.begin();
 	}
 	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln) {
@@ -778,13 +823,14 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 {
 	// construct a table of flattened sequences
 	vector<AlignData> vTable;
+	vTable.reserve(m_map.size());
 	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit) {
 		// Skip any sequence that begin with one of the two special characters
 		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
 			continue;
-		AlignData::Sequence s;
-		cit->second.Flatten(s);
-		vTable.push_back(AlignData(cit->second.m_ssName, s));
+		vTable.push_back(AlignData(cit->second.m_ssName));
+		cit->second.Flatten(vTable.back().seq);
+		vTable.back().it = vTable.back().seq.begin();
 	}
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap

@@ -104,7 +104,7 @@ public:
 	class Node
 	{
 	public:
-		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weight<> > Sequence;
+		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weighter<> > Sequence;
 		typedef Sequence::data_type Nucleotide;
 		typedef std::vector<Nucleotide> SeqBuffer;
 		typedef std::vector<Sequence> Sections;
@@ -132,6 +132,7 @@ public:
 	typedef Node::Nucleotide Nucleotide;
 	typedef Node::SeqBuffer SeqBuffer;
 	typedef Sequence::weight_type::size_type size_type;
+	typedef Sequence::weight_type::rate_type rate_type;
 
 	typedef std::map<std::string, std::string> Alignment;
 
@@ -203,7 +204,8 @@ private:
 	double m_dOldTime;
 	double m_dFreqs[4];
 	double m_dNucCumFreqs[4];
-	Matrix44 m_matSubst;
+	//Matrix44 m_matSubst;
+	Matrix44 m_matTrans;
 	Matrix44 m_matV;
 	Matrix44 m_matU;
 	Matrix44 m_matQ;

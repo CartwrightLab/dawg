@@ -8,7 +8,7 @@
 
 using namespace std;
 
-typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weight<> > FT;
+typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weigher<> > FT;
 
 void printnode(FT::node::pointer p) {
 	if(p == NULL)
@@ -18,8 +18,7 @@ void printnode(FT::node::pointer p) {
 		printnode(p->left);
 	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
 	if(p->right != p)
-		printnode(p->left);
-	printnode(p->right);
+		printnode(p->right);
 	cout << ")";
 }
 
@@ -32,20 +31,23 @@ int main(int argc, char* argv[]) {
 
 	std::string ss = "ACGTACGTACGT";
 
-	make_seq(ss.begin(),ss.end(),tree);
+	for(std::string::iterator it = ss.begin(); it != ss.end(); ++it) {
+		tree.insert(tree.end(), make_seq(*it));
+	}
 
 	cout << tree.root()->weight.length << endl;
 	printnode(&*tree.root());
 	cout << endl;
 
-	FT::iterator it = tree.find(4ul);
+	FT::iterator it = tree.find(FT::weight_type::size_type(4));
 	unsigned int u = 8;
 	while(u--) {
-		it->val.mark_deleted(true);
-		cout << it->val.base() <<  " " << tree.root()->weight.length << endl;
+		it = tree.find(FT::weight_type::size_type(u));
+		//it->val.mark_deleted(true);
+		cout << u << " " << it->val.base() <<  " " << tree.root()->weight.length << endl;
 		printnode(&*tree.root());
 		cout << endl;
-		it = tree.search_and_update(it, 0ul);
+		//it = tree.search_and_update(it, FT::size_type(0));
 	}
 	//it->update_weight();
 	cout << it->val.base() <<  " " << tree.root()->weight.length << endl;

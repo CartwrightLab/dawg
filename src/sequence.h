@@ -64,25 +64,6 @@ public:
 		++(*this);
 		return t;
 	}
-	self_type& inc_and_update() {
-		if(p_node->right != NULL) {
-			p_node = p_node->right;
-			while(p_node->left != NULL)
-				p_node = p_node->left;
-		} else {
-			pointer p_up = p_node->up;
-			while(p_node == p_up->right) {
-				p_node->_update_weight();
-				p_node = p_up;
-				p_up = p_node->up;
-			}
-			if(p_node->right != p_up) {
-				p_node->_update_weight();
-				p_node = p_up;
-			}
-		}
-		return *this;
-	}
 	self_type& operator--() {
 		if(p_node->up->up == p_node && p_node->color == true) {
 			p_node = p_node->right;
@@ -171,63 +152,74 @@ protected:
 };
 
 template<class _D=float, class _N=uint32_t>
-struct evo_node_weight {
+struct evo_node_weigher {
 	typedef _D rate_type;
 	typedef _N size_type;
-	typedef evo_node_weight<_D,_N> self_type;
 
-	rate_type rate;
-	size_type length;
+	struct weight {
+		typedef _D rate_type;
+		typedef _N size_type;
+		typedef typename evo_node_weigher<_D,_N>::weight self_type;
 
-	evo_node_weight() : rate(0), length(0) { }
-	evo_node_weight(const rate_type &r, const size_type &s) :
-		rate(r), length(s) { }
+		rate_type rate;
+		size_type length;
 
-	template<class _T>
-	evo_node_weight(const _T &n) :
-		rate(n.rate_scalar()), length(n.length()) { }
+		weight() : rate(0), length(0) { }
+		weight(const rate_type &r, const size_type &s) :
+			rate(r), length(s) { }
 
-	self_type operator+(const self_type &r) {
-		return self_type(rate+r.rate, length+r.length);
+		self_type operator+(const self_type &r) {
+			return self_type(rate+r.rate, length+r.length);
+		}
+
+		self_type& operator+=(const self_type &r) {
+			rate += r.rate;
+			length += r.length;
+			return *this;
+		}
+
+		self_type& operator-=(const self_type &r) {
+			rate -= r.rate;
+			length -= r.length;
+			return *this;
+		}
+
+		bool operator<(const weight &r) const {
+			return length < r.length;
+		}
+
+		operator rate_type() const {
+			return rate;
+		}
+		operator size_type() const {
+			return length;
+		}
+	};
+
+	typedef weight weight_type;
+
+	weight_type operator()(const residue& r) {
+		return weight(base_rates[r.base()]*r.rate_scalar(),r.length());
 	}
-
-	self_type& operator+=(const self_type &r) {
-		rate += r.rate;
-		length += r.length;
-		return *this;
-	}
-
-	self_type& operator-=(const self_type &r) {
-		rate -= r.rate;
-		length -= r.length;
-		return *this;
-	}
-
-	bool operator<(const evo_node_weight &r) const {
-		return length < r.length;
-	}
-
-	operator rate_type() const {
-		return rate;
-	}
-	operator size_type() const {
-		return length;
-	}
+	rate_type base_rates[64]; //maximum of 64 different bases
 };
 
 template<class _T, class _W>
 class finger_tree {
 public:
-	typedef finger_tree<_T, _W> self_type;
 	struct node;
+	typedef finger_tree<_T, _W> self_type;
 	typedef _T data_type;
-	typedef _W weight_type;
+	typedef _W weigher_type;
+	typedef typename weigher_type::weight_type weight_type;
 	typedef typename std::size_t size_type;
 
 	typedef detail::finger_tree_node_iterator<typename self_type::node> iterator;
 	typedef detail::finger_tree_node_iterator<const typename self_type::node, typename self_type::node> const_iterator;
-	typedef node& reference;
-	typedef const node& const_reference;
+	typedef typename node::reference reference;
+	typedef typename node::const_reference const_reference;
+	typedef typename node::pointer pointer;
+	typedef typename node::const_pointer const_pointer;
 
 	finger_tree() : head(), _size(0) {
 		head.up = &head;
@@ -321,6 +313,8 @@ public:
 	struct node {
 		typedef node* pointer;
 		typedef const node* const_pointer;
+		typedef node& reference;
+		typedef const node& const_reference;
 
 		pointer left, right, up;
 		bool color; // red == true; black == false
@@ -329,8 +323,8 @@ public:
 
 		node() : left(NULL), right(NULL), up(NULL), color(true),
 			val(), weight() { }
-		node(const data_type &v, pointer par=NULL) : left(NULL), right(NULL),
-			up(par), color(true), val(v), weight(v) { }
+		node(const data_type &v, const weight_type &w, pointer par=NULL) : left(NULL), right(NULL),
+			up(par), color(true), val(v), weight(w) { }
 		node(const node &n, pointer par) : left(NULL), right(NULL), up(par),
 			color(n.color), val(n.val), weight(n.weight) { }
 		~node() {
@@ -343,73 +337,13 @@ public:
 		operator data_type() { return val; }
 		operator data_type() const { return val; }
 
-		pointer rotate_left() {
-			pointer x = right;
-			right = x->left;
-			x->left = this;
-			x->color = color;
-			color = true;
-			if(up->up == this)
-				up->up = x;
-			else if(up->left == this)
-				up->left = x;
-			else
-				up->right = x;
-			x->up = up;
-			up = x;
-			if(right != NULL)
-				right->up = this;
-			_update_weight();
-			return x;
-		}
-
-		pointer rotate_right() {
-			pointer x = left;
-			left = x->right;
-			x->right = this;
-			x->color = color;
-			color = true;
-			if(up->up == this)
-				up->up = x;
-			else if(up->left == this)
-				up->left = x;
-			else
-				up->right = x;
-			x->up = up;
-			up = x;
-			if(left != NULL)
-				left->up = this;
-			_update_weight();
-			return x;
-		}
-
-		void flip_colors() {
-			color = true;
-			left->color = false;
-			right->color = false;
-		}
-
-		// recalculates the weight of this node
-		void _update_weight() {
-			weight = weight_type(val);
-			if(left != NULL)
-				weight += left->weight;
-			if(right != NULL)
-				weight += right->weight;
-		}
-		// update weight and propogate; should be called after
-		// any modification of val that affects the weight
-		void update_weight() {
-			_update_weight();
-			for(pointer p = up; p->up->up != p || p->color == false; p=p->up)
-				p->_update_weight();
-		}
+		private:
+			node & operator=(const node& n);
 	};
-
 
 	// insert value before position in tree
 	iterator insert(iterator pos, const data_type &val) {
-		typename node::pointer x = new node(val);
+		pointer x = new node(val, _weigher(val));
 		rebalance(attach_left(&(*pos),x));
 		head.up->color = false;
 		++_size;
@@ -421,42 +355,29 @@ public:
 		if(it_begin == it_end)
 			return pos;
 
-		typename node::pointer p = &(*pos);
-		typename node::pointer x = new node(*it_begin);
+		pointer p = &(*pos);
+		pointer x = new node(*it_begin, _weigher(*it_begin));
 		rebalance(attach_left(p,x));
 		++_size;
 		while(++it_begin != it_end) {
-			rebalance(attach_left(p,new node(*it_begin)));
+			rebalance(attach_left(p,new node(*it_begin, _weigher(*it_begin))));
 			++_size;
 		}
 		head.up->color = false;
 		return iterator(x);
 	}
 
-
-	//template<class It>
-	//iterator insertx(iterator pos, It it_begin, It it_end) {
-	//	if(it_begin == it_end)
-	//		return pos;
-	//
-	//	iterator x = insert(pos, *it_begin);
-	//	while(++it_begin != it_end) {
-	//		insert(pos, *it_begin);
-	//	}
-	//	return x;
-	//}
-
 	iterator insert(iterator pos, const self_type &tree) {
 		insert(pos, tree.begin(), tree.end());
 	}
 
-	void push_back(const data_type &val) {
-		insert(end(),val);
-	}
+//	void push_back(const data_type &val) {
+//		insert(end(),val);
+//	}
 
-	void push_front(const data_type &val) {
-		insert(begin(),val);
-	}
+//	void push_front(const data_type &val) {
+//		insert(begin(),val);
+//	}
 
 	//template<class _P>
 	//data_type operator[](const _P &pos) {
@@ -475,7 +396,7 @@ public:
 
 	template<class _P>
 	iterator find(const _P &pos) {
-		return iterator(const_cast<typename node::pointer>(find_node<_P>(pos)));
+		return iterator(const_cast<pointer>(find_node<_P>(pos)));
 	}
 
 	template<class _P>
@@ -485,7 +406,7 @@ public:
 
 	template<class _P>
 	iterator search(iterator start, const _P &off) {
-		return iterator(const_cast<typename node::pointer>(inc_node(&(*start), off)));
+		return iterator(const_cast<pointer>(inc_node(&(*start), off)));
 	}
 
 	template<class _P>
@@ -493,17 +414,46 @@ public:
 		return iterator(inc_node_and_update(&(*start), off));
 	}
 
+	iterator inc_and_update(iterator it) {
+		pointer p = &*it;
+		if(p->right != NULL) {
+			p = p->right;
+			while(p->left != NULL)
+				p = p->left;
+		} else {
+			pointer pup = p->up;
+			while(p == pup->right) {
+				_update_weight(p);
+				p = pup;
+				pup = p->up;
+			}
+			if(p->right != pup) {
+				_update_weight(p);
+				p = pup;
+			}
+		}
+		return iterator(p);
+	}
+
+	// update weight and propogate; should be called after
+	// any modification of p->val that affects the weight
+	void update_weight(iterator it) {
+		pointer p = &*it;
+		for(; p != &head; p=p->up)
+			_update_weight(p);
+	}
+
 protected:
-	inline bool is_null(typename node::pointer p) const {
+	inline bool is_null(pointer p) const {
 		return (p == NULL);
 	}
-	inline bool is_red(typename node::pointer p) const {
+	inline bool is_red(pointer p) const {
 		return (!is_null(p) && p->color == true);
 	}
 
 	// Attaches the node pointed to by x to just the left of p.
 	// Returns the parent of the newly attached node
-	typename node::pointer attach_left(typename node::pointer p, typename node::pointer x) {
+	pointer attach_left(pointer p, pointer x) {
 		if(head.left == &head) {
 			head.left = x;
 			head.right = x;
@@ -526,17 +476,73 @@ protected:
 		return p;
 	}
 
-	void rebalance(typename node::pointer p, typename node::pointer top=NULL) {
+	pointer rotate_left(pointer p) {
+		pointer x = p->right;
+		p->right = x->left;
+		x->left = p;
+		x->color = p->color;
+		p->color = true;
+		if(p->up == &head)
+			head.up = x;
+		else if(p->up->left == p)
+			p->up->left = x;
+		else
+			p->up->right = x;
+		x->up = p->up;
+		p->up = x;
+		if(p->right != NULL)
+			p->right->up = p;
+		_update_weight(p);
+		return x;
+	}
+
+	pointer rotate_right(pointer p) {
+		pointer x = p->left;
+		p->left = x->right;
+		x->right = p;
+		x->color = p->color;
+		p->color = true;
+		if(p->up == &head)
+			head.up = x;
+		else if(p->up->left == p)
+			p->up->left = x;
+		else
+			p->up->right = x;
+		x->up = p->up;
+		p->up = x;
+		if(p->left != NULL)
+			p->left->up = p;
+		_update_weight(p);
+		return x;
+	}
+
+	void flip_colors(pointer p) {
+		p->color = true;
+		p->left->color = false;
+		p->right->color = false;
+	}
+
+	// recalculates the weight of this node
+	void _update_weight(pointer p) {
+		p->weight = _weigher(p->val);
+		if(p->left != NULL)
+			p->weight += p->left->weight;
+		if(p->right != NULL)
+			p->weight += p->right->weight;
+	}
+
+	// TODO: Limit _update_weight calls?
+	void rebalance(pointer p, pointer top=NULL) {
 		if(top == NULL)
 			top = &head;
 		for(; p != top; p = p->up) {
 			if(is_red(p->right) && !is_red(p->left))
-				p = p->rotate_left();
+				p = rotate_left(p);
 			if(is_red(p->left) && is_red(p->left->left))
-				p = p->rotate_right();
+				p = rotate_right(p);
 			if(is_red(p->left) && is_red(p->right))
-				p->flip_colors();
-			p->_update_weight();
+				flip_colors(p);
+			_update_weight(p);
 		}
 	}
 
@@ -544,9 +550,9 @@ protected:
 	// pointed to by p, to the head node of this tree.
 	// Assumes that this tree is empty, and p is not.
 	void clone_head(const node &ohead) {
-		typename node::pointer p = ohead.up;
+		pointer p = ohead.up;
 		head.up = new node(*p, &head);
-		typename node::pointer q = head.up;
+		pointer q = head.up;
 		while(p != &ohead) {
 			if(p->left != NULL && q->left == NULL) {
 				q->left = new node(*p->left, q);
@@ -568,32 +574,42 @@ protected:
 	}
 
 	template<class _P>
-	typename node::const_pointer find_node(const _P &pos, typename node::const_pointer p=NULL) const {
+	const_pointer find_node(const _P &pos, const_pointer p=NULL) const {
 		if(p == NULL)
 			p = head.up;
         typedef _P cmp_type;
 		cmp_type temp = pos;
-		if(!(temp < cmp_type(p->weight))) {
+		cmp_type pw = cmp_type(p->weight);
+		if(!(temp < pw)) {
 			return &head;
 		}
 		for(;;) {
+			cmp_type cw;
 			if(p->left != NULL) {
-				if(temp < cmp_type(p->left->weight)) {
+				cw = cmp_type(p->left->weight);
+			 	if(temp < cw) {
 					p = p->left;
+					pw = cw;
 					continue;
 				}
-				temp -= cmp_type(p->left->weight);
 			}
-			if(temp < cmp_type(weight_type(p->val)))
-				break;
-			temp -= cmp_type(weight_type(p->val));
-			p = p->right;
+			if(p->right != NULL) {
+				cw = cmp_type(p->right->weight);
+				pw -= cw;
+				if(!(temp < pw)) {
+					temp -= pw;
+					pw = cw;
+					p = p->right;
+					continue;
+				}
+			}
+			break;
 		}
 		return p;
 	}
 
 	template<class _P>
-	typename node::const_pointer inc_node(typename node::const_pointer p, const _P &pos) const {
+	const_pointer inc_node(const_pointer p, const _P &pos) const {
 		typedef _P cmp_type;
 		cmp_type temp = pos;
 		for(;;) {
@@ -615,34 +631,35 @@ protected:
 		return p;
 	}
 
-	template<class _P>
-	typename node::pointer inc_node_and_update(typename node::pointer p, const _P &pos) {
-		typedef _P cmp_type;
-		cmp_type temp = pos;
-		for(;;) {
-			if(p == &head)
-				break;
-			if(temp < cmp_type(weight_type(p->val)))
-				break;
-			temp -= cmp_type(weight_type(p->val));
-			if(p->right != NULL) {
-				if(temp < cmp_type(p->right->weight))
-					return const_cast<typename node::pointer>(find_node(temp, p->right));
-				temp -= cmp_type(p->right->weight);
-			}
-			for(;p->up->right == p; p = p->up)
-				p->_update_weight();
-			if(p != &head) {
-				p->_update_weight();
-				p = p->up;
-			}
-		}
-		return p;
-	}
+//	template<class _P>
+//	pointer inc_node_and_update(pointer p, const _P &pos) {
+//		typedef _P cmp_type;
+//		cmp_type temp = pos;
+//		for(;;) {
+//			if(p == &head)
+//				break;
+//			if(temp < cmp_type(weight_type(p->val)))
+//				break;
+//			temp -= cmp_type(weight_type(p->val));
+//			if(p->right != NULL) {
+//				if(temp < cmp_type(p->right->weight))
+//					return const_cast<pointer>(find_node(temp, p->right));
+//				temp -= cmp_type(p->right->weight);
+//			}
+//			for(;p->up->right == p; p = p->up)
+//				_update_weight(p);
+//			if(p != &head) {
+//				_update_weight(p);
+//				p = p->up;
+//			}
+//		}
+//		return p;
+//	}
 
 
 	node head;
 	size_type _size;
+	weigher_type _weigher;
 };
 
 class residue_factory {
@@ -659,6 +676,11 @@ public:
 	void operator()(It b, It e, D &dest) {
 		std::transform(b, e, std::back_inserter(dest),
 			std::bind1st(std::mem_fun(&self_type::make_residue), this));
+	}
+	
+	template<class T>
+	residue operator()(T a) {
+		return make_residue(a);
 	}
 
 	struct biop : public std::binary_function<char, double, residue> {
@@ -681,10 +703,10 @@ public:
 	inline void model(model_type a) {_model = a; };
 
 	residue make_residue(char ch) const {
-		return residue(encode(ch), 1.0, 0, 1.0);
+		return residue(encode(ch), 1.0, 0);
 	}
 	residue make_residue(char ch, double d) const {
-		return residue(encode(ch), static_cast<residue::rate_type>(d), 0, 1.0);
+		return residue(encode(ch), static_cast<residue::rate_type>(d), 0);
 	}
 
 	residue::data_type encode(char ch) const {
