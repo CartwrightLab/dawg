@@ -439,15 +439,15 @@ public:
 		insert(begin(),val);
 	}
 
-	template<class _P>
-	data_type operator[](const _P &pos) {
-		return find<_P>(pos)->val;
-	}
+	//template<class _P>
+	//data_type operator[](const _P &pos) {
+	//	return find<_P>(pos)->val;
+	//}
 
-	template<class _P>
-	data_type operator[](const _P &pos) const {
-		return find<_P>(pos)->val;
-	}
+	//template<class _P>
+	//data_type operator[](const _P &pos) const {
+	//	return find<_P>(pos)->val;
+	//}
 
 	template<class _P>
 	const_iterator find(const _P &pos) const {

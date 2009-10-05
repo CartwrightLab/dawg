@@ -174,7 +174,7 @@ Tree::Sequence::size_type Tree::Node::SeqLength() const
 {
 	Sequence::size_type uRet = 0;
 	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
-		uRet += it->size();
+		uRet += it->root()->weight.length;
 	return uRet;
 }
 
@@ -424,6 +424,8 @@ void Tree::Evolve(Node &rNode, double dTime)
 	Sequence::size_type uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
+	
+	cerr << "new seq" << endl;
 
 	// Do indels
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
@@ -496,6 +498,9 @@ void Tree::Evolve(Node &rNode, double dTime)
 		dLength = (double)uLength;
 		// new waiting time parameter
 		dW = 1.0/m_funcRateSum(dLength);
+
+		//cerr << uLength << " " << rNode.m_vSections.front().root()->weight.length << " " << rNode.m_vSections.front().size() << endl;
+
 	}
 	//printnode(&*rNode.m_vSections.front().root()); cout << endl;
 }
