@@ -109,6 +109,7 @@ public:
 		typedef std::vector<Nucleotide> SeqBuffer;
 		typedef std::vector<Sequence> Sections;
 		typedef std::map<std::string, Tree::Node> Map;
+		typedef Sequence::weight_type::size_type size_type;
 		Sections m_vSections;
 		std::vector<std::string> m_vAncestors;
 		std::map<std::string, double> m_mBranchLens;
@@ -124,8 +125,8 @@ public:
 
 		// find the uPos-th nucleotide in the node
 		// skips gaps and recognizes different sections
-		iterator SeqPos(Sequence::size_type uPos);
-		const_iterator SeqPos(Sequence::size_type uPos) const;
+		iterator SeqPos(size_type uPos);
+		const_iterator SeqPos(size_type uPos) const;
 	};
 	typedef Node::Sequence Sequence;
 	typedef Node::Nucleotide Nucleotide;
@@ -146,9 +147,9 @@ public:
 		const std::vector<std::vector<double> > &vRates);
 
 	// Draw a random relative rate of substitution from the evolutionary parameters
-	double RandomRate(Sequence::size_type uPos) const;
+	double RandomRate(size_type uPos) const;
 	// Draw a random base from the evolutionary parameters
-	Nucleotide::base_type RandomBase() const;
+	Nucleotide::data_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
 	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate(uPos)), branchColor, 1.0); }
@@ -217,7 +218,7 @@ private:
 	LinearFunc m_funcRateSum;
 	int m_uKeepFlank;
 
-	Nucleotide::color_type branchColor;
+	Nucleotide::data_type branchColor;
 
 	residue_factory make_seq;
 };

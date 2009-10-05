@@ -186,7 +186,7 @@ void Tree::Node::Flatten(SeqBuffer& seq) const
 		seq.insert(seq.end(), cit->begin(), cit->end());
 }
 
-Tree::Node::iterator Tree::Node::SeqPos(Sequence::size_type uPos)
+Tree::Node::iterator Tree::Node::SeqPos(size_type uPos)
 {
 	vector<Sequence>::iterator itA;
 	// Find section containing uPos
@@ -203,7 +203,7 @@ Tree::Node::iterator Tree::Node::SeqPos(Sequence::size_type uPos)
 	return iterator(itA,itB);
 }
 
-Tree::Node::const_iterator Tree::Node::SeqPos(Sequence::size_type uPos) const
+Tree::Node::const_iterator Tree::Node::SeqPos(size_type uPos) const
 {
 	vector<Sequence>::const_iterator itA;
 	// Find section containing uPos
@@ -263,40 +263,6 @@ void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 // Evolve the sequences in the tree
 void Tree::Evolve()
 {
-	//Tree::Sequence st;
-	//Tree::SeqBuffer sb(7);
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//st.push_back(Nucleotide());
-	//printnode(&*st.root()); cout << endl;
-	//
-	//cout << endl;
-
-	//for(int i=1;i<=7;++i) {
-	//	Tree::Sequence sx;
-	//	sx.insert(sx.end(), sb.begin(), sb.begin()+i);
-	//	printnode(&*sx.root()); cout << endl;
-	//}
-
-	//cout << endl;
-	//Tree::Sequence sx;
-	//sx.push_back(sb.front());
-	//sx.insert(sx.end(), sb.begin()+1, sb.end());
-	//printnode(&*sx.root()); cout << endl;
-	//
-	//exit(0);
-	
-	
 	// Reset Sequences
 	for(Node::Map::iterator it=m_map.begin(); it!=m_map.end();++it)
 	{
@@ -316,8 +282,8 @@ void Tree::Evolve()
 	{
 		unsigned int u=0;
 		for(Sequence::iterator sit = it->begin(); sit != it->end(); sit.inc_and_update()) {
-			if(sit->val.scalar() < 0.0)
-				sit->val.scalar(static_cast<residue::rate_type>(RandomRate(u++)));
+			if(sit->val.rate_scalar() < 0.0)
+				sit->val.rate_scalar(static_cast<residue::rate_type>(RandomRate(u++)));
 			if(sit->val.is_deleted()) {
 				sit->val.base(RandomBase());
 				sit->val.mark_deleted(false);
@@ -338,6 +304,7 @@ void Tree::Evolve(Node &rNode)
 	rNode.m_bTouched = true;
 	// Temporary Sequences
 	map<string, Node> mapSeqs;
+	rNode.m_vSections.resize(rNode.m_vAncestors.size());
 	// Evolve ancestors and assemble
 	for(vector<string>::size_type a = 0; a < rNode.m_vAncestors.size(); ++a)
 	{
@@ -354,7 +321,8 @@ void Tree::Evolve(Node &rNode)
 			Evolve(mapSeqs[ssA], m_dTreeScale*rNode.m_mBranchLens[ssA]);
 		}
 		// Assemble final sequence
-		rNode.m_vSections.push_back(mapSeqs[ssA].m_vSections[a]);
+		rNode.m_vSections[a].swap(mapSeqs[ssA].m_vSections[a]);
+		//rNode.m_vSections[a] = mapSeqs[ssA].m_vSections[a];
 	}
 }
 
@@ -366,7 +334,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return; // Nothing to evolve
 
 	//advance branch color
-	++branchColor;
+	branchColor += dawg::residue::branch_inc;
 
 	// Substitutions
 	unsigned int uNuc = 0;
@@ -378,7 +346,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			if(jt->val.is_deleted())
 				continue;
 			// Total Evolution Rate for the position
-			double dTemp = dTime*jt->val.scalar()*m_vdScale[uNuc%m_uWidth];
+			double dTemp = dTime*jt->val.rate_scalar()*m_vdScale[uNuc%m_uWidth];
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			// if dTemp is different from the previous one, recalculate probability matrix
@@ -424,8 +392,6 @@ void Tree::Evolve(Node &rNode, double dTime)
 	Sequence::size_type uLength = rNode.SeqLength()/m_uWidth;
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
-	
-	cerr << "new seq" << endl;
 
 	// Do indels
 	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
@@ -442,7 +408,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
-				nuc.color(branchColor);
+				nuc.branch(branchColor);
 				seq.push_back(nuc);
 			}
 			// Find Position of Insertion
@@ -714,7 +680,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		// Create random sequences
 		m_vDNASeqs.assign(vLens.size(), Sequence());
 		SeqBuffer seq;
-		residue res(0, -1.0, 0, 1.0,true);
+		residue res(0, -1.0, 0, true);
 		for(unsigned int u = 0; u < vLens.size(); ++u)
 		{
 			seq.assign(m_uWidth*vLens[u], res);
@@ -732,7 +698,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			for(Sequence::iterator it = m_vDNASeqs[u].begin();
 				it != m_vDNASeqs[u].end(); ++it)
 			{
-				it->val.scalar(static_cast<residue::rate_type>(vRates[u][v]));
+				it->val.rate_scalar(static_cast<residue::rate_type>(vRates[u][v]));
 				dTemp += vRates[u][v];
 				++v;
 			}
@@ -743,15 +709,15 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			for(Sequence::iterator it = m_vDNASeqs[u].begin();
 				it != m_vDNASeqs[u].end(); ++it)
 			{
-				residue::rate_type s = it->val.scalar();
-				it->val.scalar(static_cast<residue::rate_type>(s/dTemp));
+				residue::rate_type s = it->val.rate_scalar();
+				it->val.rate_scalar(static_cast<residue::rate_type>(s/dTemp));
 			}
 		}
 	}
 	return true;
 }
 
-Tree::Nucleotide::base_type Tree::RandomBase() const
+Tree::Nucleotide::data_type Tree::RandomBase() const
 {
 	double d = rand_real();
 	if(d < m_dNucCumFreqs[0])
@@ -764,7 +730,7 @@ Tree::Nucleotide::base_type Tree::RandomBase() const
 		return 3; // T
 }
 
-double Tree::RandomRate(Sequence::size_type uPos) const
+double Tree::RandomRate(size_type uPos) const
 {
 	uPos %= m_uWidth;
 	if(m_vdIota[uPos] > DBL_EPSILON && rand_bool(m_vdIota[uPos]))
@@ -850,20 +816,20 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
 			if(sit->it == sit->seq.end()) {
 				if(!(uState == 2 && rmEmpty))
-					sit->seqAln.push_back(Nucleotide(2, 1.0, 0, 1.0, true));
+					sit->seqAln.push_back(Nucleotide(2, 1.0, 0, true));
 				continue;
 			} else if(uState == 2 && rmEmpty) {
 				if(sit->it->branch() != uBranch)
 					continue;
 			} else if(sit->it->branch() != uBranch) {
-				sit->seqAln.push_back(Nucleotide(2, 1.0, 0, 1.0, true));
+				sit->seqAln.push_back(Nucleotide(2, 1.0, 0, true));
 				continue;
 			} else if(!sit->it->is_deleted())
 				sit->seqAln.push_back(*sit->it);
 			else if(sit->it->branch() == 0)
-				sit->seqAln.push_back(Nucleotide(0, 1.0, 0, 1.0, true));
+				sit->seqAln.push_back(Nucleotide(0, 1.0, 0, true));
 			else
-				sit->seqAln.push_back(Nucleotide(1, 1.0, 0, 1.0, true));
+				sit->seqAln.push_back(Nucleotide(1, 1.0, 0, true));
 			++(sit->it);
 		}
 	}

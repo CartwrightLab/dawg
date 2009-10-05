@@ -8,6 +8,8 @@
 #include <functional>
 #include <iterator>
 
+#include <stdint.h>
+
 namespace dawg {
 // http://www.cs.princeton.edu/courses/archive/fall08/cos226/lectures/10BalancedTrees-2x2.pdf
 
@@ -118,62 +120,57 @@ protected:
 
 class residue {
 public:
-	typedef unsigned char base_type;
 	typedef float rate_type;
-	typedef unsigned int color_type;
-	typedef std::size_t size_type;
+	typedef uint32_t data_type;
 
 	enum {
-		branch_mask = 0x7FFFFFFF,
-		delete_mask	= 0x80000000,
-		delete_del	= 0x80000000,
-		delete_ext  = 0x0
+		base_mask   =  0x3F, // 111111
+		delete_mask =  0x40, // 1000
+		branch_mask = ~0x7F,
+		delete_del	=  0x40,
+		delete_ext  =  0x0,
+		branch_inc  =  0x80
 	};
 
-	inline size_type base() const { return _base; }
-	inline void base(base_type b) { _base = b; }
+	inline data_type base() const { return _data & base_mask; }
+	inline void base(data_type b) { _data = (b & base_mask) | (_data & ~base_mask); }
 
-	inline double rate() const { return _net_rate; }
-	inline std::size_t length() const { return is_deleted() ? 0 : 1; }
+	inline data_type branch() const { return _data & branch_mask; }
+	inline void branch(data_type u) { _data = (u & branch_mask) | (_data & ~branch_mask); }
 
-	inline color_type color()  const { return _color; }
-	inline void color(color_type c) { _color = c; }
-	inline void color(color_type c, bool b) {
-		_color = (c & branch_mask) | (b ? delete_del : delete_ext);
+	inline data_type length() const { return is_deleted() ? 0 : 1; }
+
+	inline data_type data()  const { return _data; }
+	inline void data(data_type d) { _data = d; }
+	inline void data(data_type a, bool b, data_type d) {
+		_data = (a & base_mask) | (b ? delete_del : delete_ext) | (d & branch_mask);
 	}
-	inline color_type branch() const { return _color & branch_mask; }
-	inline void branch(color_type u) { _color = (u & branch_mask) | (_color & ~branch_mask); }
 
-	inline bool is_deleted() const { return (_color & delete_mask) == delete_del; }
-	inline void mark_deleted(bool b) {
-		_color = (_color & ~delete_mask) | (b ? delete_del : delete_ext);
+	inline bool is_deleted() const { return (_data & delete_mask) == delete_del; }
+	inline void mark_deleted(bool b=true) {
+		_data = (_data & ~delete_mask) | (b ? delete_del : delete_ext);
 	}
-	inline bool is_branch(color_type u) const { return (branch() == (u & branch_mask)); }
+	inline bool is_branch(data_type u) const { return (branch() == (u & branch_mask)); }
 
-	inline rate_type scalar() const {return _rate_scalar;}
-	inline void scalar(rate_type s) {
-		_net_rate *= s/_rate_scalar;
+	inline rate_type rate_scalar() const {return _rate_scalar;}
+	inline void rate_scalar(rate_type s) {
 		_rate_scalar = s;
 	}
-	inline void unit_rate(rate_type r) {
-		_net_rate = r*_rate_scalar;
-	}
-	residue() : _base(0), _color(0), _rate_scalar(1.0), _net_rate(1.0) { }
-	residue(base_type xbase, rate_type xscale, color_type xbranch, rate_type xrate, bool del=false) :
-		_base(xbase), _color((xbranch & branch_mask) | (del ? delete_del : delete_ext) ),
-		_rate_scalar(xscale), _net_rate(xscale*xrate)
+
+	residue() : _data(0), _rate_scalar(1.0) { }
+	residue(data_type xbase, rate_type xscale, data_type xbranch, bool del=false) :
+		_data((xbase & base_mask) | (xbranch & branch_mask) | (del ? delete_del : delete_ext) ),
+		_rate_scalar(xscale)
 	{
 
 	}
 
 protected:
-	base_type  _base;
-	color_type _color;
+	data_type  _data;
 	rate_type  _rate_scalar;
-	rate_type  _net_rate;
 };
 
-template<class _D=double, class _N=std::size_t>
+template<class _D=float, class _N=uint32_t>
 struct evo_node_weight {
 	typedef _D rate_type;
 	typedef _N size_type;
@@ -188,7 +185,7 @@ struct evo_node_weight {
 
 	template<class _T>
 	evo_node_weight(const _T &n) :
-		rate(n.rate()), length(n.length()) { }
+		rate(n.rate_scalar()), length(n.length()) { }
 
 	self_type operator+(const self_type &r) {
 		return self_type(rate+r.rate, length+r.length);
@@ -267,6 +264,28 @@ public:
 		}
 		clone_head(tree.head);
 		return *this;
+	}
+
+	void swap(finger_tree &tree) {
+		std::swap(_size, tree._size);
+		std::swap(head.up, tree.head.up);
+		std::swap(head.right, tree.head.right);
+		std::swap(head.left, tree.head.left);
+
+		if(tree.head.up == &head) {
+			tree.head.up = &tree.head;
+			tree.head.left = &tree.head;
+			tree.head.right = &tree.head;
+		} else {
+			tree.head.up->up = &tree.head;
+		}
+		if(head.up == &tree.head) {
+			head.up = &head;
+			head.left = &head;
+			head.right = &head;
+		} else {
+			head.up->up = &head;
+		}
 	}
 
 	void clear() {
@@ -401,7 +420,7 @@ public:
 	iterator insert(iterator pos, It it_begin, It it_end) {
 		if(it_begin == it_end)
 			return pos;
-		
+
 		typename node::pointer p = &(*pos);
 		typename node::pointer x = new node(*it_begin);
 		rebalance(attach_left(p,x));
@@ -419,7 +438,7 @@ public:
 	//iterator insertx(iterator pos, It it_begin, It it_end) {
 	//	if(it_begin == it_end)
 	//		return pos;
-	//	
+	//
 	//	iterator x = insert(pos, *it_begin);
 	//	while(++it_begin != it_end) {
 	//		insert(pos, *it_begin);
@@ -668,13 +687,13 @@ public:
 		return residue(encode(ch), static_cast<residue::rate_type>(d), 0, 1.0);
 	}
 
-	residue::base_type encode(char ch) const {
-		static residue::base_type dna[] = {0,1,3,2};
+	residue::data_type encode(char ch) const {
+		static residue::data_type dna[] = {0,1,3,2};
 		if(_model == DNA || _model == RNA)
 			return dna[(ch&6u) >> 1];
 		return ~0;
 	}
-	char decode(residue::base_type r) const {
+	char decode(residue::data_type r) const {
 		static char dna[] = "ACGT";
 		static char rna[] = "ACGU";
 		// Include O & U, two rare amino acids
