@@ -340,16 +340,11 @@ void Tree::Evolve(Node &rNode, double dTime)
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
-	cerr << base_rates[0] << endl;
-	cerr << base_rates[1] << endl;
-	cerr << base_rates[2] << endl;
-	cerr << base_rates[3] << endl;
-
+	// Substitutions via a Gillespie Algorithm
 	for(Node::Sections::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it) {
-		double dM = 1.0/it->root()->weight.rate;
-		for(double dt = rand_exp(dM); dt <= dTime; dt += rand_exp(dM)) {
-			cerr << 1.0/dM << endl;
-			rate_type uPos = rate_type(rand_real()/dM);
+		double dM = it->root()->weight.rate;
+		for(double dt = rand_exp(1.0/dM); dt <= dTime; dt += rand_exp(1.0/dM)) {
+			rate_type uPos = rate_type(rand_real()*dM);
 			Sequence::iterator pit = it->find(uPos);
 			double d = rand_real();
 			int i = pit->val.base();
@@ -362,59 +357,11 @@ void Tree::Evolve(Node &rNode, double dTime)
 				d -= m_matTrans[i][j];
 			}
 			it->update_weight(pit);
-			dM = 1.0/it->root()->weight.rate;
+			dM = it->root()->weight.rate;
 		}
 	}
 
-	// Substitutions
-//	unsigned int uNuc = 0;
-//	for(vector<Sequence>::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it)
-//	{
-//		//for(Sequence::iterator jt = it->begin(); jt != it->end(); ++jt)
-//		for(Sequence::iterator jt = it->find(size_type(0)); jt != it->end(); jt = it->search(jt,size_type(1)))
-//		{
-//			// Skip any position that is a deletion
-//			//if(jt->val.is_deleted())
-//			//	continue;
-//			// Total Evolution Rate for the position
-//			double dTemp = dTime*jt->val.rate_scalar()*m_vdScale[uNuc%m_uWidth];
-//			if(dTemp < DBL_EPSILON)
-//				continue; // Invariant Site
-//			// if dTemp is different from the previous one, recalculate probability matrix
-//			if(dTemp != m_dOldTime)
-//			{
-//				m_dOldTime = dTemp;
-//				Vector4  vec;
-//				vec[0] = exp(dTemp*m_vecL[0]);
-//				vec[1] = exp(dTemp*m_vecL[1]);
-//				vec[2] = exp(dTemp*m_vecL[2]);
-//				vec[3] = exp(dTemp*m_vecL[3]);
-//				Matrix44 mat; mat.Scale(vec, m_matU);
-//				m_matSubst.Multiply(m_matV, mat);
-//				for(Matrix44::Pos i=0;i<4;++i)
-//				{
-//					m_matSubst(i,1) += m_matSubst(i,0);
-//					m_matSubst(i,2) += m_matSubst(i,1);
-//					//m_matSubst(i,3) = 1.0;
-//				}
-//			}
-//			// get the base of the current nucleotide and pick new base
-//			unsigned int uBase = jt->val.base();
-//			dTemp = rand_real();
-//			if(dTemp < m_matSubst(uBase, 0))
-//				jt->val.base(0);
-//			else if(dTemp < m_matSubst(uBase, 1))
-//				jt->val.base(1);
-//			else if(dTemp < m_matSubst(uBase, 2))
-//				jt->val.base(2);
-//			else
-//				jt->val.base(3);
-//
-//			++uNuc; // Increase position
-//		}
-//	}
 	// Indel formation via Gillespie Algorithm
-
 	// Check whether Indels are off
 	if(m_dLambdaDel+m_dLambdaIns < DBL_EPSILON)
 		return;
