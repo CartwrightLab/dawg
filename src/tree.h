@@ -96,6 +96,8 @@ protected:
 //};
 
 // The recombinant tree data structure
+struct AlignData;
+
 class Tree
 {
 public:
@@ -104,7 +106,7 @@ public:
 	class Node
 	{
 	public:
-		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weighter<> > Sequence;
+		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weigher<> > Sequence;
 		typedef Sequence::data_type Nucleotide;
 		typedef std::vector<Nucleotide> SeqBuffer;
 		typedef std::vector<Sequence> Sections;
@@ -178,7 +180,7 @@ public:
 	const Node::Map& GetMap() const { return m_map; }
 
 	// Align sequences from the tree
-	void Align(Alignment &aln, unsigned int uFlags=0) const;
+	void Align(Alignment &aln, unsigned int uFlags=0);
 
 protected:
 	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
@@ -223,9 +225,46 @@ private:
 	Nucleotide::data_type branchColor;
 
 	residue_factory make_seq;
+
+	rate_type base_rates[64];
+
+	std::vector<AlignData> m_vAlnTable;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
+
+struct AlignData {
+	typedef Tree::SeqBuffer Sequence;
+	AlignData(const std::string ss) : ssName(ss) {
+		it = seq.begin();
+	}
+	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln) {
+		it = seq.begin()+(a.it-a.seq.begin());
+	}
+	AlignData & operator=(const AlignData &a) {
+		if(this == &a)
+			return *this;
+		ssName = a.ssName;
+		seq = a.seq;
+		seqAln = a.seqAln;
+		it = seq.begin()+(a.it-a.seq.begin());
+		return *this;
+	}
+	std::string ssName;
+	Sequence seq;
+	Sequence seqAln;
+	Sequence::iterator it;
+
+	struct Printer {
+		Printer(const residue_factory &fac) : f(fac) {};
+
+		char operator()(AlignData::Sequence::const_reference r) const {
+			static char gaps[] = "-=+";
+			return r.is_deleted() ? gaps[r.base()] : f.decode(r.base());
+		}
+		const residue_factory &f;
+	};
+};
 
 namespace std {
 

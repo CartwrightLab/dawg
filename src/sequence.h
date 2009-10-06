@@ -137,6 +137,7 @@ public:
 	inline void rate_scalar(rate_type s) {
 		_rate_scalar = s;
 	}
+	inline rate_type rate_length() const { return is_deleted() ? 0.0 : rate_scalar(); }
 
 	residue() : _data(0), _rate_scalar(1.0) { }
 	residue(data_type xbase, rate_type xscale, data_type xbranch, bool del=false) :
@@ -199,9 +200,11 @@ struct evo_node_weigher {
 	typedef weight weight_type;
 
 	weight_type operator()(const residue& r) {
-		return weight(base_rates[r.base()]*r.rate_scalar(),r.length());
+		return weight(base_rates[r.base()]*r.rate_length(),r.length());
 	}
-	rate_type base_rates[64]; //maximum of 64 different bases
+	rate_type *base_rates;
+	evo_node_weigher() : base_rates(NULL) { }
+	//evo_node_weigher(const evo_node_weigher & w) : base_rates(w.base_rates) { }
 };
 
 template<class _T, class _W>
@@ -233,7 +236,7 @@ public:
 		head.right = NULL;
 	}
 
-	finger_tree(const finger_tree &tree) : head(), _size(tree._size) {
+	finger_tree(const finger_tree &tree) : head(), _size(tree._size), _weigher(tree._weigher) {
 		// tree is empty
 		if(tree.head.up == &tree.head) {
 			head.up = &head;
@@ -248,6 +251,8 @@ public:
 		if(&tree == this)
 			return *this;
 		clear();
+		_size = tree._size;
+		_weigher = tree._weigher;
 		if(tree.head.up == &tree.head) {
 			head.up = &head;
 			head.left = &head;
@@ -260,6 +265,7 @@ public:
 
 	void swap(finger_tree &tree) {
 		std::swap(_size, tree._size);
+		std::swap(_weigher, tree._weigher);
 		std::swap(head.up, tree.head.up);
 		std::swap(head.right, tree.head.right);
 		std::swap(head.left, tree.head.left);
@@ -287,6 +293,7 @@ public:
 		head.up = &head;
 		head.left = &head;
 		head.right = &head;
+		_size = 0;
 	}
 
 	iterator begin() {
@@ -309,6 +316,13 @@ public:
 	}
 
 	inline size_type size() const { return _size; }
+
+	inline const weigher_type& weigher() const {
+		return _weigher;
+	}
+	inline weigher_type& weigher() {
+		return _weigher;
+	}
 
 	struct node {
 		typedef node* pointer;
@@ -410,11 +424,11 @@ public:
 	}
 
 	template<class _P>
-	iterator search_and_update(iterator start, const _P &off) {
-		return iterator(inc_node_and_update(&(*start), off));
+	iterator update_and_search(iterator start, const _P &off) {
+		return iterator(update_and_inc_node(&(*start), off));
 	}
 
-	iterator inc_and_update(iterator it) {
+	iterator update_and_inc(iterator it) {
 		pointer p = &*it;
 		if(p->right != NULL) {
 			p = p->right;
@@ -611,50 +625,74 @@ protected:
 	template<class _P>
 	const_pointer inc_node(const_pointer p, const _P &pos) const {
 		typedef _P cmp_type;
-		cmp_type temp = pos;
+		cmp_type v = pos;
 		for(;;) {
 			if(p == &head)
 				break;
-			if(temp < cmp_type(weight_type(p->val)))
-				break;
-			temp -= cmp_type(weight_type(p->val));
+			cmp_type w = cmp_type(p->weight);
+			if(p->left != NULL)
+				w -= cmp_type(p->left->weight);
 			if(p->right != NULL) {
-				if(temp < cmp_type(p->right->weight))
-					return find_node(temp, p->right);
-				temp -= cmp_type(p->right->weight);
+				cmp_type rw = cmp_type(p->right->weight);
+				w -= rw;
+				if(v < w)
+					break;
+				v -= w;
+				if(v < rw)
+					return find_node(v, p->right);
+				v -= rw;
+			} else {
+				if(v < w)
+					break;
+				v -= w;
 			}
-			for(;p->up->right == p; p = p->up)
-				/*noop*/;
-			if(p != &head)
+
+			if(p->up->left == p) {
 				p = p->up;
+				continue;
+			}
+			for(p = p->up;p->up->right == p; p = p->up)
+				/*noop*/;
+			p = p->up;
 		}
 		return p;
 	}
 
-//	template<class _P>
-//	pointer inc_node_and_update(pointer p, const _P &pos) {
-//		typedef _P cmp_type;
-//		cmp_type temp = pos;
-//		for(;;) {
-//			if(p == &head)
-//				break;
-//			if(temp < cmp_type(weight_type(p->val)))
-//				break;
-//			temp -= cmp_type(weight_type(p->val));
-//			if(p->right != NULL) {
-//				if(temp < cmp_type(p->right->weight))
-//					return const_cast<pointer>(find_node(temp, p->right));
-//				temp -= cmp_type(p->right->weight);
-//			}
-//			for(;p->up->right == p; p = p->up)
-//				_update_weight(p);
-//			if(p != &head) {
-//				_update_weight(p);
-//				p = p->up;
-//			}
-//		}
-//		return p;
-//	}
+	template<class _P>
+	pointer update_and_inc_node(pointer p, const _P &pos) {
+		typedef _P cmp_type;
+		cmp_type v = pos;
+		for(;;) {
+			if(p == &head)
+				break;
+			_update_weight(p);
+
+			cmp_type w = cmp_type(p->weight);
+			if(p->left != NULL)
+				w -= cmp_type(p->left->weight);
+			if(p->right != NULL) {
+				cmp_type rw = cmp_type(p->right->weight);
+				w -= rw;
+				if(v < w)
+					break;
+				v -= w;
+				if(v < rw)
+					return const_cast<pointer>(find_node(v, p->right));
+				v -= rw;
+			} else {
+				if(v < w)
+					break;
+				v -= w;
+			}
+			if(p->up->left == p) {
+				p = p->up;
+				continue;
+			}
+			do _update_weight(p = p->up); while(p->up->right == p);
+			p = p->up;
+		}
+		return p;
+	}
 
 
 	node head;
@@ -677,7 +715,7 @@ public:
 		std::transform(b, e, std::back_inserter(dest),
 			std::bind1st(std::mem_fun(&self_type::make_residue), this));
 	}
-	
+
 	template<class T>
 	residue operator()(T a) {
 		return make_residue(a);

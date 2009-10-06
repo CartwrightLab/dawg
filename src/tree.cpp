@@ -181,6 +181,7 @@ Tree::Sequence::size_type Tree::Node::SeqLength() const
 // Flatten sections into one sequence
 void Tree::Node::Flatten(SeqBuffer& seq) const
 {
+	seq.reserve(m_vSections.front().size());
 	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
 		cit != m_vSections.end(); ++cit)
 		seq.insert(seq.end(), cit->begin(), cit->end());
@@ -274,22 +275,25 @@ void Tree::Evolve()
 	Node& rNode = m_map["_R()()T"];
 	rNode.m_ssName = "_R()()T";
 	rNode.m_bTouched = true;
-	// Load sectiosn from template
+
 	rNode.m_vSections = m_vDNASeqs;
-	// Process Template
-	for(vector<Sequence>::iterator it = rNode.m_vSections.begin();
-		it != rNode.m_vSections.end(); ++it)
+
+	// Process Templates
+	for(unsigned v=0;v<rNode.m_vSections.size();++v)
 	{
+		Sequence &seq = rNode.m_vSections[v];
 		unsigned int u=0;
-		for(Sequence::iterator sit = it->begin(); sit != it->end(); sit = it->inc_and_update(sit)) {
-			if(sit->val.rate_scalar() < 0.0)
-				sit->val.rate_scalar(static_cast<residue::rate_type>(RandomRate(u++)));
-			if(sit->val.is_deleted()) {
-				sit->val.base(RandomBase());
-				sit->val.mark_deleted(false);
+		for(Sequence::iterator sit = seq.begin(); sit != seq.end(); sit = seq.update_and_inc(sit)) {
+			residue &res = sit->val;
+			if(res.rate_scalar() < 0.0)
+				res.rate_scalar(static_cast<residue::rate_type>(RandomRate(u++)));
+			if(res.is_deleted()) {
+				res.base(RandomBase());
+				res.mark_deleted(false);
 			}
 		}
 	}
+
 	// Evolve each tip
 	for(vector<string>::const_iterator cit = m_vTips.begin(); cit != m_vTips.end(); ++cit)
 		Evolve(m_map[*cit]);
@@ -336,10 +340,16 @@ void Tree::Evolve(Node &rNode, double dTime)
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
+	cerr << base_rates[0] << endl;
+	cerr << base_rates[1] << endl;
+	cerr << base_rates[2] << endl;
+	cerr << base_rates[3] << endl;
+
 	for(Node::Sections::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it) {
 		double dM = 1.0/it->root()->weight.rate;
 		for(double dt = rand_exp(dM); dt <= dTime; dt += rand_exp(dM)) {
-			rate_type uPos = rate_type(dM*rand_real());
+			cerr << 1.0/dM << endl;
+			rate_type uPos = rate_type(rand_real()/dM);
 			Sequence::iterator pit = it->find(uPos);
 			double d = rand_real();
 			int i = pit->val.base();
@@ -474,7 +484,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 							itPos.second = itPos.first->search(itPos.first->begin(), size_type(0));
 						}
 						itPos.second->val.mark_deleted(true);
-						itPos.second = itPos.first->search_and_update(itPos.second, size_type(0));
+						itPos.second = itPos.first->update_and_search(itPos.second, size_type(0));
 					}
 					itPos.first->update_weight(itPos.second);
 				}
@@ -619,6 +629,11 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_matTrans(3,1) /= m_matTrans(3,3);
 	m_matTrans(3,2) /= m_matTrans(3,3);
 
+	// Base Rates
+	base_rates[0] = m_matTrans(0,0);
+	base_rates[1] = m_matTrans(1,1);
+	base_rates[2] = m_matTrans(2,2);
+	base_rates[3] = m_matTrans(3,3);
 
 	// Make Q a symetric matrix again
 	Vector4 vecD, vecE;  //D*E=I
@@ -705,31 +720,30 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	if(vSeqs.size())
 	{
 		m_vDNASeqs.assign(vSeqs.size(), Sequence());
-		SeqBuffer seq;
 		// Read sequence of each section
 		for(unsigned int u = 0; u < vSeqs.size(); ++u)
 		{
 			const string & ss = vSeqs[u];
-			unsigned int uu = BlockTrim(ss.size());
-			seq.clear();
-			make_seq(ss.begin(), ss.begin()+uu, seq);
-			m_vDNASeqs[u].insert(m_vDNASeqs[u].end(), seq.begin(), seq.end());
+			Sequence &seq = m_vDNASeqs[u];
+			seq.weigher().base_rates = &base_rates[0];
 
-			//for(unsigned int u=0; u<uu; ++u)
-			//	if(!seq[u].FromChar((*cit)[u]))
-			//		return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
+			unsigned int uu = BlockTrim(ss.size());
+			for(unsigned int v=0;v<uu;++v)
+				seq.insert(seq.end(), make_seq(ss[v]));
+
+			//return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
 		}
 	}
 	else
 	{
 		// Create random sequences
 		m_vDNASeqs.assign(vLens.size(), Sequence());
-		SeqBuffer seq;
 		residue res(0, -1.0, 0, true);
-		for(unsigned int u = 0; u < vLens.size(); ++u)
-		{
-			seq.assign(m_uWidth*vLens[u], res);
-			m_vDNASeqs[u].insert(m_vDNASeqs[u].end(), seq.begin(), seq.end());
+		for(unsigned int u = 0; u < vLens.size(); ++u) {
+			Sequence &seq = m_vDNASeqs[u];
+			seq.weigher().base_rates = &base_rates[0];
+			for(unsigned int v=0;v<m_uWidth*vLens[u];++v)
+				seq.insert(seq.end(), res);
 		}
 	}
 	// Check to see if rates are specified
@@ -740,8 +754,8 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
 		{
 			unsigned int v = 0;
-			for(Sequence::iterator it = m_vDNASeqs[u].begin();
-				it != m_vDNASeqs[u].end(); ++it)
+			Sequence &seq = m_vDNASeqs[u];
+			for(Sequence::iterator it = seq.begin(); it != seq.end(); ++it)
 			{
 				it->val.rate_scalar(static_cast<residue::rate_type>(vRates[u][v]));
 				dTemp += vRates[u][v];
@@ -751,8 +765,8 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		// Scale the Expected Rate to 1.0
 		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
 		{
-			for(Sequence::iterator it = m_vDNASeqs[u].begin();
-				it != m_vDNASeqs[u].end(); ++it)
+			Sequence &seq = m_vDNASeqs[u];
+			for(Sequence::iterator it = seq.begin(); it != seq.end(); ++it)
 			{
 				residue::rate_type s = it->val.rate_scalar();
 				it->val.rate_scalar(static_cast<residue::rate_type>(s/dTemp));
@@ -786,51 +800,18 @@ double Tree::RandomRate(size_type uPos) const
 		return 1.0;
 }
 
-struct AlignData {
-	typedef Tree::SeqBuffer Sequence;
-	AlignData(const string ss) : ssName(ss) {
-		it = seq.begin();
-	}
-	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln) {
-		it = seq.begin()+(a.it-a.seq.begin());
-	}
-	AlignData & operator=(const AlignData &a) {
-		if(this == &a)
-			return *this;
-		ssName = a.ssName;
-		seq = a.seq;
-		seqAln = a.seqAln;
-		it = seq.begin()+(a.it-a.seq.begin());
-		return *this;
-	}
-	string ssName;
-	Sequence seq;
-	Sequence seqAln;
-	Sequence::iterator it;
-
-	struct Printer {
-		Printer(const residue_factory &fac) : f(fac) {};
-
-		char operator()(AlignData::Sequence::const_reference r) const {
-			static char gaps[] = "-=+";
-			return r.is_deleted() ? gaps[r.base()] : f.decode(r.base());
-		}
-		const residue_factory &f;
-	};
-};
-
-void Tree::Align(Alignment &aln, unsigned int uFlags) const
+void Tree::Align(Alignment &aln, unsigned int uFlags)
 {
 	// construct a table of flattened sequences
-	vector<AlignData> vTable;
-	vTable.reserve(m_map.size());
+	m_vAlnTable.clear();
+	// if we remove this call to flatten, we can get even faster
 	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit) {
 		// Skip any sequence that begin with one of the two special characters
 		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
 			continue;
-		vTable.push_back(AlignData(cit->second.m_ssName));
-		cit->second.Flatten(vTable.back().seq);
-		vTable.back().it = vTable.back().seq.begin();
+		m_vAlnTable.push_back(AlignData(cit->second.m_ssName));
+		cit->second.Flatten(m_vAlnTable.back().seq);
+		m_vAlnTable.back().it = m_vAlnTable.back().seq.begin();
 	}
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
@@ -845,7 +826,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		uState = 0; // Set to quit
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
-		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
 			if(sit->it == sit->seq.end())
 				continue; // Sequence is done
 			uBranchN = sit->it->branch();
@@ -859,7 +840,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 		if(uState == 0) // Stop Aligning
 			break;
 		bool rmEmpty = !(uFlags & FlagOutKeepEmpty);
-		for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
 			if(sit->it == sit->seq.end()) {
 				if(!(uState == 2 && rmEmpty))
 					sit->seqAln.push_back(Nucleotide(2, 1.0, 0, true));
@@ -881,7 +862,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	}
 
 	// Add aligned sequences to alingment set
-	for(vector<AlignData>::iterator sit = vTable.begin(); sit != vTable.end(); ++sit) {
+	for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
 		transform(sit->seqAln.begin(), sit->seqAln.end(),
 			std::back_inserter(aln[sit->ssName]), AlignData::Printer(make_seq));
 	}

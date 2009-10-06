@@ -16,16 +16,19 @@ void printnode(FT::node::pointer p) {
 	cout << "(";
 	if(p->left != p)
 		printnode(p->left);
-	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
+	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.rate);
 	if(p->right != p)
 		printnode(p->right);
 	cout << ")";
 }
 
-
-
 int main(int argc, char* argv[]) {
 	FT tree;
+	tree.weigher().base_rates[0] = 0.1;
+	tree.weigher().base_rates[1] = 0.01;
+	tree.weigher().base_rates[2] = 0.001;
+	tree.weigher().base_rates[3] = 0.0001;
+
 	char in;
 	dawg::residue_factory make_seq;
 
@@ -42,12 +45,14 @@ int main(int argc, char* argv[]) {
 	FT::iterator it = tree.find(FT::weight_type::size_type(4));
 	unsigned int u = 8;
 	while(u--) {
-		it = tree.find(FT::weight_type::size_type(u));
-		//it->val.mark_deleted(true);
-		cout << u << " " << it->val.base() <<  " " << tree.root()->weight.length << endl;
+		//it = tree.find(FT::weight_type::size_type(u));
+		it->val.mark_deleted(true);
+
+		cout << u << " " << it->val.base() <<  " " << tree.root()->weight.rate << endl;
 		printnode(&*tree.root());
 		cout << endl;
-		//it = tree.search_and_update(it, FT::size_type(0));
+		it = tree.update_and_search(it, FT::weight_type::rate_type(0));
+		//it = tree.search(it, FT::weight_type::size_type(1));
 	}
 	//it->update_weight();
 	cout << it->val.base() <<  " " << tree.root()->weight.length << endl;
@@ -56,4 +61,3 @@ int main(int argc, char* argv[]) {
 
 	return 0;
 }
-
