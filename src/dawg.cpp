@@ -287,7 +287,7 @@ bool Execute()
 	DawgVar::Get("GapSingleChar", bGapSingle);
 	DawgVar::Get("GapPlus", bGapPlus);
 	DawgVar::Get("LowerCase", bLowerCase);
-	DawgVar::Get("Translate", bTranslate);
+	//DawgVar::Get("Translate", bTranslate);
 	DawgVar::Get("KeepEmpty", bKeepEmpty);
 
 	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
