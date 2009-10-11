@@ -203,7 +203,7 @@ bool Execute()
 	vector<string> vssSeqs;
 	string::size_type uTotalSeqLen = 0, uTotalRateLen = 0;
 
-	double dGamma, dIota, dScale;
+	double dGamma, dIota;
 
 	double dNucFreq[4] = {0.25,0.25,0.25,0.25};
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
@@ -272,18 +272,12 @@ bool Execute()
 	DawgVar::GetVector("Seed", vuSeed);
 	DawgVar::Get("Model", ssModel);
 	DawgVar::GetVector("Params", vdParams);
-	if(!DawgVar::GetArray("Gamma", &vdGamma[0], uWidth)) // Coef of Variation
+	if(!DawgVar::Get("Gamma", dGamma)) // Coef of Variation
 	{
-		if(DawgVar::GetArray("Alpha", &vdGamma[0], uWidth))  // Shape parameter
-		{
-			for(vector<double>::iterator it = vdGamma.begin();
-				it != vdGamma.end(); ++it)
-			{
-				*it = 1.0 / *it;
-			}
-		}
+		if(DawgVar::Get("Alpha", dGamma))  // Shape parameter
+			dGamma = 1.0/dGamma;
 	}
-	DawgVar::GetArray("Iota", &vdIota[0], uWidth);
+	DawgVar::Get("Iota", dIota);
 	DawgVar::Get("TreeScale", dTreeScale);
 	DawgVar::GetArray("GapModel", ssGapModel, 2);
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
@@ -407,7 +401,7 @@ bool Execute()
 
 	// Initialize Evolution
 	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		uWidth, vdGamma, vdIota, vdScale, dTreeScale, uKeepFlank ))
+		dGamma, dIota, dTreeScale, uKeepFlank ))
 		return DawgError("Bad evolution parameters");
 
 	// Initialize Root
@@ -483,10 +477,6 @@ bool Execute()
 
 	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
 		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail), bOutSubst);
-
-	// Check translate parameter
-	if(bTranslate && uWidth != 3)
-		return DawgError("Translate requires a Width of 3.");
 
 	// setup output flags
 	unsigned int uOutFlags = 0u;
