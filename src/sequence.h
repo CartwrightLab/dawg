@@ -8,7 +8,11 @@
 #include <functional>
 #include <iterator>
 
+#ifdef _WIN32
+typedef unsigned int uint32_t;
+#else
 #include <stdint.h>
+#endif
 
 namespace dawg {
 // http://www.cs.princeton.edu/courses/archive/fall08/cos226/lectures/10BalancedTrees-2x2.pdf

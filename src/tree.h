@@ -141,8 +141,7 @@ public:
 	// Setup the model of evolution
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
-		unsigned int uWidth, const std::vector<double> &vdGamma,
-		const std::vector<double> &vdIota, const std::vector<double> &vdScale, double dTreeScale,
+		double dGamma, double dIota, double dTreeScale,
 		int uKeepFlank);
 
 	// Setup the root node
@@ -157,10 +156,7 @@ public:
 	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
 	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate(uPos)), branchColor, 1.0); }
 
-	Tree() : m_nSec(0), m_uWidth(1) {}
-
-	// Trim a length to be compatible with the block width
-	inline unsigned int BlockTrim(unsigned int u) { return u - u%m_uWidth; }
+	Tree() : m_nSec(0) {}
 
 	// Evolve the tree
 	void Evolve();
@@ -196,10 +192,8 @@ private:
 	Node::Map m_map;
 	std::vector<std::string> m_vTips;
 
-	unsigned int m_uWidth;
-	std::vector<double> m_vdScale;
-	std::vector<double> m_vdGamma;
-	std::vector<double> m_vdIota;
+	double m_dGamma;
+	double m_dIota;
 
 	double m_dTreeScale;
 
