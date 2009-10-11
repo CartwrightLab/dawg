@@ -203,7 +203,7 @@ bool Execute()
 	vector<string> vssSeqs;
 	string::size_type uTotalSeqLen = 0, uTotalRateLen = 0;
 
-	vector<double> vdGamma, vdIota, vdScale;
+	double dGamma, dIota, dScale;
 
 	double dNucFreq[4] = {0.25,0.25,0.25,0.25};
 	double dRevParams[6] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
@@ -232,7 +232,6 @@ bool Execute()
 
 	bool bGapSingle = false, bGapPlus = false, bLowerCase = false, bTranslate = false;
 	bool bKeepEmpty = false;
-	unsigned int uWidth = 1;
 	DawgVar::Vec::size_type nRes;
 
 	// Read variables from configuration
@@ -256,12 +255,6 @@ bool Execute()
 	}
 	else
 		vuSeqLen.resize(vtTrees.size(), 100);
-
-	DawgVar::Get("Width", uWidth);
-
-	vdGamma.resize(uWidth, 0.0);
-	vdIota.resize(uWidth, 0.0);
-	vdScale.resize(uWidth, 1.0);
 
 	vvdRates.resize(vtTrees.size());
 	if(DawgVar::GetMatrix("Rates", &vvdRates[0], vvdRates.size()))
@@ -291,7 +284,6 @@ bool Execute()
 		}
 	}
 	DawgVar::GetArray("Iota", &vdIota[0], uWidth);
-	DawgVar::GetArray("Scale", &vdScale[0], uWidth);
 	DawgVar::Get("TreeScale", dTreeScale);
 	DawgVar::GetArray("GapModel", ssGapModel, 2);
 	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);

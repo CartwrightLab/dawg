@@ -318,7 +318,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 			if(jt->IsDeleted())
 				continue;
 			// Total Evolution Rate for the position
-			double dTemp = dTime*jt->GetRate()*m_vdScale[uNuc%m_uWidth];
+			double dTemp = dTime*jt->GetRate();
 			if(dTemp < DBL_EPSILON)
 				continue; // Invariant Site
 			// if dTemp is different from the previous one, recalculate probability matrix
@@ -361,7 +361,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		return;
 
 	// Get current length
-	Sequence::size_type uLength = rNode.SeqLength()/m_uWidth;
+	Sequence::size_type uLength = rNode.SeqLength();
 	double dLength = (double)uLength;
 	double dW = 1.0/m_funcRateSum(dLength);
 
@@ -376,24 +376,24 @@ void Tree::Evolve(Node &rNode, double dTime)
 			Sequence::size_type uPos = (Sequence::size_type)rand_uint((uint32_t)uLength); // pos is in [0,L]
 			// Construct sequence to be inserted
 			Sequence seq;
-			for(unsigned int uc = 0; uc < m_uWidth*ul; ++uc)
+			for(unsigned int uc = 0; uc < ul; ++uc)
 			{
 				Nucleotide nuc = RandomNucleotide(uc);
 				nuc.SetColor(branchColor);
 				seq.push_back(nuc);
 			}
 			// Find Position of Insertion
-			Node::iterator itPos = rNode.SeqPos(uPos*m_uWidth);
+			Node::iterator itPos = rNode.SeqPos(uPos);
 			if(itPos.first == rNode.m_vSections.end())
 			{
 				// Insert at end of sequence
 				uLength += rNode.m_vSections.back().Insertion(
-					rNode.m_vSections.back().end(), seq.begin(), seq.end())/m_uWidth;
+					rNode.m_vSections.back().end(), seq.begin(), seq.end());
 			}
 			else
 			{
 				// Insert inside sequence
-				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end())/m_uWidth;
+				uLength += itPos.first->Insertion(itPos.second, seq.begin(), seq.end());
 			}
 		}
 		else if(uLength > 0)
@@ -411,8 +411,6 @@ void Tree::Evolve(Node &rNode, double dTime)
 			// when shifted to "deletion space".
 			if(m_uKeepFlank == 0	|| ( (ul-1) < uPos+m_uKeepFlank && uPos < uLength-1+m_uKeepFlank ) ) {
 				uB -= (ul-1);
-				uB *= m_uWidth;
-				uSize *= m_uWidth;
 				// Find deletion point
 				Node::iterator itPos = rNode.SeqPos(uB);
 				Sequence::size_type uTemp = uSize;
@@ -420,7 +418,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 				// Delete uSize nucleotides begin sensitive to gaps that overlap sections
 				for(++itPos.first; uSize && itPos.first != rNode.m_vSections.end(); ++itPos.first)
 					uTemp -= itPos.first->Deletion(itPos.first->begin(), uTemp);
-				uLength -= (uSize-uTemp)/m_uWidth;
+				uLength -= (uSize-uTemp);
 			}
 		}
 		// update length
@@ -434,10 +432,8 @@ void Tree::Evolve(Node &rNode, double dTime)
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns,
 		const IndelModel::Params& rDel,
-		unsigned int uWidth,
-		const std::vector<double> &vdGamma,
-		const std::vector<double> &vdIota,
-		const std::vector<double> &vdScale,
+		double dGamma,
+		double dIota,
 		double dTreeScale,
 		int uKeepFlank)
 {
@@ -455,41 +451,16 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 		return DawgError("Lambda (Ins) must not be negative.");
 	if(rDel.dLambda < 0.0)
 		return DawgError("Lambda (Del) must not be negative.");
-	if(uWidth == 0)
-		return DawgError("Width must be positive.");
-	if(vdGamma.size() != uWidth)
-		return DawgError("Gamma must have the same size as the value of Width.");
-	if(vdIota.size() != uWidth)
-		return DawgError("Iota must have the same size as the value of Width.");
-	if(vdScale.size() != uWidth)
-		return DawgError("Scale must have the same size as the value of Width.");
-	for(vector<double>::const_iterator cit = vdGamma.begin(); cit != vdGamma.end(); ++cit)
-	{
-		if(*cit < 0.0)
-			return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", *cit);
-	}
-	for(vector<double>::const_iterator cit = vdIota.begin(); cit != vdIota.end(); ++cit)
-	{
-		if(0.0 > *cit || *cit > 1.0)
-			return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", *cit);
-	}
-	for(vector<double>::const_iterator cit = vdScale.begin(); cit != vdScale.end(); ++cit)
-	{
-		if(*cit <= 0.0)
-			return DawgError("Invalid Scale, \"%f\". Scale must be positive.", *cit);
-	}
+	if(dGamma < 0.0)
+		return DawgError("Invalid Gamma, \"%f\".  Gamma must be positive.", dGamma);
+	if(0.0 > dIota || dIota > 1.0)
+			return DawgError("Invalid Iota, \"%f\".  Iota must be a probability.", dIota);
 	if(dTreeScale <= 0.0)
 		return DawgError("Invalid TreeScale, \"%f\". TreeScale must be positive.", dTreeScale);
 
-	// Setup Frame
-	m_uWidth = uWidth;
-
 	// Setup Rate Parameters
-	m_vdGamma = vdGamma;
-	m_vdIota = vdIota;
-
-	// Setup Scale
-	m_vdScale = vdScale;
+	m_dGamma = dGamma;
+	m_dIota = dIota;
 
 	// Setup TreeScale
 	m_dTreeScale = dTreeScale;
@@ -520,10 +491,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	matQ.Scale(matQ, vecF);
 
 	// Scale such that the total rate of substitution is equal to one
-	double dX = 0.0;
-	for(unsigned int i=0;i<m_vdIota.size();++i)
-		dX -= (1.0-m_vdIota[i])*m_vdScale[i];
-	dX = m_vdIota.size()/dX;
+	double dX = 1.0/(m_dIota-1.0);
 	matQ(0,0) = -(matQ(0,1)+matQ(0,2)+matQ(0,3));
 	matQ(1,1) = -(matQ(1,0)+matQ(1,2)+matQ(1,3));
 	matQ(2,2) = -(matQ(2,0)+matQ(2,1)+matQ(2,3));
@@ -621,7 +589,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		// Read sequence of each section
 		for(vector<string>::const_iterator cit = vSeqs.begin(); cit != vSeqs.end(); ++cit)
 		{
-			Sequence seq(BlockTrim((unsigned int)cit->size()));
+			Sequence seq(cit->size());
 			for(unsigned int u=0; u<seq.size(); ++u)
 				if(!seq[u].FromChar((*cit)[u]))
 					return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
@@ -632,7 +600,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	{
 		// Create random sequences
 		for(vector<unsigned int>::const_iterator cit = vLens.begin(); cit != vLens.end(); ++cit)
-			m_vDNASeqs.push_back(Sequence(*cit*m_uWidth));
+			m_vDNASeqs.push_back(Sequence(*cit));
 	}
 	// Check to see if rates are specified
 	if(vRates.size())
@@ -672,11 +640,10 @@ Nucleotide::data_type Tree::RandomBase() const
 
 double Tree::RandomRate(Sequence::size_type uPos) const
 {
-	uPos %= m_uWidth;
-	if(m_vdIota[uPos] > DBL_EPSILON && rand_bool(m_vdIota[uPos]))
+	if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
 		return 0.0;  // Site Invariant
-	else if(m_vdGamma[uPos] > DBL_EPSILON)
-		return rand_gamma1(m_vdGamma[uPos]); // Gamma with mean 1.0 and var of m_dGamma
+	else if(m_dGamma > DBL_EPSILON)
+		return rand_gamma1(m_dGamma); // Gamma with mean 1.0 and var of m_dGamma
 	else
 		return 1.0;
 }
