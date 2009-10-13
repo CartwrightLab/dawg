@@ -324,7 +324,8 @@ bool Execute()
 
 	// Setup recombinant tree
 	Tree myTree;
-	myTree.ProcessTree(vtTrees.begin(), vtTrees.end());
+	if(!myTree.ProcessTree(vtTrees.begin(), vtTrees.end()))
+		return DawgError("Internally inconsistent Tree");
 
 	// Construct substitution matrices
 	if(ssModel == "GTR")

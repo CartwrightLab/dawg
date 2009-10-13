@@ -8,27 +8,27 @@
 
 using namespace std;
 
-void printnode(Tree::Sequence::node::pointer p) {
-	if(p == NULL)
-		return;
-	cout << "(";
-	printnode(p->left);
-	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
-	printnode(p->right);
-	cout << ")";
-}
-
-void printsections(const Tree::Node::Sections &x) {
-	for(Tree::Node::Sections::const_iterator cit = x.begin();
-		cit != x.end(); ++cit)
-	{
-		for(Tree::Sequence::const_iterator it = cit->begin();
-			it != cit->end(); ++ it ) {
-				cerr << it->val.base();
-			}
-	}
-
-}
+//void printnode(Tree::Sequence::node::pointer p) {
+//	if(p == NULL)
+//		return;
+//	cout << "(";
+//	printnode(p->left);
+//	cout << p->val.base() << ((p->color) ? "r" : "b") << (p->weight.length);
+//	printnode(p->right);
+//	cout << ")";
+//}
+//
+//void printsections(const Tree::Node::Sections &x) {
+//	for(Tree::Node::Sections::const_iterator cit = x.begin();
+//		cit != x.end(); ++cit)
+//	{
+//		for(Tree::Sequence::const_iterator it = cit->begin();
+//			it != cit->end(); ++ it ) {
+//				cerr << it->val.base();
+//			}
+//	}
+//
+//}
 
 ////////////////////////////////////////////////////////////
 //  class NewickNode
@@ -164,89 +164,38 @@ void NewickNode::MakeName()
 //	return IsExtant() ? csNuc[GetBase()] : csType[GetBase()];
 //}
 
-
-////////////////////////////////////////////////////////////
-//  class Tree::Node
-////////////////////////////////////////////////////////////
-
-// Get the total sequence length of the node
-Tree::Sequence::size_type Tree::Node::SeqLength() const
-{
-	Sequence::size_type uRet = 0;
-	for(vector<Sequence>::const_iterator it = m_vSections.begin(); it != m_vSections.end(); ++it)
-		uRet += it->root()->weight.length;
-	return uRet;
-}
-
-// Flatten sections into one sequence
-void Tree::Node::Flatten(SeqBuffer& seq) const
-{
-	seq.reserve(m_vSections.front().size());
-	for(vector<Sequence>::const_iterator cit = m_vSections.begin();
-		cit != m_vSections.end(); ++cit)
-		seq.insert(seq.end(), cit->begin(), cit->end());
-}
-
-Tree::Node::iterator Tree::Node::SeqPos(size_type uPos)
-{
-	vector<Sequence>::iterator itA;
-	// Find section containing uPos
-	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
-	{
-		if(uPos < itA->root()->weight.length)
-			break;
-		uPos -= itA->root()->weight.length;
-	}
-	// Find actual iterator of uPos
-	Sequence::iterator itB;
-	if(itA != m_vSections.end())
-		itB = itA->find(uPos);
-	return iterator(itA,itB);
-}
-
-Tree::Node::const_iterator Tree::Node::SeqPos(size_type uPos) const
-{
-	vector<Sequence>::const_iterator itA;
-	// Find section containing uPos
-	for(itA = m_vSections.begin(); itA != m_vSections.end(); ++itA)
-	{
-		if(uPos < itA->root()->weight.length)
-			break;
-		uPos -= itA->root()->weight.length;
-	}
-	// Find actual iterator of uPos
-	Sequence::const_iterator itB;
-	if(itA != m_vSections.end())
-		itB = itA->find(uPos);
-	return const_iterator(itA,itB);
-}
-
-
 ////////////////////////////////////////////////////////////
 //  class Tree
 ////////////////////////////////////////////////////////////
 
-void Tree::ProcessTree(NewickNode* pNode)
+bool Tree::ProcessTree(NewickNode* pNode)
 {
 	// Construct the ur-root node if it doesn't exist
 	m_map["_R()()T"];
-	// process the newick tree beginning at its root
-	ProcessNewickNode(pNode, "_R()()T");
 	// increase number of sections
-	m_nSec++;
+	++m_nSec;
+	// process the newick tree beginning at its root
+	return ProcessNewickNode(pNode, "_R()()T");
 }
 
-void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
+bool Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 {
 	// Process all sibs of the Newick Node
-	if(pNode->m_pSib.get())
-		ProcessNewickNode(pNode->m_pSib.get(), ssAnc);
+	if(pNode->m_pSib.get() &&
+		!ProcessNewickNode(pNode->m_pSib.get(), ssAnc))
+		return false;
 
 	// Get a reference to this node and set up parameters
 	Node& node = m_map[pNode->m_ssLabel];
-	node.m_mBranchLens[ssAnc] = pNode->m_dLen;
-	node.m_vAncestors.resize(m_nSec+1, ssAnc);
-	//node.m_vAncestors[m_nSec] = ssAnc;
+	if(!node.m_vAncestors.empty()) {
+		if(pNode->m_dLen != node.m_dBranchLen)
+			return DawgError("In recombinant tree Node \"%s\" has incompatable branch lengths to its parents.",
+				node.m_ssName.c_str());
+		node.m_vAncestors.resize(m_nSec, ssAnc);
+		return true;
+	}
+	node.m_dBranchLen = pNode->m_dLen;
+	node.m_vAncestors.push_back(ssAnc);
 
 	// add node to tips if it is a tip and hasn't been accessed yet
 	if(node.m_ssName.empty() && !pNode->m_pSub.get())
@@ -257,8 +206,10 @@ void Tree::ProcessNewickNode(NewickNode* pNode, const string &ssAnc)
 		node.m_ssName = pNode->m_ssLabel;
 
 	// Process children
-	if(pNode->m_pSub.get())
-		ProcessNewickNode(pNode->m_pSub.get(), node.m_ssName);
+	if(pNode->m_pSub.get() &&
+		!ProcessNewickNode(pNode->m_pSub.get(), node.m_ssName))
+		return false;
+	return true;
 }
 
 // Evolve the sequences in the tree
@@ -267,7 +218,7 @@ void Tree::Evolve()
 	// Reset Sequences
 	for(Node::Map::iterator it=m_map.begin(); it!=m_map.end();++it)
 	{
-		it->second.m_vSections.clear();
+		it->second.m_vSeq.clear();
 		it->second.m_bTouched = false;
 	}
 	branchColor = 0;
@@ -276,21 +227,16 @@ void Tree::Evolve()
 	rNode.m_ssName = "_R()()T";
 	rNode.m_bTouched = true;
 
-	rNode.m_vSections = m_vDNASeqs;
+	rNode.m_vSeq = m_vDNASeq;
 
-	// Process Templates
-	for(unsigned v=0;v<rNode.m_vSections.size();++v)
-	{
-		Sequence &seq = rNode.m_vSections[v];
-		unsigned int u=0;
-		for(Sequence::iterator sit = seq.begin(); sit != seq.end(); sit = seq.update_and_inc(sit)) {
-			residue &res = sit->val;
-			if(res.rate_scalar() < 0.0)
-				res.rate_scalar(static_cast<residue::rate_type>(RandomRate(u++)));
-			if(res.is_deleted()) {
-				res.base(RandomBase());
-				res.mark_deleted(false);
-			}
+	// Process Template
+	unsigned int u=0;
+	for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit) {
+		if(sit->rate_scalar() < 0.0)
+			sit->rate_scalar(static_cast<residue::rate_type>(RandomRate()));
+		if(sit->is_deleted()) {
+			sit->base(RandomBase());
+			sit->mark_deleted(false);
 		}
 	}
 
@@ -306,28 +252,20 @@ void Tree::Evolve(Node &rNode)
 	if(rNode.m_bTouched)
 		return;
 	rNode.m_bTouched = true;
-	// Temporary Sequences
-	map<string, Node> mapSeqs;
-	rNode.m_vSections.resize(rNode.m_vAncestors.size());
-	// Evolve ancestors and assemble
-	for(vector<string>::size_type a = 0; a < rNode.m_vAncestors.size(); ++a)
-	{
-		string &ssA = rNode.m_vAncestors[a];
-		if(mapSeqs.find(ssA) == mapSeqs.end())
-		{
-			// Touch Ancestor, make sure it exists
-			Node &aNode = m_map[ssA];
-			Evolve(aNode);
 
-			// Copy ancestor to temporary location
-			mapSeqs[ssA] = aNode;
-			// Evolve temporary location
-			Evolve(mapSeqs[ssA], m_dTreeScale*rNode.m_mBranchLens[ssA]);
-		}
-		// Assemble final sequence
-		rNode.m_vSections[a].swap(mapSeqs[ssA].m_vSections[a]);
-		//rNode.m_vSections[a] = mapSeqs[ssA].m_vSections[a];
+	// check to see if this is a recombination event
+	if(rNode.m_vAncestors.size() > 1) {
+		/*todo*/
+		return;
+	} else {
+		// Touch Parent
+		string &ssA = rNode.m_vAncestors.front();
+		Node &aNode = m_map[ssA];
+		Evolve(aNode);
+		// Copy parent's sequence
+		rNode.m_vSeq = aNode.m_vSeq;
 	}
+	Evolve(rNode, m_dTreeScale*rNode.m_dBranchLen);
 }
 
 // Evolve rNode a specific time
@@ -340,111 +278,24 @@ void Tree::Evolve(Node &rNode, double dTime)
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
-	// Substitutions via a Gillespie Algorithm
-	for(Node::Sections::iterator it = rNode.m_vSections.begin(); it != rNode.m_vSections.end(); ++it) {
-		double dM = it->root()->weight.rate;
-		for(double dt = rand_exp(1.0/dM); dt <= dTime; dt += rand_exp(1.0/dM)) {
-			rate_type uPos = rate_type(rand_real()*dM);
-			Sequence::iterator pit = it->find(uPos);
-			double d = rand_real();
-			int i = pit->val.base();
-			for(int j=0;j<4;++j) {
-				if(j == i) continue;
-				if(m_matTrans[i][j] < d || j == 3) {
-					pit->val.base(j);
-					break;
-				}
-				d -= m_matTrans[i][j];
-			}
-			it->update_weight(pit);
-			dM = it->root()->weight.rate;
-		}
-	}
-
-	// Indel formation via Gillespie Algorithm
-	// Check whether Indels are off
-	if(m_dLambdaDel+m_dLambdaIns < DBL_EPSILON)
-		return;
-
-	// Get current length
-	Sequence::size_type uLength = rNode.SeqLength();
-	double dLength = (double)uLength;
-	double dW = 1.0/m_funcRateSum(dLength);
-
-	// Do indels
-	for(double dt = rand_exp(dW); dt <= dTime; dt += rand_exp(dW))
-	{
-		// insertion or deletion
-		if(rand_bool(m_funcRateIns(dLength)*dW))
-		{
-			//Insertion
-			Sequence::size_type ul = m_pInsertionModel->RandSize();
-			Sequence::size_type uPos = (Sequence::size_type)rand_uint((uint32_t)uLength); // pos is in [0,L]
-			// Construct sequence to be inserted
-			SeqBuffer seq;
-			seq.reserve(ul);
-			for(unsigned int uc = 0; uc < ul; ++uc)
-			{
-				Nucleotide nuc = RandomNucleotide(uc);
-				nuc.branch(branchColor);
-				seq.push_back(nuc);
-			}
-			// Find Position of Insertion
-			Node::iterator itPos = rNode.SeqPos(uPos);
-			if(itPos.first == rNode.m_vSections.end())
-			{
-				--itPos.first;
-				itPos.second = itPos.first->end();
-			}
-			// Insert inside sequence
-			itPos.first->insert(itPos.second, seq.begin(), seq.end());
-			uLength += ul;
-		}
-		else if(uLength > 0)
-		{
-			// Deletion
-			// Draw random size and random pos and rearrange
-			Sequence::size_type ul = m_pDeletionModel->RandSize();
-			Sequence::size_type uPos = rand_uint((uint32_t)(uLength+ul-2));
-			Sequence::size_type uB = max(ul-1, uPos);
-			Sequence::size_type uSize = min(ul-1+uLength, uPos+ul)-uB;
-
-			// If GapLimits are on, only process deletion if it is completely inside the acceptance
-			// region as defined by the GapLimit.  Check points are at sequence positions 0-uKeepFlank and
-			// uLength-1+uKeepFlank.  These become 0-uKeepFlank+ul-1 and uLength-1+uKeepFlank+ul-1,
-			// when shifted to "deletion space".
-			if(m_uKeepFlank == 0 || ( (ul-1) < uPos+m_uKeepFlank && uPos < uLength-1+m_uKeepFlank ) ) {
-				uB -= (ul-1);
-				// Find deletion point
-				Node::iterator itPos = rNode.SeqPos(uB);
-				Sequence::size_type uTemp = uSize;
-
-				// Delete
-				if(itPos.first != rNode.m_vSections.end()) {
-					for(;uTemp;--uTemp) {
-						if(itPos.second == itPos.first->end()) {
-							++itPos.first;
-							if(itPos.first == rNode.m_vSections.end())
-								break;
-							itPos.second = itPos.first->search(itPos.first->begin(), size_type(0));
-						}
-						itPos.second->val.mark_deleted(true);
-						itPos.second = itPos.first->update_and_search(itPos.second, size_type(0));
-					}
-					itPos.first->update_weight(itPos.second);
-				}
-				uLength -= (uSize-uTemp);
-			}
-		}
-		// update length
-		dLength = (double)uLength;
-		// new waiting time parameter
-		dW = 1.0/m_funcRateSum(dLength);
-
-		//cerr << uLength << " " << rNode.m_vSections.front().root()->weight.length << " " << rNode.m_vSections.front().size() << endl;
+	//clear buffer
+	m_vSeqBuffer.clear();
+	const Sequence &seq = rNode.m_vSeq;
+	double dT = 1.0/dT;
+	//insertion and deletion rates in float space
+	dawg::residue::rate_type dIns = static_cast<dawg::residue::rate_type>(m_dLambdaIns);
+	dawg::residue::rate_type dDel = static_cast<dawg::residue::rate_type>(m_dLambdaDel);
+	dawg::residue::rate_type dIndel = dIns+dDel;
+	for(Sequence::const_iterator cit = seq.begin(); cit != seq.end(); ++cit) {
+		// draw exponention based on the branch length
+		double d = rand_exp(dT);
+		Sequence::const_iterator dit = cit;
+		for(;dit != seq.end() && dit->rate_scalar()+dIndel <= d; ++dit)
+			d -= dIndel+dit->rate_scalar();
+		m_vSeqBuffer.insert(m_vSeqBuffer.end(), cit, dit);
 
 	}
-	//printnode(&*rNode.m_vSections.front().root()); cout << endl;
+
 }
 
 // Setup Evolutionary parameters
@@ -704,7 +555,7 @@ Tree::Nucleotide::data_type Tree::RandomBase() const
 		return 3; // T
 }
 
-double Tree::RandomRate(size_type uPos) const
+double Tree::RandomRate() const
 {
 	if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
 		return 0.0;  // Site Invariant

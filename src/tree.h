@@ -103,38 +103,23 @@ class Tree
 public:
 
 	// A node in the tree
-	class Node
+	struct Node
 	{
-	public:
-		typedef dawg::finger_tree<dawg::residue, dawg::evo_node_weigher<> > Sequence;
-		typedef Sequence::data_type Nucleotide;
-		typedef std::vector<Nucleotide> SeqBuffer;
-		typedef std::vector<Sequence> Sections;
+		typedef std::vector<dawg::residue> Sequence;
+		typedef Sequence::value_type Nucleotide;
 		typedef std::map<std::string, Tree::Node> Map;
-		typedef Sequence::weight_type::size_type size_type;
-		Sections m_vSections;
+		typedef Sequence::size_type size_type;
+		Sequence m_vSeq;
 		std::vector<std::string> m_vAncestors;
-		std::map<std::string, double> m_mBranchLens;
+		double m_dBranchLen;
 		std::string m_ssName;
 		bool m_bTouched;
 
-		Node() : m_bTouched(false) { }
-		void Flatten(SeqBuffer& seq) const;
-		Sequence::size_type SeqLength() const;
-
-		typedef std::pair<Sections::iterator, Sequence::iterator> iterator;
-		typedef std::pair<Sections::const_iterator, Sequence::const_iterator> const_iterator;
-
-		// find the uPos-th nucleotide in the node
-		// skips gaps and recognizes different sections
-		iterator SeqPos(size_type uPos);
-		const_iterator SeqPos(size_type uPos) const;
+		Node() : m_bTouched(false), m_dBranchLen(0.0) { }
 	};
 	typedef Node::Sequence Sequence;
 	typedef Node::Nucleotide Nucleotide;
-	typedef Node::SeqBuffer SeqBuffer;
-	typedef Sequence::weight_type::size_type size_type;
-	typedef Sequence::weight_type::rate_type rate_type;
+	typedef Sequence::size_type size_type;
 
 	typedef std::map<std::string, std::string> Alignment;
 
@@ -149,12 +134,15 @@ public:
 		const std::vector<std::vector<double> > &vRates);
 
 	// Draw a random relative rate of substitution from the evolutionary parameters
-	double RandomRate(size_type uPos) const;
+	double RandomRate() const;
+	bool AreRatesConstant() const {
+		return (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
+	}
 	// Draw a random base from the evolutionary parameters
 	Nucleotide::data_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
-	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate(uPos)), branchColor, 1.0); }
+	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate()), branchColor, true); }
 
 	Tree() : m_nSec(0) {}
 
@@ -162,15 +150,18 @@ public:
 	void Evolve();
 
 	// Add a recombination section to the tree
-	void ProcessTree(NewickNode* pNode);
+	bool ProcessTree(NewickNode* pNode);
 
 	template<class itTree>
-	void ProcessTree(itTree itB, itTree itE)
+	bool ProcessTree(itTree itB, itTree itE)
 	{
 		m_nSec = 0;
 		m_map.clear();
-		for(itTree it = itB; it!=itE; it++)
-			ProcessTree(*it);
+		for(itTree it = itB; it!=itE; it++) {
+			if(!ProcessTree(*it))
+				return false;
+		}
+		return true;
 	}
 
 	const Node::Map& GetMap() const { return m_map; }
@@ -179,7 +170,7 @@ public:
 	void Align(Alignment &aln, unsigned int uFlags=0);
 
 protected:
-	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
+	bool ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
 	void Evolve(Node &rNode, double dTime);
 	void Evolve(Node &rNode);
 
@@ -188,7 +179,8 @@ protected:
 
 private:
 	int m_nSec;
-	std::vector< Sequence > m_vDNASeqs;
+	Sequence m_vDNASeq;
+	Sequence m_vSeqBuffer;
 	Node::Map m_map;
 	std::vector<std::string> m_vTips;
 
@@ -220,7 +212,7 @@ private:
 
 	residue_factory make_seq;
 
-	rate_type base_rates[64];
+	Nucleotide::rate_type base_rates[64];
 
 	std::vector<AlignData> m_vAlnTable;
 };
@@ -228,7 +220,7 @@ private:
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
 
 struct AlignData {
-	typedef Tree::SeqBuffer Sequence;
+	typedef Tree::Sequence Sequence;
 	AlignData(const std::string ss) : ssName(ss) {
 		it = seq.begin();
 	}
