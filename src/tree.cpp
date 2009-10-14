@@ -281,22 +281,130 @@ void Tree::Evolve(Node &rNode, double dTime)
 	//clear buffer
 	m_vSeqBuffer.clear();
 	const Sequence &seq = rNode.m_vSeq;
-	double dT = 1.0/dT;
+	double dT = 1.0/dTime;
 	//insertion and deletion rates in float space
 	dawg::residue::rate_type dIns = static_cast<dawg::residue::rate_type>(m_dLambdaIns);
 	dawg::residue::rate_type dDel = static_cast<dawg::residue::rate_type>(m_dLambdaDel);
 	dawg::residue::rate_type dIndel = dIns+dDel;
-	for(Sequence::const_iterator cit = seq.begin(); cit != seq.end(); ++cit) {
+	Sequence::const_iterator cit = seq.begin();
+	double d = rand_exp(dT);
+	for(;;) {
+		// process deletion here, which will allow for overlap.
+
 		// draw exponention based on the branch length
-		double d = rand_exp(dT);
 		Sequence::const_iterator dit = cit;
-		for(;dit != seq.end() && dit->rate_scalar()+dIndel <= d; ++dit)
-			d -= dIndel+dit->rate_scalar();
+		for(;dit != seq.end() && dit->rate_scalar()+dIndel <= d; ++dit) {
+			if(!dit->is_deleted())
+				d -= dIndel+dit->rate_scalar();
+		}
+		// copy unmodified sites into buffer.
 		m_vSeqBuffer.insert(m_vSeqBuffer.end(), cit, dit);
+		if(dit == seq.end())
+			break;
+		if(d < dDel) {
+			d = rand_exp(dT);
+			//cit =
+			continue;
+		} else {
+			d -= dDel;
+		}
+		if(d < dit->rate_scalar()) {
+			double w = dit->rate_scalar();
+			residue rez = *cit;
+			do {
+				rez.base(m_dTransCum[rez.base()](rand_real()));
+				// how much space is left in the substitution section
+				w = w - d;
+				d = rand_exp(dT);
+			} while(d < w);
+			d -= w;
+			// push modified base
+			m_vSeqBuffer.push_back(rez);
+		} else {
+			d -= dit->rate_scalar();
+			m_vSeqBuffer.push_back(*cit);
+		}
+		if(d < dIns) {
+			// Get Size of Insertion
+			Sequence::size_type ul = m_pInsertionModel->RandSize();
+			// Convert rate time to branch time
+			// dT1 is the amount of time left in an insertion
+			double dT1 = dT-dT*d/dIns;
+			d = rand_exp(dT1);
+			// Find site of next event.
+			Sequence::size_type x = static_cast<size_type>(floor(d/dIns));
+			if(x > ul)
+				x = ul;
+			while(x--) {
 
+			}
+
+			d = rand_exp(dT);
+		} else {
+			d -= dIns;
+		}
+		cit = dit;
+		++cit;
 	}
-
+	rNode.m_vSeq.swap(m_vSeqBuffer);
 }
+
+Tree::Sequence::const_iterator Tree::EvolveIndels(
+	// Beginning of the sequence
+	Sequence::const_iterator itBegin,
+	// End of the sequence
+	Sequence::const_iterator itEnd,
+	// Maximum time of the branch; origination time of the indel
+	double dT, double dR,
+	// Is the first one a deletion
+	bool bDel, Sequence::size_type uLen) {
+	double d, f, i;
+	dawg::residue::rate_type dIns = static_cast<dawg::residue::rate_type>(m_dLambdaIns);
+	dawg::residue::rate_type dDel = static_cast<dawg::residue::rate_type>(m_dLambdaDel);
+	dawg::residue::rate_type dIndel = dIns+dDel;
+	for(;;) {
+		if(bDel) {
+			d = rand_exp(dR);
+			f = modf(d/dIndel, &i);
+			Sequence::size_type x = static_cast<Sequence::size_type>(i);
+			if(x < uLen) {
+			}
+
+		} else {
+			d = rand_exp(dT-dR);
+			f = modf(d/dIndel, &i);
+			Sequence::size_type x = static_cast<Sequence::size_type>(i);
+			if(x < uLen) {
+				// Save tail for further processing
+				m_sIndelData.push(IndelData(bDel, dR, uLen-x));
+				// Add head to buffer
+				while(x--)
+					m_vSeqBuffer.push_back(RandomNucleotide());
+				// Is next event a deletion of Insertion?
+				if(f < dDel) {
+					bDel = true;
+					dR = (dT-dR)*f/dDel-dT;
+					uLen = m_pDeletionModel->RandSize();
+				} else {
+					bDel = false;
+					dR = (dT-dR)*(f-dDel)/dIns;
+					uLen = m_pInsertionModel->RandSize();
+				}
+				continue;
+			}
+			while(uLen--)
+				m_vSeqBuffer.push_back(RandomNucleotide());
+		}
+		if(m_sIndelData.empty())
+			break;
+		bDel = m_sIndelData.top().del;
+		dR = m_sIndelData.top().orig;
+		uLen = m_sIndelData.top().len;
+		m_sIndelData.pop();
+	}
+	return itBegin;
+}
+
 
 // Setup Evolutionary parameters
 bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
@@ -339,10 +447,11 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_uKeepFlank = uKeepFlank;
 
 	// Setup Cumulative Frequencies
-	m_dNucCumFreqs[0] = pFreqs[0];
-	m_dNucCumFreqs[1] = m_dNucCumFreqs[0]+pFreqs[1];
-	m_dNucCumFreqs[2] = m_dNucCumFreqs[1]+pFreqs[2];
-	m_dNucCumFreqs[3] = 1.0;
+	m_dFreqs[0] = pFreqs[0];
+	m_dFreqs[1] = pFreqs[1];
+	m_dFreqs[2] = pFreqs[2];
+	m_dFreqs[3] = pFreqs[3];
+	m_dFreqsCum = bitree<double>(&m_dFreqs[0], &m_dFreqs[4]);
 
 	// Setup Symetric Matrix
 	Matrix44 matQ(Matrix44::s_Zero);
@@ -372,34 +481,26 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Store Scaled Q Matrix
 	m_matQ = matQ;
 
-	// Construct Transition Prob Matrix
+	// Construct a Uniformized Transition Prob Matrix
 	m_matTrans = m_matQ;
-	m_matTrans(0,0) = -m_matTrans(0,0);
-	m_matTrans(1,1) = -m_matTrans(1,1);
-	m_matTrans(2,2) = -m_matTrans(2,2);
-	m_matTrans(3,3) = -m_matTrans(3,3);
+	double dMax = std::max(
+		std::max(-m_matTrans(0,0), -m_matTrans(1,1)),
+		std::max(-m_matTrans(2,2), -m_matTrans(3,3))
+	);
 
-	m_matTrans(0,1) /= m_matTrans(0,0);
-	m_matTrans(0,2) /= m_matTrans(0,0);
-	m_matTrans(0,3) /= m_matTrans(0,0);
+	m_matTrans(0,0) = dMax+m_matTrans(0,0);
+	m_matTrans(1,1) = dMax+m_matTrans(1,1);
+	m_matTrans(2,2) = dMax+m_matTrans(2,2);
+	m_matTrans(3,3) = dMax+m_matTrans(3,3);
+	m_matTrans.Scale(m_matTrans, 1.0/dMax);
 
-	m_matTrans(1,0) /= m_matTrans(1,1);
-	m_matTrans(1,2) /= m_matTrans(1,1);
-	m_matTrans(1,3) /= m_matTrans(1,1);
+	m_dTransCum[0] = bitree<double>(&m_matTrans[0][0], &m_matTrans[0][4]);
+	m_dTransCum[1] = bitree<double>(&m_matTrans[1][0], &m_matTrans[1][4]);
+	m_dTransCum[2] = bitree<double>(&m_matTrans[2][0], &m_matTrans[2][4]);
+	m_dTransCum[3] = bitree<double>(&m_matTrans[3][0], &m_matTrans[3][4]);
 
-	m_matTrans(2,0) /= m_matTrans(2,2);
-	m_matTrans(2,1) /= m_matTrans(2,2);
-	m_matTrans(2,3) /= m_matTrans(2,2);
-
-	m_matTrans(3,0) /= m_matTrans(3,3);
-	m_matTrans(3,1) /= m_matTrans(3,3);
-	m_matTrans(3,2) /= m_matTrans(3,3);
-
-	// Base Rates
-	base_rates[0] = m_matTrans(0,0);
-	base_rates[1] = m_matTrans(1,1);
-	base_rates[2] = m_matTrans(2,2);
-	base_rates[3] = m_matTrans(3,3);
+	// Correct TreeScale for Uniformization:
+	m_dTreeScale *= dMax;
 
 	// Make Q a symetric matrix again
 	Vector4 vecD, vecE;  //D*E=I
@@ -480,79 +581,45 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 					   const std::vector<std::vector<double> > &vRates)
 {
 	// Clear Template
-	m_vDNASeqs.clear();
+	m_vDNASeq.clear();
 
 	// Check to see if sequence is specified
-	if(vSeqs.size())
-	{
-		m_vDNASeqs.assign(vSeqs.size(), Sequence());
+	if(vSeqs.size()) {
 		// Read sequence of each section
-		for(unsigned int u = 0; u < vSeqs.size(); ++u)
-		{
+		for(unsigned int u = 0; u < vSeqs.size(); ++u) {
 			const string & ss = vSeqs[u];
-			Sequence &seq = m_vDNASeqs[u];
-			seq.weigher().base_rates = &base_rates[0];
-
-			unsigned int uu = ss.size();
-			for(unsigned int v=0;v<uu;++v)
-				seq.insert(seq.end(), make_seq(ss[v]));
-
-			//return DawgError("Unknown character, \"%c\", in Sequence", (*cit)[u]);
+			for(string::const_iterator it = ss.begin(); it != ss.end(); ++it)
+				m_vDNASeq.insert(m_vDNASeq.end(), make_seq(*it));
 		}
-	}
-	else
-	{
+	} else {
 		// Create random sequences
-		m_vDNASeqs.assign(vLens.size(), Sequence());
-		residue res(0, -1.0, 0, true);
-		for(unsigned int u = 0; u < vLens.size(); ++u) {
-			Sequence &seq = m_vDNASeqs[u];
-			seq.weigher().base_rates = &base_rates[0];
-			for(unsigned int v=0;v<vLens[u];++v)
-				seq.insert(seq.end(), res);
-		}
+		residue res(0, -1.0f, 0, true);
+		for(unsigned int u = 0; u < vLens.size(); ++u)
+			m_vDNASeq.insert(m_vDNASeq.end(), vLens[u], res);
 	}
 	// Check to see if rates are specified
-	if(vRates.size())
-	{
+	if(vRates.size()) {
 		// Read rates of each section
 		double dTemp = 0.0;
-		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
-		{
-			unsigned int v = 0;
-			Sequence &seq = m_vDNASeqs[u];
-			for(Sequence::iterator it = seq.begin(); it != seq.end(); ++it)
-			{
-				it->val.rate_scalar(static_cast<residue::rate_type>(vRates[u][v]));
+		Sequence::iterator it = m_vDNASeq.begin();
+		for(unsigned int u=0; u < vRates.size(); ++u) {
+			for(unsigned int v=0; v < vRates[u].size(); ++v) {
+				it->rate_scalar(static_cast<residue::rate_type>(vRates[u][v]));
 				dTemp += vRates[u][v];
-				++v;
+				++it;
 			}
 		}
 		// Scale the Expected Rate to 1.0
-		for(unsigned int u=0; u < m_vDNASeqs.size(); ++u)
-		{
-			Sequence &seq = m_vDNASeqs[u];
-			for(Sequence::iterator it = seq.begin(); it != seq.end(); ++it)
-			{
-				residue::rate_type s = it->val.rate_scalar();
-				it->val.rate_scalar(static_cast<residue::rate_type>(s/dTemp));
-			}
+		for(; it != m_vDNASeq.end();++it) {
+			residue::rate_type s = it->rate_scalar();
+			it->rate_scalar(static_cast<residue::rate_type>(s/dTemp));
 		}
 	}
 	return true;
 }
 
-Tree::Nucleotide::data_type Tree::RandomBase() const
-{
-	double d = rand_real();
-	if(d < m_dNucCumFreqs[0])
-		return 0; // A
-	else if(d < m_dNucCumFreqs[1])
-		return 1; // C
-	else if(d < m_dNucCumFreqs[2])
-		return 2; // G
-	else
-		return 3; // T
+Tree::Nucleotide::data_type Tree::RandomBase() const {
+	return m_dFreqsCum(rand_real());
 }
 
 double Tree::RandomRate() const
@@ -575,8 +642,8 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
 			continue;
 		m_vAlnTable.push_back(AlignData(cit->second.m_ssName));
-		cit->second.Flatten(m_vAlnTable.back().seq);
-		m_vAlnTable.back().it = m_vAlnTable.back().seq.begin();
+		m_vAlnTable.back().seq = &cit->second.m_vSeq;
+		m_vAlnTable.back().it = m_vAlnTable.back().seq->begin();
 	}
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
@@ -592,7 +659,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
 		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
-			if(sit->it == sit->seq.end())
+			if(sit->it == sit->seq->end())
 				continue; // Sequence is done
 			uBranchN = sit->it->branch();
 			if(uBranchN > uBranch) {
@@ -606,22 +673,22 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 			break;
 		bool rmEmpty = !(uFlags & FlagOutKeepEmpty);
 		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
-			if(sit->it == sit->seq.end()) {
+			if(sit->it == sit->seq->end()) {
 				if(!(uState == 2 && rmEmpty))
-					sit->seqAln.push_back(Nucleotide(2, 1.0, 0, true));
+					sit->seqAln.push_back(Nucleotide(2, 1.0f, 0, true));
 				continue;
 			} else if(uState == 2 && rmEmpty) {
 				if(sit->it->branch() != uBranch)
 					continue;
 			} else if(sit->it->branch() != uBranch) {
-				sit->seqAln.push_back(Nucleotide(2, 1.0, 0, true));
+				sit->seqAln.push_back(Nucleotide(2, 1.0f, 0, true));
 				continue;
 			} else if(!sit->it->is_deleted())
 				sit->seqAln.push_back(*sit->it);
 			else if(sit->it->branch() == 0)
-				sit->seqAln.push_back(Nucleotide(0, 1.0, 0, true));
+				sit->seqAln.push_back(Nucleotide(0, 1.0f, 0, true));
 			else
-				sit->seqAln.push_back(Nucleotide(1, 1.0, 0, true));
+				sit->seqAln.push_back(Nucleotide(1, 1.0f, 0, true));
 			++(sit->it);
 		}
 	}

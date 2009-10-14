@@ -143,6 +143,11 @@ public:
 	}
 	inline rate_type rate_length() const { return is_deleted() ? 0.0 : rate_scalar(); }
 
+	inline data_type rate_cat() const {return _rate_cat;}
+	inline void rate_cat(data_type s) {
+		_rate_cat = s;
+	}
+
 	residue() : _data(0), _rate_scalar(1.0) { }
 	residue(data_type xbase, rate_type xscale, data_type xbranch, bool del=false) :
 		_data((xbase & base_mask) | (xbranch & branch_mask) | (del ? delete_del : delete_ext) ),
@@ -151,9 +156,20 @@ public:
 
 	}
 
+	residue(data_type xbase, data_type xscale, data_type xbranch, bool del=false) :
+		_data((xbase & base_mask) | (xbranch & branch_mask) | (del ? delete_del : delete_ext) ),
+		_rate_cat(xscale)
+	{
+
+	}
+
+
 protected:
 	data_type  _data;
+	union {
 	rate_type  _rate_scalar;
+	data_type  _rate_cat;
+	};
 };
 
 template<class _D=float, class _N=uint32_t>
@@ -745,7 +761,7 @@ public:
 	inline void model(model_type a) {_model = a; };
 
 	residue make_residue(char ch) const {
-		return residue(encode(ch), 1.0, 0);
+		return residue(encode(ch), 1.0f, 0);
 	}
 	residue make_residue(char ch, double d) const {
 		return residue(encode(ch), static_cast<residue::rate_type>(d), 0);

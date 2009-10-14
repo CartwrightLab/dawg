@@ -7,7 +7,7 @@
 
 // Using an alternative implementation of a binary indexed tree
 // http://www.algorithmist.com/index.php/Fenwick_tree
-// data[i] = sum( i & (i+1) . . . i )
+// data[i] = sum( 0 . . . i )
 
 template<typename _Tp, typename _Alloc = std::allocator<_Tp> >
 class bitree {
@@ -16,35 +16,53 @@ public:
 	typedef typename storage_type::size_type size_type;
 	typedef typename storage_type::value_type value_type;
 
-	bitree(size_type n) : data(n, value_type(0)) {
-		mid = mk_mid(n);
+	bitree() : mid(0) { }
+
+	bitree(size_type n) : data(upper_bound(n), value_type(0)) {
+		mid = data.size()/2;
 	}
 
+	template<class It>
+	bitree(It b, It e) : data(upper_bound(e-b), value_type(0)) {
+		mid = data.size()/2;
+		typename storage_type::iterator it = data.begin();
+		value_type v = value_type(0);
+		for(;b != e; ++b) {
+			v += *b;
+			*(it++) = v;
+		}
+	}
 
-	// b = (b & (b + 1)) - 1
 	void increase(size_type u, const value_type& x) {
-		for(; u < data.size(); u |= u+1)
+		for(; u < data.size(); ++u)
 			data[u] += x;
 	}
-	size_type operator()(const value_type& v) {
-		size_type r = 0, u = mask;
-		for(size_type u = mask; u > 0 && r < data.size(); u >>= 1) {
-			if(v < data[r+u])
-				continue;
-			v -= data[r+u];
-			r += u+1;
+
+	size_type operator()(const value_type& v) const {
+		size_type r = 0;
+		for(size_type u = mid; u > 0; u /= 2) {
+			if(v >= data[r+u-1])
+				r += u;
 		}
-		if(v >= data[r])
-			++r;
-		return (r < data.size() ? r : data.size());
+		return r;
+	}
+
+	template<size_type n>
+	size_type operator()(const value_type& v) const {
+		size_type r = 0;
+		for(size_type u = n; u > 0; u /= 2) {
+			if(v >= data[r+u-1])
+				r += u;
+		}
+		return r;
 	}
 
 protected:
-	size_type mk_mid(size_type n) {
-		n = (n-1)/2;
-		for(int x=1; x < std::numeric_limits<size_type>::digits; x <<= 1)
-			n |= (n >> x);
-		return n;
+	size_type upper_bound(size_type n) {
+		size_type u = 4;
+		for(;u<n;u*=2)
+			/*noop*/;
+		return u;
 	}
 
 	storage_type data;

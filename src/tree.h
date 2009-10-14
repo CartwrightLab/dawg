@@ -7,10 +7,13 @@
 #include "indel.h"
 #include "matrix.h"
 #include "sequence.h"
+#include "bitree.h"
+
 
 using namespace dawg;
 
 #include <list>
+#include <stack>
 
 // A class used to represent a node in a Newick tree
 class NewickNode {
@@ -97,6 +100,7 @@ protected:
 
 // The recombinant tree data structure
 struct AlignData;
+struct IndelData;
 
 class Tree
 {
@@ -141,7 +145,7 @@ public:
 	// Draw a random base from the evolutionary parameters
 	Nucleotide::data_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
-	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
+	Nucleotide RandomNucleotide() const
 	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate()), branchColor, true); }
 
 	Tree() : m_nSec(0) {}
@@ -173,6 +177,9 @@ protected:
 	bool ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
 	void Evolve(Node &rNode, double dTime);
 	void Evolve(Node &rNode);
+	Tree::Sequence::const_iterator EvolveIndels(
+		Sequence::const_iterator itBegin, Sequence::const_iterator itEnd,
+		double dT, double dR, bool bDel, Sequence::size_type uLen);
 
 	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
 	//size_type Deletion(Sequence::iterator itBegin, Base::size_type uSize);
@@ -191,9 +198,12 @@ private:
 
 	double m_dOldTime;
 	double m_dFreqs[4];
-	double m_dNucCumFreqs[4];
+	bitree<double> m_dFreqsCum;
 	//Matrix44 m_matSubst;
 	Matrix44 m_matTrans;
+
+	bitree<double> m_dTransCum[4];
+
 	Matrix44 m_matV;
 	Matrix44 m_matU;
 	Matrix44 m_matQ;
@@ -212,20 +222,27 @@ private:
 
 	residue_factory make_seq;
 
-	Nucleotide::rate_type base_rates[64];
-
 	std::vector<AlignData> m_vAlnTable;
+	std::stack<IndelData> m_sIndelData;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
 
+struct IndelData {
+	typedef Tree::Sequence Sequence;
+	IndelData(bool b, double d, Sequence::size_type u) :
+		del(b), orig(d), len(u) { }
+
+	bool del;
+	double orig;
+	Sequence::size_type len;
+};
+
 struct AlignData {
 	typedef Tree::Sequence Sequence;
 	AlignData(const std::string ss) : ssName(ss) {
-		it = seq.begin();
 	}
-	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln) {
-		it = seq.begin()+(a.it-a.seq.begin());
+	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln), it(a.it) {
 	}
 	AlignData & operator=(const AlignData &a) {
 		if(this == &a)
@@ -233,13 +250,13 @@ struct AlignData {
 		ssName = a.ssName;
 		seq = a.seq;
 		seqAln = a.seqAln;
-		it = seq.begin()+(a.it-a.seq.begin());
+		it = a.it;
 		return *this;
 	}
 	std::string ssName;
-	Sequence seq;
+	const Sequence *seq;
 	Sequence seqAln;
-	Sequence::iterator it;
+	Sequence::const_iterator it;
 
 	struct Printer {
 		Printer(const residue_factory &fac) : f(fac) {};
