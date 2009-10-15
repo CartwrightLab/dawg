@@ -100,7 +100,6 @@ protected:
 
 // The recombinant tree data structure
 struct AlignData;
-struct IndelData;
 
 class Tree
 {
@@ -146,7 +145,7 @@ public:
 	Nucleotide::data_type RandomBase() const;
 	// Draw a random nucleotide (base and rate)
 	Nucleotide RandomNucleotide() const
-	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate()), branchColor, true); }
+	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate()), branchColor, false); }
 
 	Tree() : m_nSec(0) {}
 
@@ -179,7 +178,8 @@ protected:
 	void Evolve(Node &rNode);
 	Tree::Sequence::const_iterator EvolveIndels(
 		Sequence::const_iterator itBegin, Sequence::const_iterator itEnd,
-		double dT, double dR, bool bDel, Sequence::size_type uLen);
+		double dT, double dR, bool bDel, size_type uLen);
+	size_type NextIndel(double d, double &f);
 
 	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
 	//size_type Deletion(Sequence::iterator itBegin, Base::size_type uSize);
@@ -223,20 +223,11 @@ private:
 	residue_factory make_seq;
 
 	std::vector<AlignData> m_vAlnTable;
-	std::stack<IndelData> m_sIndelData;
+	typedef std::pair<double, Sequence::size_type> IndelData;
+	std::stack<IndelData> m_sInsData, m_sDelData;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
-
-struct IndelData {
-	typedef Tree::Sequence Sequence;
-	IndelData(bool b, double d, Sequence::size_type u) :
-		del(b), orig(d), len(u) { }
-
-	bool del;
-	double orig;
-	Sequence::size_type len;
-};
 
 struct AlignData {
 	typedef Tree::Sequence Sequence;

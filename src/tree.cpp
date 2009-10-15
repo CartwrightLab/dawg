@@ -357,52 +357,133 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 	// Maximum time of the branch; origination time of the indel
 	double dT, double dR,
 	// Is the first one a deletion
-	bool bDel, Sequence::size_type uLen) {
-	double d, f, i;
-	dawg::residue::rate_type dIns = static_cast<dawg::residue::rate_type>(m_dLambdaIns);
-	dawg::residue::rate_type dDel = static_cast<dawg::residue::rate_type>(m_dLambdaDel);
-	dawg::residue::rate_type dIndel = dIns+dDel;
+	bool bDel, size_type uLen) {
+	double d, f, t;
+	double dIns = m_dLambdaIns;
+	double dDel = m_dLambdaDel;
+	double dIndel = dIns+dDel;
 	for(;;) {
-		if(bDel) {
-			d = rand_exp(dR);
-			f = modf(d/dIndel, &i);
-			Sequence::size_type x = static_cast<Sequence::size_type>(i);
-			if(x < uLen) {
-			}
-
-		} else {
-			d = rand_exp(dT-dR);
-			f = modf(d/dIndel, &i);
-			Sequence::size_type x = static_cast<Sequence::size_type>(i);
-			if(x < uLen) {
-				// Save tail for further processing
-				m_sIndelData.push(IndelData(bDel, dR, uLen-x));
-				// Add head to buffer
-				while(x--)
-					m_vSeqBuffer.push_back(RandomNucleotide());
-				// Is next event a deletion of Insertion?
-				if(f < dDel) {
-					bDel = true;
-					dR = (dT-dR)*f/dDel-dT;
-					uLen = m_pDeletionModel->RandSize();
+		// Is there a deletion that needs to be processed?
+		if(!m_sDelData.empty()) {
+			IndelData &r = m_sDelData.top();
+			// Something has to be deleted
+			if(!m_sInsData.empty()) {
+				// Deleted Insertion
+				IndelData &n = m_sInsData.top();
+				// Did anything happen between the deletion and this insertion
+				t = r.first-n.first;
+				size_type xx = NextIndel(rand_exp(1.0/t), f);
+				size_type x = (xx+1)/2;
+				size_type u = min(r.second, n.second);
+				5xa // 2*u versus xx?
+				if(x < u) {
+					// the next event occured between these two
+					// insert x "deleted insertions"
+					m_vSeqBuffer.insert(m_vSeqBuffer.end(), x, Nucleotide(0, 1.0f, branchColor, true));
+					// remove x sites from both stacks
+					r.second -= u;
+					n.second -= u;
+					// push new event on the proper stack
+					if(xx&1) {
+						m_sInsData.push(IndelData(n.first+t*f/dIns, m_pInsertionModel->RandSize()));
+					} else {
+						m_sDelData.push(IndelData(n.first+t*f/dDel, m_pDeletionModel->RandSize()));
+					}
 				} else {
-					bDel = false;
-					dR = (dT-dR)*(f-dDel)/dIns;
-					uLen = m_pInsertionModel->RandSize();
+					// the next event does not occur between these two
+					// insert u "deleted insertions" into buffer
+					m_vSeqBuffer.insert(m_vSeqBuffer.end(), u, Nucleotide(0, 1.0f, branchColor, true));
+					// remove u sites from both stacks, pop if empty
+					r.second -= u;
+					n.second -= u;
+					if(r.second == 0)
+						m_sDelData.pop();
+					if(n.second == 0)
+						m_sInsData.pop();
 				}
-				continue;
+
+			} else if(itBegin != itEnd) {
+				// Deleted Original
+				t = r.first;
+				d = rand_exp(1.0/t);
+				size_type u = min(r.second, static_cast<size_type>(itEnd-itBegin));
+				bool bDelX = false;
+				size_type x = 1;
+				if(d >= dIns) {
+					f = modf((d-dIns)/dIndel, &d);
+					if(f < dDel)
+						bDelX = true;
+					else
+						f = f-dDel;
+					x = 1+static_cast<size_type>(d);
+				} else {
+					f = d;
+				}
+
+				if(x < u) {
+					// the next event occured between these two
+					// insert x "deleted insertions"
+					m_vSeqBuffer.insert(m_vSeqBuffer.end(), x, Nucleotide(0, 1.0f, branchColor, true));
+					// remove x sites from deletion stack
+					r.second -= u;
+					// push new event on the proper stack
+					if(bDelX) {
+						m_sDelData.push(IndelData(t*f/dDel, m_pDeletionModel->RandSize()));
+					} else {
+						m_sInsData.push(IndelData(t*f/dIns, m_pInsertionModel->RandSize()));
+					}
+				} else {
+					// remove u sites from both stacks, pop if empty
+					r.second -= u;
+					if(r.second == 0)
+						m_sDelData.pop();
+					// the next event does not occur between these two
+					// copy and mark u nucleotides as deleted
+					while(u--) {
+						m_vSeqBuffer.push_back(*itBegin++);
+						m_vSeqBuffer.back().mark_deleted(true);
+					}
+				}
+			} else {
+				// everything possible has been deleted
+				m_sDelData.pop();
 			}
-			while(uLen--)
-				m_vSeqBuffer.push_back(RandomNucleotide());
-		}
-		if(m_sIndelData.empty())
+		} else if(!m_sInsData.empty()) {
+			IndelData &n = m_sInsData.top();
+			t = dT-n.first;
+			d = rand_exp(1.0/t);
+			size_type u = n.second;
+			bool bDelX = false;
+			size_type x = 1;
+			if(d >= dIns) {
+				f = modf((d-dIns)/dIndel, &d);
+				if(f < dDel)
+					bDelX = true;
+				else
+					f = f-dDel;
+				x = 1+static_cast<size_type>(d);
+			} else {
+				f = d;
+			}
+		} else {
+			// nothing to do
 			break;
-		bDel = m_sIndelData.top().del;
-		dR = m_sIndelData.top().orig;
-		uLen = m_sIndelData.top().len;
-		m_sIndelData.pop();
+		}
 	}
 	return itBegin;
+}
+
+Tree::size_type Tree::NextIndel(double d, double &f) {
+	if(d < m_dLambdaIns) {
+		f = d;
+		return 1;
+	}
+	f = modf((d-m_dLambdaIns)/dIndel, &d);
+	size_type x = 2*static_cast<size_type>(d);
+	if(f < m_dLambdaDel)
+		return 2+x;
+	f -= m_dLambdaDel;
+	return 3+x;
 }
 
 
