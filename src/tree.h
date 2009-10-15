@@ -178,7 +178,7 @@ protected:
 	void Evolve(Node &rNode);
 	Tree::Sequence::const_iterator EvolveIndels(
 		Sequence::const_iterator itBegin, Sequence::const_iterator itEnd,
-		double dT, double dR, bool bDel, size_type uLen);
+		double dT, double dR, bool bDel);
 	size_type NextIndel(double d, double &f);
 
 	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
