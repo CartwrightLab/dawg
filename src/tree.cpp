@@ -324,6 +324,7 @@ void Tree::Evolve(Node &rNode, double dTime)
 		++dit;
 		if(d < dIns) {
 			cit = EvolveIndels(dit, seq.end(), dTime, dTime*d/dIns, false);
+			d = rand_exp(dT);
 		} else {
 			d -= dIns;
 			cit = dit;
@@ -341,13 +342,13 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 	double dT, double dR,
 	// Is the first one a deletion
 	bool bDel) {
-	double d, f, t;
+	double f, t;
 	double dIns = m_dLambdaIns;
 	double dDel = m_dLambdaDel;
 	double dIndel = dIns+dDel;
 
 	if(bDel)
-		m_sDelData.push(IndelData(dR,  m_pDeletionModel->RandSize()));
+		m_sDelData.push(IndelData(dR, m_pDeletionModel->RandSize()));
 	else
 		m_sInsData.push(IndelData(dR, m_pInsertionModel->RandSize()));
 
@@ -369,7 +370,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 					// how may sites are deleted
 					u = (x+1)/2;
 					// push the new event on the proper stack
-					if(x&1 == 1) {
+					if((x&1) == 1) {
 						m_sInsData.push(IndelData(n.first+t*f/dIns, m_pInsertionModel->RandSize()));
 					} else {
 						m_sDelData.push(IndelData(n.first+t*f/dDel, m_pDeletionModel->RandSize()));
@@ -387,7 +388,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 			} else if(itBegin != itEnd) {
 				// Deleted Original
 				t = r.first;
-				size_type u = min(r.second, static_cast<size_type>(itEnd-itBegin));
+				size_type u = r.second;
 				// Determine where the next event occurs
 				size_type x = NextIndel(rand_exp(1.0/t), f);
 				if(x < 2*u) {
@@ -395,7 +396,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 					// how may sites are deleted
 					u = (x+1)/2;
 					// push the new event on the proper stack
-					if(x&1 == 1) {
+					if((x&1) == 1) {
 						m_sInsData.push(IndelData(t*f/dIns, m_pInsertionModel->RandSize()));
 					} else {
 						m_sDelData.push(IndelData(t*f/dDel, m_pDeletionModel->RandSize()));
@@ -407,9 +408,12 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 					m_sDelData.pop();
 				// the next event does not occur between these two
 				// copy and mark u nucleotides as deleted
-				while(u--) {
-					m_vSeqBuffer.push_back(*itBegin++);
+				for(;u && itBegin != itEnd; ++itBegin) {
+					m_vSeqBuffer.push_back(*itBegin);
+					if(itBegin->is_deleted())
+						continue;
 					m_vSeqBuffer.back().mark_deleted(true);
+					--u;
 				}
 			} else {
 				// everything possible has been deleted
@@ -425,7 +429,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 				// next event overlaps this one
 				u = x/2;
 				// push the new event on the proper stack
-				if(x&1 == 0)
+				if((x&1) == 0)
 					m_sInsData.push(IndelData(n.first+t*f/dIns, m_pInsertionModel->RandSize()));
 				else
 					m_sDelData.push(IndelData(n.first+t*f/dDel, m_pDeletionModel->RandSize()));

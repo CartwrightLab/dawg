@@ -141,7 +141,7 @@ public:
 	inline void rate_scalar(rate_type s) {
 		_rate_scalar = s;
 	}
-	inline rate_type rate_length() const { return is_deleted() ? 0.0 : rate_scalar(); }
+	inline rate_type rate_length() const { return is_deleted() ? rate_type(0.0) : rate_scalar(); }
 
 	inline data_type rate_cat() const {return _rate_cat;}
 	inline void rate_cat(data_type s) {
