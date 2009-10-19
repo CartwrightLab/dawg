@@ -253,6 +253,12 @@ void Tree::Evolve(Node &rNode)
 		return;
 	rNode.m_bTouched = true;
 
+	// Make sure the ins and del stacks are empty
+	while(!m_sInsData.empty())
+		m_sInsData.pop();
+	while(!m_sDelData.empty())
+		m_sDelData.pop();
+
 	// check to see if this is a recombination event
 	if(rNode.m_vAncestors.size() > 1) {
 		/*todo*/
@@ -279,14 +285,51 @@ void Tree::Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
-	double dM = 1.0/dTime;
-	//insertion and deletion rates in float space
-	double dIns = m_dLambdaIns;
-	double dDel = m_dLambdaDel;
-	double dIndel = dIns+dDel;
-	Sequence::const_iterator cit = first;
+	double dM, d;
+	//insertion and deletion rates
+	double dIns = m_dLambdaIns, dDel = m_dLambdaDel, dIndel = dIns+dDel;
+
+	// Calculate Upstream Deletions
+	dM = dDel*(m_pDeletionModel->MeanSize()-1.0);
+	if(dM > DBL_EPSILON) {
+		dM = 1.0/dM;
+		d = rand_exp(dM);
+		while(d < dTime) {
+			size_type u = m_pDeletionModel->RandSize();
+			m_sDelUpData.push(IndelData(d,  1+rand_uint(u-2)));
+			d += rand_exp(dM);
+		}
+	}
+	// Calculate Immortal Link Insertions
+	if(dIns > DBL_EPSILON) {
+		dM = 1.0/dIns;
+		d = rand_exp(dM);
+		while(d < dTime) {
+			m_sInsData.push(IndelData(d, m_pInsertionModel->RandSize()));
+			d += rand_exp(dM);
+		}
+	}
+	// Process any Imortal Link Insertions
+	while(!m_sInsData.empty()) {
+		// Fetch most recent immortal link insertion
+		IndelData &n = m_sInsData.top();
+		// Did any upstream deletions occur before this?
+		while(!m_sDelUpData.empty() && m_sDelUpData.top().first >= n.first) {
+			m_sDelData.push(m_sDelUpData.top());
+			m_sDelUpData.pop();
+		}
+		EvolveIndels(seq, first, first, dTime);
+	}
+	// Add any outstanding upstream deletions
+	while(!m_sDelUpData.empty()) {
+		m_sDelData.push(m_sDelUpData.top());
+		m_sDelUpData.pop();
+	}
+	// Are there any gaps that need to be processed before we begin
+	Sequence::const_iterator cit = EvolveIndels(seq, first, last, dTime);
 	// draw exponention based on the branch length
-	double d = rand_exp(dM);
+	dM = 1.0/dTime;
+	d = rand_exp(dM);
 	for(;;) {
 		Sequence::const_iterator dit = cit;
 		for(;dit != last && dit->rate_scalar()+dIndel <= d; ++dit) {
@@ -324,7 +367,7 @@ void Tree::Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const
 		if(d < dIns) {
 			m_sInsData.push(IndelData(dTime*d/dIns, m_pInsertionModel->RandSize()));
 			cit = EvolveIndels(seq, dit, last, dTime);
-			d = rand_exp(dT);
+			d = rand_exp(dM);
 		} else {
 			d -= dIns;
 			cit = dit;
@@ -389,7 +432,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 						m_sDelData.push(IndelData(t*f/dDel, m_pDeletionModel->RandSize()));
 					}
 				}
-				// copy and mark u nucleotides as deleted
+				// copy and mark at most u nucleotides as deleted
 				size_type uu;
 				for(uu=0;uu != u && first != last;++first) {
 					seq.push_back(*first);
@@ -404,7 +447,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 					m_sDelData.pop();
 			} else {
 				// everything possible has been deleted
-				m_sDelData.pop();
+				break;
 			}
 		} else if(!m_sInsData.empty()) {
 			IndelData &n = m_sInsData.top();
@@ -571,7 +614,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_dLambdaIns = rIns.dLambda;
 	// Length Model
 	if(m_dLambdaIns < DBL_EPSILON)
-		m_pInsertionModel.release();
+		try {m_pInsertionModel.reset(new UserModel());}
+			catch(...) {return DawgError("Insertion model parameters not specified correctly.");}
 	else if(rIns.ssModel == "NB")
 	{
 		try {m_pInsertionModel.reset(new NegBnModel(rIns.vdModel));}
@@ -594,7 +638,10 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	m_dLambdaDel = rDel.dLambda;
 	// Length model
 	if(m_dLambdaDel < DBL_EPSILON)
-		m_pDeletionModel.release();
+	{
+		try {m_pDeletionModel.reset(new UserModel());}
+			catch(...) {return DawgError("Deletion model parameters not specified correctly");}
+	}
 	else if(rDel.ssModel == "NB")
 	{
 		try {m_pDeletionModel.reset(new NegBnModel(rDel.vdModel));}

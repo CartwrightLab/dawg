@@ -181,9 +181,6 @@ protected:
 		double dT);
 	size_type NextIndel(double d, double &f);
 
-	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
-	//size_type Deletion(Sequence::iterator itBegin, Base::size_type uSize);
-
 private:
 	int m_nSec;
 	Sequence m_vDNASeq;
@@ -223,7 +220,7 @@ private:
 
 	std::vector<AlignData> m_vAlnTable;
 	typedef std::pair<double, Sequence::size_type> IndelData;
-	std::stack<IndelData> m_sInsData, m_sDelData;
+	std::stack<IndelData> m_sInsData, m_sDelData, m_sDelUpData;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);

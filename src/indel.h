@@ -44,6 +44,7 @@ protected:
 class UserModel : public IndelModel
 {
 public:
+	UserModel();
 	UserModel(const std::vector<double>& vdModel);
 	virtual size_type RandSize() const;
 	virtual double MeanSize() const;
