@@ -174,11 +174,11 @@ public:
 
 protected:
 	bool ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
-	void Evolve(Node &rNode, double dTime);
+	void Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const_iterator last, double dTime);
 	void Evolve(Node &rNode);
-	Tree::Sequence::const_iterator EvolveIndels(
-		Sequence::const_iterator itBegin, Sequence::const_iterator itEnd,
-		double dT, double dR, bool bDel);
+	Tree::Sequence::const_iterator EvolveIndels(Sequence &seq,
+		Sequence::const_iterator first, Sequence::const_iterator last,
+		double dT);
 	size_type NextIndel(double d, double &f);
 
 	//size_type Insertion(Sequence::iterator itPos, seq_buffer::const_iterator itBegin, seq_buffer::const_iterator itEnd);
@@ -187,7 +187,6 @@ protected:
 private:
 	int m_nSec;
 	Sequence m_vDNASeq;
-	Sequence m_vSeqBuffer;
 	Node::Map m_map;
 	std::vector<std::string> m_vTips;
 

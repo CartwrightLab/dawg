@@ -262,46 +262,45 @@ void Tree::Evolve(Node &rNode)
 		string &ssA = rNode.m_vAncestors.front();
 		Node &aNode = m_map[ssA];
 		Evolve(aNode);
-		// Copy parent's sequence
-		rNode.m_vSeq = aNode.m_vSeq;
+		rNode.m_vSeq.clear();
+		Evolve(rNode.m_vSeq, aNode.m_vSeq.begin(), aNode.m_vSeq.end(), m_dTreeScale*rNode.m_dBranchLen);
 	}
-	Evolve(rNode, m_dTreeScale*rNode.m_dBranchLen);
 }
 
 // Evolve rNode a specific time
-void Tree::Evolve(Node &rNode, double dTime)
+void Tree::Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const_iterator last, double dTime)
 {
 	dTime = fabs(dTime);
-	if(dTime < DBL_EPSILON)
+	if(dTime < DBL_EPSILON) {
+		seq.assign(first, last);
 		return; // Nothing to evolve
+	}
 
 	//advance branch color
 	branchColor += dawg::residue::branch_inc;
 
-	//clear buffer
-	m_vSeqBuffer.clear();
-	const Sequence &seq = rNode.m_vSeq;
-	double dT = 1.0/dTime;
+	double dM = 1.0/dTime;
 	//insertion and deletion rates in float space
 	double dIns = m_dLambdaIns;
 	double dDel = m_dLambdaDel;
 	double dIndel = dIns+dDel;
-	Sequence::const_iterator cit = seq.begin();
+	Sequence::const_iterator cit = first;
 	// draw exponention based on the branch length
-	double d = rand_exp(dT);
+	double d = rand_exp(dM);
 	for(;;) {
 		Sequence::const_iterator dit = cit;
-		for(;dit != seq.end() && dit->rate_scalar()+dIndel <= d; ++dit) {
+		for(;dit != last && dit->rate_scalar()+dIndel <= d; ++dit) {
 			if(!dit->is_deleted())
 				d -= dIndel+dit->rate_scalar();
 		}
 		// copy unmodified sites into buffer.
-		m_vSeqBuffer.insert(m_vSeqBuffer.end(), cit, dit);
-		if(dit == seq.end())
+		seq.insert(seq.end(), cit, dit);
+		if(dit == last)
 			break;
 		if(d < dDel) {
-			cit = EvolveIndels(dit, seq.end(), dTime, dTime*d/dDel, true);
-			d = rand_exp(dT);
+			m_sDelData.push(IndelData(dTime*d/dDel,  m_pDeletionModel->RandSize()));
+			cit = EvolveIndels(seq, dit, last, dTime);
+			d = rand_exp(dM);
 			continue;
 		} else
 			d -= dDel;
@@ -312,45 +311,33 @@ void Tree::Evolve(Node &rNode, double dTime)
 				rez.base(m_dTransCum[rez.base()](rand_real()));
 				// how much space is left in the substitution section
 				w = w - d;
-				d = rand_exp(dT);
+				d = rand_exp(dM);
 			} while(d < w);
 			d -= w;
 			// push modified base
-			m_vSeqBuffer.push_back(rez);
+			seq.push_back(rez);
 		} else {
 			d -= dit->rate_scalar();
-			m_vSeqBuffer.push_back(*dit);
+			seq.push_back(*dit);
 		}
 		++dit;
 		if(d < dIns) {
-			cit = EvolveIndels(dit, seq.end(), dTime, dTime*d/dIns, false);
+			m_sInsData.push(IndelData(dTime*d/dIns, m_pInsertionModel->RandSize()));
+			cit = EvolveIndels(seq, dit, last, dTime);
 			d = rand_exp(dT);
 		} else {
 			d -= dIns;
 			cit = dit;
 		}
 	}
-	rNode.m_vSeq.swap(m_vSeqBuffer);
 }
 
-Tree::Sequence::const_iterator Tree::EvolveIndels(
-	// Beginning of the sequence
-	Sequence::const_iterator itBegin,
-	// End of the sequence
-	Sequence::const_iterator itEnd,
-	// Maximum time of the branch; origination time of the indel
-	double dT, double dR,
-	// Is the first one a deletion
-	bool bDel) {
+Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
+	Sequence::const_iterator first, Sequence::const_iterator last, double dT) {
 	double f, t;
 	double dIns = m_dLambdaIns;
 	double dDel = m_dLambdaDel;
 	double dIndel = dIns+dDel;
-
-	if(bDel)
-		m_sDelData.push(IndelData(dR, m_pDeletionModel->RandSize()));
-	else
-		m_sInsData.push(IndelData(dR, m_pInsertionModel->RandSize()));
 
 	for(;;) {
 		// Is there a deletion that needs to be processed?
@@ -377,7 +364,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 					}
 				}
 				// insert u "deleted insertions" into buffer
-				m_vSeqBuffer.insert(m_vSeqBuffer.end(), u, Nucleotide(0, 1.0f, branchColor, true));
+				seq.insert(seq.end(), u, Nucleotide(0, 1.0f, branchColor, true));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
 				n.second -= u;
@@ -385,7 +372,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 					m_sDelData.pop();
 				if(n.second == 0)
 					m_sInsData.pop();
-			} else if(itBegin != itEnd) {
+			} else if(first != last) {
 				// Deleted Original
 				t = r.first;
 				size_type u = r.second;
@@ -402,19 +389,19 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 						m_sDelData.push(IndelData(t*f/dDel, m_pDeletionModel->RandSize()));
 					}
 				}
-				// remove u sites from both stacks, pop if empty
-				r.second -= u;
+				// copy and mark u nucleotides as deleted
+				size_type uu;
+				for(uu=0;uu != u && first != last;++first) {
+					seq.push_back(*first);
+					if(first->is_deleted())
+						continue;
+					seq.back().mark_deleted(true);
+					++uu;
+				}
+				// remove sites from stack, pop if empty
+				r.second -= uu;
 				if(r.second == 0)
 					m_sDelData.pop();
-				// the next event does not occur between these two
-				// copy and mark u nucleotides as deleted
-				for(;u && itBegin != itEnd; ++itBegin) {
-					m_vSeqBuffer.push_back(*itBegin);
-					if(itBegin->is_deleted())
-						continue;
-					m_vSeqBuffer.back().mark_deleted(true);
-					--u;
-				}
 			} else {
 				// everything possible has been deleted
 				m_sDelData.pop();
@@ -440,13 +427,13 @@ Tree::Sequence::const_iterator Tree::EvolveIndels(
 				m_sInsData.pop();
 			// Insert u random nucleotides into buffer
 			while(u--)
-				m_vSeqBuffer.push_back(RandomNucleotide());
+				seq.push_back(RandomNucleotide());
 		} else {
 			// nothing to do
 			break;
 		}
 	}
-	return itBegin;
+	return first;
 }
 
 Tree::size_type Tree::NextIndel(double d, double &f) {
