@@ -138,12 +138,11 @@ public:
 
 	// Draw a random relative rate of substitution from the evolutionary parameters
 	inline Nucleotide::rate_type RandomRate() const {
+		if(AreRatesConstant())
+			return Nucleotide::rate_type(1.0);
 		if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
 			return Nucleotide::rate_type(0.0);  // Site Invariant
-		else if(m_dGamma > DBL_EPSILON)
-			return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
-		else
-			return Nucleotide::rate_type(1.0);
+		return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
 	}
 	bool AreRatesConstant() const {
 		return (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
@@ -196,7 +195,10 @@ private:
 	int m_nSec;
 	Sequence m_vDNASeq;
 	Node::Map m_map;
+	Node::Map::iterator m_itRoot;
 	std::vector<std::string> m_vTips;
+
+	bool m_bRandRootBases, m_bRandRootRates;
 
 	double m_dGamma;
 	double m_dIota;

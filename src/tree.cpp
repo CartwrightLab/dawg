@@ -65,106 +65,6 @@ void NewickNode::MakeName()
 }
 
 ////////////////////////////////////////////////////////////
-//  class Sequence
-////////////////////////////////////////////////////////////
-
-//Sequence::const_iterator Sequence::SeqPos(size_type uPos) const
-//{
-//	const_iterator it = begin();
-//	// Skip deletions
-//	while(it->IsDeleted()) {++it;}
-//	while(uPos--) {
-//		++it;
-//		// Skip deletions
-//		while(it->IsDeleted()) {++it;}
-//	}
-//	return it;
-//}
-
-//Sequence::iterator Sequence::SeqPos(size_type uPos)
-//{
-//	iterator it = begin();
-//	// Skip deletions
-//	while(it->IsDeleted()) {++it;}
-//	while(uPos--) {
-//		++it;
-//		// Skip deletions
-//		while(it->IsDeleted()) {++it;}
-//	}
-//	return it;
-//}
-
-//// Insert itBegin to itEnd at itPos
-
-//Sequence::size_type Sequence::Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd)
-//{
-//	if(itPos > end() || itPos < begin())
-//		return 0;
-
-//	size_type uRet = (size_type)(itEnd-itBegin);
-//	insert(itPos, itBegin, itEnd);
-//	m_uLength += uRet;
-//	return uRet;
-//}
-
-//// Delete uSize nucleotides at itBegin
-//Sequence::size_type Sequence::Deletion(iterator itBegin, size_type uSize)
-//{
-//	size_type uRet = 0;
-//	for(;uRet < uSize && itBegin != end(); ++itBegin)
-//	{
-//		// Skip Gaps
-//		if(itBegin->IsDeleted())
-//			continue;
-//		// Mark as Deleted-Root or Deleted-Insertion
-//		itBegin->SetType(Nucleotide::TypeDel);
-//		 ++uRet;
-//	}
-//	m_uLength -= uRet;
-//	return uRet;
-//}
-
-//void Sequence::Append(const Sequence &seq)
-//{
-//		insert(end(), seq.begin(), seq.end());
-//		m_uLength += seq.m_uLength;
-//}
-
-//void Sequence::ToString(std::string &ss) const
-//{
-//	ss.clear();
-//	for(const_iterator cit = begin(); cit != end(); ++cit)
-//		ss.push_back(cit->ToChar());
-//}
-
-//bool Nucleotide::FromChar(char ch)
-//{
-//	switch(ch&0xDF)
-//	{
-//	case 'A':
-//		m_ucNuc = NumAdenine;
-//		return true;
-//	case 'C':
-//		m_ucNuc = NumCytosine;
-//		return true;
-//	case 'G':
-//		m_ucNuc = NumGuanine;
-//		return true;
-//	case 'T':
-//		m_ucNuc = NumThymine;
-//		return true;
-//	}
-//	return false;
-//}
-//char Nucleotide::ToChar() const
-//{
-//	static const char csNuc[]	= "ACGT";
-//	static const char csType[]	= "-=+ ";
-
-//	return IsExtant() ? csNuc[GetBase()] : csType[GetBase()];
-//}
-
-////////////////////////////////////////////////////////////
 //  class Tree
 ////////////////////////////////////////////////////////////
 
@@ -223,21 +123,23 @@ void Tree::Evolve()
 	}
 	branchColor = 0;
 	// Setup Root
-	Node& rNode = m_map["_R()()T"];
-	rNode.m_ssName = "_R()()T";
+	Node& rNode = m_itRoot->second;
 	rNode.m_bTouched = true;
 
 	rNode.m_vSeq = m_vDNASeq;
 
-	// Process Template
-	unsigned int u=0;
-	for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit) {
-		if(sit->rate_scalar() < 0.0)
-			sit->rate_scalar(RandomRate());
-		if(sit->is_deleted()) {
+	if(m_bRandRootBases && m_bRandRootRates) {
+		// Process Template
+		for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit) {
 			sit->base(RandomBase());
-			sit->mark_deleted(false);
+			sit->rate_scalar(RandomRate());
 		}
+	} else if(m_bRandRootBases) {
+		for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit)
+			sit->base(RandomBase());
+	} else if(m_bRandRootRates) {
+		for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit)
+			sit->rate_scalar(RandomRate());
 	}
 
 	// Evolve each tip
@@ -407,7 +309,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 					}
 				}
 				// insert u "deleted insertions" into buffer
-				seq.insert(seq.end(), u, Nucleotide(0, 1.0f, branchColor, true));
+				seq.insert(seq.end(), u, Nucleotide(0, Nucleotide::rate_type(1.0), branchColor, true));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
 				n.second -= u;
@@ -672,8 +574,14 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vLens,
 					   const std::vector<std::vector<double> > &vRates)
 {
+	// Store iterator to root
+	m_itRoot = m_map.find("_R()()T");
+	m_itRoot->second.m_ssName = "_R()()T";
+
 	// Clear Template
 	m_vDNASeq.clear();
+	m_bRandRootBases = true;
+	m_bRandRootRates = !AreRatesConstant();
 
 	// Check to see if sequence is specified
 	if(vSeqs.size()) {
@@ -683,9 +591,10 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			for(string::const_iterator it = ss.begin(); it != ss.end(); ++it)
 				m_vDNASeq.insert(m_vDNASeq.end(), make_seq(*it));
 		}
+		m_bRandRootBases = false;
 	} else {
-		// Create random sequences
-		residue res(0, -1.0f, 0, true);
+		// Create random sequence place holder
+		residue res(0, residue::rate_type(1.0), 0);
 		for(unsigned int u = 0; u < vLens.size(); ++u)
 			m_vDNASeq.insert(m_vDNASeq.end(), vLens[u], res);
 	}
@@ -706,6 +615,7 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 			residue::rate_type s = it->rate_scalar();
 			it->rate_scalar(static_cast<residue::rate_type>(s/dTemp));
 		}
+		m_bRandRootRates = false;
 	}
 	return true;
 }

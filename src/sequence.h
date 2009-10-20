@@ -761,7 +761,7 @@ public:
 	inline void model(model_type a) {_model = a; };
 
 	residue make_residue(char ch) const {
-		return residue(encode(ch), 1.0f, 0);
+		return residue(encode(ch), static_cast<residue::rate_type>(1.0), 0);
 	}
 	residue make_residue(char ch, double d) const {
 		return residue(encode(ch), static_cast<residue::rate_type>(d), 0);
