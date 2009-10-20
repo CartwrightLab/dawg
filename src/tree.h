@@ -14,6 +14,8 @@ using namespace dawg;
 
 #include <list>
 #include <stack>
+#include <vector>
+#include <deque>
 
 // A class used to represent a node in a Newick tree
 class NewickNode {
