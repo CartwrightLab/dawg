@@ -233,7 +233,7 @@ void Tree::Evolve()
 	unsigned int u=0;
 	for(Sequence::iterator sit = rNode.m_vSeq.begin(); sit != rNode.m_vSeq.end(); ++sit) {
 		if(sit->rate_scalar() < 0.0)
-			sit->rate_scalar(static_cast<residue::rate_type>(RandomRate()));
+			sit->rate_scalar(RandomRate());
 		if(sit->is_deleted()) {
 			sit->base(RandomBase());
 			sit->mark_deleted(false);
@@ -708,20 +708,6 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 		}
 	}
 	return true;
-}
-
-Tree::Nucleotide::data_type Tree::RandomBase() const {
-	return m_dFreqsCum(rand_real());
-}
-
-double Tree::RandomRate() const
-{
-	if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
-		return 0.0;  // Site Invariant
-	else if(m_dGamma > DBL_EPSILON)
-		return rand_gamma1(m_dGamma); // Gamma with mean 1.0 and var of m_dGamma
-	else
-		return 1.0;
 }
 
 void Tree::Align(Alignment &aln, unsigned int uFlags)

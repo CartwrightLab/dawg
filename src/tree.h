@@ -8,7 +8,7 @@
 #include "matrix.h"
 #include "sequence.h"
 #include "bitree.h"
-
+#include "rand.h"
 
 using namespace dawg;
 
@@ -137,15 +137,26 @@ public:
 		const std::vector<std::vector<double> > &vRates);
 
 	// Draw a random relative rate of substitution from the evolutionary parameters
-	double RandomRate() const;
+	inline Nucleotide::rate_type RandomRate() const {
+		if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
+			return Nucleotide::rate_type(0.0);  // Site Invariant
+		else if(m_dGamma > DBL_EPSILON)
+			return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
+		else
+			return Nucleotide::rate_type(1.0);
+	}
 	bool AreRatesConstant() const {
 		return (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
 	}
 	// Draw a random base from the evolutionary parameters
-	Nucleotide::data_type RandomBase() const;
+	inline Nucleotide::data_type RandomBase() const {
+		return m_dFreqsCum(rand_real());
+	}
+
 	// Draw a random nucleotide (base and rate)
-	Nucleotide RandomNucleotide() const
-	{ return Nucleotide(RandomBase(), static_cast<Nucleotide::rate_type>(RandomRate()), branchColor, false); }
+	inline Nucleotide RandomNucleotide() const {
+		return Nucleotide(RandomBase(), RandomRate(), branchColor, false);
+	}
 
 	Tree() : m_nSec(0) {}
 
