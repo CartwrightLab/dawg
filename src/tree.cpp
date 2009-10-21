@@ -155,12 +155,6 @@ void Tree::Evolve(Node &rNode)
 		return;
 	rNode.m_bTouched = true;
 
-	// Make sure the ins and del stacks are empty
-	while(!m_sInsData.empty())
-		m_sInsData.pop();
-	while(!m_sDelData.empty())
-		m_sDelData.pop();
-
 	// check to see if this is a recombination event
 	if(rNode.m_vAncestors.size() > 1) {
 		/*todo*/
@@ -171,6 +165,11 @@ void Tree::Evolve(Node &rNode)
 		Node &aNode = m_map[ssA];
 		Evolve(aNode);
 		rNode.m_vSeq.clear();
+		// Make sure the ins and del stacks are empty
+		while(!m_sInsData.empty())
+			m_sInsData.pop();
+		while(!m_sDelData.empty())
+			m_sDelData.pop();
 		Evolve(rNode.m_vSeq, aNode.m_vSeq.begin(), aNode.m_vSeq.end(), m_dTreeScale*rNode.m_dBranchLen);
 	}
 }
@@ -197,7 +196,10 @@ void Tree::Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const
 		dM = 1.0/dM;
 		d = rand_exp(dM);
 		while(d < dTime) {
-			size_type u = m_pDeletionModel->RandSize();
+			size_type u;
+			do {
+				u = m_pDeletionModel->RandSize();
+			} while(u == 1);
 			m_sDelUpData.push(IndelData(d,  1+rand_uint(u-2)));
 			d += rand_exp(dM);
 		}
@@ -353,6 +355,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 			}
 		} else if(!m_sInsData.empty()) {
 			IndelData &n = m_sInsData.top();
+			assert(n.first < dT);
 			t = dT-n.first;
 			// Find location of next event
 			size_type x = NextIndel(rand_exp(1.0/t), f)-1;
@@ -361,10 +364,11 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 				// next event overlaps this one
 				u = x/2;
 				// push the new event on the proper stack
-				if((x&1) == 0)
+				if((x&1) == 0) {
 					m_sInsData.push(IndelData(n.first+t*f/dIns, m_pInsertionModel->RandSize()));
-				else
+				} else {
 					m_sDelData.push(IndelData(n.first+t*f/dDel, m_pDeletionModel->RandSize()));
+				}
 			}
 			// remove u sites from the location and pop if empty
 			n.second -= u;
@@ -636,12 +640,13 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	// States: Quit (0), Root(1), Ins(2), InsDel(4), Del (8)
+	// States: Quit (0), Ext(2), Del(1)
 	unsigned int uState = 1;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
+	unsigned int uRmEmpty = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
 	// Go through each column, adding gaps where neccessary
-	while(uState != 0) {
+	for(;;) {
 		uState = 0; // Set to quit
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
@@ -649,35 +654,38 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 			if(sit->it == sit->seq->end())
 				continue; // Sequence is done
 			uBranchN = sit->it->branch();
-			if(uBranchN > uBranch) {
+			if(uBranchN == uBranch) {
+				uState |= (sit->it->is_deleted() ? uRmEmpty : 2);
+			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = (sit->it->is_deleted() ? 2 : 1);
-			} else if(uBranchN == uBranch) {
-				uState |= (sit->it->is_deleted() ? 2 : 1);
+				uState = (sit->it->is_deleted() ? uRmEmpty : 2);
 			}
 		}
-		if(uState == 0) // Stop Aligning
-			break;
-		bool rmEmpty = !(uFlags & FlagOutKeepEmpty);
-		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
-			if(sit->it == sit->seq->end()) {
-				if(!(uState == 2 && rmEmpty))
-					sit->str->push_back(make_seq.decode_gaps(residue_factory::INS));
-				continue;
-			} else if(uState == 2 && rmEmpty) {
-				if(sit->it->branch() != uBranch)
-					continue;
-			} else if(sit->it->branch() != uBranch) {
-				sit->str->push_back(make_seq.decode_gaps(residue_factory::INS));
-				continue;
-			} else if(!sit->it->is_deleted())
-				sit->str->push_back(make_seq.decode(sit->it->base()));
-			else if(sit->it->branch() == 0)
-				sit->str->push_back(make_seq.decode_gaps(residue_factory::DEL));
-			else
-				sit->str->push_back(make_seq.decode_gaps(residue_factory::DELINS));
-			++(sit->it);
-		}
+		switch(uState) {
+			case 0: goto ENDFOR; // Yes, you shouldn't use goto, except here
+			case 1: // Empty column that we want to ignore
+				for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
+					if(sit->it != sit->seq->end() && sit->it->branch() == uBranch)
+						++(sit->it);
+				}
+				break;
+			case 2:
+			case 3: // Unempty column
+				for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
+					if(sit->it == sit->seq->end() || sit->it->branch() != uBranch) {
+						sit->str->push_back(make_seq.decode_gaps(residue_factory::INS));
+						continue;
+					} else if(!sit->it->is_deleted())
+						sit->str->push_back(make_seq.decode(sit->it->base()));
+					else if(sit->it->branch() == 0)
+						sit->str->push_back(make_seq.decode_gaps(residue_factory::DEL));
+					else
+						sit->str->push_back(make_seq.decode_gaps(residue_factory::DELINS));
+					++(sit->it);
+				}
+		};
 	}
+ENDFOR:
+	/*noop*/;
 }
 
