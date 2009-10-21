@@ -15,7 +15,6 @@ using namespace dawg;
 #include <list>
 #include <stack>
 #include <vector>
-#include <deque>
 
 // A class used to represent a node in a Newick tree
 class NewickNode {
@@ -30,79 +29,9 @@ protected:
 	void MakeName();
 };
 
-// A class to represent nucleotides
-//class Nucleotide
-//{
-//public:
-//	typedef unsigned short data_type;
-//protected:
-//	// First two bits specify base
-//	// Second two bits specify type
-//	data_type   m_ucNuc;
-//	float m_dRate; // 0.0 means invarant
-
-//public:
-//	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
-//	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
-
-//	static const data_type MaskColor	= ~0x7;
-//	static const data_type MaskBase		=  0x3; // 011
-//	static const data_type MaskType		=  0x4; // 100
-//	static const data_type TypeDel		=  0x4; // 100
-//	static const data_type TypeExt      =  0x0; // 000
-//	static const data_type ColorInc     =  0x8;
-//
-//	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
-//	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
-//	inline data_type GetColor() const  { return m_ucNuc & MaskColor; }
-//	inline void SetBase(data_type uc)  { m_ucNuc =  (uc & MaskBase) | (m_ucNuc & ~MaskBase); }
-//	inline void SetType(data_type uc)  { m_ucNuc =  (uc & MaskType) | (m_ucNuc & ~MaskType); }
-//	inline void SetColor(data_type uc) { m_ucNuc =  (uc & MaskColor) | (m_ucNuc & ~MaskColor); }
-//	inline void SetNuc(data_type ucB, data_type ucT, data_type ucC)
-//		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType) | (ucC & MaskColor); }
-//	inline void SetNuc(data_type uc) { m_ucNuc = uc; }
-//	inline bool IsType(data_type uc) const { return (GetType() == uc); }
-//	inline bool IsDeleted() const { return (GetType() == TypeDel); }
-//	inline bool IsExtant()  const { return (GetType() == TypeExt); }
-
-//	inline double GetRate() const { return m_dRate; }
-//	inline void SetRate(double r) { m_dRate = (float)r; }
-//
-//	bool FromChar(char ch);
-//	char ToChar() const;
-
-//};
-
-// A class that represent a sequence of nucleotides
-//class Sequence : public std::vector<Nucleotide>
-//{
-//public:
-//	typedef std::vector<Nucleotide> Base;
-//	Sequence() : m_uLength(0) { }
-//	explicit Sequence(size_type uSize) : Base(uSize, Nucleotide(0xF, -1.0))
-//	{
-//		m_uLength = uSize;
-//	}
-//	size_type SeqLength() const { return m_uLength; }
-//
-//	// find the uPos-th true nucleotide (skips gaps)
-//	const_iterator SeqPos(size_type uPos) const;
-//	iterator SeqPos(size_type uPos);
-
-//	size_type Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
-//	size_type Deletion(iterator itBegin, Base::size_type uSize);
-
-//	void Append(const Sequence &seq);
-
-//	void ToString(std::string &ss) const;
-
-//private:
-//	size_type m_uLength;
-//};
-
-// The recombinant tree data structure
 struct AlignData;
 
+// The recombinant tree data structure
 class Tree
 {
 public:
@@ -147,7 +76,7 @@ public:
 		return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
 	}
 	bool AreRatesConstant() const {
-		return (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
+		return m_bConstRates;
 	}
 	// Draw a random base from the evolutionary parameters
 	inline Nucleotide::data_type RandomBase() const {
@@ -200,7 +129,7 @@ private:
 	Node::Map::iterator m_itRoot;
 	std::vector<std::string> m_vTips;
 
-	bool m_bRandRootBases, m_bRandRootRates;
+	bool m_bRandRootBases, m_bRandRootRates, m_bConstRates;
 
 	double m_dGamma;
 	double m_dIota;
@@ -242,33 +171,12 @@ bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int
 
 struct AlignData {
 	typedef Tree::Sequence Sequence;
-	AlignData(const std::string ss) : ssName(ss) {
+	AlignData(const Sequence *xseq, Tree::Alignment::mapped_type *xstr) :
+		seq(xseq), str(xstr), it(xseq->begin()) {
 	}
-	AlignData(const AlignData &a) : ssName(a.ssName), seq(a.seq), seqAln(a.seqAln), it(a.it) {
-	}
-	AlignData & operator=(const AlignData &a) {
-		if(this == &a)
-			return *this;
-		ssName = a.ssName;
-		seq = a.seq;
-		seqAln = a.seqAln;
-		it = a.it;
-		return *this;
-	}
-	std::string ssName;
 	const Sequence *seq;
-	Sequence seqAln;
+	Tree::Alignment::mapped_type *str;
 	Sequence::const_iterator it;
-
-	struct Printer {
-		Printer(const residue_factory &fac) : f(fac) {};
-
-		char operator()(AlignData::Sequence::const_reference r) const {
-			static char gaps[] = "-=+";
-			return r.is_deleted() ? gaps[r.base()] : f.decode(r.base());
-		}
-		const residue_factory &f;
-	};
 };
 
 namespace std {

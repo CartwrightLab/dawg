@@ -429,6 +429,7 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Setup Rate Parameters
 	m_dGamma = dGamma;
 	m_dIota = dIota;
+	m_bConstRates = (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
 
 	// Setup TreeScale
 	m_dTreeScale = dTreeScale;
@@ -622,16 +623,14 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 
 void Tree::Align(Alignment &aln, unsigned int uFlags)
 {
-	// construct a table of flattened sequences
+	// construct a table of sequences
 	m_vAlnTable.clear();
-	// if we remove this call to flatten, we can get even faster
+	aln.clear();
 	for(Node::Map::const_iterator cit = m_map.begin(); cit != m_map.end(); ++cit) {
 		// Skip any sequence that begin with one of the two special characters
 		if(cit->second.m_ssName[0] == '(' || cit->second.m_ssName[0] == '_')
 			continue;
-		m_vAlnTable.push_back(AlignData(cit->second.m_ssName));
-		m_vAlnTable.back().seq = &cit->second.m_vSeq;
-		m_vAlnTable.back().it = m_vAlnTable.back().seq->begin();
+		m_vAlnTable.push_back(AlignData(&cit->second.m_vSeq, &aln[cit->second.m_ssName]));
 	}
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
@@ -663,28 +662,22 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 		for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
 			if(sit->it == sit->seq->end()) {
 				if(!(uState == 2 && rmEmpty))
-					sit->seqAln.push_back(Nucleotide(2, 1.0f, 0, true));
+					sit->str->push_back(make_seq.decode_gaps(residue_factory::INS));
 				continue;
 			} else if(uState == 2 && rmEmpty) {
 				if(sit->it->branch() != uBranch)
 					continue;
 			} else if(sit->it->branch() != uBranch) {
-				sit->seqAln.push_back(Nucleotide(2, 1.0f, 0, true));
+				sit->str->push_back(make_seq.decode_gaps(residue_factory::INS));
 				continue;
 			} else if(!sit->it->is_deleted())
-				sit->seqAln.push_back(*sit->it);
+				sit->str->push_back(make_seq.decode(sit->it->base()));
 			else if(sit->it->branch() == 0)
-				sit->seqAln.push_back(Nucleotide(0, 1.0f, 0, true));
+				sit->str->push_back(make_seq.decode_gaps(residue_factory::DEL));
 			else
-				sit->seqAln.push_back(Nucleotide(1, 1.0f, 0, true));
+				sit->str->push_back(make_seq.decode_gaps(residue_factory::DELINS));
 			++(sit->it);
 		}
-	}
-
-	// Add aligned sequences to alingment set
-	for(vector<AlignData>::iterator sit = m_vAlnTable.begin(); sit != m_vAlnTable.end(); ++sit) {
-		transform(sit->seqAln.begin(), sit->seqAln.end(),
-			std::back_inserter(aln[sit->ssName]), AlignData::Printer(make_seq));
 	}
 }
 

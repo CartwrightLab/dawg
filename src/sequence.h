@@ -729,6 +729,9 @@ public:
 	static const model_type RNA = 1;
 	static const model_type AA  = 2;
 	static const model_type CODON = 3;
+	static const model_type DEL = 0;
+	static const model_type DELINS = 1;
+	static const model_type INS = 2;
 
 	template<class It, class D>
 	void operator()(It b, It e, D &dest) {
@@ -773,15 +776,21 @@ public:
 			return dna[(ch&6u) >> 1];
 		return ~0;
 	}
+
+	char decode_gaps(model_type r) const {
+		static const char gaps[] = "-=+";
+		return gaps[r];
+	}
+
 	char decode(residue::data_type r) const {
-		static char dna[] = "ACGT";
-		static char rna[] = "ACGU";
+		static const char dna[] = "ACGT";
+		static const char rna[] = "ACGU";
 		// Include O & U, two rare amino acids
-		static char aa[] = "ACDEFGHIKLMNPQRSTVWYOU";
+		static const char aa[] = "ACDEFGHIKLMNPQRSTVWYOU";
 		// Encode 64 possible codons using a base-64 notation
 		// b/c this function returns a single char.
 		// These can later be converted to three nucleotides or 1 amino acid
-		static char cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
+		static const char cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
 
 		switch(_model) {
 		case DNA:
