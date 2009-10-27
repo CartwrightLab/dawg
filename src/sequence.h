@@ -132,6 +132,7 @@ public:
 	}
 
 	inline bool is_deleted() const { return (_data & delete_mask) == delete_del; }
+	inline data_type deleted() const { return _data & delete_mask; }
 	inline void mark_deleted(bool b=true) {
 		_data = (_data & ~delete_mask) | (b ? delete_del : delete_ext);
 	}

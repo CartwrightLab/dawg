@@ -627,6 +627,9 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 
 void Tree::Align(Alignment &aln, unsigned int uFlags)
 {
+	// Let's spend some memory to save the code from branching.
+	static unsigned int uUpdate[residue::delete_del+1];
+	
 	// construct a table of sequences
 	m_vAlnTable.clear();
 	aln.clear();
@@ -644,7 +647,8 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 	unsigned int uState = 1;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
-	unsigned int uRmEmpty = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
+	uUpdate[residue::delete_ext] = 2;
+	uUpdate[residue::delete_del] = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
 	// Go through each column, adding gaps where neccessary
 	for(;;) {
 		uState = 0; // Set to quit
@@ -655,10 +659,10 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 				continue; // Sequence is done
 			uBranchN = sit->it->branch();
 			if(uBranchN == uBranch) {
-				uState |= (sit->it->is_deleted() ? uRmEmpty : 2);
+				uState |= uUpdate[sit->it->deleted()];
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = (sit->it->is_deleted() ? uRmEmpty : 2);
+				uState = uUpdate[sit->it->deleted()];
 			}
 		}
 		switch(uState) {
