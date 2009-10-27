@@ -433,7 +433,8 @@ bool Tree::SetupEvolution(double pFreqs[], double pSubs[],
 	// Setup Rate Parameters
 	m_dGamma = dGamma;
 	m_dIota = dIota;
-	m_bConstRates = (m_dIota < DBL_EPSILON && m_dGamma < DBL_EPSILON);
+	m_bIota = !(m_dIota < DBL_EPSILON);
+	m_bConstRates = (!m_bIota && m_dGamma < DBL_EPSILON);
 
 	// Setup TreeScale
 	m_dTreeScale = dTreeScale;

@@ -71,7 +71,7 @@ public:
 	inline Nucleotide::rate_type RandomRate() const {
 		if(AreRatesConstant())
 			return Nucleotide::rate_type(1.0);
-		if(m_dIota > DBL_EPSILON && rand_bool(m_dIota))
+		if(m_bIota && rand_bool(m_dIota))
 			return Nucleotide::rate_type(0.0);  // Site Invariant
 		return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
 	}
@@ -129,7 +129,7 @@ private:
 	Node::Map::iterator m_itRoot;
 	std::vector<std::string> m_vTips;
 
-	bool m_bRandRootBases, m_bRandRootRates, m_bConstRates;
+	bool m_bRandRootBases, m_bRandRootRates, m_bConstRates, m_bIota;
 
 	double m_dGamma;
 	double m_dIota;
