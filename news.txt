@@ -1,0 +1,11 @@
+04/26/2009 - Version 1.2 Released
+
+08/14/2008 - Version 1.1.2 Released
+
+05/22/2008 - Version 1.1.1 Released
+
+09/05/2006 - Version 1.1 Released
+             1-STABLE branch created
+             2-CURRENT branch created
+
+02/18/2005 - Version 1.0.0 Released

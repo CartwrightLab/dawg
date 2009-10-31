@@ -1,4 +1,4 @@
-// rand.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// rand.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_RAND_H
 #define DAWG_RAND_H
@@ -7,221 +7,185 @@
 #	include "config.h"
 #endif
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_01.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/gamma_distribution.hpp>
-#include <boost/random/geometric_distribution.hpp>
-#include <boost/random/exponential_distribution.hpp>
-#include <boost/random/bernoulli_distribution.hpp>
-#include <boost/random/uniform_smallint.hpp>
-#include <vector>
+#include <cmath>
+#include <cfloat>
 
-typedef boost::mt19937 DawgRng;
+#ifdef HAVE_STDINT_H
+#	include <stdint.h>
+#elif defined(_MSC_VER)
+#	include "compat/stdint.h"
+#endif
 
-extern DawgRng g_rng;
-extern boost::uniform_01<DawgRng, double> g_randReal01;
+#ifdef HAVE_SYS_TYPES_H
+#	include <sys/types.h>
+#endif
 
+#define RDBL32_MIN  2.3283064365386963e-010
+#define RDBL_MIN	RDBL32_MIN
+
+#ifndef M_E
+#	define M_E        2.71828182845904523536
+#endif
+
+/************************************************
+	Mersenne Twister Generator
+************************************************/
+
+// Seed random number generator from an array
+void mt_srand(uint32_t uKeys[], size_t uLen);
+
+// Draw integer from [0,0xFFFFFFFF]
+uint32_t mt_rand();
+
+/************************************************
+	Generic Random number generators
+************************************************/
+
+// Draw integer from [0,0xFFFFFFFF]
+inline uint32_t rand_uint() { return mt_rand(); }
+
+// Draw integer from [0,uMax]
+inline uint32_t rand_uint(uint32_t uMax)
+{
+		uint32_t uMask = uMax;
+		uMask |= uMask >> 1;
+		uMask |= uMask >> 2;
+		uMask |= uMask >> 4;
+		uMask |= uMask >> 8;
+		uMask |= uMask >> 16;
+		uint32_t u;
+		do { u = rand_uint() & uMask; } while ( u > uMax);
+		return u;
+}
+
+// Draw floating point from [0.0,1.0) with 32-bit precision
 inline double rand_real()
 {
-	boost::uniform_01<DawgRng, double> r(g_rng);
-	return r();
+	uint32_t u = rand_uint();
+	return (double) u*(1.0/4294967296.0);
 }
 
-inline double rand_real(double b, double e)
+// Draw from Bernolli
+inline bool rand_bool(double p)
 {
-	boost::variate_generator<DawgRng&, boost::uniform_real<> > r(g_rng, boost::uniform_real<>(b, e));
-	return r();
+	return (rand_real() < p);
 }
 
-inline unsigned int rand_uint(unsigned int uMax)
+// Draw Exponential w/ mean 1.0
+inline double rand_exp() { return -log(1.0-rand_real()); }
+
+// Draw Exponential w/ mean L
+inline double rand_exp(double L) { return L*rand_exp(); }
+
+inline double rand_gamma_small(double a)
 {
-	boost::variate_generator<DawgRng&, boost::uniform_smallint<unsigned int> > r(g_rng, boost::uniform_smallint<unsigned int>(0, uMax));
-	return r();
-}
-
-inline double rand_exp(double dRate)
-{
-	boost::variate_generator<DawgRng&, boost::exponential_distribution<> > r(g_rng, boost::exponential_distribution<>(dRate));
-	return r();
-}
-
-inline bool rand_bool(double dP)
-{
-	boost::variate_generator<DawgRng&, boost::bernoulli_distribution<> > r(g_rng, boost::bernoulli_distribution<>(dP));
-	return r();
-}
-
-
-// mean 1 and variance (1+gamma)/(1-iota)
-template<class RealType = double>
-class gammaiota_distribution
-{
-public:
-	typedef RealType input_type;
-	typedef RealType result_type;
-
-	gammaiota_distribution(result_type g = result_type(0),
-		result_type i = result_type(0)) : 
-			_gamma(g), _iota(i), _iota_dist(_iota)
+	// Ahrens & Dieter (1974) Computer methods for sampling from gamma, 
+	// beta, Poisson and binomial distributions. Computing 12: 223-246.
+    double b = 1.0 + a*0.36788794412;
+	double p,g,r;
+	do
 	{
-		init();
-	}
-
-	template<class Engine>
-	result_type operator()(Engine& eng)
-	{
-		if(_iota != result_type(0) && _iota_dist(eng))
-			return result_type(0);
-		if(_gamma != result_type(0) )
-			return _beta*_gamma_dist(eng);
-		return result_type(1);
-	}
-
-	void reset() { }
-
-	const input_type& iota() const { return _iota; }
-	const input_type& gamma() const { return _gamma; }
-
-
-protected:
-	void init()
-	{
-		if(_gamma != result_type(0))
+		p = b*rand_real();
+		if(p < 1.0)
 		{
-			_alpha = result_type(1)/_gamma;
-			_gamma_dist = boost::gamma_distribution<RealType>(_alpha);
-			_beta = input_type(1)/(_alpha*(input_type(1)-_iota));
+			g = exp(log(p)/a);
+			r = -g;
 		}
-	}
+		else
+		{
+			g = -log((b-p)/a);
+			r = ((a-1.0)*log(g));
+		}
+	}	while(log(1.0-rand_real()) > r);
 
-private:
-	input_type _iota;
-	input_type _gamma;
-	input_type _alpha;
-	input_type _beta;
+	return g;
+}
 
-	boost::gamma_distribution<RealType> _gamma_dist;
-	boost::bernoulli_distribution<RealType> _iota_dist;
-};
-
-template<class IntType = int, class RealType = double>
-class discrete_distribution
+inline double rand_gamma_big(double a)
 {
-public:
-	typedef IntType result_type;
-	typedef RealType input_type;
-	typedef std::vector<input_type> storage_type;
-	typedef typename storage_type::const_iterator const_iterator;
-	
-	discrete_distribution() { }
-
-	template<class It>
-	discrete_distribution(const It& first, const It& last) : _P(first, last)
+	// Cheng (1977) The generation of gamma variables with non-integral
+	// shape parameter. Appl. Stat. 26(1): 71-75.     
+	double aa = sqrt(a+a+1.0);
+	double b = a - 1.38629436111989061883;
+	double c = a + aa;
+	double u1,u2,v,x,z,r;
+	do
 	{
-		init();
-	}
-	
-	void reset() { }
+		do {u1 = rand_real(); } while(u1 == 0.0);
+		u2 = rand_real();
+		v = log(u1/(1.0-u1))/aa;
+		x = a*exp(v);
+		z = u1*u1*u2;
+		r = b+c*v-x;
+	} while( r+2.50407739677627407337 < 4.5*z && r < log(z));
+	return x;
+}
 
-	const_iterator begin() const { return _P.begin(); }
-	const_iterator end() const { return _P.end(); }
-
-	template<class Engine>
-	result_type operator()(Engine& eng)
-	{
-		input_type r = eng();
-		result_type n = result_type(0);
-		for(const_iterator cit = _P.begin();
-			cit != _P.end() && r >= *cit; ++cit)
-			++n;
-		return n;
-	}
-	
-private:
-	void init()
-	{
-		input_type sum = input_type(0);
-		for(storage_type::iterator it = _P.begin();
-			it != _P.end(); ++it)
-			*it = (sum += *it);
-	}
-
-	storage_type _P;
-
-};
-
-template<class IntType = int, class RealType = double>
-class zipf_distribution
+// Draw from Gamma with mean 'a' and var 'a'
+inline double rand_gamma(double a)
 {
-public:
-	typedef IntType result_type;
-	typedef RealType input_type;
-	explicit zipf_distribution(const input_type& alpha = input_type(3)) : _alpha(alpha)
-	{
-		assert(alpha > input_type(1));
-		init();
-	}
-	
-	void reset() { }
+	if(a<=0.0)
+		return 0.0;
+	else if(a<1.0)
+		return rand_gamma_small(a);
+	else if(a>1.0)
+		return rand_gamma_big(a);
+	else
+		return rand_exp();
+}
 
-	// Draw from Zipf distribution, with parameter a > 1.0
-	// Devroye Luc (1986) Non-uniform random variate generation.
-	//     Springer-Verlag: Berlin. p551
-	template<class Engine>
-	result_type operator()(Engine& eng)
-	{
-		input_type x,t;
-		const input_type one(1);
-		do {
-		 x = floor(pow(one-eng(), -one/(_alpha-one)));
-		 t = pow(one+one/x, _alpha-one);
-		} while(eng()*x*(t-one)*_b > t*(_b-one));
-		return static_cast<result_type>(x);
-	}
-	const input_type& alpha() const { return _alpha; }
-
-private:
-	void init()
-	{
-		_b = pow(input_type(2), _alpha-input_type(1));
-	}
-	input_type _alpha;
-	input_type _b;
-};
-
-template<class IntType = int, class RealType = double>
-class truncated_zipf_distribution : public zipf_distribution<IntType, RealType>
+// Draw from Gamma with mean 'ab' and var 'abb'
+inline double rand_gamma(double a, double b)
 {
-public:
-	typedef IntType result_type;
-	typedef RealType input_type;
-	typedef zipf_distribution<IntType, RealType> base_type;
-	truncated_zipf_distribution(const input_type& alpha = input_type(3),
-		const result_type& m = result_type(-1) ) : base_type(alpha), _max(m)
-	{
-		assert(alpha > input_type(1) && (m == result_type(-1) || m >= result_type(1)));
-	}
-	
-	void reset() { base_type::reset(); }
+	return b*rand_gamma(a);
+}
 
-	template<class Engine>
-	result_type operator()(Engine& eng)
-	{
-		result_type u = base_type::operator()(eng);
-		if(_max == result_type(-1))
-			return u;
-		while(u > _max)
-			u = base_type::operator()(eng);
-		return u;
-	}
+// Draw from Gamma with mean '1' and var 'b'
+inline double rand_gamma1(double b)
+{
+	return rand_gamma(1.0/b, b);
+}
 
-	const result_type& max() const { return _max; }
+// Draw from Geometric(1-q):
+//   P(X=x)=(1-q)q^x; x <=0
+inline uint32_t rand_geometric(double q)
+{
+	return (uint32_t)(log(1.0-rand_real())/log(q));
+}
 
-private:
-	result_type _max;
-};
+// Draw from Negative Binomial(r, 1-q):
+//   P(X=x) = (r+x-1 nch x)q^x(1-q)^r; x>=0
+inline uint32_t rand_negbinomial(uint32_t r, double q)
+{
+	uint32_t u=0;
+	while(r--)
+		u += rand_geometric(q);
+	return u;
+}
 
+// Draw Poisson(l)
+inline uint32_t rand_poisson(double lambda)
+{
+	uint32_t u = 0;
+	double d, e = exp(-lambda);
+	// effecient for lambda < 12
+	d = rand_real();
+	while(d > e) {++u; d*=rand_real();}
+	return u;
+}
+
+// Draw from Zipf distribution, with parameter a > 1.0
+// Devroye Luc (1986) Non-uniform random variate generation.
+//     Springer-Verlag: Berlin. p551
+inline uint32_t rand_zipf(double a)
+{
+	double b = pow(2.0, a-1.0);
+	double x,t;
+	do {
+	 x = floor(pow(rand_real(), -1.0/(a-1.0)));
+	 t = pow(1.0+1.0/x, a-1.0);
+	} while( rand_real()*x*(t-1.0)*b > t*(b-1.0));
+	return (uint32_t)x;
+}
 
 #endif

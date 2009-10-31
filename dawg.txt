@@ -1,53 +1,66 @@
-COMMAND LINE USAGE
-  dawg -[scubvh?] file1 [file2...]
+dawg -[scubvhqew?] [-o outputfile] file1 [file2...]  
   -s: process files serially [default]
   -c: process files combined together
   -u: unbuffered output
   -b: buffered output [default]
+  -q: disable error and warning reports (quiet)
+  -e: enable error reports [default]
+  -w: enable warning reports [default]
   -v: display version information
   -h: display help information
   -?: same as -h
+  -o outputfile: override ouput filename in the configuration file
 
   Dawg will read stdin if filename is "-".
 
 FILE FORMAT
-  The file format takes a series of statements in the form of "name = value,"
-  where "name" is alphanumeric and value can be a string, number, boolean,
-  tree, or vector of values.  A single variable is equivalent to a vector of
-  a single entry.
+  The file format takes a series of statements in the form of
+  "name = value," where "name" is alphanumeric and value can be a string,
+  number, boolean, tree, or vector of values.  A single variable is
+  equivalent to a vector of a single entry.
 
-  string:  "[char-sequence]"
-           <<EOF [several lines] EOF
-  number:  [sign]digits[.digits][(e|E)[sign]digits]
-  boolean: true|false
-  tree:    Newick Format
-  vector:  { value, value, ...}
+string:  "[char-sequence]"
+         '[char-sequence]'
+         """[multi-line char-sequence]""" (rm initial and final newlines)
+         '''[multi-line char-sequence]''' (kp initial and final newlines)
+number:  [sign]digits[.digits][(e|E)[sign]digits]
+boolean: true|false
+tree:    Newick Format
+vector:  { value, value, ...}
 
 OPTIONS
-  Name          Type            Description
+
+  Name            Type            Description
 --------------------------------------------------------------------------
-  Tree           VT  phylogeny
-  TreeScale      N   coefficient to scale branch lengths by
-  Sequence       VS  root sequences 
-  Length         VN  length of generated root sequences
-  Rates          VVN rate of evolution of each root nucleotide
-  Model          S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
-  Freqs          VN  nucleotide (ACGT) frequencies 
-  Params         VN  parameters for the model of evolution
-  Width          N   block width for indels and recombination
-  Scale          VN  block position scales
-  Gamma          VN  coefficients of variance for rate heterogenity
-  Alpha          VN  shape parameters
-  Iota           VN  proportions of invariant sites
-  GapModel       VS  models of indel formation: NB|PL|US
-  Lambda         VN  rates of indel formation
-  GapParams      VVN parameter for the indel model
-  Reps           N   number of data sets to output
-  File           S   output file 
-  Format         S   output format: Fasta|Nexus|Phylip|Clustal
-  GapSingleChar  B   output gaps as a single character
-  GapPlus        B   distinguish insertions from deletions in alignment
-  LowerCase      B   output sequences in lowercase
-  Translate      B   translate outputed sequences to amino acids
-  NexusCode      S   text or file to include between datasets in Nexus format
-  Seed           VN  PRNG seed (integers)
+  Tree             VT  phylogeny
+  TreeScale        N   coefficient to scale branch lengths by
+  Sequence         VS  root sequences 
+  Length           VN  length of generated root sequences
+  Rates            VVN rate of evolution of each root nucleotide
+  Model            S   model of evolution: GTR|JC|K2P|K3P|HKY|F81|F84|TN
+  Freqs            VN  nucleotide (ACGT) frequencies 
+  Params           VN  parameters for the model of evolution
+  Width            N   block width for indels and recombination
+  Scale            VN  block position scales
+  Gamma            VN  coefficients of variance for rate heterogenity
+  Alpha            VN  shape parameters
+  Iota             VN  proportions of invariant sites
+  GapModel         VS  models of indel formation: NB|PL|US
+  Lambda           VN  rates of indel formation
+  GapParams        VVN parameter for the indel model
+  Reps             N   number of data sets to output
+  File             S   output file 
+  Format           S   output format: Fasta|Nexus|Phylip|Clustal
+  GapSingleChar    B   output gaps as a single character
+  GapPlus          B   distinguish insertions from deletions in alignment
+  KeepFlank        N   undeletable flanking regions N nucs from sequence
+  KeepEmpty        B   preserve empty columns in final alignment
+  LowerCase        B   output sequences in lowercase
+  Translate        B   translate outputed sequences to amino acids
+  Seed             VN  pseudo-random-number-generator seed (integers)
+  Out.Block.Head   S   string to insert at the start of the output
+  Out.Block.Tail   S   string to insert at the end of the output
+  Out.Block.Before S   string to insert before a sequence set in the output
+  Out.Block.After  S   string to insert after a sequence set in the output
+  Out.Subst        B   do variable subsitution in Out.Block.*
+  

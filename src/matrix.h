@@ -1,4 +1,4 @@
-// matrix.h - Copyright (C) 2004 Reed A. Cartwright (all rights reserved)
+// matrix.h - Copyright (c) 2004-2009 Reed A. Cartwright (all rights reserved)
 
 #ifndef DAWG_MATRIX_H
 #define DAWG_MATRIX_H

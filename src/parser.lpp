@@ -1,0 +1,278 @@
+%{
+// lexer.ll - Copyright (C) 2004-2005 Reed A. Cartwright (all rights reserved)
+
+#include "dawg.h"
+#include "var.h"
+#include "parser.tab.hpp"
+
+#define yylval parserlval
+#define yyparse parserparse
+#define yyerror parsererror
+
+using namespace std;
+struct State
+{
+	int    nLine;	
+	string ssFile;
+} g_state;
+
+bool g_bParseOkay = true;
+bool g_bTerminate = false;
+
+void yyerror (const char *s)
+{
+	g_bParseOkay = false;
+	cerr << "ALERT: " << s << " in " << g_state.ssFile << " at line " << g_state.nLine;
+	cerr << ": \"" << yytext << "\"." << endl;
+}
+int yyparse (void);
+bool Parse(const char* cs)
+{
+	FILE* stream;
+	if(cs==NULL || !strcmp(cs, "-"))
+		stream = stdin;
+	else
+	{
+#if _MSC_VER >= 1400
+		if(fopen_s(&stream, cs, "r"))
+			stream = NULL;
+#else	
+		stream = fopen(cs, "r");
+#endif
+	}
+	if(stream == NULL)
+		return false;
+	g_state.nLine = 1;
+	g_state.ssFile = (cs==NULL || !strcmp(cs, "-")) ? "stdin" : cs;
+	yyin = stream;
+	g_bParseOkay = true;
+	yyparse();
+	if(cs!=NULL)
+		fclose(stream);
+	return g_bParseOkay;
+}
+
+#ifdef _MSC_VER
+#	pragma warning(disable: 4127 4244 4267 )
+#	if _MSC_VER >= 1400
+#		define fileno _fileno	
+#	endif
+extern int my_isatty YY_PROTO(( int x)) {
+#	if _MSC_VER >= 1400
+	return _isatty(x);
+#else
+	return isatty(x);
+#endif
+}
+#	define isatty my_isatty
+#endif
+
+%}
+
+%option nounput
+%option noyywrap
+
+DIGIT  [0-9]
+SPACE [ \t\r\v\f]
+BIDWORD ^{SPACE}*[A-Za-z][A-Za-z_0-9.]*
+IDWORD [A-Za-z][A-Za-z_0-9.]*
+LABELCH [^ \t\n\r\v\f\(\)\[\]:;,\'\"]
+NUMBER [-+]?{DIGIT}+("."{DIGIT}+)?([eE][+-]?{DIGIT}+)?
+STR  \"[^\"\n]*\"|\'[^\'\n]*\'
+
+%x tree
+%x quote
+
+%%
+
+[=\{\}] {
+	yylval.ch = yytext[0];
+	return yytext[0];
+}
+
+^\s*"[" {
+	yylval.ch = '[';
+	return yytext[0];
+}
+
+"]"\s*\r?$ {
+	yylval.ch = '[';
+	return yytext[0];
+}
+
+[?+]"=" {
+	yylval.ch = yytext[0];
+	return yytext[0];
+}
+
+[Ff][Aa][Ll][Ss][Ee] {
+	yylval.b = false;
+	return BOOL;
+}
+
+[Tt][Rr][Uu][Ee] {
+	yylval.b = true;
+	return BOOL;
+}
+
+{BIDWORD} {
+	yylval.pss = new string(yytext+strspn(yytext, " \t\r\v\f"));
+	return BID;
+}
+
+{IDWORD} {
+	yylval.pss = new string(yytext);
+	return ID;
+}
+
+
+{NUMBER} {
+	yylval.d = atof(yytext);
+	return NUM;
+}
+
+\"\n(.*\n)*\"\n {
+	yytext[strlen(yytext)-3] = '\0';
+	yylval.pss = new string(yytext+2);
+	return STRING;
+}
+
+
+{STR} {
+	yytext[strlen(yytext)-1] = '\0';
+	yylval.pss = new string(yytext+1);
+	return STRING;
+}
+
+<INITIAL>"\"\"\""\n? {
+	yylval.ch = yytext[0];
+	g_state.nLine++;
+	BEGIN(quote);
+	return DQUOTE;
+}
+
+<quote>\n?"\"\"\"" {
+	yylval.ch = yytext[0];
+	g_state.nLine++;
+	BEGIN(INITIAL);
+	return DQUOTE;
+}
+
+<INITIAL>"\'\'\'" {
+	yylval.ch = yytext[0];
+	BEGIN(quote);
+	return SQUOTE;
+}
+
+<quote>"\'\'\'" {
+	yylval.ch = yytext[0];
+	BEGIN(INITIAL);
+	return SQUOTE;
+}
+
+<quote>\n {
+	yylval.ch = yytext[0];
+	g_state.nLine++;
+	return CHAR;
+}
+
+<quote>\r {
+	//ignore
+}
+
+<quote>. {
+	yylval.ch = yytext[0];
+	return CHAR;
+}
+
+"<<"{IDWORD}{SPACE}*\n {
+	yytext += 2;
+	g_state.nLine++;
+	int s;
+	for(s=0;!isspace(yytext[s]);++s) { }
+	yytext[s] = '\0';
+	
+	yylval.pss = new string;
+	string ssTemp;
+	string ssEnd(yytext);
+	while(1)
+	{
+		int c = yyinput();
+		if(c == '\r')
+			continue;
+		if(c == '\n' || c == EOF)
+		{
+			g_state.nLine++;
+			if(ssTemp == ssEnd)
+				break;
+			yylval.pss->append(ssTemp);
+			yylval.pss->append("\n");
+			ssTemp.clear();
+		}
+		else
+		{
+			ssTemp += c;
+		}
+		
+		if(c == EOF)
+			return UNKNOWN;
+	}
+	return STRING;
+}
+
+"#".* | 
+"//".* {
+	// Comments
+}
+
+"(" {
+	yylval.ch = yytext[0];
+	BEGIN(tree);
+	return yytext[0];
+}
+
+<tree>[\(\)] {
+	yylval.ch = yytext[0];
+	return yytext[0];
+}
+
+<tree>";" { BEGIN(INITIAL); }
+
+<tree>":"{NUMBER} {
+	yylval.d = atof(yytext+1);
+	return LENGTH;
+}
+
+<tree>{STR} {
+	yytext[strlen(yytext)-1] = '\0';
+	yylval.pss = new string(yytext+1);
+	return LABEL;
+}
+
+<tree>{LABELCH}+ {
+	yylval.pss = new string(yytext);
+	return LABEL;	
+}
+<tree>"[".+"]" { }
+
+<*><<EOF>> {
+	//if(g_bTerminate)
+		yyterminate();
+	//g_bTerminate = true;
+	return END;
+}
+
+";" { }
+
+<*>[, \t\r\v\f]+ { }
+
+<*>\n {
+	g_state.nLine++;
+}
+
+<*>. {
+	//yylval.ch = yytext[0];
+	return UNKNOWN;	
+}
+
+%%

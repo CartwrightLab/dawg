@@ -1,0 +1,41 @@
+Version 1.2
+ * Migration from Autoconf/Automake to CMake for building.  Easier to develop
+   and build packages for modern operating systems.
+ * Bug fix for homoplasious insertions.  In very large trees (>8000 branches)
+   the bug can still affect the output in very rare cases.  Email me for instructions
+   on avoiding this limitation.
+ * All empty columns in the alignment are removed by default.
+ * New KeepEmpty variable to preserve empty columns.  GapPlus is true forces
+   KeepEmpty to be true.
+ * New KeepFlank option to control long deletions into flanking regions.
+
+Version 1.1.2
+  * Bug fix in reading root sequence from input file
+
+Version 1.1.1
+  * More bug fixes in deletion code
+
+Version 1.1
+  * Bug fixes in deletion code
+  * Bug fixes in recombination code
+  * Portability Fixes
+  * Clustal default format
+  * New [Header] format
+  * New [.SubHeader] format
+  * Shorter format names: aln, phy, nex, fas, txt, out, poo
+  * Format detection based on output file name
+  * Output file can be overriden by "-o filename" flag
+  * NexusCode depreciated
+  * Out.Block.Head, Out.Block.Before, Out.Block.After, Out.Block.Tail added
+  * Varable Substitution enabled for Out.Block.*
+  * Out.Subst boolean to turn substitution on and off
+  * Getopt library support
+  * Quiet mode (disable errors and warnings)
+  * Output file commandline override
+  * Similiar to python triple quotes specify a multiline strings.
+      - Triple double quotes remove initial and final newlines
+      - Triple single quotes preserve initial and final newlines
+  * Lambda.pl has been updated.  It is still a work in progress.
+  
+Version 1.0
+  * Initial Release
