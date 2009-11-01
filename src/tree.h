@@ -6,7 +6,15 @@
 #include "dawg.h"
 #include "indel.h"
 #include "matrix.h"
+#include "sequence.h"
+#include "bitree.h"
+#include "rand.h"
 
+using namespace dawg;
+
+#include <list>
+#include <stack>
+#include <vector>
 
 // A class used to represent a node in a Newick tree
 class NewickNode {
@@ -21,76 +29,7 @@ protected:
 	void MakeName();
 };
 
-// A class to represent nucleotides
-class Nucleotide
-{
-public:
-	typedef unsigned short data_type;
-protected:
-	// First two bits specify base
-	// Second two bits specify type
-	data_type   m_ucNuc;
-	float m_dRate; // 0.0 means invarant
-
-public:
-	Nucleotide() : m_ucNuc(0xF), m_dRate(1.0) { }
-	Nucleotide(data_type nuc, double rate) : m_ucNuc(nuc), m_dRate((float)rate) { }
-
-	static const data_type MaskColor	= ~0x7;
-	static const data_type MaskBase		=  0x3; // 011
-	static const data_type MaskType		=  0x4; // 100
-	static const data_type TypeDel		=  0x4; // 100
-	static const data_type TypeExt      =  0x0; // 000
-	static const data_type ColorInc     =  0x8;
-	
-	inline data_type GetBase()  const  { return m_ucNuc & MaskBase; }
-	inline data_type GetType()  const  { return m_ucNuc & MaskType; }
-	inline data_type GetColor() const  { return m_ucNuc & MaskColor; }
-	inline void SetBase(data_type uc)  { m_ucNuc =  (uc & MaskBase) | (m_ucNuc & ~MaskBase); }
-	inline void SetType(data_type uc)  { m_ucNuc =  (uc & MaskType) | (m_ucNuc & ~MaskType); }
-	inline void SetColor(data_type uc) { m_ucNuc =  (uc & MaskColor) | (m_ucNuc & ~MaskColor); }
-	inline void SetNuc(data_type ucB, data_type ucT, data_type ucC)
-		{ m_ucNuc =  (ucB & MaskBase) | (ucT & MaskType) | (ucC & MaskColor); }
-	inline void SetNuc(data_type uc) { m_ucNuc = uc; }
-	inline bool IsType(data_type uc) const { return (GetType() == uc); }
-	inline bool IsDeleted() const { return (GetType() == TypeDel); }
-	inline bool IsExtant()  const { return (GetType() == TypeExt); }
-
-	inline double GetRate() const { return m_dRate; }
-	inline void SetRate(double r) { m_dRate = (float)r; }
-	
-	bool FromChar(char ch);
-	char ToChar() const;
-
-};
-
-// A class that represent a sequence of nucleotides
-class Sequence : public std::vector<Nucleotide>
-{
-public:
-	typedef std::vector<Nucleotide> Base;
-	Sequence() : m_uLength(0) { }
-	explicit Sequence(size_type uSize) : Base(uSize, Nucleotide(0xF, -1.0))
-	{
-		m_uLength = uSize;
-	}
-	size_type SeqLength() const { return m_uLength; }
-	
-	// find the uPos-th true nucleotide (skips gaps)
-	const_iterator SeqPos(size_type uPos) const;
-	iterator SeqPos(size_type uPos);
-
-	size_type Insertion(iterator itPos, const_iterator itBegin, const_iterator itEnd);
-	size_type Deletion(iterator itBegin, Base::size_type uSize);
-
-	void Append(const Sequence &seq);
-
-	void ToString(std::string &ss) const;
-
-private:
-	size_type m_uLength;
-};
-
+struct AlignData;
 
 // The recombinant tree data structure
 class Tree
@@ -98,82 +37,99 @@ class Tree
 public:
 
 	// A node in the tree
-	class Node
+	struct Node
 	{
-	public:
+		typedef std::vector<dawg::residue> Sequence;
+		typedef Sequence::value_type Nucleotide;
 		typedef std::map<std::string, Tree::Node> Map;
-		
-		std::vector<Sequence> m_vSections;
+		typedef Sequence::size_type size_type;
+		Sequence m_vSeq;
 		std::vector<std::string> m_vAncestors;
-		std::map<std::string, double> m_mBranchLens;
+		double m_dBranchLen;
 		std::string m_ssName;
 		bool m_bTouched;
 
-		Node() : m_bTouched(false) { }
-		void Flatten(Sequence& seq) const;
-		Sequence::size_type SeqLength() const;
-
-		typedef std::pair<std::vector<Sequence>::iterator, Sequence::iterator> iterator;
-		typedef std::pair<std::vector<Sequence>::const_iterator, Sequence::const_iterator> const_iterator;
-	
-		// find the uPos-th nucleotide in the node
-		// skips gaps and recognizes different sections
-		iterator SeqPos(Sequence::size_type uPos);
-		const_iterator SeqPos(Sequence::size_type uPos) const;
+		Node() : m_bTouched(false), m_dBranchLen(0.0) { }
 	};
+	typedef Node::Sequence Sequence;
+	typedef Node::Nucleotide Nucleotide;
+	typedef Sequence::size_type size_type;
 
 	typedef std::map<std::string, std::string> Alignment;
-	
+
 	// Setup the model of evolution
 	bool SetupEvolution(double pFreqs[], double pSubs[],
 		const IndelModel::Params& rIns, const IndelModel::Params& rDel,
 		double dGamma, double dIota, double dTreeScale,
 		int uKeepFlank);
-	
+
 	// Setup the root node
 	bool SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<unsigned int> &vData,
 		const std::vector<std::vector<double> > &vRates);
-	
+
 	// Draw a random relative rate of substitution from the evolutionary parameters
-	double RandomRate(Sequence::size_type uPos) const;
+	inline Nucleotide::rate_type RandomRate() const {
+		if(AreRatesConstant())
+			return Nucleotide::rate_type(1.0);
+		if(m_bIota && rand_bool(m_dIota))
+			return Nucleotide::rate_type(0.0);  // Site Invariant
+		return static_cast<Nucleotide::rate_type>(rand_gamma1(m_dGamma)); // Gamma with mean 1.0 and var of m_dGamma
+	}
+	bool AreRatesConstant() const {
+		return m_bConstRates;
+	}
 	// Draw a random base from the evolutionary parameters
-	Nucleotide::data_type RandomBase() const;
+	inline Nucleotide::data_type RandomBase() const {
+		return m_dFreqsCum(rand_real());
+	}
+
 	// Draw a random nucleotide (base and rate)
-	Nucleotide RandomNucleotide(Sequence::size_type uPos) const
-		{ return Nucleotide(RandomBase(), RandomRate(uPos)); }
+	inline Nucleotide RandomNucleotide() const {
+		return Nucleotide(RandomBase(), RandomRate(), branchColor, false);
+	}
 
 	Tree() : m_nSec(0) {}
-	
+
 	// Evolve the tree
 	void Evolve();
 
 	// Add a recombination section to the tree
-	void ProcessTree(NewickNode* pNode);
+	bool ProcessTree(NewickNode* pNode);
 
 	template<class itTree>
-	void ProcessTree(itTree itB, itTree itE)
+	bool ProcessTree(itTree itB, itTree itE)
 	{
 		m_nSec = 0;
 		m_map.clear();
-		for(itTree it = itB; it!=itE; it++)
-			ProcessTree(*it);
+		for(itTree it = itB; it!=itE; it++) {
+			if(!ProcessTree(*it))
+				return false;
+		}
+		return true;
 	}
-	
+
 	const Node::Map& GetMap() const { return m_map; }
-	
+
 	// Align sequences from the tree
-	void Align(Alignment &aln, unsigned int uFlags=0) const;
+	void Align(Alignment &aln, unsigned int uFlags=0);
 
 protected:
-	void ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
-	void Evolve(Node &rNode, double dTime);
+	bool ProcessNewickNode(NewickNode* pNode, const std::string &hAnc);
+	void Evolve(Sequence &seq, Sequence::const_iterator first, Sequence::const_iterator last, double dTime);
 	void Evolve(Node &rNode);
+	Tree::Sequence::const_iterator EvolveIndels(Sequence &seq,
+		Sequence::const_iterator first, Sequence::const_iterator last,
+		double dT);
+	size_type NextIndel(double d, double &f);
 
 private:
 	int m_nSec;
-	std::vector< Sequence > m_vDNASeqs;
+	Sequence m_vDNASeq;
 	Node::Map m_map;
+	Node::Map::iterator m_itRoot;
 	std::vector<std::string> m_vTips;
+
+	bool m_bRandRootBases, m_bRandRootRates, m_bConstRates, m_bIota;
 
 	double m_dGamma;
 	double m_dIota;
@@ -182,8 +138,12 @@ private:
 
 	double m_dOldTime;
 	double m_dFreqs[4];
-	double m_dNucCumFreqs[4];
-	Matrix44 m_matSubst;
+	bitree<double> m_dFreqsCum;
+	//Matrix44 m_matSubst;
+	Matrix44 m_matTrans;
+
+	bitree<double> m_dTransCum[4];
+
 	Matrix44 m_matV;
 	Matrix44 m_matU;
 	Matrix44 m_matQ;
@@ -199,9 +159,25 @@ private:
 	int m_uKeepFlank;
 
 	Nucleotide::data_type branchColor;
+
+	residue_factory make_seq;
+
+	std::vector<AlignData> m_vAlnTable;
+	typedef std::pair<double, Sequence::size_type> IndelData;
+	std::stack<IndelData> m_sInsData, m_sDelData, m_sDelUpData;
 };
 
 bool SaveAlignment(std::ostream &rFile, const Tree::Alignment& aln, unsigned int uFlags);
+
+struct AlignData {
+	typedef Tree::Sequence Sequence;
+	AlignData(const Sequence *xseq, Tree::Alignment::mapped_type *xstr) :
+		seq(xseq), str(xstr), it(xseq->begin()) {
+	}
+	const Sequence *seq;
+	Tree::Alignment::mapped_type *str;
+	Sequence::const_iterator it;
+};
 
 namespace std {
 

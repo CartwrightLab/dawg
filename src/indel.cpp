@@ -17,7 +17,7 @@ NegBnModel::NegBnModel(const vector<double>& vdModel)
 
 	m_uR = (unsigned int)vdModel[0];
 	m_dQ = vdModel[1];
-	
+
 	if(m_uR == 0)
 		throw(DawgError("Negative Binomial Model requires R > 0."));
 	if(0.0 > m_dQ || m_dQ > 1.0)
@@ -36,11 +36,13 @@ double NegBnModel::MeanSize() const
 //  class UserModel
 ////////////////////////////////////////////////////////////
 
+UserModel::UserModel() : m_dMean(1.0), m_vSizesCum(1, 1.0) { }
+
 UserModel::UserModel(const vector<double>& vdModel) : m_dMean(0.0)
 {
 	m_vSizesCum.clear();
 	double dSum = 0.0, dSize = 1.0;
-	
+
 	for(vector<double>::const_iterator cit = vdModel.begin();
 		cit != vdModel.end(); ++cit)
 	{
@@ -57,12 +59,12 @@ IndelModel::size_type UserModel::RandSize() const
 {
 	double d = rand_real();
 	IndelModel::size_type ul = 1ul;
-	
+
 	// not efficient, but it gets the job done.
 	for(vector<double>::const_iterator dit = m_vSizesCum.begin();
 		dit != m_vSizesCum.end() && d >= *dit; ++dit)
 		++ul;
-	
+
 	return ul;
 }
 double UserModel::MeanSize() const
@@ -80,12 +82,12 @@ PowerModel::PowerModel(const vector<double>& vdModel) : m_dMean(0.0)
 
 	m_dA = vdModel[0];
 	m_uM = (IndelModel::size_type)vdModel[1];
-	
+
 	if(m_dA < 1.0)
 		throw(DawgError("Power Law Model requires a >= 1.0."));
 	if(vdModel[1] < 1.0)
 		throw(DawgError("Power Law Model requires Max >= 1."));
-	
+
 	double dSum = 0.0, d;
 	for(IndelModel::size_type u = 1;u<=m_uM;++u)
 	{

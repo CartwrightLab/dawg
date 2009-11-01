@@ -90,6 +90,7 @@ ADD_EXECUTABLE(dawg ${PROJ_MACOSX_BUNDLE}
   dawg.cpp eigen.cpp indel.cpp matrix.cpp output.cpp rand.cpp tree.cpp var.cpp
   parser.lpp parser.ypp lex.parser.cpp parser.tab.cpp parser.tab.hpp
   dawg.h indel.h matrix.h rand.h tree.h var.h
+  sequence.h bitree.h
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
   ${COMPAT}
   ${RES_SRCS})
