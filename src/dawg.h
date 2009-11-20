@@ -48,10 +48,16 @@
 #include <memory>
 #include <map>
 #include <functional>
+#include <ostream>
+#include <iterator>
 
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
 bool DawgWarn(const char* csErr, ...);  //always returns false
+
+// Utility functions
+#define CERRORR(err_msg) ((std::cerr << "ERROR: " << err_msg << std::endl), false);
+#define CERROR(err_msg) (std::cerr << "ERROR: " << err_msg << std::endl);
 
 bool SetFormat(unsigned int fmt, int nNum,
 			   const char* csHead, const char* csBefore,
@@ -88,5 +94,17 @@ public:
 	void operator ( ) ( const Type& elem ) {m_Sum += elem;}
     operator Type() const { return m_Sum; }
 };
+
+namespace std {
+template<typename _Tp, typename _CharT, typename _Traits>
+basic_ostream<_CharT, _Traits>&
+operator<<(basic_ostream<_CharT, _Traits>& os, const std::vector<_Tp> &v) {
+	if(v.empty())
+		return os;
+	os << v.front();
+	std::copy(v.begin()+1, v.end(), std::ostream_iterator<_Tp, _CharT, _Traits>(os, " "));
+	return os;
+}}
+
 
 #endif

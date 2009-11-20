@@ -16,24 +16,31 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <boost/preprocessor.hpp>
+#include <boost/foreach.hpp>
+#include <boost/config.hpp>
+
+#include <exception>
+
 #include "dawg.h"
 #include "tree.h"
 #include "rand.h"
 #include "var.h"
+#include "dawg_app.h"
 
-#include <getopt.h>
+#define foreach BOOST_FOREACH
+
+using namespace std;
+using namespace boost;
+
+#define VERSION_MSG PACKAGE_STRING "\n" \
+	"    Copyright (C) 2005-2009  Reed A. Cartwright, PhD <reed@scit.us>\n" \
+	"    Report bugs to " PACKAGE_BUGREPORT
 
 // Help Information
 char g_csDawgTxt[] =
 #include "dawgtxt.h"
 ;
-
-// Notice
-char g_csDawgNotice[] =
-#include "dawgnotice.h"
-;
-
-using namespace std;
 
 bool Parse(const char* cs);
 bool Execute();
@@ -43,142 +50,80 @@ bool g_bReportWarnings = true;
 
 const char *g_csOutput = NULL;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	bool bSerial = true;
-
-	// Check to see if Usage and Version need to be printed
-	bool bUsage = (argc==1);
-	bool bVersion = (argc==1);
-	bool bOk = true;
-
-	//Parse Aruments
-	int ch;
-
-	while((ch = getopt(argc, argv, "sScCvVhHuUbBqQeEwWo:O:")) != -1)
-	{
-		switch(ch)
-		{
-		//Serial Mode
-		case 's':
-		case 'S':
-			bSerial = true;
-			break;
-		//Combined Mode
-		case 'c':
-		case 'C':
-			bSerial = false;
-			break;
-		// Version Information
-		case 'v':
-		case 'V':
-			bVersion = true;
-			break;
-		// Help Information
-		case '?':
-		case 'h':
-		case 'H':
-			bVersion = true;
-			bUsage = true;
-			break;
-		// Unbuffered Output
-		case 'u':
-		case 'U':
-			#ifdef SETVBUF_REVERSED
-			setvbuf(stdout, _IONBF, NULL, 0);
-			#else
-			setvbuf(stdout, NULL, _IONBF, 0);
-			#endif
-			break;
-		// Buffered Output
-		case 'b':
-		case 'B':
-			#ifdef SETVBUF_REVERSED
-			setvbuf(stdout, _IOFBF, NULL, BUFSIZ);
-			#else
-			setvbuf(stdout, NULL, _IOFBF, BUFSIZ);
-			#endif
-			break;
-		// Disable Errors and Warnings
-		case 'q':
-		case 'Q':
-			g_bReportErrors = false;
-			g_bReportWarnings = false;
-			break;
-		// Enable Errors
-		case 'e':
-		case 'E':
-			g_bReportErrors = true;
-			break;
-		// Enable Warnings
-		case 'w':
-		case 'W':
-			g_bReportWarnings = true;
-			break;
-		// Output Override
-		case 'o':
-		case 'O':
-			g_csOutput = optarg;
-			break;
-		// Error Reporting
-		default:
-			DawgError("Unreconized switch, \"%c\"", ch);
-			bOk = false;
-			bUsage = true;
-			bVersion = true;
-			break;
-		}
+	int ret = EXIT_FAILURE;
+	try {
+		dawg_app app(argc, argv);
+		ret = app.run();
+	} catch(std::exception &e) {
+		CERROR(e.what());
 	}
-    argc -= optind;
-    argv += optind;
-	// Print Version and/or Usage Information and exit
-	if(bVersion || bUsage)
-	{
-		if(bVersion)
-		{
-			cout << PACKAGE_STRING << endl
-				<< "DNA Assembly With Gaps" << endl
-				<< "Copyright (C) 2004-2009 Reed A. Cartwright" << endl << endl
-				<< g_csDawgNotice << endl
-				<< "Send Bug Reports to " << PACKAGE_BUGREPORT << "." << endl << endl;
-		}
-		if(bUsage)
-			cout << g_csDawgTxt << endl;
+	return ret;
+}
 
-		return 0;
-	}
-	// Close if Error
-	if(!bOk)
-		return 1;
-	if(bSerial)
-	{
-		// Process files in serial mode
-		if(argc > 1)
-			g_csOutput = NULL; // disable output override
-		for(int i=0;i<argc;++i)
-		{
-			if(Parse(argv[i]))
-			{
-				if(!Execute())
-					bOk = DawgError("Execution of \"%s\" failed.", argv[i]);
-				DawgVar::ClearMap(); // Remove variables
+dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
+	try {
+		desc.add_options()
+			#define XCMD(lname, sname, desc, type, def) ( \
+				_S(lname) _IFD(sname, "," BOOST_PP_STRINGIZE sname), \
+				po::value< type >(&arg._V(lname))->default_value(def), \
+				desc )				
+			#include "dawg.cmds"
+			#undef XCMD
+			;
+		po::variables_map vm;
+		po::positional_options_description pdesc;
+		pdesc.add("input", -1);
+		po::store(po::command_line_parser(argc, argv).options(desc).positional(pdesc).run(), vm);
+		po::notify(vm);
+		if(!arg.arg_file.empty()) {
+			if(arg.arg_file == "-") {
+				po::store(po::parse_config_file(cin, desc), vm);	
+			} else {
+				std::ifstream ifs(arg.arg_file.c_str());
+				if(!ifs.is_open()) {
+					string sse = "unable to open argument file ";
+					sse += arg.arg_file;
+					throw std::runtime_error(sse);
+				}
+				po::store(po::parse_config_file(ifs, desc), vm);
 			}
-			else
-				bOk = DawgError("Parsing of \"%s\" failed.", argv[i]);
+			po::notify(vm);
 		}
+	} catch (std::exception &e) {
+		CERROR(e.what());
+		throw std::runtime_error("unable to process command line");
 	}
-	else
-	{
-		// Process files in combined mode
-		for(int i=0;i<argc;++i)
-		{
-			if(!Parse(argv[i]))
-				bOk = DawgError("Parsing of \"%s\" failed.", argv[i]);
-		}
-		if(!Execute())
-			bOk = DawgError("Execution failed.");
+}
+
+int dawg_app::run()
+{
+	if(arg.version)	{
+		cerr << endl << VERSION_MSG << endl << endl;
+		return EXIT_SUCCESS;
 	}
-	return (int)!bOk;
+	if(arg.help) {
+		cerr << endl << VERSION_MSG << endl << endl;
+		cerr << desc << endl;
+		return EXIT_SUCCESS;
+	}
+	//if(arg.quiet)
+	//	cerr.clear(ios::failbit);
+	if(arg.unbuffer)
+		setvbuf(stdout, NULL, _IONBF, 0);
+	foreach(string &ss, arg.input) {
+		if(Parse(ss.c_str()))
+			continue;
+		DawgError("Parsing of \"%s\" failed.", ss.c_str());
+		return EXIT_FAILURE;
+	}
+	if(!Execute()) {
+		DawgError("Execution failed.");
+		return EXIT_FAILURE;
+	}
+	
+	return EXIT_SUCCESS;
 }
 
 // Fast and dirty random seed algorithm
