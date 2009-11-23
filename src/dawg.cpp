@@ -110,8 +110,6 @@ int dawg_app::run()
 	}
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
-	if(arg.unbuffer)
-		setvbuf(stdout, NULL, _IONBF, 0);
 	foreach(string &ss, arg.input) {
 		if(Parse(ss.c_str()))
 			continue;
