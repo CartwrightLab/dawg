@@ -28,6 +28,8 @@
 #include "var.h"
 #include "dawg_app.h"
 
+#include <dawg/ma.h>
+
 #define foreach BOOST_FOREACH
 
 using namespace std;
