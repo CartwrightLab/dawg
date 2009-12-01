@@ -14,11 +14,18 @@ namespace dawg {
 // Core simulation algorithm class
 class matic {
 public:
-	typedef std::vector<dawg::ma> descriptions;
-	
 	// Configure Simulation
-	bool configure(const descriptions& d);
+	void add_config_section(const dawg::ma &ma);
+	void clear_configuration();
+	inline void configure(const dawg::ma &ma);
 	
+	template<class It>
+	inline void configure(It first, It last) {
+		clear_configuration();
+		for(;first != last; ++first)
+			add_config_section(*first);
+	}
+
 	// Run the simulation
 	void walk();
 	

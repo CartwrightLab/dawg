@@ -12,17 +12,20 @@
  *    XM(name, type, def)                                                  *
  ***************************************************************************/
 
-XM((subst)(model),        std::string, "JC")
+XM((subst)(model),        std::string, "jc")
 XM((subst)(freqs),        std::vector<double>, )
 XM((subst)(params),       std::vector<double>, )
-XM((subst)(rate)(model),  std::string, "Const")
+XM((subst)(rate)(model),  std::string, "const")
 XM((subst)(rate)(params), std::vector<double>, )
 
-XM((indel)(model),  std::string, "Off")
-XM((indel)(params), std::vector<double>, )
-XM((indel)(rates),  std::vector<double>, )
+XM((indel)(model)(ins),  std::vector<std::string>, )
+XM((indel)(rate)(ins),   std::vector<double>,  )
+XM((indel)(params)(ins), std::vector<double>, )
+XM((indel)(model)(del),  std::vector<std::string>, )
+XM((indel)(rate)(del),   std::vector<double>, )
+XM((indel)(params)(del), std::vector<double>, )
 
-XM((tree)(model),  std::string, "User")
+XM((tree)(model),  std::string, "user")
 XM((tree)(params), std::vector<double>, )
 XM((tree)(tree),   dawg::wood, )
 XM((tree)(scale),  double, 1.0)
@@ -30,7 +33,7 @@ XM((tree)(scale),  double, 1.0)
 XM((root)(length),  unsigned int, 0)
 XM((root)(seq),     std::string, )
 XM((root)(rates),   std::vector<double> >, )
-XM((root)(type),    std::string, "DNA")
+XM((root)(type),    std::string, "dna")
 XM((root)(section), unsigned int, 0)
 XM((root)(overlap), bool, false)
 
