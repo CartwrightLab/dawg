@@ -34,7 +34,7 @@ XM((root)(length),  unsigned int, 0)
 XM((root)(seq),     std::string, )
 XM((root)(rates),   std::vector<double> >, )
 XM((root)(type),    std::string, "dna")
-XM((root)(section), unsigned int, 0)
+XM((root)(segment), unsigned int, 0)
 XM((root)(overlap), bool, false)
 
 /*
