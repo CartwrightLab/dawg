@@ -28,7 +28,15 @@ namespace phoenix = boost::phoenix;
 struct wood_tip {
 	wood_tip() : label(), length() {}
 	std::string label;
-	double length;	
+	double length;
+	
+	/*wood_tip& operator=(const wood_tip& r) {
+		label = r.label;
+		length = r.length;
+		std::cerr << '*';
+		return *this;
+	}
+	*/
 };
 
 struct wood_inode;
