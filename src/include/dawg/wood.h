@@ -236,6 +236,46 @@ struct newick_grammar2 : qi::grammar<Iterator, wood_data(), ascii::space_type> {
 	qi::rule<Iterator, std::string(), ascii::space_type> quoted;
 };
 
+template <typename Iterator>
+struct newick_grammar3 : qi::grammar<Iterator, std::string&(), ascii::space_type> {
+	// http://evolution.genetics.washington.edu/phylip/newick_doc.html
+	newick_grammar3() : newick_grammar3::base_type(start) {
+		using boost::spirit::float_;
+		using boost::spirit::lexeme;
+		using boost::spirit::char_;
+		using ascii::space;
+		using boost::spirit::arg_names::_1;
+		using boost::spirit::arg_names::_2;
+		using boost::spirit::arg_names::_val;
+		using boost::spirit::arg_names::_r1;
+		using boost::phoenix::arg_names::arg1;
+		using boost::phoenix::construct;
+		using boost::spirit::raw;
+		using phoenix::val;
+		using phoenix::assign;
+		using phoenix::for_each;
+		using phoenix::bind;
+		
+		start    = node(_val) >> ';';
+		node     = (label[_r1 += _1] >> -(':' >> float_))
+		         | ('(' >> (node(_r1) % ',') >> ')' >> -(label[_r1 += _1]
+				     || (':' >> float_
+				 )));
+		//tip      = (label >> -(':' >> float_))[assign(_val, 1, construct<wood_node>(_1,_2))];
+		label    %= unquoted | quoted;
+		unquoted %= lexeme[+(char_ - (char_(":,)(;'[]")|space))];
+		quoted   %= raw[lexeme['\'' >>
+			*(char_ - '\'') >> *(char_("\'") >> char_("\'") >> *(char_ - '\''))
+			>> '\'']];
+	}
+	
+	qi::rule<Iterator, std::string&(), ascii::space_type> start;
+	qi::rule<Iterator, void(std::string&), ascii::space_type> node;
+	qi::rule<Iterator, std::string(), ascii::space_type> label;
+	qi::rule<Iterator, std::string(), ascii::space_type> unquoted;
+	qi::rule<Iterator, std::string(), ascii::space_type> quoted;
+};
+
 class wood {
 public:
 	wood_data data;
@@ -244,9 +284,11 @@ public:
 	bool parse(Iterator first, Iterator last) {
 		using ascii::space;
 		
-		newick_grammar2<Iterator> newick_parser;
+		newick_grammar3<Iterator> newick_parser;
+		std::string ss;
 		
-		bool r = qi::phrase_parse(first, last, newick_parser, data, space);
+		bool r = qi::phrase_parse(first, last, newick_parser, ss, space);
+		cout << ss << endl;
 		if( first != last )
 			return false;
 		return r;
