@@ -8,6 +8,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <dawg/ma.h>
+#include <dawg.wood.h>
 
 #include <vector>
 #include <set>
@@ -17,9 +18,9 @@ namespace details {
 struct matic_section_info {
 	std::set<std::string> node_names;
 	std::string root_name;
+	dawg::wood usertree;
 };
 }
-
 
 // Core simulation algorithm class
 class matic {
@@ -31,7 +32,6 @@ public:
 	inline void clear_configuration() {
 		configs.clear();
 	}
-
 	
 	template<class It>
 	inline void configure(It first, It last) {

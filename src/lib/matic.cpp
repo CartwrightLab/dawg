@@ -8,6 +8,8 @@
 
 #define foreach BOOST_FOREACH
 
+using namespace dawg;
+
 template<class It>
 bool has_intersection(It first1, It last1, It first2, It last2) {
 	while(first1 != last1 && first2 != last2) {
@@ -29,16 +31,22 @@ void dawg::matic::add_config_section(const dawg::ma &ma) {
 	// construction section_info
 	std::auto_ptr<section_info> info(new section_info);
 	
-	// [snip]	
+	// parse tree and find all named nodes
+	info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end());
+	foreach(const dawg::dawg_node &n, section_info->usertree) {
+		if(n.label.empty())
+			continue;
+		if(!info->node_names.insert(n.label).second)
+			throw std::runtime_error("invalid tree; node label reused");
+	}
 	
 	// test whether descendents already exist in this segment
 	foreach(section_info &r, seg) {
 		if(has_intersection(
 			r.node_names.begin(), r.node_names.end(),
 			info->node_names.begin(), info->node_names.end())
-			throw std::runtime_error("invalid trees; descendent already exists"0);
+			throw std::runtime_error("invalid trees; descendent already exists");
 	}
-	
 	
 	
 	// find location to insert

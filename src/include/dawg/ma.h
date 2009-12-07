@@ -17,15 +17,16 @@ struct ma {
 #	define XM(name, type, def) type _V(name) ;
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
+	std::string name;
 
 	ma() :
 #	define XM(name, type, def) _V(name) (def),
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
-	_dummy(0)
-	{ }	
+	name()
+	{ }
+	
 private:
-	char _dummy; // needed to complete the initialization list
 };
 
 }
