@@ -9,6 +9,8 @@
 #include <cfloat>
 #include <limits>
 
+#include <boost/cstdint.hpp>
+
 #include <dawg/details/mutt.h>
 
 namespace dawg {
@@ -26,23 +28,23 @@ public:
 	inline double rand_01oc() { return gen.rand_01oc(); }
 	inline double rand_01oo() { return gen.rand_01oo(); }
 	// returns random 32-bit number
-	uint32_t rand_uint32() { return gen.rand_uint32(); }
+	boost::uint32_t rand_uint32() { return gen.rand_uint32(); }
 	// random boolean p prob of success
 	bool rand_bool(double p = 0.5) { return (rand_01() < p); }
 	// random exponential with rate r
 	double rand_exp(double r = 1.0) { return -log(rand_01oc())/r; }
 	
 	// random geometric with succcess rate p in (0,1)
-	// p(1 - p)^(k-1) for k >= 1
-	inline uint32_t rand_geometric(double p) {
-		return 1+static_cast<uint32_t>(rand_exp(-log(1.0-p)));
+	// p(1 - p)^(k-1) for k >= 1; q = 1-p
+	inline boost::uint32_t rand_geometric(double q) {
+		return 1+static_cast<uint32_t>(rand_exp(-log(q)));
 	}
 	
 	// random zeta distribution with slope z
 	// rejection-inversion method of H\"ormann and Derflinger (1996)
 	// idea borrowed from Indelible
 	// optimizations for usage in Dawg
-	inline uint32_t rand_zeta(double z) {
+	inline boost::uint32_t rand_zeta(double z) {
 		double z1 = 1.0-z;
 		double z2 = 1.0/z1;
 		double s = 2.0-zHi(zH(1.5,z1,z2)-pow(2.0,-z),z1,z2);
