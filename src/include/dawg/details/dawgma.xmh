@@ -27,7 +27,7 @@ XM((indel)(params)(del), std::vector<double>, )
 
 XM((tree)(model),  std::string, "user")
 XM((tree)(params), std::vector<double>, )
-XM((tree)(tree),   dawg::wood, )
+XM((tree)(tree),   std::string, )
 XM((tree)(scale),  double, 1.0)
 
 XM((root)(length),  unsigned int, 0)
