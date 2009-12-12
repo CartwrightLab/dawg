@@ -45,13 +45,20 @@ public:
 	// random zeta with slope z
 	boost::uint32_t rand_zeta(double z);
 	
-	// random gamma with mean 1 and var b
-	inline double rand_gamma(double b) {
-		rand_gamma(1.0/b, b);
-	}
 	// random gamma with mean ab and var abb
-	double rand_gamma(double a, double b);
-
+	inline double rand_gamma(double a, double b) {
+		if(a < 1)
+			return rand_gamma_low(a,b);
+		else
+			return rand_gamma_high(a,b);
+	}
+	// assumes a >= 1
+	double rand_gamma_high(double a, double b);
+	// assumes a < 1
+	inline double rand_gamma_low(double a, double b) {
+		return rand_gamma_high(1.0+a,b)*pow(rand_01oo(), 1.0/a);
+	}
+	
 	// random normal with mean and sigma
 	inline double rand_normal(double m, double s) {
 		return rand_normal(s)+m;
