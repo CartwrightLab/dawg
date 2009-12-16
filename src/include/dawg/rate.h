@@ -100,12 +100,12 @@ private:
 	
 	double do_iota_gamma_low(mutt &m) const {
 		//gamma > 1.0
-		return m_rand_bool(iota) ? 0.0 : m.rand_gamma_low(1.0/gamma, gamma);
+		return m.rand_bool(iota) ? 0.0 : m.rand_gamma_low(1.0/gamma, gamma);
 	}
 	
 	double do_iota_gamma_high(mutt &m) const {
 		// gamma <= 1.0
-		return m_rand_bool(iota) ? 0.0 : m.rand_gamma_high(1.0/gamma, gamma);
+		return m.rand_bool(iota) ? 0.0 : m.rand_gamma_high(1.0/gamma, gamma);
 	}	
 	
 	std::string name;

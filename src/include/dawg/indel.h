@@ -8,8 +8,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include <boost/foreach.hpp>
 #include <boost/cstdint.hpp>
+#include <boost/foreach.hpp>
 
 #include <dawg/utils.h>
 #include <dawg/log.h>
@@ -153,31 +153,36 @@ private:
 // TODO: optimize for 1 and 2 components
 class indel_mix_model {
 public:
-	bool create(const std::vector<double> &rates, const std::vector<std::string> &names,
-	            const std::vector<double> &params) {
+	template<typename It1, typename It2, typename It3>
+	bool create(It1 first_n, It1 last_n, It2 first_r, It2 last_r,
+	            It3 first_p, It3 last_p) {
+	    if(first_n == last_n)
+	    	return DAWG_ERROR("invalid indel model; no model type specified");
 		therate = 0.0;
-		mix.reserve(rates.size());
-		foreach(double d, rates) {
-			if(d <= 0.0)
-				return DAWG_ERROR("invalid indel mode; rate '" << d << "' must be positive");
-			therate += d;
+		for(;first_r!=last_r;++first_r) {
+			if(*first_r <= 0.0)
+				return DAWG_ERROR("invalid indel model; rate '" << *first_r << "' must be positive");
+			therate += *first_r;
 			mix.push_back(therate);
 		}
-		std::vector<double> temp(rates);
 		models.resize(mix.size());
-		std::vector<double>::const_iterator pit = params.begin();
+		It1 itn = first_n;
 		for(std::size_t u = 0;u<mix.size();++u) {
 			mix[u] /= therate;
-			if(!models[u].create(names[u % names.size()],pit,params.end()))
+			if(!models[u].create(*itn,first_p, last_p))
 				return false;
+			if(++itn == last_n)
+				itn = first_n;
 		}
 		mix.back() = 1.0;
+		std::size_t u=1;
+		for(;u < mix.size(); u*=2)
+			mix.resize(u, 0.0);
 		return true;		
 	}
 	
 	boost::uint32_t operator()(mutt &m) const {
-		std::size_t x = std::distance(mix.begin(),
-		                std::lower_bound(mix.begin(), mix.end(), m()));
+		std::size_t x = search_binary_cont(mix.begin(), mix.end(), m());
 		return models[x](m);
 	}
 	double rate() const { return therate; }

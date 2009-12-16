@@ -8,7 +8,10 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <dawg/ma.h>
-#include <dawg.wood.h>
+#include <dawg/wood.h>
+#include <dawg/subst.h>
+#include <dawg/rate.h>
+#include <dawg/indel.h>
 
 #include <vector>
 #include <set>
@@ -18,7 +21,13 @@ namespace details {
 struct matic_section_info {
 	std::set<std::string> node_names;
 	std::string root_name;
-	dawg::wood usertree;
+	wood usertree;
+	
+	subst_model sub_mod;
+	rate_model  rat_mod;
+	indel_model ins_mod;
+	indel_model del_mod;
+	
 };
 }
 
@@ -27,17 +36,21 @@ class matic {
 public:
 	
 	// Configure Simulation
-	void add_config_section(const dawg::ma &ma);
-	inline void configure(const dawg::ma &ma);
+	inline bool configure(const dawg::ma &ma) {
+		clear_configuration();
+		return add_config_section(ma);
+	}
 	inline void clear_configuration() {
 		configs.clear();
 	}
 	
 	template<class It>
-	inline void configure(It first, It last) {
+	inline bool configure(It first, It last) {
 		clear_configuration();
 		for(;first != last; ++first)
-			add_config_section(*first);
+			if(!add_config_section(*first))
+				return DAWG_ERROR("Configuration section '" << first->name << "' failed to process.");
+		return true;
 	}
 
 	// Run the simulation
@@ -46,9 +59,11 @@ public:
 protected:
 	typedef dawg::details::matic_section_info section_info;
 	typedef boost::ptr_vector<section_info> segment_info;
-	typedef std::vector<section_info_vector> segment_info_vector;
+	typedef std::vector<segment_info> segment_info_vector;
 	
 	segment_info_vector configs;
+	
+	bool add_config_section(const dawg::ma &ma);	
 };
 
 }
