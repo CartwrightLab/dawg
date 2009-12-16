@@ -5,14 +5,15 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <string>
+#include <boost/algorithm/string/predicate.hpp>
  
 namespace dawg {
 
 template<std::size_t _N>
 std::size_t key_switch(const std::string &ss, const std::string (&key)[_N]) {
+	using boost::algorithm::starts_with;
 	for(std::size_t i=0;i<_N;++i) {
-		if(key[i].find(ss) == 0)
+		if(starts_with(key[i], ss))
 			return i;
 	}
 	return (std::size_t)-1;

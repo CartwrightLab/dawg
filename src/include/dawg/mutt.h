@@ -83,7 +83,7 @@ private:
 class shr3 {
 public:
 	shr3() : jsr(1776) { }
-	shr2(boost::uint32_t s) : jsr(s) { }
+	shr3(boost::uint32_t s) : jsr(s) { }
 	
 	inline boost::uint32_t rand_uint32() {
 		return (jsr^=(jsr<<17), jsr^=(jsr>>13), jsr^=(jsr<<5));
@@ -92,15 +92,15 @@ public:
 		jsr = s;
 	}
 private:
-	boost::uinit_32 jsr;
+	boost::uint32_t jsr;
 };
 
 inline boost::uint32_t create_random_seed() {
-	boost::uint32_t v = static_cast<boost::uint32_t>(getpid());
+	std::size_t v = static_cast<std::size_t>(getpid());
 	v += (v << 15) + (v >> 3); // Spread 5-decimal PID over 32-bit number
 	boost::hash_combine(v, time(NULL));
 	// finish with one round of shr3
-	return (v^=(v<<17), v^=(v>>13), v^=(v<<5));	
+	return static_cast<boost::uint32_t>((v^=(v<<17), v^=(v>>13), v^=(v<<5)));
 }
 
 } // namespace dawg

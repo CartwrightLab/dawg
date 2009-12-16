@@ -13,29 +13,29 @@ class rate_model {
 public:
 
 	template<typename It>
-	bool create(const std::string &name, It &first, It last) {
+	bool create(const std::string &rname, It &first, It last) {
 		static std::string name_keys[] = {
 			std::string("const"),
 			std::string("gamma")
 		};
-		switch(key_switch(name, name_keys)) {
+		switch(key_switch(rname, name_keys)) {
 			case 0:
-				return create_const(name, first, last);
+				return create_const(first, last);
 			case 1:
-				return create_gamma(name, first, last);
+				return create_gamma(first, last);
 		};
-		return DAWG_ERROR("Invalid rate model; no model named '" << name << "'");		
+		return DAWG_ERROR("Invalid rate model; no model named '" << rname << "'");		
 		
 	}
 	template<typename It>
-	inline bool create_const(const std::string &name, It &first, It last) {
+	inline bool create_const(It &first, It last) {
 		name = "const";
 		do_op = &rate_model::do_const;
 		return true;
 	}
 
 	template<typename It>
-	bool create_gamma(const std::string &name, It &first, It last) {
+	bool create_gamma(It &first, It last) {
 		if(first == last)
 			return DAWG_ERROR("Invalid rate model; gamma requires at least 1 parameter");
 		gamma = *first++;

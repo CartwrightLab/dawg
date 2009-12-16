@@ -28,14 +28,14 @@ public:
 	indel_model() : qorz(0.9), name("geo"), do_op(&dawg::indel_model::do_geo) { }
 	
 	template<typename It>
-	bool create(const std::string &name, It &first, It last) {
+	bool create(const std::string &rname, It &first, It last) {
 		static std::string name_keys[] = {
 			std::string("user"),
 			std::string("geom"),
 			std::string("zeta"),
 			std::string("zipf"), std::string("pl")
 		};
-		switch(key_switch(name, name_keys)) {
+		switch(key_switch(rname, name_keys)) {
 		case 0: // user model
 			return create_user(first, last);
 		case 1: // geometric model
@@ -117,6 +117,10 @@ public:
 	boost::uint32_t operator()(mutt &m) const {
 		return (this->*do_op)(m);
 	}
+	
+	inline const std::string& label() const {
+		return name;
+	}	
 	
 private:
 	// pointer that will hold our method
