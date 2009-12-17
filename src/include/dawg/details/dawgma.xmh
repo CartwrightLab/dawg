@@ -13,8 +13,8 @@
  ***************************************************************************/
 
 XM((subst)(model),        std::string, "jc")
-XM((subst)(freqs),        std::vector<double>, )
 XM((subst)(params),       std::vector<double>, )
+XM((subst)(freqs),        std::vector<double>, )
 XM((subst)(rate)(model),  std::string, "const")
 XM((subst)(rate)(params), std::vector<double>, )
 

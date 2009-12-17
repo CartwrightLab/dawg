@@ -8,7 +8,6 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <dawg/ma.h>
-#include <dawg/wood.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
 #include <dawg/indel.h>
@@ -25,8 +24,8 @@ struct matic_section_info {
 	
 	subst_model sub_mod;
 	rate_model  rat_mod;
-	indel_model ins_mod;
-	indel_model del_mod;
+	indel_mix_model ins_mod;
+	indel_mix_model del_mod;
 	
 };
 }

@@ -13,7 +13,7 @@ class rate_model {
 public:
 
 	template<typename It>
-	bool create(const std::string &rname, It &first, It last) {
+	bool create(const std::string &rname, It first, It last) {
 		static std::string name_keys[] = {
 			std::string("const"),
 			std::string("gamma")
@@ -28,14 +28,14 @@ public:
 		
 	}
 	template<typename It>
-	inline bool create_const(It &first, It last) {
+	inline bool create_const(It first, It last) {
 		name = "const";
 		do_op = &rate_model::do_const;
 		return true;
 	}
 
 	template<typename It>
-	bool create_gamma(It &first, It last) {
+	bool create_gamma(It first, It last) {
 		if(first == last)
 			return DAWG_ERROR("Invalid rate model; gamma requires at least 1 parameter");
 		gamma = *first++;

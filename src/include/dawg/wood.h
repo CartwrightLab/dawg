@@ -44,7 +44,7 @@ struct make_inode_impl {
 		vec.push_back(wood_node(w));
 	}
 };
-phoenix::function<make_inode_impl> make_inode;
+const phoenix::function<make_inode_impl> make_inode;
 
 template <typename Iterator>
 struct newick_grammar : qi::grammar<Iterator, wood_data&(), ascii::space_type> {

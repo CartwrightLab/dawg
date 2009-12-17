@@ -48,6 +48,36 @@ public:
 		};
 		return DAWG_ERROR("Invalid indel model; no model named '" << name << "'");
 	}
+		
+	boost::uint32_t operator()(mutt &m) const {
+		return (this->*do_op)(m);
+	}
+	
+	inline const std::string& label() const {
+		return name;
+	}	
+	
+private:
+	// pointer that will hold our method
+	boost::uint32_t (indel_model::*do_op)(mutt &m) const;
+
+	boost::uint32_t do_geo(mutt &m) const {
+		return m.rand_geometric(qorz);
+	}
+	boost::uint32_t do_zeta(mutt &m) const {
+		return m.rand_zeta(qorz);
+	}
+	boost::uint32_t do_zipf(mutt &m) const {
+		boost::uint32_t r;
+		do {
+			r = m.rand_zeta(qorz);
+		} while(r > zmax);
+		return r;
+	}
+	boost::uint32_t do_user(mutt &m) const {
+		return std::distance(udata.begin(), std::lower_bound(
+		       udata.begin(), udata.end(), m()));
+	}
 	
 	template<typename It>
 	inline bool create_geo(It &first, It last) {
@@ -114,35 +144,6 @@ public:
 		return true;
 	}
 	
-	boost::uint32_t operator()(mutt &m) const {
-		return (this->*do_op)(m);
-	}
-	
-	inline const std::string& label() const {
-		return name;
-	}	
-	
-private:
-	// pointer that will hold our method
-	boost::uint32_t (indel_model::*do_op)(mutt &m) const;
-
-	boost::uint32_t do_geo(mutt &m) const {
-		return m.rand_geometric(qorz);
-	}
-	boost::uint32_t do_zeta(mutt &m) const {
-		return m.rand_zeta(qorz);
-	}
-	boost::uint32_t do_zipf(mutt &m) const {
-		boost::uint32_t r;
-		do {
-			r = m.rand_zeta(qorz);
-		} while(r > zmax);
-		return r;
-	}
-	boost::uint32_t do_user(mutt &m) const {
-		return std::distance(udata.begin(), std::lower_bound(
-		       udata.begin(), udata.end(), m()));
-	}
 
 	std::string name;
 	double qorz;
@@ -150,7 +151,7 @@ private:
 	std::vector<double> udata;
 };
 
-// TODO: optimize for 1 and 2 components
+// TODO: optimize for 1 and 2 components?
 class indel_mix_model {
 public:
 	template<typename It1, typename It2, typename It3>
