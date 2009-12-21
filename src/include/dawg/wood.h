@@ -5,18 +5,19 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
+#include <boost/spirit/include/version.hpp>
+#if SPIRIT_VERSION < 0x2010
+#	error Spirit version 2.1 or greater required.
+#endif
+
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/spirit/include/phoenix.hpp>
+
 
 namespace dawg {
 
 namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
+namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 
 struct wood_node {
@@ -47,20 +48,19 @@ struct make_inode_impl {
 const phoenix::function<make_inode_impl> make_inode;
 
 template <typename Iterator>
-struct newick_grammar : qi::grammar<Iterator, wood_data&(), ascii::space_type> {
+struct newick_grammar : qi::grammar<Iterator, wood_data(), standard::space_type> {
 	// http://evolution.genetics.washington.edu/phylip/newick_doc.html
 	typedef wood_data::size_type size_type;
 	newick_grammar() : newick_grammar::base_type(start) {
-		using ascii::space; using boost::spirit::eps;
-		using boost::spirit::float_; using boost::spirit::char_;
-		using boost::spirit::lexeme; using boost::spirit::raw;
-		using boost::spirit::arg_names::_1; using boost::spirit::arg_names::_2;
-		using boost::spirit::arg_names::_val; using boost::spirit::arg_names::_r1;
+		using standard::space; using standard::char_; using qi::eps;
+		using qi::float_; using qi::lexeme; using qi::raw;
+		using qi::_1; using qi::_2; using qi::_val; using qi::_r1;
 		using phoenix::construct; using phoenix::bind;
 		using phoenix::back; using phoenix::push_back;
+		using phoenix::size;
 		
-		start    = node(_val) >> ';';
-		node     %= tip(_r1) | inode(_r1);
+		start    = node(_val)[_val] >> ';';
+		node     = tip(_r1) | inode(_r1);
 		tip      = label[push_back(_r1,construct<wood_node>(_1))][_val=1]
 		           >> -(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]);
 		inode    = '(' >> node(_r1)[_val=_1] >> (+(','
@@ -68,20 +68,20 @@ struct newick_grammar : qi::grammar<Iterator, wood_data&(), ascii::space_type> {
 					   | eps[make_inode(_r1,0)][_val+=1]) >> ')'
 					>> -(label[bind(&wood_node::label, back(_r1)) = _1] ||
 					(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]));
-		label    %= unquoted | quoted;
-		unquoted %= lexeme[+(char_ - (char_(":,)(;'[]")|space))];
-		quoted   %= raw[lexeme['\'' >>
-			*(char_ - '\'') >> *(char_("\'") >> char_("\'") >> *(char_ - '\''))
+		label    = unquoted | quoted;
+		unquoted = lexeme[+(char_ - (char_(":,)(;'[]")|space))];
+		quoted   = raw[lexeme['\'' >>
+			*(char_ - '\'') >> *(standard::string("\'\'") >> *(char_ - '\''))
 			>> '\'']];
 	}
 	
-	qi::rule<Iterator, wood_data&(), ascii::space_type> start;
-	qi::rule<Iterator, size_type(wood_data&), ascii::space_type> node;
-	qi::rule<Iterator, size_type(wood_data&), ascii::space_type> tip;
-	qi::rule<Iterator, size_type(wood_data&), ascii::space_type> inode;
-	qi::rule<Iterator, std::string(), ascii::space_type> label;
-	qi::rule<Iterator, std::string(), ascii::space_type> unquoted;
-	qi::rule<Iterator, std::string(), ascii::space_type> quoted;	
+	qi::rule<Iterator, wood_data(), standard::space_type> start;
+	qi::rule<Iterator, size_type(wood_data&), standard::space_type> node;
+	qi::rule<Iterator, size_type(wood_data&), standard::space_type> tip;
+	qi::rule<Iterator, size_type(wood_data&), standard::space_type> inode;
+	qi::rule<Iterator, std::string(), standard::space_type> label;
+	qi::rule<Iterator, std::string(), standard::space_type> unquoted;
+	qi::rule<Iterator, std::string(), standard::space_type> quoted;	
 };
 
 class wood {
@@ -91,9 +91,9 @@ public:
 	
 	template<typename Iterator>
 	bool parse(Iterator first, Iterator last) {
-		using ascii::space;
+		using standard::space;
 		newick_grammar<Iterator> newick_parser;
-		bool r = qi::phrase_parse(first, last, newick_parser, data, space);
+		bool r = qi::phrase_parse(first, last, newick_parser, space, data);
 		if( first != last || !r )
 			return false;
 		// The parser produces a tree that is tips first.
@@ -101,6 +101,12 @@ public:
 		std::reverse(data.begin(), data.end());
 		return true;
 	}
+	
+	template<std::size_t _N>
+	bool parse(const char (&str)[_N]) {
+		return parse(&str[0], &str[_N]);
+	}
+	
 };
 
 }
