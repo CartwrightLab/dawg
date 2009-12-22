@@ -62,7 +62,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::pile_type(), skip_type> {
 		line = id >> '=' >> (pile_string % ',');
 		id = lexeme[+(alnum | char_("._-"))];
 		pile_string     = qqquoted_string |quoted_string | tree_string | bare_string;
-		bare_string     = lexeme[+graph - char_(",#\"[]=();"];
+		bare_string     = lexeme[+graph - char_(",#\"[]=();")];
 		tree_string     = lexeme[char_("(") >> +(char_ - ';') >> char_(";")];
 		quoted_string   = lexeme['"' >> *(print - '"') >> '"'];
 		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];		
