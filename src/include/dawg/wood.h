@@ -53,13 +53,13 @@ struct newick_grammar : qi::grammar<Iterator, wood_data(), standard::space_type>
 	typedef wood_data::size_type size_type;
 	newick_grammar() : newick_grammar::base_type(start) {
 		using standard::space; using standard::char_; using qi::eps;
-		using qi::float_; using qi::lexeme; using qi::raw;
+		using qi::float_; using qi::lexeme; using qi::raw; using qi::omit;
 		using qi::_1; using qi::_2; using qi::_val; using qi::_r1;
 		using phoenix::construct; using phoenix::bind;
 		using phoenix::back; using phoenix::push_back;
 		using phoenix::size;
 		
-		start    = node(_val)[_val] >> ';';
+		start    = omit[node(_val)] >> ';';
 		node     = tip(_r1) | inode(_r1);
 		tip      = label[push_back(_r1,construct<wood_node>(_1))][_val=1]
 		           >> -(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]);
