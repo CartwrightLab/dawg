@@ -35,7 +35,7 @@ namespace pile {
 }
 
 template<typename Iterator>
-struct white_space : qi:grammar<Iterator> {
+struct white_space : qi::grammar<Iterator> {
 	white_space() : white_space::base_type(start) {
 		using standard::space; using standard::char_;
 		using qi::eol;
