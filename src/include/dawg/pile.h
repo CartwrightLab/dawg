@@ -41,12 +41,11 @@ struct white_space : qi:grammar<Iterator> {
 		using qi::eol;
 		start = space | ('#' >> *(char_ - eol) >> eol);
 	}
-	rule<Iterator> space;
+	qi::rule<Iterator> start;
 };
 
 template <typename Iterator, typename skip_type>
 struct pile_grammar : qi::grammar<Iterator, pile::pile_type(), skip_type> {
-	
 	pile_grammar() : pile_grammar::base_type(start) {
 		using standard::space; using standard::alnum;
 		using standard::graph; using standard::print;
