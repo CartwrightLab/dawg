@@ -106,6 +106,9 @@ public:
 	bool parse(const char (&str)[_N]) {
 		return parse(&str[0], &str[_N]);
 	}
+	bool parse(const std::string &str) {
+		return parse(str.begin(), str.end());
+	}
 	
 };
 
