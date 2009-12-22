@@ -25,7 +25,7 @@ namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 
 namespace pile {
-	typedef std::pair<std::string, std::string> line_type;
+	typedef std::pair<std::string, std::vector<std::string> > line_type;
 	typedef std::vector<line_type> subsection_body_type;
 	typedef std::pair<std::string, subsection_body_type> subsection_type;
 	typedef std::vector<subsection_type> section_body_type;
@@ -52,7 +52,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::pile_type(), standard::space_t
 		subsection = subsection_header || subsection_body;
 		subsection_header = '[' >> -id >> ']';
 		subsection_body = +line;
-		line = id >> '=' >> pile_string;
+		line = id >> '=' >> (pile_string % ',');
 		id = +(alnum | char_("._-"));
 		pile_string     = qqquoted_string |quoted_string | tree_string | bare_string;
 		bare_string     = lexeme[+graph - '"'];
