@@ -174,4 +174,3 @@ bool pile::parse(Iterator first, Iterator last) {
 } // namespace dawg
 
 #endif //DAWG_PILE_H
-
