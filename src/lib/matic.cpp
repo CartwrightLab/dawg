@@ -2,14 +2,10 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <boost/foreach.hpp>
+#include <dawg/details/foreach.h>
 #include <dawg/matic.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
-
-#ifndef foreach
-#	define foreach BOOST_FOREACH
-#endif
 
 using namespace dawg;
 

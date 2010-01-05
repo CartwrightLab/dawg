@@ -80,7 +80,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::raw(), skip_type> {
 		subsection_body = +line;
 		line = id >> '=' >> (pile_string % ',');
 		id = lexeme[+(alnum | char_("._-"))];
-		pile_string     = qqquoted_string |quoted_string | tree_string | bare_string;
+		pile_string     = qqquoted_string | quoted_string | tree_string | bare_string;
 		bare_string     = lexeme[+(graph - char_(",#\"[]=();"))];
 		tree_string     = lexeme[char_("(") >> +(char_ - ';') >> char_(";")];
 		quoted_string   = lexeme['"' >> *(print - '"') >> '"'];
@@ -100,7 +100,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::raw(), skip_type> {
 	qi::rule<Iterator, std::string(), skip_type> bare_string;
 	qi::rule<Iterator, std::string(), skip_type> tree_string;
 	qi::rule<Iterator, std::string(), skip_type> quoted_string;
-	qi::rule<Iterator, std::string(), skip_type> qqquoted_string;		
+	qi::rule<Iterator, std::string(), skip_type> qqquoted_string;
 };
 
 template<typename Iterator>

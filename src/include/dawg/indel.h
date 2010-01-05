@@ -9,15 +9,11 @@
 #include <algorithm>
 #include <vector>
 #include <boost/cstdint.hpp>
-#include <boost/foreach.hpp>
 
+#include <dawg/details/foreach.hpp>
 #include <dawg/utils.h>
 #include <dawg/log.h>
 #include <dawg/mutt.h>
-
-#ifndef foreach
-#	define foreach BOOST_FOREACH
-#endif
 
 namespace dawg {
 

@@ -17,7 +17,6 @@
 */
 
 #include <boost/preprocessor.hpp>
-#include <boost/foreach.hpp>
 #include <boost/config.hpp>
 
 #include <exception>
@@ -29,8 +28,7 @@
 #include "dawg_app.h"
 
 #include <dawg/ma.h>
-
-#define foreach BOOST_FOREACH
+#include <dawg/details/foreach.h>
 
 using namespace std;
 using namespace boost;
