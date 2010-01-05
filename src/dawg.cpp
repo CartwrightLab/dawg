@@ -71,7 +71,7 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 				_S(lname) _IFD(sname, "," BOOST_PP_STRINGIZE sname), \
 				po::value< type >(&arg._V(lname))->default_value(def), \
 				desc )				
-			#include "dawg.cmds"
+			#include "dawgarg.xmh"
 			#undef XCMD
 			;
 		po::variables_map vm;

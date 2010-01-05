@@ -41,7 +41,7 @@ public:
 	{			
 	// use X-Macros to specify argument variables
 #	define XCMD(lname, sname, desc, type, def) type _V(lname) ;
-#	include "dawg.cmds"
+#	include "dawgarg.xmh"
 #	undef XCMD
 	};
 	
