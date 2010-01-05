@@ -1,0 +1,46 @@
+/****************************************************************************
+ *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *                                                                          *
+ *  This program is free software: you can redistribute it and/or modify    *
+ *  it under the terms of the GNU General Public License as published by    *
+ *  the Free Software Foundation, either version 3 of the License, or       *
+ *  (at your option) any later version.                                     *
+ *                                                                          *
+ *  This program is distributed in the hope that it will be useful,         *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ *  GNU General Public License for more details.                            *
+ *                                                                          *
+ *  You should have received a copy of the GNU General Public License       *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ ****************************************************************************/
+
+#include <dawg/details/xm.h>
+
+/***************************************************************************
+ *    X-Macro List                                                         *
+ *                                                                         *
+ *    XCMD(lname, sname, desc, type, def)                                  *
+ ***************************************************************************/
+
+//XCMD((serial),  (s), "Process input files serially", bool, true)
+//XCMD((combined),(c), "process input files together", bool, false)
+//XCMD((buffer),  (b), "buffer output", bool, true)
+//XCMD((unbuffer),  (u), "unbuffered output", bool, false)
+XCMD((output),    (o), "output to this file", std::string, std::string())
+
+// Standard options
+XCMD((quiet),        , "disable all warnings and error messages", bool, false)
+XCMD((warn),         , "dsable warnings", bool, false)
+XCMD((error),        , "disable error messages", bool, false)
+XCMD((arg)(file),    , "read arguments from file", std::string, std::string(""))
+XCMD((version),      , "display version information", bool, false)
+XCMD((help),         , "display help message", bool, false)
+XCMD((input),        , "input files", std::vector< std::string >, std::vector< std::string >(1, std::string("-")) )
+
+/***************************************************************************
+ *    cleanup                                                              *
+ ***************************************************************************/
+#include <dawg/details/xm.h>
+
+
