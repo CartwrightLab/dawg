@@ -40,9 +40,9 @@ public:
 	struct args
 	{			
 	// use X-Macros to specify argument variables
-#	define XCMD(lname, sname, desc, type, def) type _V(lname) ;
+#	define XM(lname, sname, desc, type, def) type _V(lname) ;
 #	include "dawgarg.xmh"
-#	undef XCMD
+#	undef XM
 	};
 	
 protected:

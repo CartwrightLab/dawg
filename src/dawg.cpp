@@ -67,12 +67,12 @@ int main(int argc, char *argv[])
 dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 	try {
 		desc.add_options()
-			#define XCMD(lname, sname, desc, type, def) ( \
+			#define XM(lname, sname, desc, type, def) ( \
 				_S(lname) _IFD(sname, "," BOOST_PP_STRINGIZE sname), \
 				po::value< type >(&arg._V(lname))->default_value(def), \
 				desc )				
 			#include "dawgarg.xmh"
-			#undef XCMD
+			#undef XM
 			;
 		po::variables_map vm;
 		po::positional_options_description pdesc;
