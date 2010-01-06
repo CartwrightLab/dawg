@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <dawg/wood.h>
+#include <dawg/pile.h>
 
 namespace dawg {
 
@@ -26,6 +26,9 @@ struct ma {
 	name()
 	{ }
 	
+	static void from_pile(const dawg::pile &pyle, std::vector<dawg::ma> &v);
+	
+	void read_section(const pile::map_type::value_type &sec);
 private:
 };
 

@@ -25,6 +25,7 @@
 #include <iterator>
 
 #include <dawg/log.h>
+#include <dawg/details/foreach.h>
 
 namespace dawg {
 
@@ -49,6 +50,17 @@ struct pile {
 		typedef std::map<std::string, value_type> map_type;
 		std::string inherits;
 		map_type db;
+		
+		template<typename T>
+		inline void get(const std::string& k, T& r) const;
+		template<typename T, typename A>
+		inline void get(const std::string& k, std::vector<T,A>& r) const;
+		
+	private:
+		static inline void conv(const std::string& ss, std::string& r);
+		static inline void conv(const std::string& ss, double& r);
+		static inline void conv(const std::string& ss, bool& r);
+		static inline void conv(const std::string& ss, unsigned int& r);
 	};
 	typedef std::map<std::string, section> map_type;
 	map_type data;
@@ -181,7 +193,7 @@ bool pile::parse(Iterator first, Iterator last) {
 	return true;
 }
 
-// TODO: Convert to newer 2.2 framework
+// TODO: Convert to newer 2.2 framework?
 template<typename Char, typename Traits>
 inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
 	is.unsetf(std::ios::skipws);
@@ -206,6 +218,46 @@ inline bool pile::parse_file(const char *cs) {
 	if(!ret)
 		return DAWG_ERROR("unable to parse input '" << cs << "'");
 	return true;
+}
+
+template<typename T>
+inline void pile::section::get(const std::string& k, T& r) const {
+	map_type::const_iterator it;
+	if((it = db.find(k)) != db.end() && !it->second.empty()) {
+		section::conv(it->second.front(), r);
+	}
+}
+
+template<typename T, typename A>
+inline void pile::section::get(const std::string& k, std::vector<T,A>& r) const {
+	map_type::const_iterator it;
+	if((it = db.find(k)) != db.end()) {
+		T x;
+		r.clear();
+		foreach(const std::string &ss, it->second) {
+			section::conv(it->second.front(), x);
+			r.push_back(x);
+		}
+	}
+}
+
+inline void pile::section::conv(const std::string& ss, std::string& r) {
+	r = ss;
+}
+
+inline void pile::section::conv(const std::string& ss, double& r) {
+	r = strtod(ss.c_str(), NULL);
+}
+
+inline void pile::section::conv(const std::string& ss, unsigned int& r) {
+	r = strtoul(ss.c_str(), NULL, 0);
+}
+
+// A value is false if it is equal to 0, f, false, off, no, or blank
+inline void pile::section::conv(const std::string& ss, bool& r) {
+	using boost::algorithm::iequals;
+	r = !(ss.empty() || iequals(ss, "false") || iequals(ss, "0") || iequals(ss, "f")
+		|| iequals(ss, "off") || iequals(ss, "no"));
 }
 
 } // namespace dawg

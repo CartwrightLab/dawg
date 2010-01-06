@@ -55,6 +55,7 @@
 
 #define _V(lname) _JS(_, lname)
 #define _S(lname) _SS("-", lname)
+#define _P(lname) _SS(".", lname)
 #define _DL(a,b) a,b
 
 #else
@@ -70,6 +71,7 @@
 #undef _IFD
 #undef _V
 #undef _S
+#undef _P
 #undef _DL
 
 #endif

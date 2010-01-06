@@ -99,8 +99,7 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 	}
 }
 
-int dawg_app::run()
-{
+int dawg_app::run() {
 	if(arg.version)	{
 		cerr << endl << VERSION_MSG << endl << endl;
 		return EXIT_SUCCESS;
@@ -120,6 +119,8 @@ int dawg_app::run()
 	}
 	if(!ret)
 		return EXIT_FAILURE;	
+	vector<dawg::ma> configs;
+	
 	
 	//if(!Execute()) {
 	//	DawgError("Execution failed.");

@@ -75,5 +75,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	    && info->node_names.count(it->root_name); ++it)
 		/*noop*/;
 	seg.insert(it, info);
-		
+	
+	return true;
 }
+
