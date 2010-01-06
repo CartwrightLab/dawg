@@ -12,6 +12,7 @@
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -19,10 +20,13 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
+#include <fstream>
+#include <iterator>
 
 #include <dawg/log.h>
 
-namespace dawg{
+namespace dawg {
 
 namespace qi = boost::spirit::qi;
 namespace standard = boost::spirit::standard;
@@ -48,9 +52,17 @@ struct pile {
 	};
 	typedef std::map<std::string, section> map_type;
 	map_type data;
-	
+
+	inline bool parse_file(const char *cs);
 	template<typename Iterator>
 	bool parse(Iterator first, Iterator last);
+	template<typename Char, typename Traits>
+	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
+	
+	pile() {
+		map_type::iterator sit = data.insert(std::make_pair(std::string("_initial_"), section())).first;
+		sit->second.inherits = "_default_";
+	}
 };
 
 template<typename Iterator>
@@ -113,9 +125,7 @@ bool pile::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
-	data.clear();
-	map_type::iterator sit = data.insert(std::make_pair(header, section())).first;
-	sit->second.inherits = "_default_";
+	map_type::iterator sit = data.find(header);
 	std::pair<map_type::iterator,bool> ret;
 	for(raw::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
@@ -168,6 +178,33 @@ bool pile::parse(Iterator first, Iterator last) {
 			
 	}
 	
+	return true;
+}
+
+// TODO: Convert to newer 2.2 framework
+template<typename Char, typename Traits>
+inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
+	is.unsetf(std::ios::skipws);
+	typedef std::istreambuf_iterator<Char, Traits> base_iterator_type;
+	boost::spirit::multi_pass<base_iterator_type> first = 
+		boost::spirit::make_default_multi_pass(base_iterator_type(is));
+	boost::spirit::multi_pass<base_iterator_type> last = 
+		boost::spirit::make_default_multi_pass(base_iterator_type());
+	return parse(first, last);	
+}
+
+inline bool pile::parse_file(const char *cs) {
+	bool ret;
+	if(strcmp(cs, "-")==0) {
+		ret = parse_stream(std::cin);
+	} else {
+		std::ifstream is(cs);
+		if(!is.is_open())
+			return DAWG_ERROR("unable to open input file '" << cs << "'");
+		ret = parse_stream(is);
+	}
+	if(!ret)
+		return DAWG_ERROR("unable to parse input '" << cs << "'");
 	return true;
 }
 

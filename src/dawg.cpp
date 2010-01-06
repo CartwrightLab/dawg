@@ -28,10 +28,12 @@
 #include "dawg_app.h"
 
 #include <dawg/ma.h>
+#include <dawg/pile.h>
 #include <dawg/details/foreach.h>
 
 using namespace std;
 using namespace boost;
+using namespace dawg;
 
 #define VERSION_MSG PACKAGE_STRING "\n" \
 	"    Copyright (C) 2005-2009  Reed A. Cartwright, PhD <reed@scit.us>\n" \
@@ -110,16 +112,19 @@ int dawg_app::run()
 	}
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
+	pile input;
+		
+	bool ret = true;
 	foreach(string &ss, arg.input) {
-		if(Parse(ss.c_str()))
-			continue;
-		DawgError("Parsing of \"%s\" failed.", ss.c_str());
-		return EXIT_FAILURE;
+		ret &= input.parse_file(ss.c_str());
 	}
-	if(!Execute()) {
-		DawgError("Execution failed.");
-		return EXIT_FAILURE;
-	}
+	if(!ret)
+		return EXIT_FAILURE;	
+	
+	//if(!Execute()) {
+	//	DawgError("Execution failed.");
+	//	return EXIT_FAILURE;
+	//}
 	
 	return EXIT_SUCCESS;
 }
