@@ -19,16 +19,16 @@ struct ma {
 #	undef XM
 	std::string name;
 
-	ma() :
+	ma(const std::string &_n = std::string() ) :
 #	define XM(name, type, def) _V(name) (def),
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
-	name()
+	name(_n)
 	{ }
 	
 	static void from_pile(const dawg::pile &pyle, std::vector<dawg::ma> &v);
 	
-	void read_section(const pile::map_type::value_type &sec);
+	void read_section(const pile::data_type::value_type &sec);
 private:
 };
 

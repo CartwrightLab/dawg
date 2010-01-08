@@ -47,9 +47,9 @@ struct pile {
 	typedef details::pile_raw_type raw;
 	struct section {
 		typedef std::vector<std::string> value_type;
-		typedef std::map<std::string, value_type> map_type;
+		typedef std::map<std::string, value_type> db_type;
 		std::string inherits;
-		map_type db;
+		db_type db;
 		
 		template<typename T>
 		inline void get(const std::string& k, T& r) const;
@@ -62,8 +62,8 @@ struct pile {
 		static inline void conv(const std::string& ss, bool& r);
 		static inline void conv(const std::string& ss, unsigned int& r);
 	};
-	typedef std::map<std::string, section> map_type;
-	map_type data;
+	typedef std::map<std::string, section> data_type;
+	data_type data;
 
 	inline bool parse_file(const char *cs);
 	template<typename Iterator>
@@ -72,7 +72,7 @@ struct pile {
 	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
 	
 	pile() {
-		map_type::iterator sit = data.insert(std::make_pair(std::string("_initial_"), section())).first;
+		data_type::iterator sit = data.insert(std::make_pair(std::string("_initial_"), section())).first;
 		sit->second.inherits = "_default_";
 	}
 };
@@ -137,8 +137,8 @@ bool pile::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
-	map_type::iterator sit = data.find(header);
-	std::pair<map_type::iterator,bool> ret;
+	data_type::iterator sit = data.find(header);
+	std::pair<data_type::iterator,bool> ret;
 	for(raw::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
 		// if section header is not blank, we have a new section
@@ -222,7 +222,7 @@ inline bool pile::parse_file(const char *cs) {
 
 template<typename T>
 inline void pile::section::get(const std::string& k, T& r) const {
-	map_type::const_iterator it;
+	db_type::const_iterator it;
 	if((it = db.find(k)) != db.end() && !it->second.empty()) {
 		section::conv(it->second.front(), r);
 	}
@@ -230,7 +230,7 @@ inline void pile::section::get(const std::string& k, T& r) const {
 
 template<typename T, typename A>
 inline void pile::section::get(const std::string& k, std::vector<T,A>& r) const {
-	map_type::const_iterator it;
+	db_type::const_iterator it;
 	if((it = db.find(k)) != db.end()) {
 		T x;
 		r.clear();
