@@ -95,16 +95,4 @@ public:
     operator Type() const { return m_Sum; }
 };
 
-namespace std {
-template<typename _Tp, typename _CharT, typename _Traits>
-basic_ostream<_CharT, _Traits>&
-operator<<(basic_ostream<_CharT, _Traits>& os, const std::vector<_Tp> &v) {
-	if(v.empty())
-		return os;
-	os << v.front();
-	std::copy(v.begin()+1, v.end(), std::ostream_iterator<_Tp, _CharT, _Traits>(os, " "));
-	return os;
-}}
-
-
 #endif

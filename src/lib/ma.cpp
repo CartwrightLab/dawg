@@ -21,7 +21,7 @@ void dawg::ma::read_section(const pile::data_type::value_type &sec) {
 
 // Reads the pile format into a vector of dawg::mas
 // Use inheritance and defaults
-void dawg::ma::from_pile(const pile &pyle, vector<ma> &v) {
+bool dawg::ma::from_pile(const pile &pyle, vector<ma> &v) {
 	// create lookup map so we can know if something has been touched
 	typedef map<std::string, const ma*> map_t;
 	map_t lookup;
@@ -29,17 +29,26 @@ void dawg::ma::from_pile(const pile &pyle, vector<ma> &v) {
 	v.reserve(pyle.data.size());
 	// create default object and put it in the map
 	const ma def("_default_");
-	lookup.insert(make_pair(def.name, &def));
+	lookup[def.name] = &def;
 	
 	for(pile::data_type::const_iterator secit = pyle.data.begin();
 		secit != pyle.data.end(); ++secit) {
-		// ensure that the inherited section exists
-		map_t::const_iterator iit = 
-		// TODO
+		// lookup parent section
+		map_t::const_iterator iit = lookup.find(secit->second.inherits);
+		if(iit == lookup.end())
+			return DAWG_ERROR("section '" << secit->second.inherits <<
+				"' not found (inherited by '" << secit->first << "')");
+		// lookup section
+		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->first, (dawg::ma*)NULL));
+		if(!me.second)
+			return DAWG_ERROR("section '" << secit->first << "' specified more than once.");
+
 		// read inherited ma
-		v.push_back(*lookup[secit->second.inherits]);
+		v.push_back(*iit->second);
 		// read the section
 		v.back().read_section(*secit);
-		
+		// add section to map
+		me.first->second = &v.back();
 	}
+	return true;
 }

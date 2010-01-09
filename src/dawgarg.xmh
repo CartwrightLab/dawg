@@ -36,7 +36,7 @@ XM((error),       (e), "disable error messages", bool, false)
 XM((arg)(file),      , "read arguments from file", std::string, std::string(""))
 XM((version),        , "display version information", bool, false)
 XM((help),           , "display help message", bool, false)
-XM((input),          , "input files", std::vector< std::string >, std::vector< std::string >(1, std::string("-")) )
+XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(1, std::string("-")), "-") )
 
 /***************************************************************************
  *    cleanup                                                              *

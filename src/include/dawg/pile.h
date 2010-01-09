@@ -235,7 +235,7 @@ inline void pile::section::get(const std::string& k, std::vector<T,A>& r) const 
 		T x;
 		r.clear();
 		foreach(const std::string &ss, it->second) {
-			section::conv(it->second.front(), x);
+			section::conv(ss, x);
 			r.push_back(x);
 		}
 	}

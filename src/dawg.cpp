@@ -120,7 +120,14 @@ int dawg_app::run() {
 	if(!ret)
 		return EXIT_FAILURE;	
 	vector<dawg::ma> configs;
+	if(!dawg::ma::from_pile(input, configs)) {
+		DAWG_ERROR("bad configuration");
+		return EXIT_FAILURE;
+	}
 	
+	foreach(const dawg::ma& aa, configs) {
+		cout << aa << endl;
+	}
 	
 	//if(!Execute()) {
 	//	DawgError("Execution failed.");
