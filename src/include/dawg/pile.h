@@ -15,6 +15,7 @@
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <utility>
 #include <string>
@@ -48,6 +49,7 @@ struct pile {
 	struct section {
 		typedef std::vector<std::string> value_type;
 		typedef std::map<std::string, value_type> db_type;
+		std::string name;
 		std::string inherits;
 		db_type db;
 		
@@ -62,7 +64,7 @@ struct pile {
 		static inline void conv(const std::string& ss, bool& r);
 		static inline void conv(const std::string& ss, unsigned int& r);
 	};
-	typedef std::map<std::string, section> data_type;
+	typedef std::vector<section> data_type;
 	data_type data;
 
 	inline bool parse_file(const char *cs);
@@ -72,8 +74,9 @@ struct pile {
 	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
 	
 	pile() {
-		data_type::iterator sit = data.insert(std::make_pair(std::string("_initial_"), section())).first;
-		sit->second.inherits = "_default_";
+		data.push_back(section());
+		data.back().name = "_initial_";
+		data.back().inherits = "_default_";
 	}
 };
 
@@ -130,6 +133,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::raw(), skip_type> {
 template<typename Iterator>
 bool pile::parse(Iterator first, Iterator last) {
 	using boost::algorithm::starts_with;
+	using boost::algorithm::to_lower;
 	raw pyle;
 	white_space<Iterator> wasp;
 	pile_grammar<Iterator, dawg::white_space<Iterator> > pyler;
@@ -137,20 +141,17 @@ bool pile::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
-	data_type::iterator sit = data.find(header);
-	std::pair<data_type::iterator,bool> ret;
+	section *psec = &data.front();
 	for(raw::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
 		// if section header is not blank, we have a new section
 		if(!sec.first.first.empty()) {
-			ret = data.insert(std::make_pair(sec.first.first, section()));
-			if(!ret.second)
-				return DAWG_ERROR("section named " << sec.first.first << " already exists.");
-			sit = ret.first;
+			data.push_back(section());
+			psec = &data.back();
 			// if section parent is black, inherit from previous
-			sit->second.inherits = sec.first.second.empty() ? header : sec.first.second;
+			psec->inherits = sec.first.second.empty() ? header : sec.first.second;
 			// set new header and reset subheader
-			header = sec.first.first;
+			psec->name = header = sec.first.first;
 			subheader.clear();
 		}
 		const details::section_body_type &body = sec.second;
@@ -184,7 +185,7 @@ bool pile::parse(Iterator first, Iterator last) {
 				if(!hh.empty())
 					hh.append(1, '.');
 				hh.append(lit->first);
-				sit->second.db[hh] = lit->second;
+				psec->db[hh] = lit->second;
 			}
 		}
 			
