@@ -26,7 +26,7 @@
 #include <iterator>
 
 #include <dawg/log.h>
-#include <dawg/details/foreach.h>
+#include <dawg/utils/foreach.h>
 
 namespace dawg {
 

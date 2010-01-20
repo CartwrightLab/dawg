@@ -2,7 +2,7 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <dawg/details/foreach.h>
+#include <dawg/utils/foreach.h>
 #include <dawg/matic.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>

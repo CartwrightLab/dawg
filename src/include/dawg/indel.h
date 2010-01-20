@@ -10,7 +10,7 @@
 #include <vector>
 #include <boost/cstdint.hpp>
 
-#include <dawg/details/foreach.hpp>
+#include <dawg/utils/foreach.h>
 #include <dawg/utils.h>
 #include <dawg/log.h>
 #include <dawg/mutt.h>

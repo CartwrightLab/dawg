@@ -29,7 +29,7 @@
 
 #include <dawg/ma.h>
 #include <dawg/pile.h>
-#include <dawg/details/foreach.h>
+#include <dawg/utils/foreach.h>
 
 using namespace std;
 using namespace boost;

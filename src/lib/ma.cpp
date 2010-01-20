@@ -1,7 +1,7 @@
 /****************************************************************************
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
-#include <dawg/details/foreach.h>
+#include <dawg/utils/foreach.h>
 #include <dawg/ma.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
@@ -13,8 +13,8 @@ using namespace std;
 
 // Read a section, setting and values that correspond to 
 void dawg::ma::read_section(const pile::data_type::value_type &sec) {
-	name = sec.first;
-#	define XM(name, type, def) sec.second.get(_P(name), _V(name));
+	name = sec.name;
+#	define XM(aname, type, def) sec.get(_P(aname), _V(aname));
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 }
@@ -34,14 +34,14 @@ bool dawg::ma::from_pile(const pile &pyle, vector<ma> &v) {
 	for(pile::data_type::const_iterator secit = pyle.data.begin();
 		secit != pyle.data.end(); ++secit) {
 		// lookup parent section
-		map_t::const_iterator iit = lookup.find(secit->second.inherits);
+		map_t::const_iterator iit = lookup.find(secit->inherits);
 		if(iit == lookup.end())
-			return DAWG_ERROR("section '" << secit->second.inherits <<
-				"' not found (inherited by '" << secit->first << "')");
+			return DAWG_ERROR("section '" << secit->inherits <<
+				"' not found (inherited by '" << secit->name << "')");
 		// lookup section
-		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->first, (dawg::ma*)NULL));
+		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->name, (dawg::ma*)NULL));
 		if(!me.second)
-			return DAWG_ERROR("section '" << secit->first << "' specified more than once.");
+			return DAWG_ERROR("section '" << secit->name << "' specified more than once.");
 
 		// read inherited ma
 		v.push_back(*iit->second);
