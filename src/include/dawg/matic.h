@@ -8,9 +8,10 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <dawg/ma.h>
+#include <dawg/indel.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
-#include <dawg/indel.h>
+#include <dawg/wood.h>
 
 #include <vector>
 #include <set>

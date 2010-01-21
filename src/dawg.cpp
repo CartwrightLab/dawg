@@ -30,6 +30,7 @@
 #include <dawg/ma.h>
 #include <dawg/pile.h>
 #include <dawg/utils/foreach.h>
+#include <dawg/matic.h>
 
 using namespace std;
 using namespace boost;
@@ -127,6 +128,12 @@ int dawg_app::run() {
 	
 	foreach(const dawg::ma& aa, configs) {
 		cout << aa << endl;
+	}
+	
+	dawg::matic kimura;
+	if(!kimura.configure(configs.begin(), configs.end())) {
+		DAWG_ERROR("bad configuration");
+		return EXIT_FAILURE;
 	}
 	
 	//if(!Execute()) {

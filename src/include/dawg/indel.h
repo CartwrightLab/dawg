@@ -1,6 +1,6 @@
 #pragma once
-#ifndef DAWG_INDEL_H
-#define DAWG_INDEL_H
+#ifndef DAWG_DAWG_INDEL_H
+#define DAWG_DAWG_INDEL_H
 /****************************************************************************
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
