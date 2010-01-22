@@ -96,6 +96,24 @@ public:
 		bool r = qi::phrase_parse(first, last, newick_parser, space, data);
 		if( first != last || !r )
 			return false;
+			
+		// Auto label nodes that have no name
+		// assumes tips first tree
+		for(wood_data::iterator it = data.begin(); it != data.end(); ++it) {
+			if(it->label.empty() && it->right != 0) {
+				if(it->right == 1) {
+					it->label = "(" + (it-it->right)->label + ")";
+				} else {
+					std::string &a = (it-1)->label;
+					std::string &b = (it-it->right)->label;
+					if(b > a)
+						it->label = "(" + a + "," + b + ")";
+					else
+						it->label = "(" + b + "," + a + ")";
+				}
+			}
+		}
+		
 		// The parser produces a tree that is tips first.
 		// Transform to root first.
 		std::reverse(data.begin(), data.end());

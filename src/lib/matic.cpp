@@ -2,12 +2,16 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <dawg/utils/foreach.h>
+#include <dawg/residue.h>
 #include <dawg/matic.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
 
+#include <dawg/utils/foreach.h>
+#include <dawg/utils/vecio.h>
+
 using namespace dawg;
+using namespace std;
 
 template<class It1, class It2>
 It2 has_intersection(It1 first1, It1 last1, It2 first2, It2 last2) {
@@ -23,6 +27,8 @@ It2 has_intersection(It1 first1, It1 last1, It2 first2, It2 last2) {
 }
 
 bool dawg::matic::add_config_section(const dawg::ma &ma) {
+	if(ma.tree_model == "user" && ma.tree_tree.empty())
+		return true; // Nothing to evolve
 	if(ma.root_segment >= configs.size())
 		configs.resize(ma.root_segment+1);
 	segment_info &seg = configs[ma.root_segment];
@@ -46,15 +52,22 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		ma.indel_rate_del.begin(), ma.indel_rate_del.end(),
 		ma.indel_params_del.begin(), ma.indel_params_del.end()))
 		return DAWG_ERROR("deletion model could not be created.");
+	if(!info->rut_mod.create(ma.root_length, ma.root_seq, ma.root_rates))
+		return DAWG_ERROR("root model could not be created.");
 	
-	// parse tree and find all named nodes
+	// parse tree and find all named descendant nodes
 	info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end());
-	foreach(const dawg::wood::node &n, info->usertree.data) {
-		if(n.label.empty())
-			continue;
-		if(!info->node_names.insert(n.label).second)
-			return DAWG_ERROR("invalid tree; node label '" << n.label
-			                  << "' used more than once by Tree.Tree.");
+	
+	if(!info->usertree.data.empty()) {
+		wood_data::const_iterator nit = info->usertree.data.begin();
+		info->root_name = nit->label;
+		for(++nit;nit != info->usertree.data.end(); ++nit) {
+			if(nit->label.empty())
+				continue;
+			if(!info->node_names.insert(nit->label).second)
+				return DAWG_ERROR("invalid tree; node label '" << nit->label
+					              << "' used more than once by Tree.Tree.");
+		}
 	}
 	
 	// test whether descendents already exist in this segment
@@ -72,10 +85,35 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	// find location to insert
 	segment_info::iterator it;
 	for(it = seg.begin(); it != seg.end()
-	    && info->node_names.count(it->root_name); ++it)
+	    && !info->node_names.count(it->root_name); ++it)
 		/*noop*/;
 	seg.insert(it, info);
 	
 	return true;
+}
+
+typedef map<string,sequence> seq_map;
+
+void dawg::matic::walk() {
+	sequence seq_buf, seq_buf2;
+	foreach(const segment_info &seg, configs) {
+		seq_map seqs;
+		foreach(const section_info &sec, seg) {
+			pair<seq_map::iterator,bool> res = seqs.insert(make_pair(sec.root_name, sequence()));
+			if(res.second)
+				sec.rut_mod(res.first->second, maxx, sec.sub_mod, sec.rat_mod);
+			wood_data::const_iterator nit = sec.usertree.data.begin();
+			for(++nit;nit!=sec.usertree.data.end();++nit) {
+				seqs[nit->label] = seqs[(nit-nit->anc)->label];
+			}
+		}
+		foreach(seq_map::value_type &kv, seqs) {
+			cout << kv.first << " "
+				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
+				 << kv.second << endl;
+		}
+		cout << endl;
+	}
+	
 }
 

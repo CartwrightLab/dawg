@@ -7,7 +7,14 @@
 
 #include <iostream> 
 
-#define DAWG_ERROR(err_msg) ((std::cerr << "ERROR: " << err_msg << std::endl), false)
-#define DAWG_WARN(warn_msg) ((std::cerr << "WARNING: " << warn_msg << std::endl), false)
- 
+#ifdef NDEBUG
+#	define DAWG_ERROR(err_msg) ((std::cerr << "ERROR: " << err_msg << std::endl), false)
+#	define DAWG_WARN(warn_msg) ((std::cerr << "WARNING: " << warn_msg << std::endl), false)
+#else
+#	define DAWG_ERROR(err_msg) ((std::cerr << "ERROR: " << err_msg << std::endl \
+	<< "(" << __FILE__ << ":" << __LINE__ << ")" << std::endl ), false)
+#	define DAWG_WARN(warn_msg) ((std::cerr << "WARNING: " << warn_msg << std::endl \
+	<< "(" << __FILE__ << ":" << __LINE__ << ")" << std::endl ), false)
+#endif
+
 #endif /* DAWG_LOG_H */

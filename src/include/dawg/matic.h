@@ -7,11 +7,14 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include <dawg/ma.h>
 #include <dawg/indel.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
 #include <dawg/wood.h>
+#include <dawg/root.h>
+#include <dawg/mutt.h>
+
+#include <dawg/ma.h>
 
 #include <vector>
 #include <set>
@@ -25,6 +28,7 @@ struct matic_section_info {
 	
 	subst_model sub_mod;
 	rate_model  rat_mod;
+	root_model  rut_mod;
 	indel_mix_model ins_mod;
 	indel_mix_model del_mod;
 	
@@ -62,8 +66,9 @@ protected:
 	typedef std::vector<segment_info> segment_info_vector;
 	
 	segment_info_vector configs;
+	mutt maxx;
 	
-	bool add_config_section(const dawg::ma &ma);	
+	bool add_config_section(const dawg::ma &ma);
 };
 
 }

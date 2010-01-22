@@ -171,10 +171,13 @@ public:
 			if(++itn == last_n)
 				itn = first_n;
 		}
-		mix.back() = 1.0;
-		std::size_t u=1;
-		for(;u < mix.size(); u*=2)
+		if(!mix.empty()) {
+			mix.back() = 1.0;
+			std::size_t u=1;
+			for(;u < mix.size(); u*=2)
+				/*noop*/;
 			mix.resize(u, 0.0);
+		}
 		return true;		
 	}
 	

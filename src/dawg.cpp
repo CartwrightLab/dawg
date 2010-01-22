@@ -135,6 +135,7 @@ int dawg_app::run() {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
+	kimura.walk();
 	
 	//if(!Execute()) {
 	//	DawgError("Execution failed.");

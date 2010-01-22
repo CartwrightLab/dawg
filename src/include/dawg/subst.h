@@ -19,11 +19,11 @@ public:
 	typedef uint32_t base_type;
 	
 	// return random base from stat. dist.
-	inline base_type operator()(mutt &m) {
+	inline base_type operator()(mutt &m) const {
 		return (this->*do_op_f)(m);
 	}
 	// return random mutant base
-	inline base_type operator()(mutt &m, base_type n) {
+	inline base_type operator()(mutt &m, base_type n) const {
 		return (this->*do_op_s)(m,n);
 	}
 
