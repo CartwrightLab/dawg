@@ -57,35 +57,22 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	
 	// parse tree and find all named descendant nodes
 	info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end());
-	
-	if(!info->usertree.data.empty()) {
-		wood_data::const_iterator nit = info->usertree.data.begin();
-		info->root_name = nit->label;
-		for(++nit;nit != info->usertree.data.end(); ++nit) {
-			if(nit->label.empty())
-				continue;
-			if(!info->node_names.insert(nit->label).second)
-				return DAWG_ERROR("invalid tree; node label '" << nit->label
-					              << "' used more than once by Tree.Tree.");
-		}
-	}
-	
+		
 	// test whether descendents already exist in this segment
 	foreach(section_info &r, seg) {
 		std::set<std::string>::const_iterator it = has_intersection(
-			r.node_names.begin(), r.node_names.end(),
-			info->node_names.begin(), info->node_names.end());
-		if(it != info->node_names.end())
+			r.usertree.descs().begin(), r.usertree.descs().end(),
+			info->usertree.descs().begin(), info->usertree.descs().end());
+		if(it != info->usertree.descs().end())
 			return DAWG_ERROR("invalid tree; descendent '" <<  *it
 			               << "' already exists in segment #"
 			               << ma.root_segment);
 	}
-	
-	
+		
 	// find location to insert
 	segment_info::iterator it;
 	for(it = seg.begin(); it != seg.end()
-	    && !info->node_names.count(it->root_name); ++it)
+	    && !info->usertree.has_desc(it->usertree.root_label()); ++it)
 		/*noop*/;
 	seg.insert(it, info);
 	
@@ -96,21 +83,24 @@ typedef map<string,sequence> seq_map;
 
 void dawg::matic::walk() {
 	sequence seq_buf, seq_buf2;
+	rex.model(residue_exchange::DNA);
 	foreach(const segment_info &seg, configs) {
 		seq_map seqs;
 		foreach(const section_info &sec, seg) {
-			pair<seq_map::iterator,bool> res = seqs.insert(make_pair(sec.root_name, sequence()));
+			pair<seq_map::iterator,bool> res = seqs.insert(make_pair(sec.usertree.root_label(), sequence()));
 			if(res.second)
 				sec.rut_mod(res.first->second, maxx, sec.sub_mod, sec.rat_mod);
-			wood_data::const_iterator nit = sec.usertree.data.begin();
-			for(++nit;nit!=sec.usertree.data.end();++nit) {
+			wood::data_type::const_iterator nit = sec.usertree.data().begin();
+			for(++nit;nit!=sec.usertree.data().end();++nit) {
 				seqs[nit->label] = seqs[(nit-nit->anc)->label];
 			}
 		}
 		foreach(seq_map::value_type &kv, seqs) {
+			string ss(kv.second.size(), ' ');
+			rex.decode_array(kv.second.begin(), kv.second.end(), ss.begin());
 			cout << kv.first << " "
 				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
-				 << kv.second << endl;
+				 << ss << endl;
 		}
 		cout << endl;
 	}

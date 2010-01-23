@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include <boost/cstdint.hpp>
+#include <boost/bind.hpp>
 
 namespace dawg {
 
@@ -87,13 +88,71 @@ protected:
 	};
 };
 
-template<class CharType, class CharTrait, class T, class A>
+template<class CharType, class CharTrait>
 std::basic_ostream<CharType, CharTrait>&
 operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
 	if(!o.good()) return o;
 	o << v.base();
 	return o;
 }
+
+class residue_exchange {
+public:
+	enum { DNA = 0, RNA, AA, CODON, MODEND };
+	enum { DEL = 0, DELINS = 1, INS = 2};
+
+	typedef residue_exchange self_type;
+
+	inline void model(int a) {
+		if(a >= MODEND)
+			return;
+		_model = a;
+		static const char dna[] = "ACGT????????????????????????????????????????????????????????????";
+		static const char rna[] = "ACGU????????????????????????????????????????????????????????????";
+		// Include O & U, two rare amino acids
+		static const char aa[]  = "ACDEFGHIKLMNPQRSTVWYOU??????????????????????????????????????????";
+		// Encode 64 possible codons using a base-64 notation
+		// b/c this function returns a single char.
+		// These can later be converted to three nucleotides or 1 amino acid
+		static const char cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
+		
+		static const char* mods[] = { &dna[0], &rna[0], &aa[0], &cod[0] };
+		
+		cs_decode = mods[a];
+				
+	};
+
+	residue::data_type encode(char ch) const {
+		static residue::data_type dna[] = {0,1,3,2};
+		if(_model == DNA || _model == RNA)
+			return dna[(ch&6u) >> 1];
+		return ~0;
+	}
+
+	char decode_gaps(int r) const {
+		static const char gaps[] = "-=+";
+		return gaps[r];
+	}
+
+	char decode_base(residue::data_type r) const {
+		return cs_decode[r&63];
+	}
+	char decode(const residue &r) const {
+		return decode_base(r.base());
+	}
+	
+	template<typename It1, typename It2>
+	void decode_array(It1 afirst, It1 alast, It2 bfirst) const {
+		std::transform(afirst, alast, bfirst,
+			boost::bind(&self_type::decode,this,_1));
+	}
+
+	residue_exchange() { model(DNA); }
+
+protected:
+	int _model;
+	const char* cs_decode;
+};
 
 class residue_factory {
 public:

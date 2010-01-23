@@ -40,6 +40,7 @@ private:
 			it->base(s(m));
 			it->rate_scalar(r(m));
 		}
+		
 	}
 	
 	unsigned int root_len;

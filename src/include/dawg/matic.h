@@ -22,8 +22,6 @@
 namespace dawg {
 namespace details {
 struct matic_section_info {
-	std::set<std::string> node_names;
-	std::string root_name;
 	wood usertree;
 	
 	subst_model sub_mod;
@@ -67,6 +65,7 @@ protected:
 	
 	segment_info_vector configs;
 	mutt maxx;
+	residue_exchange rex;
 	
 	bool add_config_section(const dawg::ma &ma);
 };

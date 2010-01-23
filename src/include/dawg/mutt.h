@@ -21,7 +21,7 @@ class mutt {
 public:
 	typedef details::dsfmt_mutt_gen generator;
 	
-	inline void seed(uint32_t s) { gen.seed(s); }
+	inline void seed(uint32_t s) { gen.seed(_seed = s); }
 	
 	// returns a random double between [0,1)
 	inline double operator()() { return rand_01(); }
@@ -66,8 +66,11 @@ public:
 	// random normal with sigma
 	double rand_normal(double sigma);
 	
+	mutt();
+	
 private:
 	generator gen;
+	uint32_t _seed;
 	
 	inline double zH(double x, double z1, double z2) {
 		return pow(x+1.0, z1)*z2;
@@ -101,6 +104,10 @@ inline boost::uint32_t create_random_seed() {
 	boost::hash_combine(v, time(NULL));
 	// finish with one round of shr3
 	return static_cast<boost::uint32_t>((v^=(v<<17), v^=(v>>13), v^=(v<<5)));
+}
+
+inline mutt::mutt() {
+	seed(create_random_seed());
 }
 
 } // namespace dawg
