@@ -87,7 +87,8 @@ void dawg::matic::walk() {
 	foreach(const segment_info &seg, configs) {
 		seq_map seqs;
 		foreach(const section_info &sec, seg) {
-			pair<seq_map::iterator,bool> res = seqs.insert(make_pair(sec.usertree.root_label(), sequence()));
+			pair<seq_map::iterator,bool> res =
+				seqs.insert(make_pair(sec.usertree.root_label(), sequence()));
 			if(res.second)
 				sec.rut_mod(res.first->second, maxx, sec.sub_mod, sec.rat_mod);
 			wood::data_type::const_iterator nit = sec.usertree.data().begin();
@@ -95,6 +96,7 @@ void dawg::matic::walk() {
 				seqs[nit->label] = seqs[(nit-nit->anc)->label];
 			}
 		}
+		
 		foreach(seq_map::value_type &kv, seqs) {
 			string ss(kv.second.size(), ' ');
 			rex.decode_array(kv.second.begin(), kv.second.end(), ss.begin());
@@ -104,6 +106,10 @@ void dawg::matic::walk() {
 		}
 		cout << endl;
 	}
+}
+
+void dawg::matic::evolve(sequence &child, const sequence &par, double time) {
 	
 }
+
 

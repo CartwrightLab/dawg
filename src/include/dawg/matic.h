@@ -51,7 +51,8 @@ public:
 		clear_configuration();
 		for(;first != last; ++first)
 			if(!add_config_section(*first))
-				return DAWG_ERROR("Configuration section '" << first->name << "' failed to process.");
+				return DAWG_ERROR("Configuration section '"
+					<< first->name << "' failed to process.");
 		return true;
 	}
 
@@ -68,6 +69,8 @@ protected:
 	residue_exchange rex;
 	
 	bool add_config_section(const dawg::ma &ma);
+	
+	void evolve(sequence &child, const sequence &par, double time);
 };
 
 }
