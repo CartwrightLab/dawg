@@ -281,7 +281,7 @@ private:
 	template<typename It1, typename It2>
 	bool create_freqs(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) const {
 		It2 result = first2;
-		double d;
+		double d=0.0;
 		for(int u=0;first1 != last1 && result != last2;++first1,++result,++u) {
 			if(*first1 < 0)
 				return DAWG_ERROR("Invalid subst model; " << rname << "frequency #" << u

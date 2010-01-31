@@ -38,7 +38,7 @@ private:
 		seq.resize(root_len);
 		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
 			it->base(s(m));
-			it->rate_scalar(r(m));
+			it->rate_scalar(static_cast<residue::rate_type>(r(m)));
 		}
 		
 	}

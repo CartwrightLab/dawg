@@ -58,4 +58,3 @@ typed_value<bool>* value(bool* v) {
 }}
 
 #endif
-

@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>

@@ -10,10 +10,15 @@
 #include <limits>
 #include <ctime>
 
+#include <boost/config.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 
 #include <dawg/details/mutt.h>
+
+#ifdef BOOST_WINDOWS
+#	include <process.h>
+#endif
 
 namespace dawg {
 

@@ -106,7 +106,7 @@ static const double ytab[128] = {
 
 /* tabulated values for 2^24 times x[i]/x[i+1],
  * used to accept for U*x[i+1]<=x[i] without any floating point operations */
-static const unsigned long ktab[128] = {
+static const boost::uint32_t ktab[128] = {
   0, 12590644, 14272653, 14988939,
   15384584, 15635009, 15807561, 15933577,
   16029594, 16105155, 16166147, 16216399,
@@ -187,12 +187,10 @@ static const double wtab[128] = {
  /* position of right-most step */
 #define PARAM_R 3.44428647676
 double dawg::mutt::rand_normal(double sigma) {
-	unsigned long int i, j;
+	boost::uint32_t i, j;
 	int sign;
 	double x, y;
 
-	const unsigned long int range = 4294967296;
-	const unsigned long int offset = 0;
 	for(;;) {
 		boost::uint32_t k = rand_uint32();
 		i = (k & 0xFF);
