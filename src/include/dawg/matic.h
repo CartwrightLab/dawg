@@ -70,7 +70,31 @@ protected:
 	
 	bool add_config_section(const dawg::ma &ma);
 	
-	void evolve(sequence &child, const sequence &par, double time);
+	struct indel_data {
+		typedef std::pair<double, boost::uint32_t> element;
+		typedef std::stack<element> stack;
+		
+		stack ins;
+		stack del;
+
+		inline void clear() {
+			while(!ins.empty())
+				ins.pop();
+			while(!del.empty())
+				del.pop();
+		}
+	};
+	
+	void evolve(sequence &child, indel_data &indels, double T, 
+		sequence::const_iterator first, sequence::const_iterator last);
+	void evolve_upstream(sequence &child, indel_data &indels, double T,
+		const subst_model &sub_mod,
+		const indel_mix_model &ins_mod, const indel_mix_model &del_mod);
+	void evolve_indels(sequence &child, indel_data &indels, double T, 
+		sequence::const_iterator first, sequence::const_iterator last,
+		const subst_model &sub_mod,
+		const indel_mix_model &ins_mod, const indel_mix_model &del_mod);
+
 };
 
 }

@@ -108,8 +108,183 @@ void dawg::matic::walk() {
 	}
 }
 
-void dawg::matic::evolve(sequence &child, const sequence &par, double time) {
+void evolve_upstream(sequence &child, indel_data &indels, double T,
+	const subst_model &sub_mod,
+	const indel_mix_model &ins_mod, const indel_mix_model &del_mod) {
+	double dM, d;
+	//insertion and deletion rates
+	double dIns = ins_mod.rate(), dDel = del_mod.rate();
+	double dIndel = dIns+dDel;
+
+	indel_data::stack del_up;
+
+	// Calculate Upstream Deletions
+	dM = dDel*(del_mod.meansize()-1.0);
+	if(dM > DBL_EPSILON) {
+		d = rand_exp(dM);
+		while(d < T) {
+			size_type u;
+			do {
+				u = ();
+			} while(u == 1);
+			del_up.push(indel_data::element(d/T,  1+rand_uint(u-2)));
+			d += rand_exp(dM);
+		}
+	}
+	// Calculate Immortal Link Insertions
+	if(dIns > DBL_EPSILON) {
+		dM = dIns;
+		d = rand_exp(dM);
+		while(d < T) {
+			indels.ins.push(indel_data::element(d/T, ins_mod()));
+			d += rand_exp(dM);
+		}
+	}
+	// Process any Imortal Link Insertions
+	while(!indels.ins.empty()) {
+		// Fetch most recent immortal link insertion
+		indel_data::element &n = indels.ins.top();
+		// Did any upstream deletions occur before this?
+		while(!del_up.empty() && del_up.top().first >= n.first) {
+			indels.del.push(del_up.top());
+			del_up.pop();
+		}
+		evolve_indels(seq, indels, dTime, seq.begin(), seq.begin(), sub_mod, ins_mod, del_mod);
+	}
+	// Add any outstanding upstream deletions
+	while(!del_up.empty()) {
+		indels.del.push(del_up.top());
+		del_up.pop();
+	}
+}
+
+boost:uint32_t next_indel(double d, double &f, double dIns, double dDel) {
+	if(d < dIns) {
+		f = d;
+		return 1;
+	}
+	f = modf((d-dIns)/(dIns+dDel), &d);
+	f *= dIns+dDel;
+	boost:uint32_t x = 2*static_cast<boost:uint32_t>(d);
+	if(f < dDel)
+		return 2+x;
+	f -= dDel;
+	return 3+x;
+}
+
+
+dawg::sequence::const_iterator
+dawg::matic::evolve_indels(sequence &child, indel_data &indels, double T, 
+	sequence::const_iterator first, sequence::const_iterator last,
+	const subst_model &sub_mod,
+	const indel_mix_model &ins_mod, const indel_mix_model &del_mod) {
+	double f, t;
+	double dIns = ins_mod.rate(), dDel = del_mod.rate();
+	double dIndel = dIns+dDel;
+
+	for(;;) {
+		// Is there a deletion that needs to be processed?
+		if(!indels.del.empty()) {
+			indel_data::element &r = indels.del.top();
+			// Something has to be deleted
+			if(!indels.ins.empty()) {
+				// Deleted Insertion
+				indel_data::element &n = indels.ins.top();
+				// Did anything happen between the deletion and this insertion
+				t = r.first-n.first;
+				boost::uint32_t u = min(r.second, n.second);
+				// Determine where the next event occurs
+				boost::uint32_t x = next_indel(rand_exp(t*T), f, dIns, dDel);
+				if(x < 2*u) {
+					// the next event occured between these two
+					// how may sites are deleted
+					u = (x+1)/2;
+					// push the new event on the proper stack
+					if((x&1) == 1) {
+						indels.ins.push(indel_data::element(n.first+t*f/dIns/T, ins_mod()));
+					} else {
+						indels.del.push(indel_data::element(n.first+t*f/dDel/T, del_mod()));
+					}
+				}
+				// insert u "deleted insertions" into buffer
+				seq.insert(seq.end(), u, residue(0, residue::rate_type(1.0), branch_color, true));
+				// remove u sites from both stacks, pop if empty
+				r.second -= u;
+				n.second -= u;
+				if(r.second == 0)
+					indels.del.pop();
+				if(n.second == 0)
+					indels.ins.pop();
+			} else if(first != last) {
+				// Deleted Original
+				t = r.first;
+				boost::uint32_t u = r.second;
+				// Determine where the next event occurs
+				boost::uint32_t x = next_indel(rand_exp(t*T), f, dIns, dDel);
+				if(x < 2*u) {
+					// the next event occured between these two
+					// how may sites are deleted
+					u = (x+1)/2;
+					// push the new event on the proper stack
+					if((x&1) == 1) {
+						indels.ins.push(indel_data::element(t*f/dIns/T, ins_mod()));
+					} else {
+						indels.del.push(indel_data::element(t*f/dDel/T, del_mod()));
+					}
+				}
+				// copy and mark at most u nucleotides as deleted
+				boost::uint32_t uu;
+				for(uu=0;uu != u && first != last;++first) {
+					seq.push_back(*first);
+					if(first->is_deleted())
+						continue;
+					seq.back().mark_deleted(true);
+					++uu;
+				}
+				// remove sites from stack, pop if empty
+				r.second -= uu;
+				if(r.second == 0)
+					indels.del.pop();
+			} else {
+				// everything possible has been deleted
+				break;
+			}
+		} else if(!indels.ins.empty()) {
+			indel_data::element &n = indels.ins.top();
+			assert(n.first < T);
+			t = T-n.first;
+			// Find location of next event
+			boost::uint32_t x = next_indel(rand_exp(1.0/t), f,dIns,dDel)-1;
+			boost::uint32_t u = n.second;
+			if(x <= 2*u) {
+				// next event overlaps this one
+				u = x/2;
+				// push the new event on the proper stack
+				if((x&1) == 0) {
+					indels.ins.push(indel_data::element(n.first+t*f/dIns/T, ins_mod()));
+				} else {
+					indels.del.push(indel_data::element(n.first+t*f/dDel/T, del_mod()));
+				}
+			}
+			// remove u sites from the location and pop if empty
+			n.second -= u;
+			if(n.second == 0)
+				indels.ins.pop();
+			// Insert u random nucleotides into buffer
+			while(u--)
+				seq.push_back(sub_mod());
+		} else {
+			// nothing to do
+			break;
+		}
+	}
+	return first;
+}
+
+void dawg::matic::evolve(sequence &child, const sequence &par, double T) {
 	
 }
+
+
 
 
