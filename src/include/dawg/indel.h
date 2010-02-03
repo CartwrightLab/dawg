@@ -11,6 +11,7 @@
 #include <boost/cstdint.hpp>
 
 #include <dawg/utils/foreach.h>
+#include <dawg/utils/zeta.h>
 #include <dawg/utils.h>
 #include <dawg/log.h>
 #include <dawg/mutt.h>
@@ -21,7 +22,9 @@ class indel_model {
 public:
 	typedef std::vector<double> params_type;
 	
-	indel_model() : qorz(0.9), name("geo"), do_op(&dawg::indel_model::do_geo) { }
+	indel_model() : qorz(0.9), mean(10.0), name("geo"), do_op(&dawg::indel_model::do_geo) { }
+	
+	inline double meansize() const { return mean;}
 	
 	template<typename It>
 	bool create(const std::string &rname, It &first, It last) {
@@ -85,6 +88,7 @@ private:
 				<< "' is not between (0,1)");
 		name = "geom";
 		do_op = &dawg::indel_model::do_geo;
+		mean = 1.0/(1.0-qorz);
 		return true;
 	}
 
@@ -98,6 +102,10 @@ private:
 				<< "' must be > 1");
 		name = "zeta";
 		do_op = &dawg::indel_model::do_zeta;
+		if(qorz <= 2.0) //TODO: no quiet; mean is ininite, silently remove upstream stuff
+			mean = 1.0;
+		else
+			mean = zeta(qorz-1.0)/zeta(qorz);
 		return true;
 	}
 
@@ -115,6 +123,14 @@ private:
 				<< "' must be >= 1");
 		name = "zipf";
 		do_op = &dawg::indel_model::do_zipf;
+		// mean is HarmonicNumber[M,z-1]/HarmonicNumber[M,z]
+		double a = 0.0,b = 0.0, d=1.0;
+		for(uint32_t u=1;u<=zmax;++u,d+=1.0) {
+			double t = pow(d,-qorz);
+			a += d*t;
+			b += t;
+		}
+		mean = a/b;
 		return true;
 	}
 	
@@ -123,8 +139,13 @@ private:
 	inline bool create_user(It &first, It last) {
 		udata.assign(1,0.0);
 		double d = 0.0;
+		double n = 1.0;
+		double m = 0.0;
 		while(first != last && *first >= 0.0) {
-			d += *first++;
+			m += *first*n;
+			d += *first;
+			n += 1.0;
+			++first;
 			udata.push_back(d);
 		}
 		if(*first < 0.0)
@@ -137,12 +158,13 @@ private:
 		name = "user";
 		udata.back() = 1.0;
 		do_op = &dawg::indel_model::do_user;
+		mean = n / d;
 		return true;
 	}
 	
 
 	std::string name;
-	double qorz;
+	double qorz, mean;
 	boost::uint32_t zmax;
 	std::vector<double> udata;
 };

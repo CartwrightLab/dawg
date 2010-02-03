@@ -18,10 +18,26 @@
 
 #include <vector>
 #include <set>
+#include <stack>
 
 namespace dawg {
 namespace details {
-struct matic_section_info {
+struct indel_data {
+	typedef std::pair<double, boost::uint32_t> element;
+	typedef std::stack<element> stack;
+	
+	stack ins;
+	stack del;
+
+	inline void clear() {
+		while(!ins.empty())
+			ins.pop();
+		while(!del.empty())
+			del.pop();
+	}
+};
+
+struct matic_section {
 	wood usertree;
 	
 	subst_model sub_mod;
@@ -30,6 +46,29 @@ struct matic_section_info {
 	indel_mix_model ins_mod;
 	indel_mix_model del_mod;
 	
+	void evolve(sequence &child, indel_data &indels, double T,
+		sequence::const_iterator first, sequence::const_iterator last);
+	void evolve_upstream(sequence &child, indel_data &indels, double T,
+		sequence::const_iterator first, sequence::const_iterator last);
+	void evolve_indels(sequence &child, indel_data &indels, double T, 
+		sequence::const_iterator first, sequence::const_iterator last);
+		
+	inline boost::uint32_t next_indel(double d, double &f) {
+		double ins_rate = ins_mod.rate();
+		double del_rate = del_mod.rate();
+		double indel_rate = ins_rate+del_rate;
+		if(d < ins_rate) {
+			f = d;
+			return 1;
+		}
+		f = modf((d-ins_rate)/(indel_rate), &d);
+		f *= (indel_rate);
+		boost::uint32_t x = 2*static_cast<boost::uint32_t>(d);
+		if(f < del_rate)
+			return 2+x;
+		f -= del_rate;
+		return 3+x;
+	}
 };
 }
 
@@ -60,41 +99,15 @@ public:
 	void walk();
 	
 protected:
-	typedef dawg::details::matic_section_info section_info;
-	typedef boost::ptr_vector<section_info> segment_info;
-	typedef std::vector<segment_info> segment_info_vector;
+	typedef dawg::details::matic_section section;
+	typedef boost::ptr_vector<section> segment;
+	typedef std::vector<segment> segment_vector;
 	
-	segment_info_vector configs;
+	segment_vector configs;
 	mutt maxx;
 	residue_exchange rex;
 	
 	bool add_config_section(const dawg::ma &ma);
-	
-	struct indel_data {
-		typedef std::pair<double, boost::uint32_t> element;
-		typedef std::stack<element> stack;
-		
-		stack ins;
-		stack del;
-
-		inline void clear() {
-			while(!ins.empty())
-				ins.pop();
-			while(!del.empty())
-				del.pop();
-		}
-	};
-	
-	void evolve(sequence &child, indel_data &indels, double T, 
-		sequence::const_iterator first, sequence::const_iterator last);
-	void evolve_upstream(sequence &child, indel_data &indels, double T,
-		const subst_model &sub_mod,
-		const indel_mix_model &ins_mod, const indel_mix_model &del_mod);
-	void evolve_indels(sequence &child, indel_data &indels, double T, 
-		sequence::const_iterator first, sequence::const_iterator last,
-		const subst_model &sub_mod,
-		const indel_mix_model &ins_mod, const indel_mix_model &del_mod);
-
 };
 
 }
