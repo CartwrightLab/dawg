@@ -47,11 +47,14 @@ struct matic_section {
 	indel_mix_model del_mod;
 	
 	void evolve(sequence &child, indel_data &indels, double T,
-		sequence::const_iterator first, sequence::const_iterator last);
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m);
 	void evolve_upstream(sequence &child, indel_data &indels, double T,
-		sequence::const_iterator first, sequence::const_iterator last);
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m);
 	void evolve_indels(sequence &child, indel_data &indels, double T, 
-		sequence::const_iterator first, sequence::const_iterator last);
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m);
 		
 	inline boost::uint32_t next_indel(double d, double &f) {
 		double ins_rate = ins_mod.rate();

@@ -178,6 +178,7 @@ public:
 	    if(first_n == last_n)
 	    	return DAWG_ERROR("invalid indel model; no model type specified");
 		therate = 0.0;
+		mean = 0.0;
 		for(;first_r!=last_r;++first_r) {
 			if(*first_r <= 0.0)
 				return DAWG_ERROR("invalid indel model; rate '" << *first_r << "' must be positive");
@@ -190,6 +191,7 @@ public:
 			mix[u] /= therate;
 			if(!models[u].create(*itn,first_p, last_p))
 				return false;
+			mean += mix[u]*models[u].mean();
 			if(++itn == last_n)
 				itn = first_n;
 		}
@@ -208,10 +210,12 @@ public:
 		return models[x](m);
 	}
 	double rate() const { return therate; }
+	double meansize() const { return mean; }
 protected:
 	std::vector<double> mix;
 	std::vector<indel_model> models;
 	double therate;
+	double mean;
 };
 
 } /* namespace dawg */

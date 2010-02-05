@@ -110,7 +110,8 @@ void dawg::matic::walk() {
 
 void dawg::details::matic_section::evolve_upstream(
 		sequence &child, indel_data &indels, double T,
-		sequence::const_iterator first, sequence::const_iterator last) {
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m) {
 	double dM, d;
 	//insertion and deletion rates
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
@@ -121,23 +122,23 @@ void dawg::details::matic_section::evolve_upstream(
 	// Calculate Upstream Deletions
 	dM = del_rate*(del_mod.meansize()-1.0);
 	if(dM > DBL_EPSILON) {
-		d = rand_exp(dM);
+		d = m.rand_exp(dM);
 		while(d < T) {
-			size_type u;
+			boost::uint32_t u;
 			do {
-				u = ();
+				u = del_mod(m);
 			} while(u == 1);
-			del_up.push(indel_data::element(d/T,  1+rand_uint(u-2)));
-			d += rand_exp(dM);
+			del_up.push(indel_data::element(d/T,  1+m.rand_uint32(u-1)));
+			d +=m.rand_exp(dM);
 		}
 	}
 	// Calculate Immortal Link Insertions
 	if(ins_rate > DBL_EPSILON) {
 		dM = ins_rate;
-		d = rand_exp(dM);
+		d = m.rand_exp(dM);
 		while(d < T) {
-			indels.ins.push(indel_data::element(d/T, ins_mod()));
-			d += rand_exp(dM);
+			indels.ins.push(indel_data::element(d/T, ins_mod(m)));
+			d += m.rand_exp(dM);
 		}
 	}
 	// Process any Imortal Link Insertions
@@ -149,7 +150,7 @@ void dawg::details::matic_section::evolve_upstream(
 			indels.del.push(del_up.top());
 			del_up.pop();
 		}
-		evolve_indels(seq, indels, dTime, seq.begin(), seq.begin(), sub_mod, ins_mod, del_mod);
+		evolve_indels(child, indels, T, first, first);
 	}
 	// Add any outstanding upstream deletions
 	while(!del_up.empty()) {
@@ -161,7 +162,9 @@ void dawg::details::matic_section::evolve_upstream(
 dawg::sequence::const_iterator
 dawg::details::matic_section::evolve_indels(
 		sequence &child, indel_data &indels, double T,
-		sequence::const_iterator first, sequence::const_iterator last)	double f, t;
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m)
+	double f, t;
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
 	double indel_rate = ins_rate+del_rate;
 
@@ -266,7 +269,8 @@ dawg::details::matic_section::evolve_indels(
 
 dawg::details::matic_section::evolve(
 		sequence &child, indel_data &indels, double T,
-		sequence::const_iterator first, sequence::const_iterator last) {
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m) {
 }
 
 

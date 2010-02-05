@@ -36,6 +36,10 @@ public:
 	inline double rand_01oo() { return gen.rand_01oo(); }
 	// returns random 32-bit number
 	boost::uint32_t rand_uint32() { return gen.rand_uint32(); }
+	// returns random 32-bit number with max n-1
+	boost::uint32_t rand_uint32(boost::uint32_t n) {
+		return static_cast<boost::uint32_t>(rand_01()*n);
+	}
 	// random boolean p prob of success
 	inline bool rand_bool(double p = 0.5) { return (rand_01() < p); }
 	// random exponential with rate r
