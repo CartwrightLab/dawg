@@ -9,10 +9,9 @@
 
 namespace dawg {
 
-double zeta(double z) {
+inline double zeta(double z) {
 	return gsl_sf_zeta(z);
 }
-
 
 };
 

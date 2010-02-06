@@ -40,19 +40,20 @@ struct indel_data {
 struct matic_section {
 	wood usertree;
 	
-	subst_model sub_mod;
-	rate_model  rat_mod;
-	root_model  rut_mod;
+	subst_model     sub_mod;
+	rate_model      rat_mod;
+	root_model      rut_mod;
 	indel_mix_model ins_mod;
 	indel_mix_model del_mod;
 	
-	void evolve(sequence &child, indel_data &indels, double T,
+	void evolve(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m);
-	void evolve_upstream(sequence &child, indel_data &indels, double T,
+	void evolve_upstream(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m);
-	void evolve_indels(sequence &child, indel_data &indels, double T, 
+	dawg::sequence::const_iterator
+	evolve_indels(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m);
 		
@@ -101,6 +102,9 @@ public:
 	// Run the simulation
 	void walk();
 	
+	matic() : branch_color(0)
+	{}
+	
 protected:
 	typedef dawg::details::matic_section section;
 	typedef boost::ptr_vector<section> segment;
@@ -109,6 +113,8 @@ protected:
 	segment_vector configs;
 	mutt maxx;
 	residue_exchange rex;
+	
+	residue::data_type branch_color;
 	
 	bool add_config_section(const dawg::ma &ma);
 };

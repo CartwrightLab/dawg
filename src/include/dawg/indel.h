@@ -191,7 +191,7 @@ public:
 			mix[u] /= therate;
 			if(!models[u].create(*itn,first_p, last_p))
 				return false;
-			mean += mix[u]*models[u].mean();
+			mean += mix[u]*models[u].meansize();
 			if(++itn == last_n)
 				itn = first_n;
 		}
