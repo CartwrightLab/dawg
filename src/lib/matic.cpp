@@ -272,6 +272,50 @@ void dawg::details::matic_section::evolve(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) {
+		
+	//process any existing indels.
+	first = evolve_indels(child, indels, T, branch_color, first, last, m);
+	
+	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
+	double indel_rate = ins_rate+del_rate;	
+	double d = m.rand_exp(T);
+	for(;;) {
+		sequence::const_iterator start = first;
+		// TODO: Optimize out this if?
+		// TODO: Variant for constant rate_scale
+		for(;first != last && first->rate_scalar()+indel_rate <= d; ++first) {
+			if(!first->is_deleted())
+				d -= indel_rate+first->rate_scalar();
+		}
+		// copy unmodified sites into buffer.
+		child.insert(child.end(), start, first);
+		if(first == last)
+			break;
+		if(d < del_rate) {
+			indels.del.push(indel_data::element(d/del_rate, del_mod(m)));
+			first = evolve_indels(child, indels, T, branch_color, first, last, m);
+			d = m.rand_exp(T);
+			continue;
+		} else
+			d -= del_rate;
+		double w = first->rate_scalar();
+		residue rez = *first;
+		++first;
+		while(d < w) {
+			rez.base(sub_mod(m,rez.base()));
+			// how much space is left in the substitution section
+			w = w - d;
+			d = m.rand_exp(T);		
+		}
+		d -= w;
+		child.push_back(rez);
+		if(d < ins_rate) {
+			indels.ins.push(indel_data::element(d/ins_rate, ins_mod(m)));
+			first = evolve_indels(child, indels, T, branch_color, first, last, m);
+			d = m.rand_exp(T);
+		} else
+			d -= ins_rate;
+	}	
 }
 
 
