@@ -38,22 +38,10 @@ XM((root)(segment), unsigned int, 0)
 XM((root)(overlap), bool, false)
 
 /*
-(output)(block)(head) string
-(output)(block)(tail) string
-(output)(block)(before) string
-(output)(block)(after) string
-(output)(block)(between) string
-(output)(vars) bool
-(output)(file) string
-(output)(split) bool
 (output)(gapplus) bool
 (output)(gapsinglechar) bool 
 (output)(lowercase) bool
 (output)(translate) bool
-
-(sim)(reps) int
-(sim)(seed) uint
-
 */
 
 /***************************************************************************

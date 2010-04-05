@@ -1,0 +1,31 @@
+/****************************************************************************
+ *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
+ ****************************************************************************/
+
+#include <dawg/details/xm.h>
+
+/***************************************************************************
+ *    X-Macro List                                                         *
+ *    Defines the core model for Dawg, simulate sequences down a tree      *
+ *    using substitution and indel models                                  *
+ *                                                                         *
+ *    XM(name, type, def)                                                  *
+ ***************************************************************************/
+
+XM( (output)(block)(head),    std::string, )
+XM( (output)(block)(tail),    std::string, )
+XM( (output)(block)(before),  std::string, )
+XM( (output)(block)(after),   std::string, )
+XM( (output)(block)(between), std::string, )
+
+XM( (output)(vars),   bool, true)
+XM( (output)(file),   std::string, )
+XM( (output)(split),  bool, false)
+
+XM( (sim)(reps),  unsigned int, 1)
+XM( (sim)(seed),  unsigned int, 0)
+
+/***************************************************************************
+ *    cleanup                                                              *
+ ***************************************************************************/
+#include <dawg/details/xm.h>

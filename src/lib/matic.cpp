@@ -79,27 +79,36 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	return true;
 }
 
-typedef map<string,sequence> seq_map;
+struct sequence_data {
+	sequence seq;
+	dawg::details::indel_data indels;
+};
+
+typedef map<string,sequence_data> seq_map;
 
 void dawg::matic::walk() {
-	sequence seq_buf, seq_buf2;
 	rex.model(residue_exchange::DNA);
+	branch_color = 0;
+	seq_map seqs;
 	foreach(const segment &seg, configs) {
-		seq_map seqs;
 		foreach(const section &sec, seg) {
+			branch_color += dawg::residue::branch_inc;
 			pair<seq_map::iterator,bool> res =
-				seqs.insert(make_pair(sec.usertree.root_label(), sequence()));
+				seqs.insert(make_pair(sec.usertree.root_label(), sequence_data()));
 			if(res.second)
-				sec.rut_mod(res.first->second, maxx, sec.sub_mod, sec.rat_mod);
+				sec.rut_mod(res.first->second.seq, maxx, sec.sub_mod, sec.rat_mod);
 			wood::data_type::const_iterator nit = sec.usertree.data().begin();
 			for(++nit;nit!=sec.usertree.data().end();++nit) {
-				seqs[nit->label] = seqs[(nit-nit->anc)->label];
+				res = seqs.insert(make_pair(nit->label, sequence_data()));
+				const sequence &ranc = seqs[(nit-nit->anc)->label].seq;
+				sec.evolve(res.first->second.seq, res.first->second.indels, nit->length,
+					branch_color, ranc.begin(), ranc.end(), maxx);
 			}
 		}
 		
 		foreach(seq_map::value_type &kv, seqs) {
-			string ss(kv.second.size(), ' ');
-			rex.decode_array(kv.second.begin(), kv.second.end(), ss.begin());
+			string ss(kv.second.seq.size(), ' ');
+			rex.decode_array(kv.second.seq.begin(), kv.second.seq.end(), ss.begin());
 			cout << kv.first << " "
 				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
 				 << ss << endl;
@@ -111,7 +120,7 @@ void dawg::matic::walk() {
 void dawg::details::matic_section::evolve_upstream(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m) {
+		mutt &m) const {
 	double dM, d;
 	//insertion and deletion rates
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
@@ -163,7 +172,7 @@ dawg::sequence::const_iterator
 dawg::details::matic_section::evolve_indels(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m) {
+		mutt &m) const {
 	double f, t;
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
 	double indel_rate = ins_rate+del_rate;
@@ -237,8 +246,8 @@ dawg::details::matic_section::evolve_indels(
 			}
 		} else if(!indels.ins.empty()) {
 			indel_data::element &n = indels.ins.top();
-			assert(n.first < T);
-			t = T-n.first;
+			assert(n.first < 1.0);
+			t = 1.0-n.first;
 			// Find location of next event
 			boost::uint32_t x = next_indel(m.rand_exp(t*T), f)-1;
 			boost::uint32_t u = n.second;
@@ -271,7 +280,7 @@ dawg::details::matic_section::evolve_indels(
 void dawg::details::matic_section::evolve(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m) {
+		mutt &m) const {
 		
 	//process any existing indels.
 	first = evolve_indels(child, indels, T, branch_color, first, last, m);

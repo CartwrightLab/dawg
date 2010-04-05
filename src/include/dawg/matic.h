@@ -48,16 +48,16 @@ struct matic_section {
 	
 	void evolve(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m);
+		mutt &m) const;
 	void evolve_upstream(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m);
+		mutt &m) const;
 	dawg::sequence::const_iterator
 	evolve_indels(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
-		mutt &m);
+		mutt &m) const;
 		
-	inline boost::uint32_t next_indel(double d, double &f) {
+	inline boost::uint32_t next_indel(double d, double &f) const {
 		double ins_rate = ins_mod.rate();
 		double del_rate = del_mod.rate();
 		double indel_rate = ins_rate+del_rate;

@@ -209,7 +209,7 @@ inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
 
 inline bool pile::parse_file(const char *cs) {
 	bool ret;
-	if(strcmp(cs, "-")==0) {
+	if(cs == NULL || strcmp(cs, "")==0 || strcmp(cs, "-")==0) {
 		ret = parse_stream(std::cin);
 	} else {
 		std::ifstream is(cs);

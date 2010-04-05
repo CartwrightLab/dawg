@@ -31,6 +31,7 @@
 #include <dawg/pile.h>
 #include <dawg/utils/foreach.h>
 #include <dawg/matic.h>
+#include <dawg/global.h>
 
 using namespace std;
 using namespace boost;
@@ -120,11 +121,16 @@ int dawg_app::run() {
 	}
 	if(!ret)
 		return EXIT_FAILURE;	
+
+	global_options glopts;
+	glopts.read_section(input.data.front());
+
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_pile(input, configs)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
+	
 	
 	foreach(const dawg::ma& aa, configs) {
 		cout << aa << endl;
