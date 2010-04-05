@@ -86,7 +86,7 @@ struct sequence_data {
 
 typedef map<string,sequence_data> seq_map;
 
-void dawg::matic::walk() {
+void dawg::matic::walk(alignment& aln) {
 	rex.model(residue_exchange::DNA);
 	branch_color = 0;
 	seq_map seqs;

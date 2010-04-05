@@ -74,12 +74,19 @@ struct matic_section {
 		return 3+x;
 	}
 };
+
+struct aligned_sequence {
+	std::string label;
+	std::string seq;
+};
+
 }
+
+typedef std::vector<details::aligned_sequence> alignment;
 
 // Core simulation algorithm class
 class matic {
 public:
-	
 	// Configure Simulation
 	inline bool configure(const dawg::ma &ma) {
 		clear_configuration();
@@ -100,7 +107,7 @@ public:
 	}
 
 	// Run the simulation
-	void walk();
+	void walk(alignment& aln);
 	
 	
 	template<typename _It>

@@ -147,7 +147,9 @@ int dawg_app::run() {
 	if(!glopts.sim_seed.empty()) {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
-	kimura.walk();
+	// create a set of aligned sequences;
+	dawg::alignment aln;
+	kimura.walk(aln);
 	
 	//if(!Execute()) {
 	//	DawgError("Execution failed.");
