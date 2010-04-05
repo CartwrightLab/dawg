@@ -23,7 +23,7 @@ XM( (output)(file),   std::string, )
 XM( (output)(split),  bool, false)
 
 XM( (sim)(reps),  unsigned int, 1)
-XM( (sim)(seed),  unsigned int, 0)
+XM( (sim)(seed),  std::vector<unsigned int>, )
 
 /***************************************************************************
  *    cleanup                                                              *

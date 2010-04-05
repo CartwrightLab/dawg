@@ -102,6 +102,12 @@ public:
 	// Run the simulation
 	void walk();
 	
+	
+	template<typename _It>
+	void seed(_It first, _It last) {
+		maxx.seed(first, last);
+	}
+	
 	matic() : branch_color(0)
 	{}
 	

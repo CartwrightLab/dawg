@@ -10,6 +10,8 @@
 #include <limits>
 #include <ctime>
 
+#include <vector>
+
 #include <boost/config.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
@@ -26,7 +28,19 @@ class mutt {
 public:
 	typedef details::dsfmt_mutt_gen generator;
 	
-	inline void seed(uint32_t s) { gen.seed(_seed = s); }
+	inline void seed(uint32_t s) { 
+		_seed.assign(1, s);
+		gen.seed(_seed.begin(), _seed.end());
+	}
+	
+	template<typename _It>
+	inline void seed(_It first, _It last) {
+		_seed.assign(first, last);
+		if(_seed.size() == 1)
+			gen.seed(_seed[0]);
+		else if(_seed.size() > 1)
+			gen.seed(first, last);
+	}
 	
 	// returns a random double between [0,1)
 	inline double operator()() { return rand_01(); }
@@ -79,7 +93,7 @@ public:
 	
 private:
 	generator gen;
-	uint32_t _seed;
+	std::vector<uint32_t> _seed;
 	
 	inline double zH(double x, double z1, double z2) {
 		return pow(x+1.0, z1)*z2;

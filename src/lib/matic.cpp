@@ -186,6 +186,7 @@ dawg::details::matic_section::evolve_indels(
 				// Deleted Insertion
 				indel_data::element &n = indels.ins.top();
 				// Did anything happen between the deletion and this insertion
+				assert(r.first >= n.first && 1.0 > r.first-n.first );
 				t = r.first-n.first;
 				boost::uint32_t u = min(r.second, n.second);
 				// Determine where the next event occurs
@@ -196,9 +197,9 @@ dawg::details::matic_section::evolve_indels(
 					u = (x+1)/2;
 					// push the new event on the proper stack
 					if((x&1) == 1) {
-						indels.ins.push(indel_data::element(n.first+t*f/ins_rate/T, ins_mod(m)));
+						indels.ins.push(indel_data::element(n.first+t*f/ins_rate, ins_mod(m)));
 					} else {
-						indels.del.push(indel_data::element(n.first+t*f/del_rate/T, del_mod(m)));
+						indels.del.push(indel_data::element(n.first+t*f/del_rate, del_mod(m)));
 					}
 				}
 				// insert u "deleted insertions" into buffer
@@ -212,6 +213,7 @@ dawg::details::matic_section::evolve_indels(
 					indels.ins.pop();
 			} else if(first != last) {
 				// Deleted Original
+				assert(r.first < 1.0);
 				t = r.first;
 				boost::uint32_t u = r.second;
 				// Determine where the next event occurs
@@ -222,9 +224,9 @@ dawg::details::matic_section::evolve_indels(
 					u = (x+1)/2;
 					// push the new event on the proper stack
 					if((x&1) == 1) {
-						indels.ins.push(indel_data::element(t*f/ins_rate/T, ins_mod(m)));
+						indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
 					} else {
-						indels.del.push(indel_data::element(t*f/del_rate/T, del_mod(m)));
+						indels.del.push(indel_data::element(t*f/del_rate, del_mod(m)));
 					}
 				}
 				// copy and mark at most u nucleotides as deleted
@@ -256,9 +258,9 @@ dawg::details::matic_section::evolve_indels(
 				u = x/2;
 				// push the new event on the proper stack
 				if((x&1) == 0) {
-					indels.ins.push(indel_data::element(n.first+t*f/ins_rate/T, ins_mod(m)));
+					indels.ins.push(indel_data::element(n.first+t*f/ins_rate, ins_mod(m)));
 				} else {
-					indels.del.push(indel_data::element(n.first+t*f/del_rate/T, del_mod(m)));
+					indels.del.push(indel_data::element(n.first+t*f/del_rate, del_mod(m)));
 				}
 			}
 			// remove u sites from the location and pop if empty

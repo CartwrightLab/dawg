@@ -136,10 +136,16 @@ int dawg_app::run() {
 		cout << aa << endl;
 	}
 	
+	// Create our the object that will do all the simulation
+	// work for us.  Configure its sections.
 	dawg::matic kimura;
 	if(!kimura.configure(configs.begin(), configs.end())) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
+	}
+	// if a seed was specified, use it
+	if(!glopts.sim_seed.empty()) {
+		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
 	kimura.walk();
 	
