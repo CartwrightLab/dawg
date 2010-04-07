@@ -369,38 +369,38 @@ void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
 		uState = 0; // Set to quit
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
-		for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
-			if(sit->it == sit->last)
+		foreach(aligner_data &v, aln_table) {
+			if(v.it == v.last)
 				continue; // Sequence is done
-			uBranchN = sit->it->branch();
+			uBranchN = v.it->branch();
 			if(uBranchN == uBranch) {
-				uState |= uUpdate[sit->it->deleted()];
+				uState |= uUpdate[v.it->deleted()];
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = uUpdate[sit->it->deleted()];
+				uState = uUpdate[v.it->deleted()];
 			}
 		}
 		switch(uState) {
 			case 0: goto ENDFOR; // Yes, you shouldn't use goto, except here
 			case 1: // Empty column that we want to ignore
-				for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
-					if(sit->it != sit->last && sit->it->branch() == uBranch)
-						++(sit->it);
+				foreach(aligner_data &v, aln_table) {
+					if(v.it != v.last && v.it->branch() == uBranch)
+						++v.it;
 				}
 				break;
 			case 2:
 			case 3: // Unempty column
-				for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
-					if(sit->it == sit->last || sit->it->branch() != uBranch) {
-						sit->str->push_back(rex.decode_gaps(residue_factory::INS));
+				foreach(aligner_data &v, aln_table) {
+					if(v.it == v.last || v.it->branch() != uBranch) {
+						v.str->push_back(rex.decode_gaps(residue_factory::INS));
 						continue;
-					} else if(!sit->it->is_deleted())
-						sit->str->push_back(rex.decode_base(sit->it->base()));
-					else if(sit->it->branch() == 0)
-						sit->str->push_back(rex.decode_gaps(residue_factory::DEL));
+					} else if(!v.it->is_deleted())
+						v.str->push_back(rex.decode_base(v.it->base()));
+					else if(v.it->branch() == 0)
+						v.str->push_back(rex.decode_gaps(residue_factory::DEL));
 					else
-						sit->str->push_back(rex.decode_gaps(residue_factory::DELINS));
-					++(sit->it);
+						v.str->push_back(rex.decode_gaps(residue_factory::DELINS));
+					++(v.it);
 				}
 		};
 	}
