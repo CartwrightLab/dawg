@@ -21,8 +21,9 @@ public:
 		return true;
 	}
 
-	inline void operator()(sequence &seq, mutt &m, const subst_model &s, const rate_model &r) const {
-		(this->*do_op)(seq,m,s,r);
+	inline void operator()(sequence &seq, mutt &m, const subst_model &s, const rate_model &r,
+		residue::data_type b) const {
+		(this->*do_op)(seq,m,s,r,b);
 	}
 	
 	inline const std::string& label() const {
@@ -31,13 +32,14 @@ public:
 
 private:
 	// pointer that will hold our method
-	void (root_model::*do_op)(sequence &seq,
-		mutt &m, const subst_model &s, const rate_model &r) const;
+	void (root_model::*do_op)(sequence &seq, mutt &m,
+		const subst_model &s, const rate_model &r, residue::data_type b) const;
 	
-	void do_stat(sequence &seq, mutt &m, const subst_model &s, const rate_model &r) const {
+	void do_stat(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
 		seq.resize(root_len);
 		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
 			it->base(s(m));
+			it->branch(b);
 			it->rate_scalar(static_cast<residue::rate_type>(r(m)));
 		}
 		

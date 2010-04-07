@@ -79,34 +79,30 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	return true;
 }
 
-struct sequence_data {
-	sequence seq;
-	dawg::details::indel_data indels;
-};
 
-typedef map<string,sequence_data> seq_map;
-
+// TODO: Replace map lookups with precached indexes
 void dawg::matic::walk(alignment& aln) {
 	rex.model(residue_exchange::DNA);
 	branch_color = 0;
-	seq_map seqs;
 	foreach(const segment &seg, configs) {
+		details::seq_map seqs;
 		foreach(const section &sec, seg) {
 			branch_color += dawg::residue::branch_inc;
-			pair<seq_map::iterator,bool> res =
-				seqs.insert(make_pair(sec.usertree.root_label(), sequence_data()));
+			pair<details::seq_map::iterator,bool> res =
+				seqs.insert(make_pair(sec.usertree.root_label(), details::sequence_data()));
 			if(res.second)
-				sec.rut_mod(res.first->second.seq, maxx, sec.sub_mod, sec.rat_mod);
+				sec.rut_mod(res.first->second.seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
 			wood::data_type::const_iterator nit = sec.usertree.data().begin();
 			for(++nit;nit!=sec.usertree.data().end();++nit) {
-				res = seqs.insert(make_pair(nit->label, sequence_data()));
+				res = seqs.insert(make_pair(nit->label, details::sequence_data()));
 				const sequence &ranc = seqs[(nit-nit->anc)->label].seq;
 				sec.evolve(res.first->second.seq, res.first->second.indels, nit->length,
 					branch_color, ranc.begin(), ranc.end(), maxx);
 			}
 		}
+		align(aln, seqs);
 		
-		foreach(seq_map::value_type &kv, seqs) {
+		foreach(details::seq_map::value_type &kv, seqs) {
 			string ss(kv.second.seq.size(), ' ');
 			rex.decode_array(kv.second.seq.begin(), kv.second.seq.end(), ss.begin());
 			cout << kv.first << " "
@@ -329,6 +325,89 @@ void dawg::details::matic_section::evolve(
 	}	
 }
 
+struct aligner_data {
+	aligner_data(const sequence &xseq, std::string &xstr) :
+		it(xseq.begin()), last(xseq.end()), str(&xstr) {
+	}
+	sequence::const_iterator it, last;
+	std::string *str;
+};
+
+void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
+	unsigned uFlags = 0; //temporary
+	// Let's spend some memory to save the code from branching.
+	static unsigned int uUpdate[residue::delete_del+1];
+	
+	// construct a table to hold alignment information
+	std::vector<aligner_data> aln_table;
+	// TODO: Remove this to reuse aln locations
+	aln.clear();
+	aln.reserve(seqs.size());
+	for(details::seq_map::const_iterator cit = seqs.begin(); cit != seqs.end(); ++cit) {
+		// Skip any sequence that begin with one of the two special characters
+		if(cit->first[0] == '(' || cit->first[0] == '_')
+			continue;
+		// TODO: Remove this to reuse aln locations
+		aln.push_back(alignment::value_type());
+		aln.back().label = cit->first;
+		aln_table.push_back(aligner_data(cit->second.seq, aln.back().seq));
+	}
+	
+	// Alignment rules:
+	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
+	// Deletion & Original Nucleotide : w/ del, original nucl
+
+	// States: Quit (0), Ext(2), Del(1)
+	unsigned int uState = 1;
+	unsigned int uBranch = 0;
+	unsigned int uBranchN = 0;
+	uUpdate[residue::delete_ext] = 2;
+	//uUpdate[residue::delete_del] = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
+	uUpdate[residue::delete_del] = 1;
+	// Go through each column, adding gaps where neccessary
+	for(;;) {
+		uState = 0; // Set to quit
+		uBranch = 0; // Set to lowest branch
+		// Find column state(s)
+		for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
+			if(sit->it == sit->last)
+				continue; // Sequence is done
+			uBranchN = sit->it->branch();
+			if(uBranchN == uBranch) {
+				uState |= uUpdate[sit->it->deleted()];
+			} else if(uBranchN > uBranch) {
+				uBranch = uBranchN;
+				uState = uUpdate[sit->it->deleted()];
+			}
+		}
+		switch(uState) {
+			case 0: goto ENDFOR; // Yes, you shouldn't use goto, except here
+			case 1: // Empty column that we want to ignore
+				for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
+					if(sit->it != sit->last && sit->it->branch() == uBranch)
+						++(sit->it);
+				}
+				break;
+			case 2:
+			case 3: // Unempty column
+				for(vector<aligner_data>::iterator sit = aln_table.begin(); sit != aln_table.end(); ++sit) {
+					if(sit->it == sit->last || sit->it->branch() != uBranch) {
+						sit->str->push_back(rex.decode_gaps(residue_factory::INS));
+						continue;
+					} else if(!sit->it->is_deleted())
+						sit->str->push_back(rex.decode_base(sit->it->base()));
+					else if(sit->it->branch() == 0)
+						sit->str->push_back(rex.decode_gaps(residue_factory::DEL));
+					else
+						sit->str->push_back(rex.decode_gaps(residue_factory::DELINS));
+					++(sit->it);
+				}
+		};
+	}
+ENDFOR:
+	/*noop*/;
+
+}
 
 
 

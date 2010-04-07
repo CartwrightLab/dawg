@@ -16,9 +16,12 @@
 
 #include <dawg/ma.h>
 
+#include <dawg/utils/foreach.h>
+
 #include <vector>
 #include <set>
 #include <stack>
+#include <map>
 
 namespace dawg {
 namespace details {
@@ -80,9 +83,28 @@ struct aligned_sequence {
 	std::string seq;
 };
 
+struct sequence_data {
+	sequence seq;
+	dawg::details::indel_data indels;
+};
+
+typedef std::map<std::string,sequence_data> seq_map;
+
 }
 
-typedef std::vector<details::aligned_sequence> alignment;
+class alignment : public std::vector<details::aligned_sequence> {
+public:
+	
+};
+
+template<class CharType, class CharTrait>
+inline std::basic_ostream<CharType, CharTrait>&
+operator<<(std::basic_ostream<CharType, CharTrait>& o, const alignment &aln) {
+	foreach(const alignment::value_type &v, aln) {
+		o << v.label << "\t" << v.seq << std::endl;
+	}
+	return o;
+}
 
 // Core simulation algorithm class
 class matic {
@@ -130,6 +152,8 @@ protected:
 	residue::data_type branch_color;
 	
 	bool add_config_section(const dawg::ma &ma);
+	
+	void align(alignment& aln, const details::seq_map &seqs);
 };
 
 }

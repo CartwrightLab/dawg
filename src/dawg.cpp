@@ -150,6 +150,7 @@ int dawg_app::run() {
 	// create a set of aligned sequences;
 	dawg::alignment aln;
 	kimura.walk(aln);
+	cout << aln << endl;
 	
 	//if(!Execute()) {
 	//	DawgError("Execution failed.");
