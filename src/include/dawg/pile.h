@@ -84,8 +84,8 @@ template<typename Iterator>
 struct white_space : qi::grammar<Iterator> {
 	white_space() : white_space::base_type(start) {
 		using standard::space; using standard::char_;
-		using qi::eol;
-		start = space | ('#' >> *(char_ - eol) >> eol);
+		using qi::eol; using qi::eoi;
+		start = space | ('#' >> *(char_ - eol) >> (eol|eoi));
 	}
 	qi::rule<Iterator> start;
 };
