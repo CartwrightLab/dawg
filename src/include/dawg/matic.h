@@ -41,7 +41,10 @@ struct indel_data {
 };
 
 struct matic_section {
+	typedef std::vector<wood::data_type::size_type> wood_meta_type;
+
 	wood usertree;
+	wood_meta_type metatree;
 	
 	subst_model     sub_mod;
 	rate_model      rat_mod;
@@ -144,6 +147,7 @@ protected:
 	typedef dawg::details::matic_section section;
 	typedef boost::ptr_vector<section> segment;
 	typedef std::vector<segment> segment_vector;
+	typedef std::map<std::string, wood::data_type::size_type> wood_label_to_index;
 	
 	segment_vector configs;
 	mutt maxx;
@@ -152,6 +156,7 @@ protected:
 	residue::data_type branch_color;
 	
 	bool add_config_section(const dawg::ma &ma);
+	bool finalize_configuration();
 	
 	void align(alignment& aln, const details::seq_map &seqs);
 };
