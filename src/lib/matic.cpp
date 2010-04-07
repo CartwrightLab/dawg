@@ -406,8 +406,5 @@ void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
 	}
 ENDFOR:
 	/*noop*/;
-
 }
-
-
 
