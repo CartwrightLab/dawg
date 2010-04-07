@@ -139,7 +139,7 @@ public:
 		return cs_decode[r&63];
 	}
 	char decode(const residue &r) const {
-		return decode_base(r.base());
+		return r.is_deleted() ? '-' : decode_base(r.base());
 	}
 	
 	template<typename It1, typename It2>

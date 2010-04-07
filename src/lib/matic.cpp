@@ -83,21 +83,23 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 // TODO: Replace map lookups with precached indexes
 void dawg::matic::walk(alignment& aln) {
 	rex.model(residue_exchange::DNA);
-	branch_color = 0;
 	foreach(const segment &seg, configs) {
 		details::seq_map seqs;
+		branch_color = 0;		
 		foreach(const section &sec, seg) {
-			branch_color += dawg::residue::branch_inc;
 			pair<details::seq_map::iterator,bool> res =
 				seqs.insert(make_pair(sec.usertree.root_label(), details::sequence_data()));
-			if(res.second)
+			if(res.second) {
 				sec.rut_mod(res.first->second.seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
+				branch_color += dawg::residue::branch_inc;
+			}
 			wood::data_type::const_iterator nit = sec.usertree.data().begin();
 			for(++nit;nit!=sec.usertree.data().end();++nit) {
 				res = seqs.insert(make_pair(nit->label, details::sequence_data()));
 				const sequence &ranc = seqs[(nit-nit->anc)->label].seq;
 				sec.evolve(res.first->second.seq, res.first->second.indels, nit->length,
 					branch_color, ranc.begin(), ranc.end(), maxx);
+				branch_color += dawg::residue::branch_inc;
 			}
 		}
 		align(aln, seqs);
@@ -108,6 +110,10 @@ void dawg::matic::walk(alignment& aln) {
 			cout << kv.first << " "
 				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
 				 << ss << endl;
+			foreach(residue &r, kv.second.seq) {
+				cout << rex.decode(r) << "/" << r.branch() / dawg::residue::branch_inc << " ";
+			}
+			cout << endl;
 		}
 		cout << endl;
 	}
