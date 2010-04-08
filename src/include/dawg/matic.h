@@ -115,7 +115,8 @@ public:
 	// Configure Simulation
 	inline bool configure(const dawg::ma &ma) {
 		clear_configuration();
-		return add_config_section(ma);
+		return ( add_config_section(ma) &&
+		         finalize_configuration() );
 	}
 	inline void clear_configuration() {
 		configs.clear();
@@ -128,7 +129,7 @@ public:
 			if(!add_config_section(*first))
 				return DAWG_ERROR("Configuration section '"
 					<< first->name << "' failed to process.");
-		return true;
+		return finalize_configuration();
 	}
 
 	// Run the simulation
@@ -147,7 +148,6 @@ protected:
 	typedef dawg::details::matic_section section;
 	typedef boost::ptr_vector<section> segment;
 	typedef std::vector<segment> segment_vector;
-	typedef std::map<std::string, wood::data_type::size_type> wood_label_to_index;
 	
 	segment_vector configs;
 	mutt maxx;

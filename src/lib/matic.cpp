@@ -56,7 +56,8 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("root model could not be created.");
 	
 	// parse tree and find all named descendant nodes
-	info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end());
+	if(!info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end()))
+		return DAWG_ERROR("invalid tree; it failed to parse");
 		
 	// test whether descendents already exist in this segment
 	foreach(section &r, seg) {
@@ -75,6 +76,13 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	    && !info->usertree.has_desc(it->usertree.root_label()); ++it)
 		/*noop*/;
 	seg.insert(it, info);
+	
+	return true;
+}
+
+bool dawg::matic::finalize_configuration() {
+	typedef std::map<std::string, wood::data_type::size_type> wood_label_to_index;
+	// find all the names
 	
 	return true;
 }
@@ -351,7 +359,7 @@ void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
 	aln.reserve(seqs.size());
 	for(details::seq_map::const_iterator cit = seqs.begin(); cit != seqs.end(); ++cit) {
 		// Skip any sequence that begin with one of the two special characters
-		if(cit->first[0] == '(' || cit->first[0] == '_')
+		if(cit->first.empty() || cit->first[0] == '{' || cit->first[0] == '~')
 			continue;
 		// TODO: Remove this to reuse aln locations
 		aln.push_back(alignment::value_type());

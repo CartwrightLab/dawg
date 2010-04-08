@@ -15,6 +15,7 @@
 
 #include <set>
 #include <iterator>
+#include <functional>
 
 
 namespace dawg {
@@ -76,14 +77,14 @@ public:
 		for(data_type::reverse_iterator it = _data.rbegin(); it != _data.rend(); ++it) {
 			if(it->unlabeled() && !it->terminal()) {
 				if(it->one_child()) {
-					it->label = "(" + get_right(it)->label + ")";
+					it->label = "{" + get_right(it)->label + "}";
 				} else {
 					std::string &a = get_left(it)->label;
 					std::string &b = get_right(it)->label;
 					if(b > a)
-						it->label = "(" + a + "," + b + ")";
+						it->label = "{" + a + "," + b + "}";
 					else
-						it->label = "(" + b + "," + a + ")";
+						it->label = "{" + b + "," + a + "}";
 				}
 			}
 			// add label to descendents list
@@ -173,7 +174,10 @@ struct newick_grammar : qi::grammar<Iterator, wood::data_type(), standard::space
 					>> -(label[bind(&wood_node::label, back(_r1)) = _1] ||
 					(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]));
 		label    = unquoted | quoted;
-		unquoted = lexeme[+(char_ - (char_(":,)(;'[]")|space))];
+		// Due to the way hidden nodes are constructed,
+		// unquoted labels should not begin with {, |, or }.
+		unquoted = lexeme[(char_ - (char_(":,)(;'[]|{}")|space)) >>
+		                 *(char_ - (char_(":,)(;'[]")|space))];
 		quoted   = raw[lexeme['\'' >>
 			*(char_ - '\'') >> *(standard::string("\'\'") >> *(char_ - '\''))
 			>> '\'']];
