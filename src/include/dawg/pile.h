@@ -100,7 +100,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::raw(), skip_type> {
 		
 		start = +section;
 		section = section_header || section_body;
-		section_header = "[[" >> -(id >> -('=' >> id)) >> "]]";
+		section_header = "[[" >> id >> -('=' >> id) >> "]]";
 		section_body = +subsection;
 		subsection = subsection_header || subsection_body;
 		subsection_header = '[' >> -id >> ']';
