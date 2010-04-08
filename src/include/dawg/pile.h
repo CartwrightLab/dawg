@@ -141,6 +141,8 @@ bool pile::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
+	const std::string autoseg("Unamed Section ");
+	unsigned int autonum = 1;
 	section *psec = &data.front();
 	for(raw::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
@@ -151,7 +153,12 @@ bool pile::parse(Iterator first, Iterator last) {
 			// if section parent is black, inherit from previous
 			psec->inherits = sec.first.second.empty() ? header : sec.first.second;
 			// set new header and reset subheader
-			psec->name = header = sec.first.first;
+			if(sec.first.first != '-') {
+				header = sec.first.first;
+			} else {
+				header = autoseg;
+			}
+			psec->name = header;
 			subheader.clear();
 		}
 		const details::section_body_type &body = sec.second;
