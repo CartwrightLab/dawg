@@ -45,6 +45,7 @@ struct matic_section {
 
 	wood usertree;
 	wood_meta_type metatree;
+	bool create_root;
 	
 	subst_model     sub_mod;
 	rate_model      rat_mod;
@@ -149,16 +150,21 @@ protected:
 	typedef boost::ptr_vector<section> segment;
 	typedef std::vector<segment> segment_vector;
 	
+	typedef std::map<std::string, wood::data_type::size_type> label_to_index_type;
+	typedef std::vector<details::sequence_data> seq_buffers_type;
+	
 	segment_vector configs;
 	mutt maxx;
 	residue_exchange rex;
 	
 	residue::data_type branch_color;
 	
+	label_to_index_type label_union;
+	
 	bool add_config_section(const dawg::ma &ma);
 	bool finalize_configuration();
 	
-	void align(alignment& aln, const details::seq_map &seqs);
+	void align(alignment& aln, const seq_buffers_type &seqs);
 };
 
 }

@@ -57,7 +57,7 @@ public:
 	inline const data_type& data() const { return _data; }
 	inline const std::string& root_label() const { return root_name; }
 	inline bool  has_desc(const std::string &d) const  { return desc_names.count(d) != 0; }
-	inline const std::set<std::string>& descs() const { return desc_names; }
+	inline const std::set<std::string>& desc_labels() const { return desc_names; }
 
 	template<typename Iterator>
 	bool parse(Iterator first, Iterator last);

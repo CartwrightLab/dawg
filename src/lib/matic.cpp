@@ -62,9 +62,9 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	// test whether descendents already exist in this segment
 	foreach(section &r, seg) {
 		std::set<std::string>::const_iterator it = has_intersection(
-			r.usertree.descs().begin(), r.usertree.descs().end(),
-			info->usertree.descs().begin(), info->usertree.descs().end());
-		if(it != info->usertree.descs().end())
+			r.usertree.desc_labels().begin(), r.usertree.desc_labels().end(),
+			info->usertree.desc_labels().begin(), info->usertree.desc_labels().end());
+		if(it != info->usertree.desc_labels().end())
 			return DAWG_ERROR("invalid tree; descendent '" <<  *it
 			               << "' already exists in segment #"
 			               << ma.root_segment);
@@ -81,8 +81,40 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 }
 
 bool dawg::matic::finalize_configuration() {
-	typedef std::map<std::string, wood::data_type::size_type> wood_label_to_index;
-	// find all the names
+	label_union.clear();
+	label_to_index_type::value_type::second_type u = 1;
+	// find the union of all labels in the configuration
+	foreach(segment &seg, configs) {
+		foreach(section &sec, seg) {
+			label_to_index_type::iterator it;
+			// try to insert the root label
+			it = label_union.insert(label_to_index_type::value_type(sec.usertree.root_label(),0)).first;
+			// if this root hasn't been seen before in this segment, mark it
+			sec.create_root = (it->second < u);
+			it->second = u;
+			// insert and mark all descendant labels
+			it = label_union.begin();
+			foreach(const string &lab, sec.usertree.desc_labels()) {
+				it = label_union.insert(it, label_to_index_type::value_type(lab,0));
+				it->second = u;
+			}
+		}
+		++u; // increment segment number
+	}
+	// set id's for each label
+	u = 0;
+	foreach(label_to_index_type::value_type &lab, label_union) {
+		lab.second = u++;
+	}
+	// copy the id's to the meta information for a tree
+	foreach(segment &seg, configs) {
+		foreach(section &sec, seg) {
+			sec.metatree.resize(sec.usertree.data().size());
+			for(u=0;u<sec.usertree.data().size();++u) {
+				sec.metatree[u] = label_union[sec.usertree.data()[u].label];
+			}
+		}
+	}
 	
 	return true;
 }
@@ -91,37 +123,49 @@ bool dawg::matic::finalize_configuration() {
 // TODO: Replace map lookups with precached indexes
 void dawg::matic::walk(alignment& aln) {
 	rex.model(residue_exchange::DNA);
+	
+	aln.resize(label_union.size());
+	vector<details::sequence_data> seqs(label_union.size());
+	int uu = 0;
+	foreach(const label_to_index_type::value_type &kv, label_union) {
+		aln[uu++].label = kv.first;
+		
+	}
+	
 	foreach(const segment &seg, configs) {
-		details::seq_map seqs;
-		branch_color = 0;		
+		branch_color = 0;
+		// clear the sequence buffers
+		foreach(details::sequence_data &v, seqs) {
+			v.seq.clear();
+			//v.indels.clear();
+		}
 		foreach(const section &sec, seg) {
-			pair<details::seq_map::iterator,bool> res =
-				seqs.insert(make_pair(sec.usertree.root_label(), details::sequence_data()));
-			if(res.second) {
-				sec.rut_mod(res.first->second.seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
+			if(sec.create_root) {
+				sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
 				branch_color += dawg::residue::branch_inc;
 			}
-			wood::data_type::const_iterator nit = sec.usertree.data().begin();
-			for(++nit;nit!=sec.usertree.data().end();++nit) {
-				res = seqs.insert(make_pair(nit->label, details::sequence_data()));
-				const sequence &ranc = seqs[(nit-nit->anc)->label].seq;
-				sec.evolve(res.first->second.seq, res.first->second.indels, nit->length,
+			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
+				const wood::node &n = sec.usertree.data()[u];
+				const sequence &ranc = seqs[sec.metatree[u-n.anc]].seq;
+				sequence &seq = seqs[sec.metatree[u]].seq;
+				sec.evolve(seq, seqs[sec.metatree[u]].indels, n.length,
 					branch_color, ranc.begin(), ranc.end(), maxx);
 				branch_color += dawg::residue::branch_inc;
 			}
 		}
 		align(aln, seqs);
 		
-		foreach(details::seq_map::value_type &kv, seqs) {
-			string ss(kv.second.seq.size(), ' ');
-			rex.decode_array(kv.second.seq.begin(), kv.second.seq.end(), ss.begin());
-			cout << kv.first << " "
+		uu = 0;
+		foreach(details::sequence_data &v, seqs) {
+			string ss(v.seq.size(), ' ');
+			rex.decode_array(v.seq.begin(), v.seq.end(), ss.begin());
+			cout << aln[uu++].label << " "
 				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
 				 << ss << endl;
-			foreach(residue &r, kv.second.seq) {
-				cout << rex.decode(r) << "/" << r.branch() / dawg::residue::branch_inc << " ";
-			}
-			cout << endl;
+			//foreach(residue &r, v.seq) {
+			//	cout << rex.decode(r) << "/" << r.branch() / dawg::residue::branch_inc << " ";
+			//}
+			//cout << endl;
 		}
 		cout << endl;
 	}
@@ -347,7 +391,9 @@ struct aligner_data {
 	std::string *str;
 };
 
-void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
+void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs) {
+	assert(aln.size() <= seqs.size());
+	
 	unsigned uFlags = 0; //temporary
 	// Let's spend some memory to save the code from branching.
 	static unsigned int uUpdate[residue::delete_del+1];
@@ -355,16 +401,8 @@ void dawg::matic::align(alignment& aln, const details::seq_map &seqs) {
 	// construct a table to hold alignment information
 	std::vector<aligner_data> aln_table;
 	// TODO: Remove this to reuse aln locations
-	aln.clear();
-	aln.reserve(seqs.size());
-	for(details::seq_map::const_iterator cit = seqs.begin(); cit != seqs.end(); ++cit) {
-		// Skip any sequence that begin with one of the two special characters
-		if(cit->first.empty() || cit->first[0] == '{' || cit->first[0] == '~')
-			continue;
-		// TODO: Remove this to reuse aln locations
-		aln.push_back(alignment::value_type());
-		aln.back().label = cit->first;
-		aln_table.push_back(aligner_data(cit->second.seq, aln.back().seq));
+	for(alignment::size_type u=0;u<aln.size();++u) {
+		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
 	}
 	
 	// Alignment rules:
