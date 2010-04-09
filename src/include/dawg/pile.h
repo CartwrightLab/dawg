@@ -11,6 +11,7 @@
 #endif
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/fusion/include/std_pair.hpp>
@@ -141,8 +142,7 @@ bool pile::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
-	const std::string autoseg("Unamed Section ");
-	unsigned int autonum = 1;
+	int autonum = 1;
 	section *psec = &data.front();
 	for(raw::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
@@ -153,10 +153,16 @@ bool pile::parse(Iterator first, Iterator last) {
 			// if section parent is black, inherit from previous
 			psec->inherits = sec.first.second.empty() ? header : sec.first.second;
 			// set new header and reset subheader
-			if(sec.first.first != '-') {
+			if(sec.first.first != "-") {
 				header = sec.first.first;
 			} else {
-				header = autoseg;
+				using boost::spirit::karma::generate;
+				using boost::spirit::karma::int_;
+				char x[16+12] = "Unnamed Section ";
+				char *p = x+16;
+				generate(p, int_, autonum++);
+				*p = 0;
+				header = x;
 			}
 			psec->name = header;
 			subheader.clear();
