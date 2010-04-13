@@ -136,7 +136,7 @@ int dawg_app::run() {
 		cout << aa << endl;
 	}
 	
-	// Create our the object that will do all the simulation
+	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
 	dawg::matic kimura;
 	if(!kimura.configure(configs.begin(), configs.end())) {
@@ -147,16 +147,13 @@ int dawg_app::run() {
 	if(!glopts.sim_seed.empty()) {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
-	// create a set of aligned sequences;
+	// create sets of aligned sequences;
 	dawg::alignment aln;
-	kimura.walk(aln);
-	cout << aln << endl;
-	
-	//if(!Execute()) {
-	//	DawgError("Execution failed.");
-	//	return EXIT_FAILURE;
-	//}
-	
+	for(unsigned int i=1;i<=glopts.sim_reps;++i) {
+		kimura.walk(aln);
+		cout << aln << endl;
+	}
+		
 	return EXIT_SUCCESS;
 }
 

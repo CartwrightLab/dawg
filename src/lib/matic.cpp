@@ -120,7 +120,6 @@ bool dawg::matic::finalize_configuration() {
 }
 
 
-// TODO: Replace map lookups with precached indexes
 void dawg::matic::walk(alignment& aln) {
 	rex.model(residue_exchange::DNA);
 	
@@ -128,8 +127,9 @@ void dawg::matic::walk(alignment& aln) {
 	vector<details::sequence_data> seqs(label_union.size());
 	int uu = 0;
 	foreach(const label_to_index_type::value_type &kv, label_union) {
+		aln[uu].seq.clear();
+		//TODO: Move this to pre walk?
 		aln[uu++].label = kv.first;
-		
 	}
 	
 	foreach(const segment &seg, configs) {
@@ -153,21 +153,8 @@ void dawg::matic::walk(alignment& aln) {
 				branch_color += dawg::residue::branch_inc;
 			}
 		}
+		// Align segment
 		align(aln, seqs);
-		
-		uu = 0;
-		foreach(details::sequence_data &v, seqs) {
-			string ss(v.seq.size(), ' ');
-			rex.decode_array(v.seq.begin(), v.seq.end(), ss.begin());
-			cout << aln[uu++].label << " "
-				 << set_open('\x7f') << set_delimiter('\x7f') << set_close('\x7f')
-				 << ss << endl;
-			//foreach(residue &r, v.seq) {
-			//	cout << rex.decode(r) << "/" << r.branch() / dawg::residue::branch_inc << " ";
-			//}
-			//cout << endl;
-		}
-		cout << endl;
 	}
 }
 
