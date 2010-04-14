@@ -77,7 +77,10 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 			               << "' already exists in segment #"
 			               << ma.root_segment);
 	}
-		
+	
+	// Allow gap overlap ?
+	info->gap_overlap = ma.root_gapoverlap;
+	
 	// find location to insert
 	segment::iterator it;
 	for(it = seg.begin(); it != seg.end()
@@ -129,13 +132,34 @@ bool dawg::matic::finalize_configuration() {
 
 
 void dawg::matic::walk(alignment& aln) {
+	if(configs.empty())
+		return;
 	aln.resize(label_union.size());
 	vector<details::sequence_data> seqs(label_union.size());
 	int uu = 0;
 	foreach(const label_to_index_type::value_type &kv, label_union) {
 		aln[uu].seq.clear();
+		seqs[uu].indels.clear();
+		seqs[uu].seq.clear();
 		//TODO: Move this to pre walk?
 		aln[uu++].label = kv.first;
+	}
+	
+	{	// take first seg and do upstream indels
+		// root.gapoverlap = false prevents upstream indel creation
+		const segment &seg = configs[0];
+		branch_color = 0;
+		foreach(const section &sec, seg) {
+			if(!sec.gap_overlap)
+				continue;
+			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
+				const wood::node &n = sec.usertree.data()[u];
+				details::sequence_data &sd = seqs[sec.metatree[u]];
+				sec.evolve_upstream(sd.seq, sd.indels, n.length,
+					branch_color, maxx);
+			}
+		}
+		align(aln, seqs, seg.rex);
 	}
 	
 	foreach(const segment &seg, configs) {
@@ -143,12 +167,18 @@ void dawg::matic::walk(alignment& aln) {
 		// clear the sequence buffers
 		foreach(details::sequence_data &v, seqs) {
 			v.seq.clear();
-			//v.indels.clear();
 		}
 		foreach(const section &sec, seg) {
 			if(sec.create_root) {
 				sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
 				branch_color += dawg::residue::branch_inc;
+			}
+			if(!sec.gap_overlap) {
+				// if gap_overlap is false, clear the upstream buffer
+				// of all sequences in the tree
+				for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
+					seqs[sec.metatree[u]].indels.clear();
+				}
 			}
 			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
 				const wood::node &n = sec.usertree.data()[u];
@@ -158,6 +188,7 @@ void dawg::matic::walk(alignment& aln) {
 					branch_color, ranc.begin(), ranc.end(), maxx);
 				branch_color += dawg::residue::branch_inc;
 			}
+			
 		}
 		// Align segment
 		align(aln, seqs, seg.rex);
@@ -166,13 +197,14 @@ void dawg::matic::walk(alignment& aln) {
 
 void dawg::details::matic_section::evolve_upstream(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
-		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const {
 	double dM, d;
 	//insertion and deletion rates
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
 	double indel_rate = ins_rate+del_rate;
-
+	
+	indels.clear();
+	
 	indel_data::stack del_up;
 
 	// Calculate Upstream Deletions
@@ -206,7 +238,8 @@ void dawg::details::matic_section::evolve_upstream(
 			indels.del.push(del_up.top());
 			del_up.pop();
 		}
-		evolve_indels(child, indels, T, branch_color, first, first, m);
+		evolve_indels(child, indels, T, branch_color,
+			sequence::const_iterator(), sequence::const_iterator(), m);
 	}
 	// Add any outstanding upstream deletions
 	while(!del_up.empty()) {
@@ -401,7 +434,8 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	unsigned int uStateQuit = (residue::deleted_base+1)*2; // (residue::deleted_base+1)*4-1
+	unsigned int uStateQuit = (residue::deleted_base+1)*2;
+	//unsigned int uStateQuit = (residue::deleted_base+1)*2-1;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
 	// Go through each column, adding gaps where neccessary
@@ -417,10 +451,10 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 				uState &= v.it->base();
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = v.it->base();
+				uState = v.it->base() & uStateQuit;
 			}
 		}
-		switch((uState+1) >> residue::base_bit_width) {
+		switch(((uState+1) >> residue::base_bit_width)&3) {
 			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
 			case 1: // Empty column that we want to ignore
 				foreach(aligner_data &v, aln_table) {

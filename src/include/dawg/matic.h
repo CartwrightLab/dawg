@@ -46,6 +46,7 @@ struct matic_section {
 	wood usertree;
 	wood_meta_type metatree;
 	bool create_root;
+	bool gap_overlap;
 	
 	subst_model     sub_mod;
 	rate_model      rat_mod;
@@ -57,7 +58,6 @@ struct matic_section {
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const;
 	void evolve_upstream(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
-		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const;
 	dawg::sequence::const_iterator
 	evolve_indels(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
