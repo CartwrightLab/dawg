@@ -85,7 +85,7 @@ public:
 
 	// Draw a random nucleotide (base and rate)
 	inline Nucleotide RandomNucleotide() const {
-		return Nucleotide(RandomBase(), RandomRate(), branchColor, false);
+		return Nucleotide(RandomBase(), RandomRate(), branchColor);
 	}
 
 	Tree() : m_nSec(0) {}

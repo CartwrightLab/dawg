@@ -22,7 +22,6 @@
 #include <exception>
 
 #include "dawg.h"
-#include "tree.h"
 #include "rand.h"
 #include "var.h"
 #include "dawg_app.h"
@@ -212,178 +211,6 @@ bool Execute()
 
 	// Read variables from configuration
 
-	if(!DawgVar::GetVector("Tree", vtTrees))
-		return DawgError("No trees specified.");
-
-	if(DawgVar::GetVector("Sequence", vssSeqs))
-	{
-		if(vssSeqs.size() < vtTrees.size())
-			return DawgError("\"Sequence\" and \"Tree\" must have the same size.");
-		for(vector<string>::const_iterator cit = vssSeqs.begin(); cit != vssSeqs.end(); ++cit)
-			uTotalSeqLen += cit->length();
-	}
-	else if(DawgVar::GetVector("Length", vuSeqLen))
-	{
-		if(vuSeqLen.size() < vtTrees.size())
-			return DawgError("\"Length\" and \"Tree\" must have the same size.");
-		for(vector<unsigned int>::const_iterator cit = vuSeqLen.begin(); cit != vuSeqLen.end(); ++cit)
-			uTotalSeqLen += *cit;
-	}
-	else
-		vuSeqLen.resize(vtTrees.size(), 100);
-
-	vvdRates.resize(vtTrees.size());
-	if(DawgVar::GetMatrix("Rates", &vvdRates[0], vvdRates.size()))
-	{
-		for(vector< vector<double> >::const_iterator cit = vvdRates.begin();
-			cit != vvdRates.end(); ++cit)
-			uTotalRateLen += cit->size();
-		if(uTotalRateLen > 0 && uTotalRateLen < uTotalSeqLen)
-			return DawgError("\"Rates\" vector is too small");
-	}
-	else
-		vvdRates.clear();
-
-    DawgVar::Get("Reps", uReps);
-	DawgVar::GetVector("Seed", vuSeed);
-	DawgVar::Get("Model", ssModel);
-	DawgVar::GetVector("Params", vdParams);
-	if(!DawgVar::Get("Gamma", dGamma)) // Coef of Variation
-	{
-		if(DawgVar::Get("Alpha", dGamma))  // Shape parameter
-			dGamma = 1.0/dGamma;
-	}
-	DawgVar::Get("Iota", dIota);
-	DawgVar::Get("TreeScale", dTreeScale);
-	DawgVar::GetArray("GapModel", ssGapModel, 2);
-	nRes = DawgVar::GetArray("Freqs", dNucFreq, 4, false);
-	if(nRes > 0 && nRes < 4)
-		return DawgError("\"Freqs\" specified incorrectly.");
-
-	DawgVar::Get("GapSingleChar", bGapSingle);
-	DawgVar::Get("GapPlus", bGapPlus);
-	DawgVar::Get("LowerCase", bLowerCase);
-	//DawgVar::Get("Translate", bTranslate);
-	DawgVar::Get("KeepEmpty", bKeepEmpty);
-
-	nRes = DawgVar::GetArray("Lambda", dLambda, 2, false);
-	if(nRes)
-	{
-		if(nRes == 1)
-			dLambda[1] = dLambda[0] *= 0.5;
-		nRes = DawgVar::GetMatrix("GapParams", vdGapModel, 2);
-		if(nRes == 0)
-			return DawgError("\"GapParams\" must be specified if \"Lambda\" is.");
-	}
-	DawgVar::Get("KeepFlank", uKeepFlank);
-
-	DawgVar::Get("File", ssFile);
-	DawgVar::Get("Format", ssFormat);
-    if(DawgVar::Get("NexusCode", ssOutBlockAfter))
-		DawgWarn("NexusCode is depreciated.  Use Out.Block.* instead.");
-
-	DawgVar::Get("Out.Block.Head", ssOutBlockHead);
-	DawgVar::Get("Out.Block.Before", ssOutBlockBefore);
-	DawgVar::Get("Out.Block.After", ssOutBlockAfter);
-	DawgVar::Get("Out.Block.Tail", ssOutBlockTail);
-	DawgVar::Get("Out.Subst", bOutSubst);
-
-	// Setup Model Parameters from Variables
-
-	// Load random number generator
-	if(vuSeed.empty())
-	{
-		for(unsigned int u=0;u<4;++u)
-			vuSeed.push_back(rand_seed());
-	}
-	mt_srand(&vuSeed[0], vuSeed.size());
-
-	// Setup recombinant tree
-	Tree myTree;
-	if(!myTree.ProcessTree(vtTrees.begin(), vtTrees.end()))
-		return DawgError("Internally inconsistent Tree");
-
-	// Construct substitution matrices
-	if(ssModel == "GTR")
-	{
-		if(vdParams.size() < 6)
-			return DawgError("GTR model requires at least 6 numerical parameters.");
-		for(int i=0;i<6;i++)
-			dRevParams[i] = vdParams[i];
-	}
-	else if(ssModel == "JC")
-	{
-		dNucFreq[3] = dNucFreq[2] = dNucFreq[1] = dNucFreq[0] = 0.25;
-		dRevParams[5] = dRevParams[4] = dRevParams[3] = 1.0;
-		dRevParams[2] = dRevParams[1] = dRevParams[0] = 1.0;
-	}
-	else if(ssModel == "K2P")
-	{
-		if(vdParams.size() < 2)
-			return DawgError("K2P model requires at least 2 numerical parameters.");
-		dNucFreq[3] = dNucFreq[2] = dNucFreq[1] = dNucFreq[0] = 0.25;
-		dRevParams[4] = dRevParams[1] = vdParams[0];
-		dRevParams[0] = dRevParams[2] = dRevParams[3] = dRevParams[5] = vdParams[1];
-	}
-	else if(ssModel == "K3P")
-	{
-		if(vdParams.size() < 3)
-			return DawgError("K3P model requires at least 3 numerical parameters.");
-		dNucFreq[3] = dNucFreq[2] = dNucFreq[1] = dNucFreq[0] = 0.25;
-		dRevParams[4] = dRevParams[1] = vdParams[0];
-		dRevParams[2] = dRevParams[3] = vdParams[1];
-		dRevParams[0] = dRevParams[5] = vdParams[2];
-
-	}
-	else if(ssModel == "HKY")
-	{
-		if(vdParams.size() < 1)
-			return DawgError("HKY model requires at least 1 numerical parameter.");
-		dRevParams[4] = dRevParams[1] = vdParams[0];
-		dRevParams[0] = dRevParams[2] = dRevParams[3] = dRevParams[5] = 1.0;
-	}
-	else if(ssModel == "F81")
-	{
-		dRevParams[5] = dRevParams[4] = dRevParams[3] = 1.0;
-		dRevParams[2] = dRevParams[1] = dRevParams[0] = 1.0;
-	}
-	else if(ssModel == "F84")
-	{
-		if(vdParams.size() < 1)
-			return DawgError("F84 model requires at least 1 numerical parameter.");
-		dRevParams[1] = 1.0 + vdParams[0]/(dNucFreq[0]+dNucFreq[2]);
-		dRevParams[4] = 1.0 + vdParams[0]/(dNucFreq[1]+dNucFreq[3]);
-		dRevParams[0] = dRevParams[2] = dRevParams[3] = dRevParams[5] = 1.0;
-	}
-	else if(ssModel == "TN")
-	{
-		if(vdParams.size() < 3)
-			return DawgError("TN model requires at least 3 numerical parameters.");
-		dRevParams[1] = vdParams[0];
-		dRevParams[4] = vdParams[1];
-		dRevParams[0] = dRevParams[2] = dRevParams[3] = dRevParams[5] = vdParams[2];
-	}
-	else
-		return DawgError("Unknown substitution model, \"%s\".", ssModel.c_str());
-
-	// Construct Indel parameters
-	IndelModel::Params paramsDel, paramsIns;
-	paramsIns.ssModel = ssGapModel[0];
-	paramsIns.dLambda = dLambda[0];
-	paramsIns.vdModel = vdGapModel[0];
-
-	paramsDel.ssModel = ssGapModel[1];
-	paramsDel.dLambda = dLambda[1];
-	paramsDel.vdModel = vdGapModel[1];
-
-	// Initialize Evolution
-	if(!myTree.SetupEvolution(dNucFreq, dRevParams, paramsIns, paramsDel,
-		dGamma, dIota, dTreeScale, uKeepFlank ))
-		return DawgError("Bad evolution parameters");
-
-	// Initialize Root
-	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
-		return DawgError("Bad root parameters");
 
 	// Read Out.Block.* from file if neccessary
    	if(!ssOutBlockHead.empty())
@@ -452,22 +279,6 @@ bool Execute()
 	else
 		return DawgError("Unknown file format, \"%s\".", ssFormat.c_str());
 
-	SetFormat(uFmt, uReps, SS2CS(ssOutBlockHead), SS2CS(ssOutBlockBefore),
-		SS2CS(ssOutBlockAfter), SS2CS(ssOutBlockTail), bOutSubst);
-
-	// setup output flags
-	unsigned int uOutFlags = 0u;
-	if(bGapSingle)
-		uOutFlags |= FlagOutGapSingleChar;
-	if(bGapPlus)
-		uOutFlags |= FlagOutGapPlus|FlagOutKeepEmpty;
-	if(bLowerCase)
-		uOutFlags |= FlagOutLowerCase;
-	if(bTranslate)
-		uOutFlags |= FlagOutTranslate;
-	if(bKeepEmpty)
-		uOutFlags |= FlagOutKeepEmpty;
-
 	// setup output location
 	ostream* pOut;
 	ofstream ofOut;
@@ -487,20 +298,6 @@ bool Execute()
 	DawgIniOutput(*pOut);
 
 	// Evolve Many Sequences
-	while(uReps--)
-	{
-		//Evolve
-		myTree.Evolve();
-
-		//SaveOutput
-		Tree::Alignment aln;
-		myTree.Align(aln, uOutFlags);
-		if(!SaveAlignment(*pOut, aln, uOutFlags))
-			return DawgError("Error saving alignment.");
-	}
-
-	DawgFinOutput(*pOut);
-
 	return true;
 }
 

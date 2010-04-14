@@ -311,7 +311,8 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 					}
 				}
 				// insert u "deleted insertions" into buffer
-				seq.insert(seq.end(), u, Nucleotide(0, Nucleotide::rate_type(1.0), branchColor, true));
+				seq.insert(seq.end(), u, Nucleotide(Nucleotide::deleted_base,
+					Nucleotide::rate_type(1.0), branchColor));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
 				n.second -= u;
@@ -342,7 +343,7 @@ Tree::Sequence::const_iterator Tree::EvolveIndels( Sequence &seq,
 					seq.push_back(*first);
 					if(first->is_deleted())
 						continue;
-					seq.back().mark_deleted(true);
+					seq.back().base(Nucleotide::deleted_base);
 					++uu;
 				}
 				// remove sites from stack, pop if empty
@@ -626,10 +627,11 @@ bool Tree::SetupRoot(const std::vector<std::string> &vSeqs, const std::vector<un
 	return true;
 }
 
+// TODO: uUpdate code broken
 void Tree::Align(Alignment &aln, unsigned int uFlags)
 {
 	// Let's spend some memory to save the code from branching.
-	static unsigned int uUpdate[residue::delete_del+1];
+	unsigned int uUpdate[residue::base_mask+1];
 	
 	// construct a table of sequences
 	m_vAlnTable.clear();
@@ -648,8 +650,8 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 	unsigned int uState = 1;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
-	uUpdate[residue::delete_ext] = 2;
-	uUpdate[residue::delete_del] = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
+	//uUpdate[residue::delete_ext] = 2;
+	//uUpdate[residue::delete_del] = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
 	// Go through each column, adding gaps where neccessary
 	for(;;) {
 		uState = 0; // Set to quit
@@ -660,10 +662,10 @@ void Tree::Align(Alignment &aln, unsigned int uFlags)
 				continue; // Sequence is done
 			uBranchN = sit->it->branch();
 			if(uBranchN == uBranch) {
-				uState |= uUpdate[sit->it->deleted()];
+				uState |= uUpdate[sit->it->base()];
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = uUpdate[sit->it->deleted()];
+				uState = uUpdate[sit->it->base()];
 			}
 		}
 		switch(uState) {

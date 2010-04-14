@@ -244,7 +244,8 @@ dawg::details::matic_section::evolve_indels(
 					}
 				}
 				// insert u "deleted insertions" into buffer
-				child.insert(child.end(), u, residue(0, residue::rate_type(1.0), branch_color, true));
+				child.insert(child.end(), u, residue(residue::deleted_base,
+					residue::rate_type(1.0), branch_color));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
 				n.second -= u;
@@ -276,7 +277,7 @@ dawg::details::matic_section::evolve_indels(
 					child.push_back(*first);
 					if(first->is_deleted())
 						continue;
-					child.back().mark_deleted(true);
+					child.back().base(residue::deleted_base);
 					++uu;
 				}
 				// remove sites from stack, pop if empty
@@ -382,12 +383,10 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs) {
 	assert(aln.size() <= seqs.size());
 	
 	unsigned uFlags = 0; //temporary
-	// Let's spend some memory to save the code from branching.
-	static unsigned int uUpdate[residue::delete_del+1];
 	
 	// construct a table to hold alignment information
+	// TODO: Cache this?
 	std::vector<aligner_data> aln_table;
-	// TODO: Remove this to reuse aln locations
 	for(alignment::size_type u=0;u<aln.size();++u) {
 		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
 	}
@@ -396,16 +395,12 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs) {
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	// States: Quit (0), Ext(2), Del(1)
-	unsigned int uState = 1;
+	unsigned int uStateQuit = (residue::deleted_base+1)*2; // (residue::deleted_base+1)*4-1
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
-	uUpdate[residue::delete_ext] = 2;
-	//uUpdate[residue::delete_del] = (uFlags & FlagOutKeepEmpty) ? 3 : 1;
-	uUpdate[residue::delete_del] = 1;
 	// Go through each column, adding gaps where neccessary
 	for(;;) {
-		uState = 0; // Set to quit
+		unsigned int uState =  uStateQuit; // Set to quit
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
 		foreach(aligner_data &v, aln_table) {
@@ -413,33 +408,30 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs) {
 				continue; // Sequence is done
 			uBranchN = v.it->branch();
 			if(uBranchN == uBranch) {
-				uState |= uUpdate[v.it->deleted()];
+				uState &= v.it->base();
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = uUpdate[v.it->deleted()];
+				uState = v.it->base();
 			}
 		}
-		switch(uState) {
-			case 0: goto ENDFOR; // Yes, you shouldn't use goto, except here
+		switch((uState+1) >> residue::base_bit_width) {
+			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
 			case 1: // Empty column that we want to ignore
 				foreach(aligner_data &v, aln_table) {
 					if(v.it != v.last && v.it->branch() == uBranch)
 						++v.it;
 				}
 				break;
-			case 2:
-			case 3: // Unempty column
+			case 0: // Unempty column
 				foreach(aligner_data &v, aln_table) {
 					if(v.it == v.last || v.it->branch() != uBranch) {
-						v.str->push_back(rex.decode_gaps(residue_factory::INS));
-						continue;
-					} else if(!v.it->is_deleted())
-						v.str->push_back(rex.decode_base(v.it->base()));
-					else if(v.it->branch() == 0)
-						v.str->push_back(rex.decode_gaps(residue_factory::DEL));
-					else
-						v.str->push_back(rex.decode_gaps(residue_factory::DELINS));
-					++(v.it);
+						residue_exchange::str_type s = rex.decode_ins();
+						v.str->append(s.first, s.second);
+					} else {
+						residue_exchange::str_type s = rex.decode(*v.it);
+						v.str->append(s.first, s.second);
+						++v.it;
+					}
 				}
 		};
 	}
