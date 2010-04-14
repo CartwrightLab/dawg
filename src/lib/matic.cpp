@@ -32,7 +32,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	if(ma.root_segment >= configs.size())
 		configs.resize(ma.root_segment+1);
 	segment &seg = configs[ma.root_segment];
-
+		
 	// construction section_info
 	std::auto_ptr<section> info(new section);
 	
@@ -41,6 +41,14 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		ma.subst_params.begin(), ma.subst_params.end(),
 		ma.subst_freqs.begin(), ma.subst_freqs.end()))
 		return DAWG_ERROR("substitution model could not be created.");
+	
+	if(seg.empty()) { // new segment
+		seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase, ma.output_markins);
+	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(),
+	           ma.output_lowercase, ma.output_markins)) {
+		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
+	}	
+	
 	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
 		ma.subst_rate_params.end()))
 		return DAWG_ERROR("heterogenous rate model could not be created.");
@@ -121,8 +129,6 @@ bool dawg::matic::finalize_configuration() {
 
 
 void dawg::matic::walk(alignment& aln) {
-	rex.model(residue_exchange::DNA);
-	
 	aln.resize(label_union.size());
 	vector<details::sequence_data> seqs(label_union.size());
 	int uu = 0;
@@ -154,7 +160,7 @@ void dawg::matic::walk(alignment& aln) {
 			}
 		}
 		// Align segment
-		align(aln, seqs);
+		align(aln, seqs, seg.rex);
 	}
 }
 
@@ -379,7 +385,7 @@ struct aligner_data {
 	std::string *str;
 };
 
-void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs) {
+void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const residue_exchange &rex) {
 	assert(aln.size() <= seqs.size());
 	
 	unsigned uFlags = 0; //temporary

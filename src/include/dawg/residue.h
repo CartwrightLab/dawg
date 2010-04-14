@@ -94,7 +94,9 @@ operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
 
 class residue_exchange {
 public:
-	enum { DNA = 0, RNA, AA, CODON, MODEND, WIDTH_MAX=3 };
+	enum { DNA = 0, RNA, AA, CODON, MODEND,
+	       WIDTH_MAX=3
+	     };
 
 	typedef residue_exchange self_type;
 	typedef std::pair<const char*,const char*> str_type;
@@ -105,6 +107,7 @@ public:
 		_model = a;
 		if(lc) // use lowercase translations
 			_model += 3;
+		_markins = markins;
 		// ??- is a trigraph; add a slash to prevent it
 		static const char DNA[] = "ACGT??????????????????????????????????????????????????????????\?-";
 		static const char dna[] = "acgt??????????????????????????????????????????????????????????\?-";
@@ -119,10 +122,15 @@ public:
 		                              &dna[0], &rna[0], &aa[0]
 		                            };
 		
-		cs_decode = mods[a];
-		cs_ins = &ins[(markins ? 3 : 0)];
+		cs_decode = mods[_model];
+		cs_ins = &ins[(_markins ? 3 : 0)];
 		width = (a != CODON) ? 1 : 3;
 	};
+	inline bool is_same_model(int a, bool lc=false, bool markins=false) const {
+		if(lc)
+			a += 3;
+		return (a == _model && markins == _markins);
+	}
 
 	inline residue::data_type encode(char ch) const {
 		static residue::data_type dna[] = {0,1,3,2};
@@ -157,6 +165,7 @@ public:
 
 protected:
 	int _model;
+	bool _markins;
 	const char* cs_decode;
 	const char* cs_ins;
 	int width;

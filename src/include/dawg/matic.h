@@ -147,7 +147,9 @@ public:
 	
 protected:
 	typedef dawg::details::matic_section section;
-	typedef boost::ptr_vector<section> segment;
+	struct segment : public boost::ptr_vector<section> {
+		residue_exchange rex;
+	};
 	typedef std::vector<segment> segment_vector;
 	
 	typedef std::map<std::string, wood::data_type::size_type> label_to_index_type;
@@ -155,7 +157,6 @@ protected:
 	
 	segment_vector configs;
 	mutt maxx;
-	residue_exchange rex;
 	
 	residue::data_type branch_color;
 	
@@ -164,7 +165,7 @@ protected:
 	bool add_config_section(const dawg::ma &ma);
 	bool finalize_configuration();
 	
-	void align(alignment& aln, const seq_buffers_type &seqs);
+	void align(alignment& aln, const seq_buffers_type &seqs, const residue_exchange &rex);
 };
 
 }

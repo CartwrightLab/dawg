@@ -29,6 +29,7 @@ public:
 
 	inline const std::string& label() const { return name; }
 	inline double uniform_scale() const { return uni_scale; }
+	inline int seq_type() const { return _model; }
 	
 	template<typename It1, typename It2>
 	bool create(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) {
@@ -61,6 +62,13 @@ public:
 	}
 	
 private:
+	// must hold at least 64 different characters
+	double freqs[64];
+	double table[64][64];
+	double uni_scale;
+	std::string name;
+	int _model;
+
 	// pointer that will hold our method
 	base_type (subst_model::*do_op_f)(mutt &m) const;
 	base_type (subst_model::*do_op_s)(mutt &m, base_type n) const;
@@ -76,6 +84,7 @@ private:
 	bool create_gtr(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) {
 		double d = 0.0;
 		int u = 0;
+		_model = residue_exchange::DNA;
 		// do freqs first
 		if(!create_freqs(rname, first2, last2, &freqs[0], &freqs[4]))
 			return false;
@@ -296,12 +305,6 @@ private:
 			*first2 /= d;
 		return true;
 	}
-		
-	// must hold at least 64 different characters
-	double freqs[64];
-	double table[64][64];
-	double uni_scale;
-	std::string name;
 };
  
 } /* namespace dawg */
