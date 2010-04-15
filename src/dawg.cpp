@@ -32,6 +32,8 @@
 #include <dawg/matic.h>
 #include <dawg/global.h>
 
+#include <boost/algorithm/string/regex.hpp>
+
 using namespace std;
 using namespace boost;
 using namespace dawg;
@@ -101,6 +103,12 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 }
 
 int dawg_app::run() {
+	//std::string _temp(" I love %r/%R/%%/%.  Do you?"), _out;
+	//_out = boost::algorithm::replace_all_regex_copy(_temp, boost::regex("%(r)|%(R)|%(%)"),
+	//	std::string("?1x:?2y:z"), match_default | format_all);
+	//cout << _out << endl << endl;
+	
+
 	if(arg.version)	{
 		cerr << endl << VERSION_MSG << endl << endl;
 		return EXIT_SUCCESS;
