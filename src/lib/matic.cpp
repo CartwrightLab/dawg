@@ -96,12 +96,18 @@ bool dawg::matic::finalize_configuration() {
 	label_to_index_type::value_type::second_type u = 1;
 	// find the union of all labels in the configuration
 	foreach(segment &seg, configs) {
+		bool has_root = false;
 		foreach(section &sec, seg) {
 			label_to_index_type::iterator it;
 			// try to insert the root label
 			it = label_union.insert(label_to_index_type::value_type(sec.usertree.root_label(),0)).first;
 			// if this root hasn't been seen before in this segment, mark it
-			sec.create_root = (it->second < u);
+			if(it->second < u) {
+				if(has_root)
+					return DAWG_ERROR("segment " << u-1 << " has an extra root ( "
+						<< sec.usertree.root_label() << " )");
+				has_root = true;
+			}
 			it->second = u;
 			// insert and mark all descendant labels
 			it = label_union.begin();
@@ -163,16 +169,20 @@ void dawg::matic::walk(alignment& aln) {
 	}
 	
 	foreach(const segment &seg, configs) {
+		if(seg.empty())
+			continue;
 		branch_color = 0;
 		// clear the sequence buffers
 		foreach(details::sequence_data &v, seqs) {
 			v.seq.clear();
 		}
+		{ // create root sequence of this 
+			const section &sec = seg[0];
+			seqs[sec.metatree[0]].indels.clear();	
+			sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
+			branch_color += dawg::residue::branch_inc;
+		}		
 		foreach(const section &sec, seg) {
-			if(sec.create_root) {
-				sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
-				branch_color += dawg::residue::branch_inc;
-			}
 			if(!sec.gap_overlap) {
 				// if gap_overlap is false, clear the upstream buffer
 				// of all sequences in the tree
