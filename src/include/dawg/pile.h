@@ -59,11 +59,15 @@ struct pile {
 		template<typename T, typename A>
 		inline void get(const std::string& k, std::vector<T,A>& r) const;
 		
+		inline void read_aliases();
+		
 	private:
 		static inline void conv(const std::string& ss, std::string& r);
 		static inline void conv(const std::string& ss, double& r);
 		static inline void conv(const std::string& ss, bool& r);
 		static inline void conv(const std::string& ss, unsigned int& r);
+		
+		inline void read_alias(const std::string& a, const std::string& b);
 	};
 	typedef std::vector<section> data_type;
 	data_type data;
@@ -79,6 +83,8 @@ struct pile {
 		data.back().name = "_initial_";
 		data.back().inherits = "_default_";
 	}
+	
+	inline void read_aliases();	
 };
 
 template<typename Iterator>
@@ -273,6 +279,26 @@ inline void pile::section::conv(const std::string& ss, bool& r) {
 	using boost::algorithm::iequals;
 	r = !(ss.empty() || iequals(ss, "false") || iequals(ss, "0") || iequals(ss, "f")
 		|| iequals(ss, "off") || iequals(ss, "no"));
+}
+
+inline void pile::section::read_alias(const std::string& a, const std::string& b) {
+	db_type::const_iterator it;
+	// if b exists or a doesn't, stop
+	if(db.find(b) != db.end() || (it = db.find(a)) == db.end())
+		return;
+	db[b] = it->second;
+}
+
+inline void pile::section::read_aliases() {
+	#define XM(aname, bname) read_alias(_P(aname), _P(bname));
+	#include <dawg/details/aliases.xmh>
+	#undef XM
+}
+
+inline void pile::read_aliases() {
+	foreach(section &sec, data) {
+		sec.read_aliases();
+	}
 }
 
 } // namespace dawg

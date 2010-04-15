@@ -120,6 +120,8 @@ int dawg_app::run() {
 	}
 	if(!ret)
 		return EXIT_FAILURE;	
+	// process aliases
+	input.read_aliases();
 
 	global_options glopts;
 	glopts.read_section(input.data.front());
@@ -129,12 +131,7 @@ int dawg_app::run() {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
-	
-	
-	foreach(const dawg::ma& aa, configs) {
-		cout << aa << endl;
-	}
-	
+		
 	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
 	dawg::matic kimura;
