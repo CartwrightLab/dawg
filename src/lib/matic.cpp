@@ -43,9 +43,10 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("substitution model could not be created.");
 	
 	if(seg.empty()) { // new segment
-		seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase, ma.output_markins);
+		seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase,
+			ma.output_markins, ma.output_keepempty);
 	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(),
-	           ma.output_lowercase, ma.output_markins)) {
+	           ma.output_lowercase, ma.output_markins, ma.output_keepempty)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}	
 	
@@ -444,8 +445,8 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	unsigned int uStateQuit = (residue::deleted_base+1)*2;
-	//unsigned int uStateQuit = (residue::deleted_base+1)*2-1;
+	unsigned int uStateQuit = rex.is_keep_empty() ? (residue::deleted_base+1)*2
+		                                          : (residue::deleted_base+1)*2-1 ;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
 	// Go through each column, adding gaps where neccessary

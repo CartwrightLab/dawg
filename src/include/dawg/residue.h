@@ -101,13 +101,14 @@ public:
 	typedef residue_exchange self_type;
 	typedef std::pair<const char*,const char*> str_type;
 
-	inline void model(int a, bool lc=false, bool markins=false) {
+	inline void model(int a, bool lc=false, bool markins=false, bool keepempty=true) {
 		if(a >= MODEND)
 			return;
 		_model = a;
 		if(lc) // use lowercase translations
 			_model += 3;
 		_markins = markins;
+		_keepempty = keepempty;
 		// ??- is a trigraph; add a slash to prevent it
 		static const char DNA[] = "ACGT??????????????????????????????????????????????????????????\?-";
 		static const char dna[] = "acgt??????????????????????????????????????????????????????????\?-";
@@ -126,11 +127,12 @@ public:
 		cs_ins = &ins[(_markins ? 3 : 0)];
 		width = (a != CODON) ? 1 : 3;
 	};
-	inline bool is_same_model(int a, bool lc=false, bool markins=false) const {
+	inline bool is_same_model(int a, bool lc, bool markins, bool keepempty) const {
 		if(lc)
 			a += 3;
-		return (a == _model && markins == _markins);
+		return (a == _model && markins == _markins && keepempty == _keepempty);
 	}
+	inline bool is_keep_empty() const { return _keepempty; }
 
 	inline residue::data_type encode(char ch) const {
 		static residue::data_type dna[] = {0,1,3,2};
@@ -165,7 +167,7 @@ public:
 
 protected:
 	int _model;
-	bool _markins;
+	bool _markins, _keepempty;
 	const char* cs_decode;
 	const char* cs_ins;
 	int width;
