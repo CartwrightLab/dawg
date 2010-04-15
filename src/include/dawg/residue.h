@@ -12,6 +12,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
+#include <boost/range/sub_range.hpp>
 
 namespace dawg {
 
@@ -99,7 +100,7 @@ public:
 	     };
 
 	typedef residue_exchange self_type;
-	typedef std::pair<const char*,const char*> str_type;
+	typedef boost::sub_range< const char [64] > str_type;
 
 	inline void model(int a, bool lc=false, bool markins=false, bool keepempty=true) {
 		if(a >= MODEND)
@@ -158,7 +159,7 @@ public:
 	It2 decode_array(It1 afirst, It1 alast, It2 bfirst) const {
 		for(;afirst != alast;++afirst) {
 			str_type r = decode(*afirst);
-			bfirst = std::copy(r.first, r.second, bfirst);
+			bfirst = std::copy(r.begin(), r.end(), bfirst);
 		}
 		return bfirst;
 	}
@@ -172,6 +173,7 @@ protected:
 	const char* cs_ins;
 	int width;
 };
+
 
 class residue_factory {
 public:
@@ -204,15 +206,6 @@ public:
 			return obj->make_residue(ch,d);
 		}
 	};
-	/*
-	template<typename It1, typename It2>
-	seq_iterator operator()(It1 b, It1 e, It2 r) {
-		store.push_back(Block());
-		store.back().reserve(e-b);
-		std::transform(b, e, r, std::back_inserter(store.back()), biop(this));
-		return store.back().begin();
-	}
-	*/
 
 	inline void model(model_type a) {_model = a; };
 
@@ -265,6 +258,7 @@ public:
 protected:
 	model_type _model;
 };
+
 
 }
 #endif

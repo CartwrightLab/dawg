@@ -477,10 +477,10 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 				foreach(aligner_data &v, aln_table) {
 					if(v.it == v.last || v.it->branch() != uBranch) {
 						residue_exchange::str_type s = rex.decode_ins();
-						v.str->append(s.first, s.second);
+						v.str->append(s.begin(), s.end());
 					} else {
 						residue_exchange::str_type s = rex.decode(*v.it);
-						v.str->append(s.first, s.second);
+						v.str->append(s.begin(), s.end());
 						++v.it;
 					}
 				}
