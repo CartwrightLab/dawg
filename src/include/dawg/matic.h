@@ -45,6 +45,8 @@ struct matic_section {
 
 	wood usertree;
 	wood_meta_type metatree;
+	double tree_scale;
+	
 	bool gap_overlap;
 	
 	subst_model     sub_mod;

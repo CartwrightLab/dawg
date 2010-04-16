@@ -70,6 +70,12 @@ public:
 		return parse(str.begin(), str.end());
 	}
 	
+	inline void scale(double d) {
+		for(data_type::iterator it = _data.begin(); it != _data.end(); ++it) {
+			it->length *= d;
+		}
+	}
+	
 	bool autolabel() {
 		if(_data.empty())
 			return true;

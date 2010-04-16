@@ -82,6 +82,10 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	// Allow gap overlap ?
 	info->gap_overlap = ma.root_gapoverlap;
 	
+	// Tree Scale
+	info->tree_scale = ma.tree_scale;
+	info->usertree.scale(info->tree_scale);
+	
 	// find location to insert
 	segment::iterator it;
 	for(it = seg.begin(); it != seg.end()
