@@ -126,7 +126,10 @@ int dawg_app::run() {
 	glopts.read_section(input.data.front());
 
 	dawg::output poo;
-	poo.open(glopts.output_file.c_str());
+	if(!poo.open(glopts.output_file.c_str())) {
+		DAWG_ERROR("bad configuration");
+		return EXIT_FAILURE;
+	}
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_pile(input, configs)) {

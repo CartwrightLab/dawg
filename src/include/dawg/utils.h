@@ -9,6 +9,7 @@
  
 namespace dawg {
 
+/*
 template<std::size_t _N>
 std::size_t key_switch(const std::string &ss, const std::string (&key)[_N]) {
 	using boost::algorithm::starts_with;
@@ -18,12 +19,13 @@ std::size_t key_switch(const std::string &ss, const std::string (&key)[_N]) {
 	}
 	return (std::size_t)-1;
 }
+*/
 
 template<class A, class B, std::size_t _N>
 std::size_t key_switch(A &ss, const B (&key)[_N]) {
-	using boost::algorithm::starts_with;
+	using boost::algorithm::istarts_with;
 	for(std::size_t i=0;i<_N;++i) {
-		if(starts_with(key[i], ss))
+		if(istarts_with(key[i], ss))
 			return i;
 	}
 	return (std::size_t)-1;

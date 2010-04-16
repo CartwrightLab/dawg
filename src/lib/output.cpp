@@ -21,8 +21,8 @@ bool dawg::output::open(const char *file_name) {
 	typedef boost::iterator_range<const char*> cs_range;
 
 	static const char format_keys[][10] = {
-		"aln", "poo", "fasta", "fas", "fsa",
-		"nexus", "nex", "phylip", "phy"
+		"aln", "poo", "fasta", "fsa",
+		"nexus", "phylip"
 	};
 	std::size_t format_id;
 	cs_range format;
@@ -36,12 +36,11 @@ bool dawg::output::open(const char *file_name) {
 			// format:file
 			format = boost::make_iterator_range(file_name, mid);
 			file_name = mid+1;
-		} else {
+		} else if((mid = strrchr(file_name, '.')) != NULL) {
 			// file.format
-			mid = strrchr(file_name, '.');
 			format = boost::make_iterator_range(mid+1, strchr(mid+1, '\0'));
 		}
-		if(!format) {
+		if(format) {
 			format_id = key_switch(format, format_keys);
 			if(format_id == -1) {
 				return DAWG_ERROR("unknown output format \'"
