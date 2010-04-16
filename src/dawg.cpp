@@ -22,8 +22,6 @@
 #include <exception>
 
 #include "dawg.h"
-#include "rand.h"
-#include "var.h"
 #include "dawg_app.h"
 
 #include <dawg/ma.h>
@@ -39,21 +37,13 @@ using namespace boost;
 using namespace dawg;
 
 #define VERSION_MSG PACKAGE_STRING "\n" \
-	"    Copyright (C) 2005-2009  Reed A. Cartwright, PhD <reed@scit.us>\n" \
+	"    Copyright (C) 2005-2010  Reed A. Cartwright, PhD <reed@scit.us>\n" \
 	"    Report bugs to " PACKAGE_BUGREPORT
 
 // Help Information
 char g_csDawgTxt[] =
 #include "dawgtxt.h"
 ;
-
-bool Parse(const char* cs);
-bool Execute();
-
-bool g_bReportErrors = true;
-bool g_bReportWarnings = true;
-
-const char *g_csOutput = NULL;
 
 int main(int argc, char *argv[])
 {
@@ -161,19 +151,7 @@ int dawg_app::run() {
 	return EXIT_SUCCESS;
 }
 
-// Fast and dirty random seed algorithm
-// based off of NR's randqd1
-inline unsigned int rand_seed()
-{
-	static unsigned int u = (unsigned int)(time(NULL)+3*getpid());
-	return (u = u*1664525u + 1013904223u);
-}
-
-inline const char * SS2CS(const string& ss)
-{
-	return ss.empty() ? NULL : ss.c_str();
-}
-
+/*
 // Execute the Dawg process based on the current configuration
 bool Execute()
 {
@@ -344,3 +322,5 @@ bool DawgWarn(const char* csErr, ...)
 	fprintf(stderr, "\n");
 	return false;
 }
+*/
+

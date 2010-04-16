@@ -416,6 +416,7 @@ void dawg::details::matic_section::evolve(
 			d -= del_rate;
 		double w = first->rate_scalar();
 		residue rez = *first;
+		cout << rez.base() << " " << rez.rate_scalar() << endl;
 		++first;
 		while(d < w) {
 			rez.base(sub_mod(m,rez.base()));

@@ -100,10 +100,8 @@ IF(NOT HAVE_UNISTD_H)
 ENDIF(NOT HAVE_UNISTD_H)
 
 ADD_EXECUTABLE(dawg ${PROJ_MACOSX_BUNDLE}
-  dawg.cpp eigen.cpp indel.cpp matrix.cpp output.cpp rand.cpp tree.cpp var.cpp
-  parser.lpp parser.ypp lex.parser.cpp parser.tab.cpp parser.tab.hpp
-  dawg.h indel.h matrix.h rand.h tree.h var.h
-  sequence.h bitree.h dawg_app.h
+  dawg.cpp
+  dawg.h dawg_app.h
   lib/ma.cpp lib/matic.cpp lib/mutt.cpp lib/mutt/dSFMT/dSFMT.c
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
   ${COMPAT}

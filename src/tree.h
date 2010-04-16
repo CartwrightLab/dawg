@@ -6,7 +6,9 @@
 #include "dawg.h"
 #include "indel.h"
 #include "matrix.h"
-#include "sequence.h"
+
+#include <dawg/residue.h>
+
 #include "bitree.h"
 #include "rand.h"
 

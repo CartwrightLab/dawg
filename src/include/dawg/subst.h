@@ -11,6 +11,7 @@
 #include <dawg/mutt.h>
 #include <dawg/utils.h>
 #include <dawg/log.h>
+#include <dawg/residue.h>
  
 namespace dawg {
  
