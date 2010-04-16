@@ -29,6 +29,7 @@
 #include <dawg/utils/foreach.h>
 #include <dawg/matic.h>
 #include <dawg/global.h>
+#include <dawg/output.h>
 
 #include <boost/algorithm/string/regex.hpp>
 
@@ -123,6 +124,9 @@ int dawg_app::run() {
 
 	global_options glopts;
 	glopts.read_section(input.data.front());
+
+	dawg::output poo;
+	poo.open(glopts.output_file.c_str());
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_pile(input, configs)) {
