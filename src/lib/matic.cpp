@@ -308,7 +308,7 @@ dawg::details::matic_section::evolve_indels(
 				}
 				// insert u "deleted insertions" into buffer
 				child.insert(child.end(), u, residue(residue::deleted_base,
-					residue::rate_type(1.0), branch_color));
+					residue::rate_type(0.0), branch_color));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
 				n.second -= u;
@@ -341,6 +341,7 @@ dawg::details::matic_section::evolve_indels(
 					if(first->is_deleted())
 						continue;
 					child.back().base(residue::deleted_base);
+					child.back().rate_scalar(0.0);
 					++uu;
 				}
 				// remove sites from stack, pop if empty
@@ -399,9 +400,12 @@ void dawg::details::matic_section::evolve(
 		sequence::const_iterator start = first;
 		// TODO: Optimize out this if?
 		// TODO: Variant for constant rate_scale
-		for(;first != last && first->rate_scalar()+indel_rate <= d; ++first) {
-			if(!first->is_deleted())
-				d -= indel_rate+first->rate_scalar();
+		for(;first != last; ++first) {
+			if(first->is_deleted())
+				continue;
+			if(d < first->rate_scalar()+indel_rate)
+				break;
+			d -= indel_rate+first->rate_scalar();
 		}
 		// copy unmodified sites into buffer.
 		child.insert(child.end(), start, first);
@@ -416,7 +420,6 @@ void dawg::details::matic_section::evolve(
 			d -= del_rate;
 		double w = first->rate_scalar();
 		residue rez = *first;
-		cout << rez.base() << " " << rez.rate_scalar() << endl;
 		++first;
 		while(d < w) {
 			rez.base(sub_mod(m,rez.base()));
