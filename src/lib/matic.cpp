@@ -121,8 +121,14 @@ bool dawg::matic::finalize_configuration() {
 	}
 	// set id's for each label
 	u = 0;
+	aln_size = 0;
 	foreach(label_to_index_type::value_type &lab, label_union) {
 		lab.second = u++;
+		if(lab.first[0] != '{' && lab.first[0] != '~')
+			aln_size = u;
+	}
+	if(aln_size == 0) {
+		return DAWG_ERROR("no sequences to align");
 	}
 	// copy the id's to the meta information for a tree
 	foreach(segment &seg, configs) {
@@ -141,15 +147,18 @@ bool dawg::matic::finalize_configuration() {
 void dawg::matic::walk(alignment& aln) {
 	if(configs.empty())
 		return;
-	aln.resize(label_union.size());
+	aln.resize(aln_size);
 	vector<details::sequence_data> seqs(label_union.size());
-	int uu = 0;
-	foreach(const label_to_index_type::value_type &kv, label_union) {
+	alignment::size_type uu = 0;
+	for(label_to_index_type::const_iterator cit = label_union.begin();
+		uu < aln.size(); ++uu, ++cit) {
 		aln[uu].seq.clear();
+		//TODO: Move this to pre walk?
+		aln[uu].label = cit->first;		
+	}
+	for(;uu<seqs.size();++uu) {
 		seqs[uu].indels.clear();
 		seqs[uu].seq.clear();
-		//TODO: Move this to pre walk?
-		aln[uu++].label = kv.first;
 	}
 	
 	{	// take first seg and do upstream indels

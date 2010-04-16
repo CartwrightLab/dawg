@@ -160,6 +160,7 @@ protected:
 	residue::data_type branch_color;
 	
 	label_to_index_type label_union;
+	alignment::size_type aln_size;
 	
 	bool add_config_section(const dawg::ma &ma);
 	bool finalize_configuration();
