@@ -72,7 +72,7 @@ public:
 	
 	inline void scale(double d) {
 		for(data_type::iterator it = _data.begin(); it != _data.end(); ++it) {
-			it->length *= d;
+			it->length *= static_cast<float>(d);
 		}
 	}
 	
@@ -173,12 +173,12 @@ struct newick_grammar : qi::grammar<Iterator, wood::data_type(), standard::space
 		start    = omit[node(_val)] >> ';';
 		node     = tip(_r1) | inode(_r1);
 		tip      = label[push_back(_r1,construct<wood_node>(_1))][_val=1]
-		           >> -(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]);
+		           >> -(':' >> float_[phoenix::bind(&wood_node::length, back(_r1)) = _1]);
 		inode    = '(' >> node(_r1)[_val=_1] >> (+(','
 		               >> node(_r1)[make_inode(_r1, _1)][_val+=_1+1])
 					   | eps[make_inode(_r1,0)][_val+=1]) >> ')'
-					>> -(label[bind(&wood_node::label, back(_r1)) = _1] ||
-					(':' >> float_[bind(&wood_node::length, back(_r1)) = _1]));
+					   >> -(label[phoenix::bind(&wood_node::label, back(_r1)) = _1] ||
+					   (':' >> float_[phoenix::bind(&wood_node::length, back(_r1)) = _1]));
 		label    = unquoted | quoted;
 		// Due to the way hidden nodes are constructed,
 		// unquoted labels should not begin with {, |, or }.

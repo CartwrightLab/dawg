@@ -13,7 +13,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/support_istream_iterator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -214,15 +214,10 @@ bool pile::parse(Iterator first, Iterator last) {
 	return true;
 }
 
-// TODO: Convert to newer 2.2 framework?
 template<typename Char, typename Traits>
 inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
 	is.unsetf(std::ios::skipws);
-	typedef std::istreambuf_iterator<Char, Traits> base_iterator_type;
-	boost::spirit::multi_pass<base_iterator_type> first = 
-		boost::spirit::make_default_multi_pass(base_iterator_type(is));
-	boost::spirit::multi_pass<base_iterator_type> last = 
-		boost::spirit::make_default_multi_pass(base_iterator_type());
+	boost::spirit::basic_istream_iterator<Char, Traits> first(is), last;
 	return parse(first, last);	
 }
 

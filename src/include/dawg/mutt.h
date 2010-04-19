@@ -16,6 +16,12 @@
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+#	define DSFMT_UINT32_DEFINED 1
+using boost::uint32_t;
+using boost::uint64_t;
+#endif
+
 #include <dawg/details/mutt.h>
 
 #ifdef BOOST_WINDOWS

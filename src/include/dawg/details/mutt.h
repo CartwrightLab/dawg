@@ -26,7 +26,11 @@ struct dsfmt_mutt_gen {
 	}
 	template<typename _It>
 	void seed(_It first, _It last) {
-		dsfmt_init_by_array(&state, &*first, last-first);
+		std::size_t sz = last-first;
+		uint32_t *p = new uint32_t[sz];
+		std::copy(first, last, p);
+		dsfmt_init_by_array(&state, p, sz);
+		delete p;
 	}
 
 private:
