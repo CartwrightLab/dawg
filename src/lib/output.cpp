@@ -50,21 +50,18 @@ bool dawg::output::open(const char *file_name) {
 	}
 	if(file_name != NULL && file_name[0] != '\0'
 		&& strcmp(file_name, "-") != 0) {
-		fout.close();
+		if(fout.is_open())
+			fout.close();
 		fout.open(file_name, ios_base::out|ios_base::trunc);
 		if(!fout.is_open()) {
 			return DAWG_ERROR("unable to open output file \'" << file_name<< "\'.");
 		}
 		p_out = &fout;
-		fout << "Hello You" << endl;
-		fout.close();
 	} else {
 		p_out = &cout;
 	}
 	                       
 	*p_out << "Hello World" << endl
-	       << format_id << " " << std::string(format.begin(), format.end()) << endl;
-	cout << "Hello World" << endl
 	       << format_id << " " << std::string(format.begin(), format.end()) << endl;
 	return true;
 }
