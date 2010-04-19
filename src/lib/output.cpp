@@ -24,8 +24,8 @@ bool dawg::output::open(const char *file_name) {
 		"aln", "poo", "fasta", "fsa",
 		"nexus", "phylip"
 	};
-	std::size_t format_id;
-	cs_range format;
+	std::size_t format_id = 0;
+	cs_range format(file_name, file_name);
 	if(file_name != NULL && file_name[0] != '\0') {
 		const char *mid = strchr(file_name, ':');
 #ifdef BOOST_WINDOWS
@@ -55,11 +55,16 @@ bool dawg::output::open(const char *file_name) {
 		if(!fout.is_open()) {
 			return DAWG_ERROR("unable to open output file \'" << file_name<< "\'.");
 		}
+		p_out = &fout;
+		fout << "Hello You" << endl;
+		fout.close();
+	} else {
+		p_out = &cout;
 	}
-	p_out = fout.is_open() ? static_cast<ostream*>(&fout)
-	                       : static_cast<ostream*>(&cout);
 	                       
 	*p_out << "Hello World" << endl
+	       << format_id << " " << std::string(format.begin(), format.end()) << endl;
+	cout << "Hello World" << endl
 	       << format_id << " " << std::string(format.begin(), format.end()) << endl;
 	return true;
 }
