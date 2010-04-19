@@ -16,10 +16,6 @@
 
 namespace dawg {
 
-class residue;
-
-typedef std::vector<residue> sequence;
-
 class residue {
 public:
 	typedef float rate_type;
@@ -172,92 +168,6 @@ protected:
 	const char* cs_ins;
 	int width;
 };
-
-
-class residue_factory {
-public:
-	typedef unsigned int model_type;
-	typedef residue_factory self_type;
-
-	static const model_type DNA = 0;
-	static const model_type RNA = 1;
-	static const model_type AA  = 2;
-	static const model_type CODON = 3;
-	static const model_type DEL = 0;
-	static const model_type DELINS = 1;
-	static const model_type INS = 2;
-
-	template<class It, class D>
-	void operator()(It b, It e, D &dest) {
-		std::transform(b, e, std::back_inserter(dest),
-			std::bind1st(std::mem_fun(&self_type::make_residue), this));
-	}
-
-	template<class T>
-	residue operator()(T a) {
-		return make_residue(a);
-	}
-
-	struct biop : public std::binary_function<char, double, residue> {
-		biop(const residue_factory *o) : obj(o) { }
-		const residue_factory *obj;
-		residue operator()(char ch, double d) {
-			return obj->make_residue(ch,d);
-		}
-	};
-
-	inline void model(model_type a) {_model = a; };
-
-	residue make_residue(char ch) const {
-		return residue(encode(ch), static_cast<residue::rate_type>(1.0), 0);
-	}
-	residue make_residue(char ch, double d) const {
-		return residue(encode(ch), static_cast<residue::rate_type>(d), 0);
-	}
-
-	residue::data_type encode(char ch) const {
-		static residue::data_type dna[] = {0,1,3,2};
-		if(_model == DNA || _model == RNA)
-			return dna[(ch&6u) >> 1];
-		return ~0;
-	}
-
-	char decode_gaps(model_type r) const {
-		static const char gaps[] = "-=+";
-		return gaps[r];
-	}
-
-	char decode(residue::data_type r) const {
-		static const char dna[] = "ACGT";
-		static const char rna[] = "ACGU";
-		// Include O & U, two rare amino acids
-		static const char aa[] = "ACDEFGHIKLMNPQRSTVWYOU";
-		// Encode 64 possible codons using a base-64 notation
-		// b/c this function returns a single char.
-		// These can later be converted to three nucleotides or 1 amino acid
-		static const char cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.";
-
-		switch(_model) {
-		case DNA:
-			return dna[r];
-		case RNA:
-			return rna[r];
-		case AA:
-			return aa[r];
-		case CODON:
-			return cod[r];
-		default:
-			break;
-		}
-		return '?';
-	}
-
-	residue_factory() : _model(DNA) { }
-
-protected:
-	model_type _model;
-};
-
 
 }
 #endif

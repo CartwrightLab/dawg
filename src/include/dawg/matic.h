@@ -13,6 +13,7 @@
 #include <dawg/wood.h>
 #include <dawg/root.h>
 #include <dawg/mutt.h>
+#include <dawg/sequence.h>
 
 #include <dawg/ma.h>
 
@@ -25,6 +26,7 @@
 
 namespace dawg {
 namespace details {
+
 struct indel_data {
 	typedef std::pair<double, boost::uint32_t> element;
 	typedef std::stack<element> stack;
@@ -83,11 +85,6 @@ struct matic_section {
 	}
 };
 
-struct aligned_sequence {
-	std::string label;
-	std::string seq;
-};
-
 struct sequence_data {
 	sequence seq;
 	dawg::details::indel_data indels;
@@ -96,11 +93,6 @@ struct sequence_data {
 typedef std::map<std::string,sequence_data> seq_map;
 
 }
-
-class alignment : public std::vector<details::aligned_sequence> {
-public:
-	
-};
 
 template<class CharType, class CharTrait>
 inline std::basic_ostream<CharType, CharTrait>&

@@ -5,13 +5,11 @@
 #include <dawg/log.h>
 
 #include <dawg/output.h>
-#include <dawg/utils.h>
+#include <dawg/utils/foreach.h>
 
 #include <cstring>
-#include <utility>
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/range/iterator_range.hpp>
 
 using namespace dawg;
@@ -20,11 +18,7 @@ using namespace std;
 bool dawg::output::open(const char *file_name) {
 	typedef boost::iterator_range<const char*> cs_range;
 
-	static const char format_keys[][10] = {
-		"aln", "poo", "fasta", "fsa",
-		"nexus", "phylip"
-	};
-	std::size_t format_id = 0;
+	format_id = 0;
 	cs_range format(file_name, file_name);
 	if(file_name != NULL && file_name[0] != '\0') {
 		const char *mid = strchr(file_name, ':');
@@ -40,12 +34,9 @@ bool dawg::output::open(const char *file_name) {
 			// file.format
 			format = boost::make_iterator_range(mid+1, strchr(mid+1, '\0'));
 		}
-		if(format) {
-			format_id = key_switch(format, format_keys);
-			if(format_id == -1) {
-				return DAWG_ERROR("unknown output format \'"
-				       << std::string(format.begin(), format.end()) << "\'.");
-			}
+		if(format && !set_format(format)) {
+			return DAWG_ERROR("unknown output format \'"
+						<< std::string(format.begin(), format.end()) << "\'.");
 		}
 	}
 	if(file_name != NULL && file_name[0] != '\0'
@@ -56,14 +47,29 @@ bool dawg::output::open(const char *file_name) {
 		if(!fout.is_open()) {
 			return DAWG_ERROR("unable to open output file \'" << file_name<< "\'.");
 		}
-		p_out = &fout;
+		set_ostream(fout);
 	} else {
-		p_out = &cout;
+		set_ostream(cout);
 	}
-	                       
-	*p_out << "Hello World" << endl
-	       << format_id << " " << std::string(format.begin(), format.end()) << endl;
+	
+	do_op = &output::print_fasta;
+
 	return true;
 }
 
+void dawg::output::print_fasta(const alignment& aln) {
+	ostream &out = *p_out;
+	
+	foreach(const alignment::value_type& v, aln) {
+		out << ">" << v.label << endl;
 
+		const char *it = v.seq.c_str();
+		const char *last = it+v.seq.size();
+		for(;it+75 < last;it+=75) {
+			out.write(it, 75);
+			out << endl;
+		}
+		out.write(it, last-it);
+		out << endl << endl;
+	}
+}

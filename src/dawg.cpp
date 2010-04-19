@@ -125,8 +125,8 @@ int dawg_app::run() {
 	global_options glopts;
 	glopts.read_section(input.data.front());
 
-	dawg::output poo;
-	if(!poo.open(glopts.output_file.c_str())) {
+	dawg::output write_aln;
+	if(!write_aln.open(glopts.output_file.c_str())) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
@@ -152,7 +152,7 @@ int dawg_app::run() {
 	dawg::alignment aln;
 	for(unsigned int i=1;i<=glopts.sim_reps;++i) {
 		kimura.walk(aln);
-		cout << aln << endl;
+		write_aln(aln);
 	}
 		
 	return EXIT_SUCCESS;
