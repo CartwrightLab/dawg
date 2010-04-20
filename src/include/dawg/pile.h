@@ -6,8 +6,8 @@
  ****************************************************************************/
 
 #include <boost/spirit/include/version.hpp>
-#if SPIRIT_VERSION < 0x2010
-#	error Spirit version 2.1 or greater required.
+#if SPIRIT_VERSION < 0x2020
+#	error Spirit version 2.2 or greater required.
 #endif
 
 #include <boost/spirit/include/qi.hpp>
