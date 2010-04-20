@@ -154,8 +154,7 @@ int dawg_app::run() {
 	for(unsigned int i=1;i<=glopts.sim_reps;++i) {
 		kimura.walk(aln);
 		write_aln(aln);
-	}
-		
+	}	
 	return EXIT_SUCCESS;
 }
 

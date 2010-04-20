@@ -40,7 +40,11 @@ public:
 private:
 	void (output::*do_op)(const alignment& aln);
 
+	void print_aln(const alignment& aln);
+	void print_poo(const alignment& aln);
 	void print_fasta(const alignment& aln);
+	void print_nexus(const alignment& aln);
+	void print_phylip(const alignment& aln);
 
 protected:
 	std::ostream *p_out;
@@ -54,11 +58,19 @@ bool output::set_format(T format) {
 		"aln", "poo", "fasta", "fsa",
 		"nexus", "phylip"
 	};
+	static void (output::*format_ops[])(const alignment& aln) = {
+		&output::print_aln, &output::print_poo,
+		&output::print_fasta, &output::print_fasta,
+		&output::print_nexus, &output::print_phylip
+	};
 	format_id = key_switch(format, format_keys);
-	if(format_id != -1)
-		return true;
-	format_id = 0;
-	return false;
+	if(format_id == -1) {
+		format_id = 0;
+		do_op = &output::print_aln;
+		return false;
+	}
+	do_op = format_ops[format_id];
+	return true;
 }
 
 } // namespace dawg 

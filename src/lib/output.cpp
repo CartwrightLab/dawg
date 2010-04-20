@@ -9,6 +9,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 
 #include <boost/range/iterator_range.hpp>
 
@@ -51,9 +52,6 @@ bool dawg::output::open(const char *file_name) {
 	} else {
 		set_ostream(cout);
 	}
-	
-	do_op = &output::print_fasta;
-
 	return true;
 }
 
@@ -73,3 +71,84 @@ void dawg::output::print_fasta(const alignment& aln) {
 		out << endl << endl;
 	}
 }
+
+void dawg::output::print_aln(const alignment& aln) {
+	ostream &out = *p_out;
+	out << "CLUSTAL multiple sequence alignment (Created by "
+		<< PACKAGE_STRING << ")\n\n" << endl;
+
+	// TODO: Cache width
+	string::size_type max_width = 14;
+	foreach(const alignment::value_type& v, aln) {
+		max_width = std::max(max_width, v.label.length());
+	}
+	// find alignment length
+	string::size_type u=0, len = aln[0].seq.length();
+	for(;u+60 < len;u += 60) {
+		foreach(const alignment::value_type& v, aln) {
+			out << setw(max_width) << left << v.label << ' ';
+			out.write(&v.seq[u], 60);
+			out << endl;
+		}
+		out << '\n' << endl;
+	}
+	len = len-u;
+	foreach(const alignment::value_type& v, aln) {
+		out << setw(max_width) << left << v.label << ' ';
+		out.write(&v.seq[u], len);
+		out << endl;
+	}
+	out << '\n' << endl;
+}
+
+void dawg::output::print_poo(const alignment& aln) {
+	ostream &out = *p_out;
+
+	// TODO: Cache width
+	string::size_type max_width = 0;
+	foreach(const alignment::value_type& v, aln) {
+		max_width = std::max(max_width, v.label.length());
+	}
+	foreach(const alignment::value_type& v, aln) {
+		out << setw(max_width) << v.label
+			<< ' ' << v.seq
+			<< '\n' << endl;
+	}
+	out << endl;
+}
+
+void dawg::output::print_phylip(const alignment& aln) {
+	ostream &out = *p_out;
+
+	out << "  " << aln.size() << "    " << aln[0].seq.size() << endl;
+	foreach(const alignment::value_type& v, aln) {
+		out << setw(10) << left << v.label << v.seq << endl;
+	}
+	out << endl;
+}
+
+// TODO: save sequence type in aln
+void dawg::output::print_nexus(const alignment& aln) {
+	ostream &out = *p_out;
+
+	// TODO: Move this to the block support routine
+	out << "#NEXUS\n[Created by " PACKAGE_STRING "]" << endl;
+
+	out << "BEGIN DATA;\n"
+		   "\tDIMENSIONS NTAX=" << aln.size() << " NCHAR=" << aln[0].seq.size() << ";\n"
+	       "\tFORMAT DATATYPE=";
+	out << "DNA"; //TODO or protein
+	out << " MISSING=? GAP=- MATCHCHAR=. EQUATE=\"+=-\";\n"
+	       "\tMATRIX" << endl;
+	
+	// Write sequences in non-interleaved format
+	foreach(const alignment::value_type& v, aln) {
+		out << setw(15) << left << v.label << ' ' << v.seq << endl;
+	}
+	// Close data block
+	out << ";\nEND;\n" << endl;
+
+}
+
+
+
