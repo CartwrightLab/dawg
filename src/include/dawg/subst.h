@@ -53,6 +53,12 @@ private:
 	inline base_type do_gtr_s(mutt &m, base_type n) const {
 		return search_binary_cont(&table[n][0], &table[n][4], m());
 	}
+	inline base_type do_aagtr_f(mutt &m) const {
+		return search_binary_cont(&freqs[0], &freqs[20], m());
+	}
+	inline base_type do_aagtr_s(mutt &m, base_type n) const {
+		return search_binary_cont(&table[n][0], &table[n][20], m());
+	}	
 
 	template<typename It1, typename It2>
 	bool create_freqs(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) const;
@@ -80,6 +86,9 @@ private:
 
 	template<typename It1, typename It2>
 	bool create_hky(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_aagtr(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
 
 };
 
