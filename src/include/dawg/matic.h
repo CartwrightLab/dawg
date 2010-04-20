@@ -151,6 +151,8 @@ protected:
 	typedef std::map<std::string, wood::data_type::size_type> label_to_index_type;
 	typedef std::vector<details::sequence_data> seq_buffers_type;
 	
+	seq_buffers_type seqs;
+	
 	segment_vector configs;
 	mutt maxx;
 	

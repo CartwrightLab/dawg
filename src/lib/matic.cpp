@@ -151,14 +151,16 @@ void dawg::matic::pre_walk(alignment& aln) {
 	if(configs.empty())
 		return;
 	aln.resize(aln_size);
+	seqs.resize(label_union.size());
 	aln.max_label_width = 0;
 	aln.max_label_width_14 = 14;
-	alignment::size_type uu = 0;
-	foreach(label_to_index_type::value_type &kv, label_union) {
-		aln.max_label_width = std::max(aln.max_label_width, kv.first.length());
-		aln.max_label_width_14 = std::max(aln.max_label_width_14, kv.first.length());
-		aln[uu].label = kv.first;
-		++uu;
+	label_to_index_type::const_iterator it = label_union.begin();
+	for(alignment::size_type uu = 0; uu < aln_size;++uu) {
+		const string &lab = it->first;
+		aln.max_label_width = std::max(aln.max_label_width, lab.length());
+		aln.max_label_width_14 = std::max(aln.max_label_width_14, lab.length());
+		aln[uu].label = lab;
+		++it;
 	}
 	aln.seq_type = configs[0][0].sub_mod.seq_type();
 }
@@ -166,26 +168,21 @@ void dawg::matic::pre_walk(alignment& aln) {
 void dawg::matic::walk(alignment& aln) {
 	if(configs.empty())
 		return;
-	aln.resize(aln_size);
-	vector<details::sequence_data> seqs(label_union.size());
-	alignment::size_type uu = 0;
-	for(;uu < aln_size; ++uu) {
-		aln[uu].seq.clear();
-		seqs[uu].indels.clear();
-		seqs[uu].seq.clear();		
+	// clear alignment
+	foreach(alignment::value_type &a, aln) {
+		a.seq.clear();
 	}
-	for(;uu < seqs.size();++uu) {
-		seqs[uu].indels.clear();
-		seqs[uu].seq.clear();
-	}
-	
-	{	// take first seg and do upstream indels
-		// root.gapoverlap = false prevents upstream indel creation
-		const segment &seg = configs[0];
+
+	if(configs[0][0].gap_overlap) {
+		// take first seg and do upstream indels
+		// root.gapoverlap = false prevents upstream indel creation		
 		branch_color = 0;
-		foreach(const section &sec, seg) {
-			if(!sec.gap_overlap)
-				continue;
+		// clear sequence buffer
+		foreach(details::sequence_data &v, seqs) {
+			v.seq.clear();
+			v.indels.clear();
+		}
+		foreach(const section &sec, configs[0]) {
 			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
 				const wood::node &n = sec.usertree.data()[u];
 				details::sequence_data &sd = seqs[sec.metatree[u]];
@@ -193,7 +190,7 @@ void dawg::matic::walk(alignment& aln) {
 					branch_color, maxx);
 			}
 		}
-		align(aln, seqs, seg.rex);
+		align(aln, seqs, configs[0].rex);
 	}
 	
 	foreach(const segment &seg, configs) {
@@ -209,15 +206,14 @@ void dawg::matic::walk(alignment& aln) {
 			seqs[sec.metatree[0]].indels.clear();	
 			sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
 			branch_color += dawg::residue::branch_inc;
-		}		
-		foreach(const section &sec, seg) {
+			// if gap_overlap is false, clear the upstream buffer of all sequences
 			if(!sec.gap_overlap) {
-				// if gap_overlap is false, clear the upstream buffer
-				// of all sequences in the tree
-				for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
-					seqs[sec.metatree[u]].indels.clear();
+				foreach(details::sequence_data &v, seqs) {
+					v.indels.clear();
 				}
 			}
+		}
+		foreach(const section &sec, seg) {
 			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
 				const wood::node &n = sec.usertree.data()[u];
 				const sequence &ranc = seqs[sec.metatree[u-n.anc]].seq;
