@@ -147,6 +147,21 @@ bool dawg::matic::finalize_configuration() {
 	return true;
 }
 
+void dawg::matic::pre_walk(alignment& aln) {
+	if(configs.empty())
+		return;
+	aln.resize(aln_size);
+	aln.max_label_width = 0;
+	aln.max_label_width_14 = 14;
+	alignment::size_type uu = 0;
+	foreach(label_to_index_type::value_type &kv, label_union) {
+		aln.max_label_width = std::max(aln.max_label_width, kv.first.length());
+		aln.max_label_width_14 = std::max(aln.max_label_width_14, kv.first.length());
+		aln[uu].label = kv.first;
+		++uu;
+	}
+	aln.seq_type = configs[0][0].sub_mod.seq_type();
+}
 
 void dawg::matic::walk(alignment& aln) {
 	if(configs.empty())
@@ -154,13 +169,12 @@ void dawg::matic::walk(alignment& aln) {
 	aln.resize(aln_size);
 	vector<details::sequence_data> seqs(label_union.size());
 	alignment::size_type uu = 0;
-	for(label_to_index_type::const_iterator cit = label_union.begin();
-		uu < aln.size(); ++uu, ++cit) {
+	for(;uu < aln_size; ++uu) {
 		aln[uu].seq.clear();
-		//TODO: Move this to pre walk?
-		aln[uu].label = cit->first;		
+		seqs[uu].indels.clear();
+		seqs[uu].seq.clear();		
 	}
-	for(;uu<seqs.size();++uu) {
+	for(;uu < seqs.size();++uu) {
 		seqs[uu].indels.clear();
 		seqs[uu].seq.clear();
 	}

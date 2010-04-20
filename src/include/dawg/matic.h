@@ -129,6 +129,9 @@ public:
 	// Run the simulation
 	void walk(alignment& aln);
 	
+	// Precalculate stuff for simulation
+	void pre_walk(alignment& aln);
+	
 	
 	template<typename _It>
 	void seed(_It first, _It last) {

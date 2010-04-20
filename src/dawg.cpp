@@ -151,6 +151,7 @@ int dawg_app::run() {
 	}
 	// create sets of aligned sequences;
 	dawg::alignment aln;
+	kimura.pre_walk(aln);
 	for(unsigned int i=1;i<=glopts.sim_reps;++i) {
 		kimura.walk(aln);
 		write_aln(aln);

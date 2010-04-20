@@ -102,7 +102,7 @@ public:
 			return;
 		_model = a;
 		if(lc) // use lowercase translations
-			_model += 3;
+			_model += MODEND;
 		_markins = markins;
 		_keepempty = keepempty;
 		// ??- is a trigraph; add a slash to prevent it
@@ -115,8 +115,8 @@ public:
 		static const char aa[]  = "acdefghiklmnpqrstvwyou????????????????????????????????????????\?-";
 		static const char ins[] = "---+++";
 		
-		static const char* mods[] = { &DNA[0], &RNA[0], &AA[0],
-		                              &dna[0], &rna[0], &aa[0]
+		static const char* mods[] = { &DNA[0], &RNA[0], &AA[0], &AA[0],
+		                              &dna[0], &rna[0], &aa[0], &aa[0]
 		                            };
 		
 		cs_decode = mods[_model];
@@ -125,7 +125,7 @@ public:
 	};
 	inline bool is_same_model(int a, bool lc, bool markins, bool keepempty) const {
 		if(lc)
-			a += 3;
+			a += MODEND;
 		return (a == _model && markins == _markins && keepempty == _keepempty);
 	}
 	inline bool is_keep_empty() const { return _keepempty; }
