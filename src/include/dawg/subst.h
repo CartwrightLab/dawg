@@ -90,6 +90,8 @@ private:
 	template<typename It1, typename It2>
 	bool create_aagtr(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
 
+	template<typename It1, typename It2>
+	bool create_wag(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
 };
 
 template<typename It1, typename It2>

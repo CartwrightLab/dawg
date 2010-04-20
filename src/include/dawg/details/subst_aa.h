@@ -87,6 +87,12 @@ bool subst_model::create_aagtr(const std::string &rname, It1 first1, It1 last1, 
 	return true;
 }
 
+template<typename It1, typename It2>
+bool subst_model::create_wag(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static const double s[] = {1.0};
+	static const double p[] = {1.0};
+}
+
  
 } // namespace dawg
  
