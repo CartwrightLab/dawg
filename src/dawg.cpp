@@ -126,7 +126,8 @@ int dawg_app::run() {
 	glopts.read_section(input.data.front());
 
 	dawg::output write_aln;
-	if(!write_aln.open(glopts.output_file.c_str())) {
+	if(!write_aln.open(arg.output.empty() ?
+		glopts.output_file.c_str() : arg.output.c_str() )) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
