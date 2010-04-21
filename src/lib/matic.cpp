@@ -403,8 +403,9 @@ void dawg::details::matic_section::evolve(
 	//process any existing indels.
 	first = evolve_indels(child, indels, T, branch_color, first, last, m);
 	
-	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
-	double indel_rate = ins_rate+del_rate;	
+	const double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
+	const double indel_rate = ins_rate+del_rate;
+	const double uni_scale = sub_mod.uniform_scale();
 	double d = m.rand_exp(T);
 	for(;;) {
 		sequence::const_iterator start = first;
@@ -413,9 +414,9 @@ void dawg::details::matic_section::evolve(
 		for(;first != last; ++first) {
 			if(first->is_deleted())
 				continue;
-			if(d < first->rate_scalar()+indel_rate)
+			if(d < indel_rate+first->rate_scalar()*uni_scale)
 				break;
-			d -= indel_rate+first->rate_scalar();
+			d -= indel_rate+first->rate_scalar()*uni_scale;
 		}
 		// copy unmodified sites into buffer.
 		child.insert(child.end(), start, first);
@@ -428,7 +429,7 @@ void dawg::details::matic_section::evolve(
 			continue;
 		} else
 			d -= del_rate;
-		double w = first->rate_scalar();
+		double w = first->rate_scalar()*uni_scale;
 		residue rez = *first;
 		++first;
 		while(d < w) {
