@@ -30,7 +30,7 @@ struct dsfmt_mutt_gen {
 		uint32_t *p = new uint32_t[sz];
 		std::copy(first, last, p);
 		dsfmt_init_by_array(&state, p, sz);
-		delete p;
+		delete[] p;
 	}
 
 private:

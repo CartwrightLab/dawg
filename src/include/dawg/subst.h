@@ -92,6 +92,9 @@ private:
 
 	template<typename It1, typename It2>
 	bool create_wag(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_wagstar(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
 };
 
 template<typename It1, typename It2>
@@ -100,7 +103,8 @@ bool subst_model::create(const std::string &rname, It1 first1, It1 last1, It2 fi
 		std::string("jc"),  std::string("gtr"),
 		std::string("k2p"), std::string("hky"),
 		std::string("f84"), std::string("f81"), 
-		std::string("tn"), std::string("tn-f04")
+		std::string("tn"), std::string("tn-f04"),
+		std::string("wag"), std::string("wagstar")
 	};
 	switch(key_switch(rname, name_keys)) {
 		case 0:
@@ -119,7 +123,8 @@ bool subst_model::create(const std::string &rname, It1 first1, It1 last1, It2 fi
 			return create_tn("tn", first1, last1, first2, last2);
 		case 7:
 			return create_tn_f04("tn-f04", first1, last1, first2, last2);
-			
+		case 8:
+			return create_wag("wag", first1, last1, first2, last2);
 	};
 	return DAWG_ERROR("Invalid subst model; no model named '" << rname << "'");			
 }
