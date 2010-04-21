@@ -33,7 +33,7 @@ public:
 	inline int seq_type() const { return _model; }
 	
 	template<typename It1, typename It2>
-	bool create(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 	
 private:
 	// must hold at least 64 different characters
@@ -54,94 +54,83 @@ private:
 		return search_binary_cont(&table[n][0], &table[n][4], m());
 	}
 	inline base_type do_aagtr_f(mutt &m) const {
-		return search_binary_cont(&freqs[0], &freqs[20], m());
+		return search_binary_cont(&freqs[0], &freqs[32], m());
 	}
 	inline base_type do_aagtr_s(mutt &m, base_type n) const {
-		return search_binary_cont(&table[n][0], &table[n][20], m());
+		return search_binary_cont(&table[n][0], &table[n][32], m());
 	}	
 
+	// DNA Models
 	template<typename It1, typename It2>
-	bool create_freqs(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) const;
+	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) const;
 	
 	template<typename It1, typename It2>
-	bool create_gtr(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_gtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 	
 	template<typename It1, typename It2>
-	bool create_jc(const std::string &, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_jc(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_f81(const std::string &, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_f81(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_k2p(const std::string &, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_k2p(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_tn(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_tn(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_tn_f04(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_tn_f04(const char *mod_namee, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_f84(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_f84(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_hky(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_hky(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	// Protein Models
+	template<typename It1, typename It2>
+	bool create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_aagtr(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_wag(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_wag(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
-
-	template<typename It1, typename It2>
-	bool create_wagstar(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_wagstar(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 };
 
 template<typename It1, typename It2>
-bool subst_model::create(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) {
-	static std::string name_keys[] = {
-		std::string("jc"),  std::string("gtr"),
-		std::string("k2p"), std::string("hky"),
-		std::string("f84"), std::string("f81"), 
-		std::string("tn"), std::string("tn-f04"),
-		std::string("wag"), std::string("wagstar")
+bool subst_model::create(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static const char name_keys[][10] = {
+		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
+		"aagtr", "wag", "wagstar"
 	};
-	switch(key_switch(rname, name_keys)) {
-		case 0:
-			return create_jc("jc", first1, last1, first2, last2);
-		case 1:
-			return create_gtr("gtr", first1, last1, first2, last2);
-		case 2:
-			return create_k2p("k2p", first1, last1, first2, last2);
-		case 3:
-			return create_hky("hky", first1, last1, first2, last2);
-		case 4:
-			return create_f84("f84", first1, last1, first2, last2);
-		case 5:
-			return create_f81("f81", first1, last1, first2, last2);
-		case 6:
-			return create_tn("tn", first1, last1, first2, last2);
-		case 7:
-			return create_tn_f04("tn-f04", first1, last1, first2, last2);
-		case 8:
-			return create_wag("wag", first1, last1, first2, last2);
+	
+	static bool (subst_model::*create_ops[])(const char *, It1, It1, It2, It2) = {
+		&subst_model::create_jc, &subst_model::create_gtr, &subst_model::create_k2p,
+		&subst_model::create_hky, &subst_model::create_f84, &subst_model::create_f81,
+		&subst_model::create_tn, &subst_model::create_tn_f04,
+		&subst_model::create_aagtr, &subst_model::create_wag, &subst_model::create_wagstar,
 	};
-	return DAWG_ERROR("Invalid subst model; no model named '" << rname << "'");			
+	std::size_t pos = key_switch(mod_name, name_keys);
+	if(pos == (std::size_t)-1)
+		return DAWG_ERROR("Invalid subst model; no model named '" << mod_name << "'");
+	return (this->*create_ops[pos])(name_keys[pos], first1, last1, first2, last2);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_freqs(const std::string &rname, It1 first1, It1 last1, It2 first2, It2 last2) const {
+bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) const {
 	It2 result = first2;
 	double d=0.0;
 	for(int u=0;first1 != last1 && result != last2;++first1,++result,++u) {
 		if(*first1 < 0)
-			return DAWG_ERROR("Invalid subst model; " << rname << "frequency #" << u
+			return DAWG_ERROR("Invalid subst model; " << mod_name << "frequency #" << u
 				<< " '" << *first1 << "' is not >= 0.");
 		d += *first1;
 		*result = *first1;
 	}
 	if(result != last2)
-		return DAWG_ERROR("Invalid subst model; " << rname << " requires "
+		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires "
 			<< std::distance(first2, last2) << " frequencies.");
 	for(;first2 != last2;++first2)
 		*first2 /= d;

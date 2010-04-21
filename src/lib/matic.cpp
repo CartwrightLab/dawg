@@ -37,7 +37,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	std::auto_ptr<section> info(new section);
 	
 	// construct models
-	if(!info->sub_mod.create(ma.subst_model,
+	if(!info->sub_mod.create(ma.subst_model.c_str(),
 		ma.subst_params.begin(), ma.subst_params.end(),
 		ma.subst_freqs.begin(), ma.subst_freqs.end()))
 		return DAWG_ERROR("substitution model could not be created.");
@@ -192,7 +192,7 @@ void dawg::matic::walk(alignment& aln) {
 		}
 		align(aln, seqs, configs[0].rex);
 	}
-	
+
 	foreach(const segment &seg, configs) {
 		if(seg.empty())
 			continue;

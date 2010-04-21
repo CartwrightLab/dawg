@@ -74,8 +74,7 @@ private:
 		return r;
 	}
 	boost::uint32_t do_user(mutt &m) const {
-		return std::distance(udata.begin(), std::lower_bound(
-		       udata.begin(), udata.end(), m()));
+		return search_binary_cont(udata.begin(), udata.end(), m());
 	}
 	
 	template<typename It>
@@ -155,14 +154,15 @@ private:
 		foreach(double &p, udata) {
 			p /= d;
 		}
-		name = "user";
 		udata.back() = 1.0;
+		udata.resize(upper_binary(udata.size()), 1.0);
+		
+		name = "user";
 		do_op = &dawg::indel_model::do_user;
-		mean = n / d;
+		mean = m / d;
 		return true;
 	}
 	
-
 	std::string name;
 	double qorz, mean;
 	boost::uint32_t zmax;

@@ -19,7 +19,7 @@ using namespace std;
 bool dawg::output::open(const char *file_name) {
 	typedef boost::iterator_range<const char*> cs_range;
 
-	format_id = 0;
+	set_format("aln");
 	cs_range format(file_name, file_name);
 	if(file_name != NULL && file_name[0] != '\0') {
 		const char *mid = strchr(file_name, ':');
@@ -39,7 +39,7 @@ bool dawg::output::open(const char *file_name) {
 			return DAWG_ERROR("unknown output format \'"
 						<< std::string(format.begin(), format.end()) << "\'.");
 		}
-	}
+	};
 	if(file_name != NULL && file_name[0] != '\0'
 		&& strcmp(file_name, "-") != 0) {
 		if(fout.is_open())

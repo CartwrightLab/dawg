@@ -6,20 +6,9 @@
  ****************************************************************************/
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/cstdint.hpp>
  
 namespace dawg {
-
-/*
-template<std::size_t _N>
-std::size_t key_switch(const std::string &ss, const std::string (&key)[_N]) {
-	using boost::algorithm::starts_with;
-	for(std::size_t i=0;i<_N;++i) {
-		if(starts_with(key[i], ss))
-			return i;
-	}
-	return (std::size_t)-1;
-}
-*/
 
 template<class A, class B, std::size_t _N>
 std::size_t key_switch(A &ss, const B (&key)[_N]) {
@@ -44,6 +33,29 @@ inline std::size_t search_binary_cont(It first, It last, const _V &v) {
 template<typename _V, std::size_t _N>
 inline std::size_t search_binary_cont(_V (&a)[_N], const _V &v) {
 	return search_binary_cont(&a[0], &a[_N], v);
+}
+
+inline boost::uint32_t upper_binary(boost::uint32_t u) {
+	u--;
+	u |= u >> 1;
+	u |= u >> 2;
+	u |= u >> 4;
+	u |= u >> 8;
+	u |= u >> 16;
+	u++;
+	return u;
+}
+
+inline boost::uint64_t upper_binary(boost::uint64_t u) {
+	u--;
+	u |= u >> 1;
+	u |= u >> 2;
+	u |= u >> 4;
+	u |= u >> 8;
+	u |= u >> 16;
+	u |= u >> 32;
+	u++;
+	return u;
 }
 
 } /* namespace dawg */
