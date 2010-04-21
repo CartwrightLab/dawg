@@ -411,6 +411,8 @@ void dawg::details::matic_section::evolve(
 		sequence::const_iterator start = first;
 		// TODO: Optimize out this if?
 		// TODO: Variant for constant rate_scale
+		// TODO: Optimzie out uni_scale multiplication by changing T and indel_rate
+		// TODO: Move to residue_model class
 		for(;first != last; ++first) {
 			if(first->is_deleted())
 				continue;
