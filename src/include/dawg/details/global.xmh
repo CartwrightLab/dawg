@@ -21,6 +21,7 @@ XM( (output)(block)(between), std::string, )
 XM( (output)(vars),   bool, true)
 XM( (output)(file),   std::string, )
 XM( (output)(split),  bool, false)
+XM( (output)(append), bool, false)
 
 XM( (sim)(reps),  unsigned int, 1)
 XM( (sim)(seed),  std::vector<unsigned int>, )

@@ -125,6 +125,8 @@ int dawg_app::run() {
 	global_options glopts;
 	glopts.read_section(input.data.front());
 
+	unsigned int num_reps = (arg.reps > 0) ? arg.reps : glopts.sim_reps;
+
 	dawg::output write_aln;
 	if(!write_aln.open(arg.output.empty() ?
 		glopts.output_file.c_str() : arg.output.c_str() )) {
@@ -146,13 +148,15 @@ int dawg_app::run() {
 		return EXIT_FAILURE;
 	}
 	// if a seed was specified, use it
-	if(!glopts.sim_seed.empty()) {
+	if(arg.seed != -1) {
+		kimura.seed(arg.seed);
+	} else if(!glopts.sim_seed.empty()) {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
 	// create sets of aligned sequences;
 	dawg::alignment aln;
 	kimura.pre_walk(aln);
-	for(unsigned int i=1;i<=glopts.sim_reps;++i) {
+	for(unsigned int i=0;i<num_reps;++i) {
 		kimura.walk(aln);
 		write_aln(aln);
 	}	

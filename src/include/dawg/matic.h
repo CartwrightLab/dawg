@@ -137,6 +137,10 @@ public:
 	void seed(_It first, _It last) {
 		maxx.seed(first, last);
 	}
+	template<typename T>
+	void seed(T t) {
+		maxx.seed(t);
+	}
 	
 	matic() : branch_color(0)
 	{}

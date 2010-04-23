@@ -145,6 +145,3 @@ void dawg::output::print_nexus(const alignment& aln) {
 	out << ";\nEND;\n" << endl;
 
 }
-
-
-

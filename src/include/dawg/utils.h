@@ -35,25 +35,11 @@ inline std::size_t search_binary_cont(_V (&a)[_N], const _V &v) {
 	return search_binary_cont(&a[0], &a[_N], v);
 }
 
-inline boost::uint32_t upper_binary(boost::uint32_t u) {
+template<typename T>
+inline T upper_binary(T u) {
 	u--;
-	u |= u >> 1;
-	u |= u >> 2;
-	u |= u >> 4;
-	u |= u >> 8;
-	u |= u >> 16;
-	u++;
-	return u;
-}
-
-inline boost::uint64_t upper_binary(boost::uint64_t u) {
-	u--;
-	u |= u >> 1;
-	u |= u >> 2;
-	u |= u >> 4;
-	u |= u >> 8;
-	u |= u >> 16;
-	u |= u >> 32;
+	for(int i=1;i<8*sizeof(u);i*=2)
+		u |= u >> i;
 	u++;
 	return u;
 }
