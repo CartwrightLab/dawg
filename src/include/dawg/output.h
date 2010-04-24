@@ -18,13 +18,18 @@ namespace dawg {
 
 class output {
 public:
-	output() : p_out(NULL), format_id(0), do_op(&output::print_fasta) { }
+	output() : p_out(NULL), format_id(0), do_op(&output::print_aln),
+		split_width(0), app(false), rep(0), split_id_offset(0) { }
 
-	bool open(const char *file_name);
+	bool open(const char *file_name, unsigned int max_rep=0, bool append=false);
 
-	inline void operator()(const alignment& aln) {
-		if(p_out != NULL)
-			(this->*do_op)(aln);
+	inline bool operator()(const alignment& aln) {
+		open_next();
+		if(p_out == NULL)
+			return false;
+		(this->*do_op)(aln);
+		++rep;
+		return true;
 	}
 
 	template<class T>
@@ -47,9 +52,16 @@ private:
 	void print_phylip(const alignment& aln);
 
 protected:
+	bool open_file(const char* file_name);
+	bool open_next();
+
 	std::ostream *p_out;
 	std::ofstream fout;
 	std::size_t format_id;
+	unsigned int rep, split_width;
+	bool app;
+	std::string split_file_name;
+	std::string::size_type split_id_offset;
 };
 
 template<class T>
