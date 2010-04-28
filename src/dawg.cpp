@@ -152,7 +152,7 @@ int dawg_app::run() {
 		return EXIT_FAILURE;
 	}
 	// if a seed was specified, use it
-	if(arg.seed != -1) {
+	if(arg.seed != 0) {
 		kimura.seed(arg.seed);
 	} else if(!glopts.sim_seed.empty()) {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
