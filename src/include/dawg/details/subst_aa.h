@@ -166,7 +166,47 @@ bool subst_model::create_wagstar(const char *, It1 first1, It1 last1, It2 first2
 	}
 	return create_aagtr("wagstar", &s[0], &s[190], &p[0], &p[20]);
 }
- 
+
+template<typename It1, typename It2>
+bool subst_model::create_lg(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static double s[190];
+	static double p[20];
+	if(first2 != last2) { //+F model
+		return create_aagtr("lg+f", &s[0], &s[190], first2, last2);
+	}
+	return create_aagtr("lg", &s[0], &s[190], &p[0], &p[20]);
+}
+
+template<typename It1, typename It2>
+bool subst_model::create_jtt(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static double s[190];
+	static double p[20];
+	if(first2 != last2) { //+F model
+		return create_aagtr("jtt+f", &s[0], &s[190], first2, last2);
+	}
+	return create_aagtr("jtt", &s[0], &s[190], &p[0], &p[20]);
+}
+
+template<typename It1, typename It2>
+bool subst_model::create_dayhoff(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static double s[190];
+	static double p[20];
+	if(first2 != last2) { //+F model
+		return create_aagtr("dayhoff+f", &s[0], &s[190], first2, last2);
+	}
+	return create_aagtr("dayhoff", &s[0], &s[190], &p[0], &p[20]);
+}
+
+template<typename It1, typename It2>
+bool subst_model::create_molphy(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+	static double s[190];
+	static double p[20];
+	if(first2 != last2) { //+F model
+		return create_aagtr("molphy+f", &s[0], &s[190], first2, last2);
+	}
+	return create_aagtr("molphy", &s[0], &s[190], &p[0], &p[20]);
+}
+
 } // namespace dawg
  
 #endif // DAWG_SUBST_AA_H
