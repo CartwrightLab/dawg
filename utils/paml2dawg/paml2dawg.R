@@ -1,6 +1,6 @@
 aa <- "A   R   N   D   C   Q   E   G   H   I   L   K   M   F   P   S   T   W   Y   V"
 aa <- strsplit(aa, "\\s+")[[1]]
-m <- scan("wag.txt")
+m <- scan("in.txt")
 ss <- m[1:190]
 p <- m[191:210]
 
@@ -16,9 +16,10 @@ ss.new <- s[upper.tri(s)]
 
 p.new <- p[o]
 
-paste(ss.new, collapse=", ")
-
-paste(p.new, collapse=", ")
+cat(paste(ss.new, collapse=", "))
+cat("\n")
+cat(paste(p.new, collapse=", "))
+cat("\n")
 
 p2 <- p.new/sum(p.new)
 s2 <- t(p2*s)*p2

@@ -90,6 +90,9 @@ private:
 
 	// Protein Models
 	template<typename It1, typename It2>
+	bool create_equ(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
 	bool create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
@@ -115,16 +118,16 @@ template<typename It1, typename It2>
 bool subst_model::create(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
-		"aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy"
+		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy"
 	};
 	
 	static bool (subst_model::*create_ops[])(const char *, It1, It1, It2, It2) = {
-		&subst_model::create_jc, &subst_model::create_gtr, &subst_model::create_k2p,
+		&subst_model::create_jc,  &subst_model::create_gtr, &subst_model::create_k2p,
 		&subst_model::create_hky, &subst_model::create_f84, &subst_model::create_f81,
-		&subst_model::create_tn, &subst_model::create_tn_f04,
-		&subst_model::create_aagtr, &subst_model::create_lg, &subst_model::create_wag,
-		&subst_model::create_wagstar, &subst_model::create_jtt, &subst_model::create_dayhoff,
-		&subst_model::create_molphy
+		&subst_model::create_tn,  &subst_model::create_tn_f04,
+		&subst_model::create_equ, &subst_model::create_aagtr, &subst_model::create_lg,
+		&subst_model::create_wag, &subst_model::create_wagstar, &subst_model::create_jtt,
+		&subst_model::create_dayhoff, &subst_model::create_molphy
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
 	if(pos == (std::size_t)-1)
