@@ -20,9 +20,10 @@
 using namespace dawg;
 using namespace std;
 
-bool dawg::output::open(const char *file_name, unsigned int max_rep, bool append) {
+bool dawg::output::open(const char *file_name, unsigned int max_rep, bool split, bool append) {
 	typedef boost::iterator_range<const char*> cs_range;
 	set_format("aln");
+	last_rep = max_rep;
 	rep = 0;
 	cs_range format(file_name, file_name);
 	const char *mid = NULL;
@@ -51,7 +52,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep, bool append
 		// set append option before we open the file
 		app = append;
 		// find how wide the id number must be
-		unsigned int m = max_rep;
+		unsigned int m = split ? max_rep : 0;
 		split_width = (m == 0) ? 0 : (m < 10) ? 1 : (m < 100) ? 2 : (m < 1000) ? 3 :
 			(m < 10000) ? 4 : (m < 100000) ? 5 : (m < 1000000) ? 6 :
 			(m < 10000000) ? 7 : (m < 100000000) ? 8 :

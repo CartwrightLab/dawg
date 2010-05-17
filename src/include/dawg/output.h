@@ -21,14 +21,22 @@ public:
 	output() : p_out(NULL), format_id(0), do_op(&output::print_aln),
 		split_width(0), app(false), rep(0), split_id_offset(0) { }
 
-	bool open(const char *file_name, unsigned int max_rep=0, bool append=false);
+	bool open(const char *file_name, unsigned int max_rep=0, bool split = false, bool append=false);
 
 	inline bool operator()(const alignment& aln) {
 		open_next();
 		if(p_out == NULL)
 			return false;
+		std::ostream &out = *p_out;
+		if(split_width == 0)
+			out << ((rep == 0) ? block_head : block_between);
+		out << block_before;
 		(this->*do_op)(aln);
+		out << block_after;
+		if(split_width == 0 && rep == last_rep)
+			out << block_tail;
 		++rep;
+		out.flush();
 		return true;
 	}
 
@@ -40,6 +48,15 @@ public:
 	}
 	inline void set_ostream(std::ostream *os) {
 		p_out = os;
+	}
+	
+	inline void set_blocks(const char *h, const char *w,
+		const char *t, const char *b, const char *a) {
+		block_head.assign(h);
+		block_between.assign(w);
+		block_tail.assign(t);		
+		block_before.assign(b);
+		block_after.assign(a);
 	}
 
 private:
@@ -58,10 +75,16 @@ protected:
 	std::ostream *p_out;
 	std::ofstream fout;
 	std::size_t format_id;
-	unsigned int rep, split_width;
+	unsigned int rep, split_width, last_rep;
 	bool app;
 	std::string split_file_name;
 	std::string::size_type split_id_offset;
+	
+	std::string block_head;
+	std::string block_between;
+	std::string block_tail;
+	std::string block_before;
+	std::string block_after;
 };
 
 template<class T>

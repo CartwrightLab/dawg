@@ -130,13 +130,18 @@ int dawg_app::run() {
 	dawg::output write_aln;
 	const char *file_name = arg.output.empty() ? glopts.output_file.c_str()
 		                                       : arg.output.c_str();
-	unsigned int max_rep = (!arg.unsplit && (arg.split || glopts.output_split))
-		                 ? num_reps-1 : 0;
+	bool split  = (!arg.unsplit && (arg.split || glopts.output_split));
 	bool append = (!arg.unappend && (arg.append || glopts.output_append));
-	if(!write_aln.open(file_name, max_rep, append)) {
+	if(!write_aln.open(file_name, num_reps-1, split, append)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
+	write_aln.set_blocks(glopts.output_block_head.c_str(),
+		glopts.output_block_between.c_str(),
+		glopts.output_block_tail.c_str(),
+		glopts.output_block_before.c_str(),
+		glopts.output_block_after.c_str()
+	);		
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_pile(input, configs)) {
