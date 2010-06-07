@@ -34,10 +34,12 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 	double s[20][20];
 	double rs[20];
 	u = 0;
+	double aa = 0.0;
 	for(int i=0;i<20;++i) {
 		s[i][i] = 0.0;
 		for(int j=i+1;j<20;++j) {
 			s[i][j] = s[j][i] = params[u++];
+			aa = std::max(aa,s[i][j]);
 		}
 	}
 	// scale the matrix to substitution time and uniformize
@@ -49,6 +51,7 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 			d += s[i][j]*freqs[i];
 		}
 	}
+	std::cout << d << " " << aa << std::endl;
 	for(int i=0;i<20;++i) {
 		rs[i] = 0.0;
 		for(int j=0;j<20;++j) {
@@ -73,8 +76,7 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 	}
 	// we will include 32 sites in our binary search
 	// so fill them with 1.0
-	std::fill(&freqs[19],&freqs[31], 1.0);
-	freqs[19] = 1.0;
+	std::fill(&freqs[19],&freqs[32], 1.0);
 	for(int i=0;i<20;++i) {
 		d = 0.0;
 		for(int j=0;j<19;++j) {
@@ -83,7 +85,7 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 		}
 		// we will include 32 sites in our binary search
 		// so fill them with 1.0
-		std::fill(&table[i][19],&table[i][31], 1.0);
+		std::fill(&table[i][19],&table[i][32], 1.0);
 	}
 	name = mod_name;
 	do_op_f = &subst_model::do_aagtr_f;
@@ -122,7 +124,7 @@ bool subst_model::create_equ(const char *, It1 first1, It1 last1, It2 first2, It
 	if(first2 != last2) { //+F model
 		return create_aagtr("equ+f", &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("eqy", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("equ", &s[0], &s[190], &p[0], &p[20]);
 }
 
 
