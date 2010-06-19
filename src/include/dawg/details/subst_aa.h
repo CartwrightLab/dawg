@@ -51,7 +51,6 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 			d += s[i][j]*freqs[i];
 		}
 	}
-	std::cout << d << " " << aa << std::endl;
 	for(int i=0;i<20;++i) {
 		rs[i] = 0.0;
 		for(int j=0;j<20;++j) {
