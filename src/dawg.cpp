@@ -68,8 +68,6 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 			#include "dawgarg.xmh"
 			#undef XM
 			;
-		po::variables_map vm;
-		po::positional_options_description pdesc;
 		pdesc.add("input", -1);
 		po::store(po::command_line_parser(argc, argv).options(desc).positional(pdesc).run(), vm);
 		po::notify(vm);
@@ -130,8 +128,12 @@ int dawg_app::run() {
 	dawg::output write_aln;
 	const char *file_name = arg.output.empty() ? glopts.output_file.c_str()
 		                                       : arg.output.c_str();
-	bool split  = (!arg.unsplit && (arg.split || glopts.output_split));
-	bool append = (!arg.unappend && (arg.append || glopts.output_append));
+	bool split  = (!vm["split"].defaulted()) ? arg.split : glopts.output_split;
+	bool append = (!vm["append"].defaulted()) ? arg.append : glopts.output_append;
+
+	cout << split << " " << append << endl;
+	return 1;
+
 	if(!write_aln.open(file_name, num_reps-1, split, append)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;

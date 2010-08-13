@@ -30,18 +30,16 @@
 XM((output),    (o),  "output to this file", std::string, std::string())
 XM((seed),         ,  "PRNG seed", unsigned int, 0)
 XM((reps),         ,  "the number of alignments to generate", unsigned int, 0)
-XM((split),        ,  "split output into separate files", bool, false)
-XM((unsplit),      ,  "unsplit the output", bool, false)
-XM((append),       ,  "append output to file", bool, false)
-XM((unappend),     ,  "unappend output to file", bool, false)
+XM((split),        ,  "split output into separate files", bool, _DL(false, "off"))
+XM((append),       ,  "append output to file", bool, _DL(false, "off"))
 
 // Standard options
-XM((quiet),       (q), "disable all warnings and error messages", bool, false)
-XM((warn),        (w), "dsable warnings", bool, false)
-XM((error),       (e), "disable error messages", bool, false)
+XM((quiet),       (q), "disable all warnings and error messages", bool, _DL(false, "off"))
+XM((warn),        (w), "dsable warnings", bool, _DL(false, "off"))
+XM((error),       (e), "disable error messages", bool, _DL(false, "off"))
 XM((arg)(file),      , "read arguments from file", std::string, std::string(""))
-XM((version),        , "display version information", bool, false)
-XM((help),           , "display help message", bool, false)
+XM((version),        , "display version information", bool, _DL(false, "off"))
+XM((help),           , "display help message", bool, _DL(false, "off"))
 XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(1, std::string("-")), "-") )
 
 /***************************************************************************
