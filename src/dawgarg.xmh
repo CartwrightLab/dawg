@@ -30,8 +30,8 @@
 XM((output),    (o),  "output to this file", std::string, std::string())
 XM((seed),         ,  "PRNG seed", unsigned int, 0)
 XM((reps),         ,  "the number of alignments to generate", unsigned int, 0)
-XM((split),        ,  "split output into separate files", bool, _DL(false, "off"))
-XM((append),       ,  "append output to file", bool, _DL(false, "off"))
+XM((split),        ,  "split output into separate files", boost::tribool, _DL(boost::indeterminate, "null"))
+XM((append),       ,  "append output to file", boost::tribool, _DL(boost::indeterminate, "null"))
 
 // Standard options
 XM((quiet),       (q), "disable all warnings and error messages", bool, _DL(false, "off"))

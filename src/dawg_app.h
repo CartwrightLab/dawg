@@ -21,6 +21,8 @@
 #include <vector>
 #include <utility>
 
+#include <boost/logic/tribool.hpp>
+#include <boost/logic/tribool_io.hpp>
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -58,10 +60,56 @@ template<>
 typed_value<bool>* value(bool* v) {
 	//return bool_switch(v);
 	typed_value<bool>* r = new typed_value<bool>(v);
-    r->default_value(0, "off");
+    //r->default_value(0, "off");
     r->implicit_value(1, "on");
 	return r;
 }
+template<>
+typed_value<boost::tribool>* value(boost::tribool* v) {
+	//return bool_switch(v);
+	typed_value<boost::tribool>* r = new typed_value<boost::tribool>(v);
+    r->implicit_value(true, "on");
+	return r;
+}
+
+// modified from boost/libs/program_options/src/value_semantic.cpp
+void validate(boost::any& v, const std::vector<std::string>& xs, boost::tribool*, int) {
+    check_first_occurrence(v);
+	std::string s(get_single_string(xs, true));
+
+    for (size_t i = 0; i < s.size(); ++i)
+        s[i] = char(tolower(s[i]));
+
+    if (s.empty() || s == "on" || s == "yes" || s == "1" || s == "true")
+		v = any(boost::tribool(true));
+    else if (s == "off" || s == "no" || s == "0" || s == "false")
+		v = any(boost::tribool(false));
+    else if (s == "null" || s == "maybe" || s == "2" || s == "indeterminate")
+		v = any(boost::tribool(boost::indeterminate));
+    else
+        boost::throw_exception(validation_error(validation_error::invalid_option_value, s));
+}
+#if !defined(BOOST_NO_STD_WSTRING)
+void validate(any& v, const std::vector<std::wstring>& xs, boost::tribool*, int)
+{
+    check_first_occurrence(v);
+	std::wstring s(get_single_string(xs, true));
+
+    for (size_t i = 0; i < s.size(); ++i)
+        s[i] = wchar_t(tolower(s[i]));
+
+    if (s.empty() || s == L"on" || s == L"yes" || s == L"1" || s == L"true")
+        v = any(boost::tribool(true));
+    else if (s == L"off" || s == L"no" || s == L"0" || s == L"false")
+        v = any(boost::tribool(false));
+    else if (s == L"null" || s == L"maybe" || s == L"2" || s == L"indeterminate")
+		v = any(boost::tribool(boost::indeterminate));
+    else
+        boost::throw_exception(validation_error(validation_error::invalid_option_value));
+}
+#endif
+
+
 }}
 
 #endif

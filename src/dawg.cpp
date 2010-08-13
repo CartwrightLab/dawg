@@ -128,11 +128,11 @@ int dawg_app::run() {
 	dawg::output write_aln;
 	const char *file_name = arg.output.empty() ? glopts.output_file.c_str()
 		                                       : arg.output.c_str();
-	bool split  = (!vm["split"].defaulted()) ? arg.split : glopts.output_split;
-	bool append = (!vm["append"].defaulted()) ? arg.append : glopts.output_append;
+	//bool split  = (!vm["split"].defaulted()) ? arg.split : glopts.output_split;
+	//bool append = (!vm["append"].defaulted()) ? arg.append : glopts.output_append;
 
-	cout << split << " " << append << endl;
-	return 1;
+	bool split  = arg.split || (indeterminate(arg.split) && glopts.output_split);
+	bool append = arg.append || (indeterminate(arg.append) && glopts.output_append);
 
 	if(!write_aln.open(file_name, num_reps-1, split, append)) {
 		DAWG_ERROR("bad configuration");
