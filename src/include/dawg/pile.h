@@ -105,7 +105,7 @@ struct pile_grammar : qi::grammar<Iterator, pile::raw(), skip_type> {
 		using standard::char_;
 		using qi::raw; using qi::lexeme; using qi::eol;
 		
-		start = +section;
+		start = *section;
 		section = section_header || section_body;
 		section_header = "[[" >> id >> -('=' >> id) >> "]]";
 		section_body = +subsection;
