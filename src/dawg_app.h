@@ -37,7 +37,8 @@ public:
 	
 	virtual int run();
 	
-	po::options_description desc;
+	std::string runname;
+	po::options_description desc, indesc;
 	po::positional_options_description pdesc;
 	po::variables_map vm;
 
@@ -48,6 +49,7 @@ public:
 #	define XM(lname, sname, desc, type, def) type _V(lname) ;
 #	include "dawgarg.xmh"
 #	undef XM
+		std::vector< std::string > input;
 	};
 	
 protected:
@@ -87,7 +89,7 @@ void validate(boost::any& v, const std::vector<std::string>& xs, boost::tribool*
     else if (s == "null" || s == "maybe" || s == "2" || s == "indeterminate")
 		v = any(boost::tribool(boost::indeterminate));
     else
-        boost::throw_exception(validation_error(validation_error::invalid_option_value, s));
+        boost::throw_exception(invalid_option_value(s));
 }
 #if !defined(BOOST_NO_STD_WSTRING)
 void validate(any& v, const std::vector<std::wstring>& xs, boost::tribool*, int)
@@ -105,7 +107,7 @@ void validate(any& v, const std::vector<std::wstring>& xs, boost::tribool*, int)
     else if (s == L"null" || s == L"maybe" || s == L"2" || s == L"indeterminate")
 		v = any(boost::tribool(boost::indeterminate));
     else
-        boost::throw_exception(validation_error(validation_error::invalid_option_value));
+        boost::throw_exception(invalid_option_value(s));
 }
 #endif
 

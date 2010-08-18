@@ -23,6 +23,9 @@
  *    XCMD(lname, sname, desc, type, def)                                  *
  ***************************************************************************/
 
+XM((version),        , "display version information", bool, _DL(false, "off"))
+XM((help),           , "display help message", bool, _DL(false, "off"))
+
 //XCMD((serial),  (s), "Process input files serially", bool, true)
 //XCMD((combined),(c), "process input files together", bool, false)
 //XCMD((buffer),  (b), "buffer output", bool, true)
@@ -38,9 +41,9 @@ XM((quiet),       (q), "disable all warnings and error messages", bool, _DL(fals
 XM((warn),        (w), "dsable warnings", bool, _DL(false, "off"))
 XM((error),       (e), "disable error messages", bool, _DL(false, "off"))
 XM((arg)(file),      , "read arguments from file", std::string, std::string(""))
-XM((version),        , "display version information", bool, _DL(false, "off"))
-XM((help),           , "display help message", bool, _DL(false, "off"))
-XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(1, std::string("-")), "-") )
+//XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(1, std::string("-")), "-") )
+//XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(), "") )
+
 
 /***************************************************************************
  *    cleanup                                                              *

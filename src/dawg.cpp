@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 }
 
 dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
+	runname = argv[0];
 	try {
 		desc.add_options()
 			#define XM(lname, sname, desc, type, def) ( \
@@ -68,8 +69,10 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 			#include "dawgarg.xmh"
 			#undef XM
 			;
+		indesc.add_options()("input", po::value< vector<string> >(&arg.input), "input files");
+		indesc.add(desc);
 		pdesc.add("input", -1);
-		po::store(po::command_line_parser(argc, argv).options(desc).positional(pdesc).run(), vm);
+		po::store(po::command_line_parser(argc, argv).options(indesc).positional(pdesc).run(), vm);
 		po::notify(vm);
 		if(!arg.arg_file.empty()) {
 			if(arg.arg_file == "-") {
@@ -102,8 +105,11 @@ int dawg_app::run() {
 		cerr << endl << VERSION_MSG << endl << endl;
 		return EXIT_SUCCESS;
 	}
-	if(arg.help) {
+	if(arg.help || arg.input.empty()) {
 		cerr << endl << VERSION_MSG << endl << endl;
+		cerr << "Usage:\n  "
+		     << runname << " [options] input-1.dawg input-2.dawg"
+			 << endl << endl;
 		cerr << desc << endl;
 		return EXIT_SUCCESS;
 	}
