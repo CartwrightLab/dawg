@@ -41,7 +41,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep, bool split,
 			mid = strrchr(file_name, '.');
 		} else if((mid = strrchr(file_name, '.')) != NULL) {
 			// file.format
-			format = boost::make_iterator_range(mid+1, strchr(mid+1, '\0'));
+			format = boost::make_iterator_range(mid+1, (const char*)strchr(mid+1, '\0'));
 		}
 		if(format && !set_format(format)) {
 			return DAWG_ERROR("unknown output format \'"
