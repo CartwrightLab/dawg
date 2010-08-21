@@ -5,7 +5,9 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#define __STDC_CONSTANT_MACROS 1
+#ifndef __STDC_CONSTANT_MACROS
+#	define __STDC_CONSTANT_MACROS 1
+#endif
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 #include <cmath>
@@ -196,8 +198,8 @@ public:
 		double d=7.69711747013104972, t=d, q;
 		
 		q = v/exp(-d);
-		k[0]=(d/q)*m;
-		k[1]=0;
+		k[0] = static_cast<boost::uint64_t>((d/q)*m);
+		k[1] = 0;
 
 		w[0]=q/m;
 		w[255]=d/m;
@@ -207,7 +209,7 @@ public:
 
 		for(int i=254; i>=1; i--) {
 			d=-log(v/d+q);
-			k[i+1] = (d/t)*m;
+			k[i+1] = static_cast<boost::uint64_t>((d/t)*m);
 			t=d;
 			f[i]=q=exp(-d);
 			w[i]=d/m;

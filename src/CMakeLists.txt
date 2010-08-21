@@ -92,7 +92,8 @@ ENDIF(NOT HAVE_UNISTD_H)
 ADD_EXECUTABLE(dawg ${PROJ_MACOSX_BUNDLE}
   dawg.cpp
   dawg.h dawg_app.h
-  lib/ma.cpp lib/matic.cpp lib/output.cpp lib/mutt.cpp lib/mutt/dSFMT/dSFMT.c
+  lib/ma.cpp lib/matic.cpp lib/output.cpp lib/mutt.cpp lib/pile.cpp
+  lib/mutt/dSFMT/dSFMT.c
   "${CMAKE_CURRENT_BINARY_DIR}/config.h"
   ${COMPAT}
   ${RES_SRCS})

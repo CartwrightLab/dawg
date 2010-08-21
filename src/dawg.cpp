@@ -119,7 +119,7 @@ int dawg_app::run() {
 		
 	bool ret = true;
 	foreach(string &ss, arg.input) {
-		ret &= input.parse_file(ss.c_str());
+		ret &= pile::parse_file(input, ss.c_str());
 	}
 	if(!ret)
 		return EXIT_FAILURE;	

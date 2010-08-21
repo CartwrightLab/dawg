@@ -26,6 +26,8 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+#include <dawg/pile.h>
+
 /****************************************************************************
  *    class dawg_app                                                        *
  ****************************************************************************/
@@ -36,13 +38,12 @@ public:
 	virtual ~dawg_app() { }
 	
 	virtual int run();
-	
+
 	std::string runname;
 	po::options_description desc, indesc;
 	po::positional_options_description pdesc;
 	po::variables_map vm;
 
-	
 	struct args
 	{			
 	// use X-Macros to specify argument variables
@@ -54,7 +55,6 @@ public:
 	
 protected:
 	args arg;
-	
 };
 
 namespace boost { namespace program_options {

@@ -51,4 +51,3 @@ operator<<(std::basic_ostream<CharType, CharTrait>& o, const ma &a) {
 
 } //namespace dawg
 #endif //DAWG_MA_H
-
