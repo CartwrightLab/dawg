@@ -52,7 +52,9 @@ inline double to_real_b(uint32_t v) {
 
 /* generate a random number on [0,1) with 53-bit resolution*/
 inline double to_real53_o(uint64_t v) { 
-    return v * (1.0/18446744073709551616.0L);
+    return (sizeof(long double) == 8) ? 
+		(v >> 11) * (1.0/9007199254740992.0) :
+		v * (1.0/18446744073709551616.0L);
 }
 
 /* generate a random number on [0,1) with 53-bit resolution from two
@@ -62,8 +64,11 @@ inline double to_real53_o(uint32_t x, uint32_t y) {
 }
 
 /* generate a random number on (0,1) with 53-bit resolution*/
-inline double to_real53_b(uint64_t v) { 
-    return (((double)v)+0.5) * (1.0/18446744073709551616.0L);
+/* actually 52 */
+inline double to_real53_b(uint64_t v) {
+    return (sizeof(long double) == 8) ?
+		((v >> 11) | 1) * (1.0/9007199254740992.0) :
+		(v|1) * (1.0/18446744073709551616.0L);
 }
 
 /* generate a random number on (0,1) with 53-bit resolution from two
