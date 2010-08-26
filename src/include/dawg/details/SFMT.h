@@ -49,6 +49,7 @@
  * of 64-bit integers.*/
 #define SFMT_N64 (SFMT_N * 2)
 
+#ifndef SFMT_UINT32_DEFINED
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <inttypes.h>
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
@@ -70,6 +71,7 @@
     #define PRIu64 "llu"
     #define PRIx64 "llx"
   #endif
+#endif
 #endif
 
 #if defined(__GNUC__)

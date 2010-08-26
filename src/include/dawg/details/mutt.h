@@ -8,24 +8,71 @@
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
 #endif
+#define SFMT_UINT32_DEFINED 1
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 #include <cmath>
 
-// include stuff for DSFMT
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-#	define DSFMT_UINT32_DEFINED 1
+#define USE_SFMT 1
+
+extern "C" {
 using boost::uint32_t;
 using boost::uint64_t;
+
+#ifdef USE_SFMT
+#	include <dawg/details/SFMT.h>
+#else
+#ifdef USE_DSFMT
+#	include <dawg/details/dSFMT.h>
 #endif
-#define DSFMT_MEXP 19937
-#define DSFMT_DO_NOT_USE_OLD_NAMES
-extern "C" {
-#include <dawg/details/dSFMT.h>
+#endif
 }
 
 namespace dawg { namespace details {
 
+inline boost::uint64_t to_uint64(uint32_t x, uint32_t y) {
+	return y | ((uint64_t)x << 32);
+}
+
+/* These real versions are derived from Isaku Wada's code. */
+/* generate a random number on [0,1]-real-interval */
+inline double to_real_c(uint32_t v) {
+    return v * (1.0/4294967295.0); /* divided by 2^32-1 */ 
+}
+
+/* generate a random number on [0,1)-real-interval */
+inline double to_real_o(uint32_t v) {
+    return v * (1.0/4294967296.0); /* divided by 2^32 */
+}
+
+/* generate a random number on (0,1)-real-interval */
+inline double to_real_b(uint32_t v) {
+    return (((double)v) + 0.5)*(1.0/4294967296.0); /* divided by 2^32 */
+}
+
+/* generate a random number on [0,1) with 53-bit resolution*/
+inline double to_real53_o(uint64_t v) { 
+    return v * (1.0/18446744073709551616.0L);
+}
+
+/* generate a random number on [0,1) with 53-bit resolution from two
+ * 32 bit integers */
+inline double to_real53_o(uint32_t x, uint32_t y) { 
+    return to_real53_o(to_uint64(x,y));
+}
+
+/* generate a random number on (0,1) with 53-bit resolution*/
+inline double to_real53_b(uint64_t v) { 
+    return (((double)v)+0.5) * (1.0/18446744073709551616.0L);
+}
+
+/* generate a random number on (0,1) with 53-bit resolution from two
+ * 32 bit integers */
+inline double to_real53_b(uint32_t x, uint32_t y) { 
+    return to_real53_b(to_uint64(x,y));
+}
+
+#ifdef USE_DSFMT
 struct dsfmt_mutt_gen {
 	double rand_01()  { return dsfmt_genrand_close_open(&state);	}
 	double rand_01oc() { return dsfmt_genrand_open_close(&state); }
@@ -53,6 +100,33 @@ struct dsfmt_mutt_gen {
 private:
 	dsfmt_t state;
 };
+#endif
+
+#ifdef USE_SFMT
+struct sfmt_mutt_gen {
+	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
+	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
+	double rand_real()   { return to_real53_o(rand_uint64()); }
+	double rand_real_b() { return to_real53_b(rand_uint64()); }
+	
+	void seed(uint32_t x) { sfmt_init_gen_rand(&state, x); }
+	template<int _N>
+	void seed(uint32_t (&x)[_N]) {
+		sfmt_init_by_array(&state, &x[0], _N);
+	}
+	template<typename _It>
+	void seed(_It first, _It last) {
+		std::size_t sz = last-first;
+		boost::uint32_t *p = new boost::uint32_t[sz];
+		std::copy(first, last, p);
+		sfmt_init_by_array(&state, p, sz);
+		delete[] p;
+	}
+
+private:
+	sfmt_t state;
+};
+#endif
 
 // George Marsaglia's quick but good generator
 // http://www.jstatsoft.org/v08/i14/paper
@@ -65,24 +139,10 @@ struct shr3a_mutt_gen {
 		y=(y^(y>>3))^(t^(t>>7));
 		return y;
 	}
-	inline boost::uint64_t rand_uint64() {
-		uint64_t a = rand_uint32();
-		uint64_t b = rand_uint32();
-		return (a << 32) | b;
-	}
-	// doubles with 53-bits worth of precision
-	inline double rand_01() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return u/4503599627370496.0;
-	}
-	inline double rand_01oo() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return ((u+1)/4503599627370497.0);
-	}
-	inline double rand_01oc() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return ((u+1)/4503599627370496.0);
-	}
+	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
+	double rand_real()   { return to_real53_o(rand_uint64()); }
+	double rand_real_b() { return to_real53_b(rand_uint64()); }
+
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;
 		// 1 round of 32-bit shr3 to fill in the rest
@@ -123,18 +183,9 @@ struct shr3b_mutt_gen {
 		return y;
 	}
 	// doubles with 53-bits worth of precision
-	inline double rand_01() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return u/4503599627370496.0;
-	}
-	inline double rand_01oo() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return ((u+1)/4503599627370497.0);
-	}
-	inline double rand_01oc() {
-		uint64_t u = rand_uint64() & UINT64_C(4503599627370495);
-		return ((u+1)/4503599627370496.0);
-	}
+	double rand_real()   { return to_real53_o(rand_uint64()); }
+	double rand_real_b() { return to_real53_b(rand_uint64()); }
+
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;
 	}
@@ -153,7 +204,6 @@ struct shr3b_mutt_gen {
 		std::size_t h = static_cast<std::size_t>(*first++);
 		boost::hash_range(h, first, last);
 		y |= (static_cast<boost::uint64_t>(h) << 32);
-		
 	}
 	
 	private:
@@ -187,10 +237,12 @@ public:
 		
 		return a*w[b];
 	}
+	
 	template<class _R>
 	inline double inv(_R &rng) const {
 		return log(unif01open(rng.rand_uint64()));
 	}
+	
 	rand_exp_ziggurat() {
 		static const double v = 0.0039496598225815571993;
 		static const double m = 4503599627370496.0; // 2^52

@@ -19,7 +19,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
 	
 	double U, X,K;
 	for(;;) {
-		U = rand_01(); // [0,1)
+		U = rand_real(); // [0,1)
 		U = Him+U*Hx0;
 		X = zHi(U,z1,z2);
 		K = floor(X+1.5);
@@ -42,7 +42,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
  */
 double dawg::mutt::rand_gamma_high(double a, double b) {
 	if(a < 1)
-		return rand_gamma(1.0+a,b)*pow(rand_01oo(), 1.0/a);
+		return rand_gamma(1.0+a,b)*pow(rand_real_b(), 1.0/a);
 
 	double x, v, u;
 	double d = a - 1.0/3.0;
@@ -54,7 +54,7 @@ double dawg::mutt::rand_gamma_high(double a, double b) {
 			v = 1.0 + c * x;
 		} while (v <= 0);
 		v = v * v * v;
-		u = rand_01oo();
+		u = rand_real_b();
 		x *= x;
 		if (u < 1 - 0.0331 * x * x) 
 			break;
@@ -206,11 +206,11 @@ double dawg::mutt::rand_normal(double sigma) {
 
 		if(i < 127) {
 			double y0 = ytab[i], y1 = ytab[i + 1];
-			double U1 = rand_01();
+			double U1 = rand_real();
 			y = y1 + (y0 - y1) * U1;
 		} else {
 			double U1 = 1.0 - rand_uint32();
-			double U2 = rand_01();
+			double U2 = rand_real();
 			x = PARAM_R - log(U1) / PARAM_R;
 			y = exp(-PARAM_R * (x - 0.5 * PARAM_R)) * U2;
 		}

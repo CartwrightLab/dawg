@@ -34,18 +34,14 @@
 #include <stdio.h>
 #include <assert.h>
 
-#if !defined(DSFMT_MEXP)
-#ifdef __GNUC__
-  #warning "DSFMT_MEXP is not defined. I assume DSFMT_MEXP is 19937."
-#endif
-  #define DSFMT_MEXP 19937
-#endif
+#define DSFMT_DO_NOT_USE_OLD_NAMES
+
 /*-----------------
   BASIC DEFINITIONS
   -----------------*/
 /* Mersenne Exponent. The period of the sequence 
- *  is a multiple of 2^DSFMT_MEXP-1.
- * #define DSFMT_MEXP 19937 */
+ *  is a multiple of 2^DSFMT_MEXP-1. */
+#define DSFMT_MEXP 19937
 /** DSFMT generator has an internal state array of 128-bit integers,
  * and N is its size. */
 #define DSFMT_N ((DSFMT_MEXP - 128) / 104 + 1)

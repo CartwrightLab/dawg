@@ -12,6 +12,7 @@
  */
 #include <string.h>
 #include <assert.h>
+
 #include <dawg/details/SFMT.h>
 #include <dawg/details/SFMT-params19937.h>
 

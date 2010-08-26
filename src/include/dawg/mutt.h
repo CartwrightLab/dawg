@@ -44,19 +44,21 @@ public:
 	}
 	
 	// returns a random double between [0,1)
-	inline double operator()() { return rand_01(); }
-	inline double rand_01() { return gen.rand_01(); }
+	inline double operator()() { return rand_real(); }
+	inline double rand_real() { return gen.rand_real(); }
 	// between (0,1] and (0,1)
-	inline double rand_01oc() { return gen.rand_01oc(); }
-	inline double rand_01oo() { return gen.rand_01oo(); }
+	//inline double rand_01oc() { return gen.rand_01oc(); }
+	inline double rand_real_b() { return gen.rand_real_b(); }
+	// returns random 64-bit number
+	boost::uint64_t rand_uint64() { return gen.rand_uint64(); }
 	// returns random 32-bit number
 	boost::uint32_t rand_uint32() { return gen.rand_uint32(); }
 	// returns random 32-bit number with max n-1
 	boost::uint32_t rand_uint32(boost::uint32_t n) {
-		return static_cast<boost::uint32_t>(rand_01()*n);
+		return static_cast<boost::uint32_t>(rand_real()*n);
 	}
 	// random boolean p prob of success
-	inline bool rand_bool(double p = 0.5) { return (rand_01() < p); }
+	inline bool rand_bool(double p = 0.5) { return (rand_real() < p); }
 	// random exponential with rate r
 	inline double rand_exp(double r = 1.0) { return rand_exp_zig()/r; }
 	inline double rand_exp_zig();
@@ -82,7 +84,7 @@ public:
 	double rand_gamma_high(double a, double b);
 	// assumes a < 1
 	inline double rand_gamma_low(double a, double b) {
-		return rand_gamma_high(1.0+a,b)*pow(rand_01oo(), 1.0/a);
+		return rand_gamma_high(1.0+a,b)*pow(rand_real_b(), 1.0/a);
 	}
 	
 	// random normal with mean and sigma
@@ -106,18 +108,7 @@ private:
 	}
 	static inline double zHi(double x, double z1, double z2) {
 		return pow(z1*x,z2)-1.0;
-	}
-
-	static double inline unif01open(boost::uint64_t u) {
-		u &= UINT64_C(4503599627370495);
-		return ((u+1)/4503599627370497.0);
-	}
-
-	static double inline unif01(boost::uint64_t u) {
-		u &= UINT64_C(4503599627370495);
-		return u/4503599627370496.0;
 	}	
-	
 };
 
 // George Marsaglia's quick but good generator
@@ -144,10 +135,10 @@ inline double mutt::rand_exp_zig() {
 		return a*ew[b];
 	do {
 		if(b == 0)
-			return r-log(unif01open(gen.rand_uint64()));
+			return r+rand_exp_inv();
 		double x = a*ew[b];
 		// we can cache ef[b-1]-ef[b], but it should be minor
-		if(ef[b]+unif01(gen.rand_uint64())*(ef[b-1]-ef[b]) < exp(-x) )
+		if(ef[b]+rand_real()*(ef[b-1]-ef[b]) < exp(-x) )
 			return x;
 		a = gen.rand_uint64();
 		b = a & 255;
@@ -158,7 +149,7 @@ inline double mutt::rand_exp_zig() {
 }
 
 inline double mutt::rand_exp_inv() {
-	return -log(unif01open(gen.rand_uint64()));
+	return -log(rand_real_b());
 }
 
 
