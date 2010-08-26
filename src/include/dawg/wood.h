@@ -5,24 +5,13 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <boost/spirit/include/version.hpp>
-#if SPIRIT_VERSION < 0x2010
-#	error Spirit version 2.1 or greater required.
-#endif
-
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-
 #include <set>
 #include <iterator>
 #include <functional>
 
+#include <boost/optional.hpp>
 
 namespace dawg {
-
-namespace qi = boost::spirit::qi;
-namespace standard = boost::spirit::standard;
-namespace phoenix = boost::phoenix;
 
 struct wood_node {
 	unsigned short anc;
@@ -69,7 +58,8 @@ public:
 	bool parse(const std::string &str) {
 		return parse(str.begin(), str.end());
 	}
-	
+	static bool parse_string(wood &w, const std::string &str);
+
 	inline void scale(double d) {
 		for(data_type::iterator it = _data.begin(); it != _data.end(); ++it) {
 			it->length *= static_cast<float>(d);
@@ -105,7 +95,6 @@ public:
 		return true;
 	}
 	
-	
 	template<typename Iterator>
 	static Iterator get_left(Iterator me) {
 		std::advance(me, 1);
@@ -135,7 +124,7 @@ public:
 	static std::reverse_iterator<Iterator> get_anc(std::reverse_iterator<Iterator> me) {
 		std::advance(me, static_cast<int>(me->anc));
 		return me;
-	}	
+	}
 
 protected:
 	data_type _data;
@@ -143,78 +132,6 @@ protected:
 	std::string root_name;
 	
 };
-
-
-struct make_inode_impl {
-	template<typename V, typename C>
-	struct result {typedef void type; };
-	template<typename V, typename C>
-	void operator()(V &vec, const C& width) const {
-		vec.back().anc = 1;
-		C w = width+1;
-		(vec.end()-w)->anc = w;
-		vec.push_back(wood_node(w));
-	}
-};
-const phoenix::function<make_inode_impl> make_inode;
-
-template <typename Iterator>
-struct newick_grammar : qi::grammar<Iterator, wood::data_type(), standard::space_type> {
-	// http://evolution.genetics.washington.edu/phylip/newick_doc.html
-	typedef wood::data_type::size_type size_type;
-	newick_grammar() : newick_grammar::base_type(start) {
-		using standard::space; using standard::char_; using qi::eps;
-		using qi::float_; using qi::lexeme; using qi::raw; using qi::omit;
-		using qi::_1; using qi::_2; using qi::_val; using qi::_r1;
-		using phoenix::construct; using phoenix::bind;
-		using phoenix::back; using phoenix::push_back;
-		using phoenix::size;
-		
-		start    = omit[node(_val)] >> ';';
-		node     = tip(_r1) | inode(_r1);
-		tip      = label[push_back(_r1,construct<wood_node>(_1))][_val=1]
-		           >> -(':' >> float_[phoenix::bind(&wood_node::length, back(_r1)) = _1]);
-		inode    = '(' >> node(_r1)[_val=_1] >> (+(','
-		               >> node(_r1)[make_inode(_r1, _1)][_val+=_1+1])
-					   | eps[make_inode(_r1,0)][_val+=1]) >> ')'
-					   >> -(label[phoenix::bind(&wood_node::label, back(_r1)) = _1] ||
-					   (':' >> float_[phoenix::bind(&wood_node::length, back(_r1)) = _1]));
-		label    = unquoted | quoted;
-		// Due to the way hidden nodes are constructed,
-		// unquoted labels should not begin with {, |, or }.
-		unquoted = lexeme[(char_ - (char_(":,)(;'[]|{}")|space)) >>
-		                 *(char_ - (char_(":,)(;'[]")|space))];
-		quoted   = raw[lexeme['\'' >>
-			*(char_ - '\'') >> *(standard::string("\'\'") >> *(char_ - '\''))
-			>> '\'']];
-	}
-	
-	qi::rule<Iterator, wood::data_type(), standard::space_type> start;
-	qi::rule<Iterator, size_type(wood::data_type&), standard::space_type> node;
-	qi::rule<Iterator, size_type(wood::data_type&), standard::space_type> tip;
-	qi::rule<Iterator, size_type(wood::data_type&), standard::space_type> inode;
-	qi::rule<Iterator, std::string(), standard::space_type> label;
-	qi::rule<Iterator, std::string(), standard::space_type> unquoted;
-	qi::rule<Iterator, std::string(), standard::space_type> quoted;	
-};
-
-template<typename Iterator>
-bool wood::parse(Iterator first, Iterator last) {
-	using standard::space;
-	newick_grammar<Iterator> newick_parser;
-	bool r = qi::phrase_parse(first, last, newick_parser, space, _data);
-	if( first != last || !r )
-		return false;
-				
-	// The parser produces a tree that is tips first.
-	// Transform to root first.
-	std::reverse(_data.begin(), _data.end());
-	
-	if(!autolabel())
-		return false;
-	
-	return true;
-}
 
 }
 

@@ -414,7 +414,7 @@ uint64_t sfmt_gen_rand64(sfmt_t *sfmt) {
  */
 void sfmt_fill_array32(sfmt_t *sfmt, uint32_t *array, int size) {
     //assert(initialized);
-    assert(idx == SFMT_N32);
+    assert(sfmt->idx == SFMT_N32);
     assert(size % 4 == 0);
     assert(size >= SFMT_N32);
 
@@ -450,7 +450,7 @@ void sfmt_fill_array32(sfmt_t *sfmt, uint32_t *array, int size) {
  */
 void fill_array64(sfmt_t *sfmt, uint64_t *array, int size) {
     //assert(initialized);
-    assert(idx == SFMT_N32);
+    assert(sfmt->idx == SFMT_N32);
     assert(size % 2 == 0);
     assert(size >= SFMT_N64);
 

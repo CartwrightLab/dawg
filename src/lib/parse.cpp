@@ -3,6 +3,7 @@
  ****************************************************************************/
 
 #include <dawg/pile_parse.h>
+#include <dawg/wood_parse.h>
 
 #include <iostream>
 #include <fstream>
@@ -22,4 +23,8 @@ bool pile::parse_file(pile& p, const char *cs) {
 	if(!ret)
 		return DAWG_ERROR("unable to parse input '" << cs << "'");
 	return true;
+}
+
+bool wood::parse_string(wood &w, const std::string &ss) {
+	return w.parse(ss);
 }
