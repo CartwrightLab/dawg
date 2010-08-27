@@ -78,11 +78,10 @@ inline double to_real53_oc(uint32_t x, uint32_t y) {
 
 
 /* generate a random number on (0,1) with 53-bit resolution*/
-/* actually 52 */
 inline double to_real53_oo(uint64_t v) {
 	union {	boost::uint64_t u;	double d; } a;
-	a.u = (v >> 12) | UINT64_C(0x3FF0000000000001);
-	return a.d-1.0;
+	a.u = (v >> 12) | UINT64_C(0x3FF0000000000000);
+	return a.d-(1.0-(DBL_EPSILON/2.0));
 }
 
 /* generate a random number on (0,1) with 53-bit resolution from two
