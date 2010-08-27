@@ -15,6 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include <dawg/matic.h>
 
 #include <boost/preprocessor.hpp>
 #include <boost/config.hpp>
@@ -27,7 +28,6 @@
 #include <dawg/ma.h>
 #include <dawg/pile.h>
 #include <dawg/utils/foreach.h>
-#include <dawg/matic.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
 

@@ -5,6 +5,8 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
+#include <dawg/mutt.h>
+
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include <dawg/indel.h>
@@ -12,7 +14,6 @@
 #include <dawg/rate.h>
 #include <dawg/wood.h>
 #include <dawg/root.h>
-#include <dawg/mutt.h>
 #include <dawg/sequence.h>
 
 #include <dawg/ma.h>

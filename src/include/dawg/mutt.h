@@ -5,6 +5,8 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
+#include <dawg/details/mutt.h>
+
 #include <cmath>
 #include <cfloat>
 #include <limits>
@@ -14,8 +16,6 @@
 
 #include <boost/config.hpp>
 #include <boost/functional/hash.hpp>
-
-#include <dawg/details/mutt.h>
 
 #ifdef BOOST_WINDOWS
 #	include <process.h>
@@ -47,8 +47,8 @@ public:
 	inline double operator()() { return rand_real(); }
 	inline double rand_real() { return gen.rand_real(); }
 	// between (0,1] and (0,1)
-	//inline double rand_01oc() { return gen.rand_01oc(); }
-	inline double rand_real_b() { return gen.rand_real_b(); }
+	inline double rand_real_oc() { return gen.rand_real_oc(); }
+	inline double rand_real_oo() { return gen.rand_real_oo(); }
 	// returns random 64-bit number
 	boost::uint64_t rand_uint64() { return gen.rand_uint64(); }
 	// returns random 32-bit number
@@ -84,7 +84,8 @@ public:
 	double rand_gamma_high(double a, double b);
 	// assumes a < 1
 	inline double rand_gamma_low(double a, double b) {
-		return rand_gamma_high(1.0+a,b)*pow(rand_real_b(), 1.0/a);
+		// TODO: check to see if this can be _oc
+		return rand_gamma_high(1.0+a,b)*pow(rand_real_oo(), 1.0/a);
 	}
 	
 	// random normal with mean and sigma
@@ -149,9 +150,8 @@ inline double mutt::rand_exp_zig() {
 }
 
 inline double mutt::rand_exp_inv() {
-	return -log(rand_real_b());
+	return -log(rand_real_oc());
 }
-
 
 } // namespace dawg
 #endif

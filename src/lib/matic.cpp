@@ -2,8 +2,8 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <dawg/residue.h>
 #include <dawg/matic.h>
+#include <dawg/residue.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
 
