@@ -124,9 +124,9 @@ private:
 struct sfmt_mutt_gen {
 	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
-	double rand_real()   { return to_real53_co(rand_uint64()); }
-	double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	double rand_real_oc() { return to_real53_oc(rand_uint64()); }
+	double rand_real()   { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
 	
 	void seed(uint32_t x) { sfmt_init_gen_rand(&state, x); }
 	template<int _N>
@@ -159,9 +159,9 @@ struct shr3a_mutt_gen {
 		return y;
 	}
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
-	double rand_real()   { return to_real53_co(rand_uint64()); }
-	double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	double rand_real_oc() { return to_real53_oc(rand_uint64()); }
+	double rand_real()   { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;
@@ -203,9 +203,9 @@ struct shr3b_mutt_gen {
 		return y;
 	}
 	// doubles with 53-bits worth of precision
-	double rand_real()   { return to_real53_co(rand_uint64()); }
-	double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	double rand_real_oc() { return to_real53_oc(rand_uint64()); }
+	double rand_real()   { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
+	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;

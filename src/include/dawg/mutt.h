@@ -43,12 +43,12 @@ public:
 			gen.seed(first, last);
 	}
 	
-	// returns a random double between [0,1)
+	// returns a random double between (0,1)
 	inline double operator()() { return rand_real(); }
 	inline double rand_real() { return gen.rand_real(); }
 	// between (0,1] and (0,1)
-	inline double rand_real_oc() { return gen.rand_real_oc(); }
-	inline double rand_real_oo() { return gen.rand_real_oo(); }
+	// inline double rand_real_oc() { return gen.rand_real_oc(); }
+	// inline double rand_real_oo() { return gen.rand_real_oo(); }
 	// returns random 64-bit number
 	boost::uint64_t rand_uint64() { return gen.rand_uint64(); }
 	// returns random 32-bit number
@@ -85,7 +85,7 @@ public:
 	// assumes a < 1
 	inline double rand_gamma_low(double a, double b) {
 		// TODO: check to see if this can be _oc
-		return rand_gamma_high(1.0+a,b)*pow(rand_real_oo(), 1.0/a);
+		return rand_gamma_high(1.0+a,b)*pow(rand_real(), 1.0/a);
 	}
 	
 	// random normal with mean and sigma
@@ -129,9 +129,8 @@ inline mutt::mutt() {
 
 inline double mutt::rand_exp_zig() {
 	static const double r = 7.69711747013104972;
-	boost::uint64_t a = gen.rand_uint64();
+	boost::uint64_t a = rand_uint64();
 	int b = a & 255;
-	a >>= 12;
 	if( a <= ek[b])
 		return a*ew[b];
 	do {
@@ -141,16 +140,15 @@ inline double mutt::rand_exp_zig() {
 		// we can cache ef[b-1]-ef[b], but it should be minor
 		if(ef[b]+rand_real()*(ef[b-1]-ef[b]) < exp(-x) )
 			return x;
-		a = gen.rand_uint64();
+		a = rand_uint64();
 		b = a & 255;
-		a >>= 12;
 	} while(a > ek[b]);
 	
 	return a*ew[b];
 }
 
 inline double mutt::rand_exp_inv() {
-	return -log(rand_real_oc());
+	return -log(rand_real());
 }
 
 } // namespace dawg
