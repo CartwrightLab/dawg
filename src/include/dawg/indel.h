@@ -116,7 +116,7 @@ private:
 		if(qorz <= 1.0) 
 			return DAWG_ERROR("Invalid indel model; zeta parameter '" << qorz
 				<< "' must be > 1");
-		zmax = static_cast<uint32_t>(*first++);
+		zmax = static_cast<boost::uint32_t>(*first++);
 		if(zmax < 1)
 			return DAWG_ERROR("Invalid indel model; zeta parameter '" << zmax
 				<< "' must be >= 1");
@@ -124,7 +124,7 @@ private:
 		do_op = &dawg::indel_model::do_zipf;
 		// mean is HarmonicNumber[M,z-1]/HarmonicNumber[M,z]
 		double a = 0.0,b = 0.0, d=1.0;
-		for(uint32_t u=1;u<=zmax;++u,d+=1.0) {
+		for(boost::uint32_t u=1;u<=zmax;++u,d+=1.0) {
 			double t = pow(d,-qorz);
 			a += d*t;
 			b += t;

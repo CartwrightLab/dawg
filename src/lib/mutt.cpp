@@ -28,7 +28,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
 		if(U > zH(K-0.5,z1,z2)-pow(K,-z))
 			break;
 	}
-	return static_cast<uint32_t>(K);
+	return static_cast<boost::uint32_t>(K);
 }
 
 /* New version based on Marsaglia and Tsang, "A Simple Method for
@@ -209,7 +209,7 @@ double dawg::mutt::rand_normal(double sigma) {
 			double U1 = rand_real();
 			y = y1 + (y0 - y1) * U1;
 		} else {
-			double U1 = 1.0 - rand_real();
+			double U1 = rand_real();
 			double U2 = rand_real();
 			x = PARAM_R - log(U1) / PARAM_R;
 			y = exp(-PARAM_R * (x - 0.5 * PARAM_R)) * U2;

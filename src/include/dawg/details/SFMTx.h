@@ -31,6 +31,13 @@
 #ifndef SFMT_H
 #define SFMT_H
 
+#if (_MSC_VER && _M_IX86_FP == 2) || (__GNUC__ && __SSE2__)
+#	define HAVE_SSE2 1
+#elif defined(REQUIRES_SIMD)
+#	error("RANDOM_GEN=sfmt requires compiler support for SSE2 or ALTIVEC.")
+#endif
+
+
 #include <stdio.h>
 
 /*-----------------

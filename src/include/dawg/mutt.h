@@ -27,7 +27,7 @@ class mutt {
 public:
 	typedef RANDOM_GEN_CLASS generator;
 	
-	inline void seed(uint32_t s) { 
+	inline void seed(boost::uint32_t s) { 
 		_seed.assign(1, s);
 		gen.seed(_seed.begin(), _seed.end());
 	}
@@ -65,7 +65,7 @@ public:
 	// random geometric with succcess rate p in (0,1)
 	// p(1 - p)^(k-1) for k >= 1; q = 1-p
 	inline boost::uint32_t rand_geometric(double q) {
-		return 1+static_cast<uint32_t>(rand_exp(-log(q)));
+		return 1+static_cast<boost::uint32_t>(rand_exp(-log(q)));
 	}
 
 	// random zeta with slope z
@@ -97,7 +97,7 @@ public:
 	
 private:
 	generator gen;
-	std::vector<uint32_t> _seed;
+	std::vector<boost::uint32_t> _seed;
 	
 	static const boost::uint64_t ek[256];
 	static const double ew[256], ef[256];
@@ -151,4 +151,3 @@ inline double mutt::rand_exp_inv() {
 
 } // namespace dawg
 #endif
-

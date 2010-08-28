@@ -13,7 +13,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <dawg/details/SFMT.h>
+#include <dawg/details/SFMTx.h>
 #include <dawg/details/SFMT-params19937.h>
 
 /** a parity check vector which certificate the period of 2^{MEXP} */

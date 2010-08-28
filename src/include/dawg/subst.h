@@ -17,7 +17,7 @@ namespace dawg {
  
 class subst_model {
 public:
-	typedef uint32_t base_type;
+	typedef boost::uint32_t base_type;
 	
 	// return random base from stat. dist.
 	inline base_type operator()(mutt &m) const {
