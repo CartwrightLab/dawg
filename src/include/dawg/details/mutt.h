@@ -12,6 +12,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 #include <cmath>
+#include <cfloat>
 
 #define USE_SFMT 1
 
@@ -90,37 +91,6 @@ inline double to_real53_oo(uint32_t x, uint32_t y) {
     return to_real53_oo(to_uint64(x,y));
 }
 
-#ifdef USE_DSFMT
-struct dsfmt_mutt_gen {
-	double rand_01()  { return dsfmt_genrand_close_open(&state);	}
-	double rand_01oc() { return dsfmt_genrand_open_close(&state); }
-	double rand_01oo() { return dsfmt_genrand_open_open(&state); }
-	boost::uint32_t rand_uint32() { return dsfmt_genrand_uint32(&state); }
-	boost::uint64_t rand_uint64() { 
-		uint64_t a = rand_uint32();
-		uint64_t b = rand_uint32();
-		return (a << 32) | b;
-	}
-	void seed(uint32_t x) { dsfmt_init_gen_rand(&state, x); }
-	template<int _N>
-	void seed(uint32_t (&x)[_N]) {
-		dsfmt_init_by_array(&state, &x[0], _N);
-	}
-	template<typename _It>
-	void seed(_It first, _It last) {
-		std::size_t sz = last-first;
-		boost::uint32_t *p = new boost::uint32_t[sz];
-		std::copy(first, last, p);
-		dsfmt_init_by_array(&state, p, sz);
-		delete[] p;
-	}
-
-private:
-	dsfmt_t state;
-};
-#endif
-
-#ifdef USE_SFMT
 struct sfmt_mutt_gen {
 	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
@@ -145,7 +115,6 @@ struct sfmt_mutt_gen {
 private:
 	sfmt_t state;
 };
-#endif
 
 // George Marsaglia's quick but good generator
 // http://www.jstatsoft.org/v08/i14/paper
@@ -230,6 +199,36 @@ struct shr3b_mutt_gen {
 	private:
 		boost::uint64_t y;
 };
+
+#ifdef USE_DSFMT
+struct dsfmt_mutt_gen {
+	double rand_01()  { return dsfmt_genrand_close_open(&state);	}
+	double rand_01oc() { return dsfmt_genrand_open_close(&state); }
+	double rand_01oo() { return dsfmt_genrand_open_open(&state); }
+	boost::uint32_t rand_uint32() { return dsfmt_genrand_uint32(&state); }
+	boost::uint64_t rand_uint64() { 
+		uint64_t a = rand_uint32();
+		uint64_t b = rand_uint32();
+		return (a << 32) | b;
+	}
+	void seed(uint32_t x) { dsfmt_init_gen_rand(&state, x); }
+	template<int _N>
+	void seed(uint32_t (&x)[_N]) {
+		dsfmt_init_by_array(&state, &x[0], _N);
+	}
+	template<typename _It>
+	void seed(_It first, _It last) {
+		std::size_t sz = last-first;
+		boost::uint32_t *p = new boost::uint32_t[sz];
+		std::copy(first, last, p);
+		dsfmt_init_by_array(&state, p, sz);
+		delete[] p;
+	}
+
+private:
+	dsfmt_t state;
+};
+#endif
 
 // Ziggurat method for rand exponential value
 // Memory hog, but really really fast

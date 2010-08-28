@@ -22,7 +22,7 @@ class indel_model {
 public:
 	typedef std::vector<double> params_type;
 	
-	indel_model() : qorz(0.9), mean(10.0), name("geo"), do_op(&dawg::indel_model::do_geo) { }
+	indel_model() : do_op(&dawg::indel_model::do_geo), qorz(0.9), mean(10.0), name("geo") { }
 	
 	inline double meansize() const { return mean;}
 	
@@ -163,8 +163,8 @@ private:
 		return true;
 	}
 	
-	std::string name;
 	double qorz, mean;
+	std::string name;
 	boost::uint32_t zmax;
 	std::vector<double> udata;
 };

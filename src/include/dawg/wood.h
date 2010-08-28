@@ -14,10 +14,11 @@
 namespace dawg {
 
 struct wood_node {
+	std::string label;
+	float length;
 	unsigned short anc;
 	unsigned short right;
-	float length;
-	std::string label;
+
 	wood_node() : label(), length(), anc(), right() { }
 	wood_node(short r) : label(), length(), anc(), right(r) { }
 	wood_node(const std::string &lab, float len=0.0f) : label(lab), length(len), anc(0), right(0) { }

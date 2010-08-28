@@ -7,6 +7,9 @@ SET(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
+SET(USE_STATIC_LIBS OFF CACHE BOOL "Link against static libraries.")
+SET(RANDOM_GEN "shr3b" CACHE STRING "Pseudo-random number generator to use, options are mt, sfmt, shr3a, shr3b")
+
 IF(USE_STATIC_LIBS)
   SET(Boost_USE_STATIC_LIBS ON)
   SET(GSL_USE_STATIC_LIBS ON)

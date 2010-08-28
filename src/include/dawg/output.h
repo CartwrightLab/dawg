@@ -18,8 +18,8 @@ namespace dawg {
 
 class output {
 public:
-	output() : p_out(NULL), format_id(0), do_op(&output::print_aln),
-		split_width(0), app(false), rep(0), split_id_offset(0) { }
+	output() : do_op(&output::print_aln), p_out(NULL), format_id(0),
+		rep(0), split_width(0), app(false), split_id_offset(0) { }
 
 	bool open(const char *file_name, unsigned int max_rep=0, bool split = false, bool append=false);
 
@@ -99,7 +99,7 @@ bool output::set_format(T format) {
 		&output::print_nexus, &output::print_phylip
 	};
 	format_id = key_switch(format, format_keys);
-	if(format_id == -1) {
+	if(format_id == (std::size_t)-1) {
 		format_id = 0;
 		do_op = &output::print_aln;
 		return false;

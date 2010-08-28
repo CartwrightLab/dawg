@@ -35,9 +35,9 @@ inline static void swap(w128_t *array, int size);
 #endif
 
 #if defined(HAVE_ALTIVEC)
-  #include "SFMT-alti.h"
+  #include <dawg/details/SFMT-alti.h>
 #elif defined(HAVE_SSE2)
-  #include "SFMT-sse2.h"
+  #include <dawg/details/SFMT-sse2.h>
 #endif
 
 /**
@@ -357,8 +357,6 @@ uint32_t sfmt_gen_rand32(sfmt_t *sfmt) {
 /**
  * This function generates and returns 64-bit pseudorandom number.
  * init_gen_rand or init_by_array must be called before this function.
- * The function gen_rand64 should not be called after gen_rand32,
- * unless an initialization is again executed. 
  * @return 64-bit pseudorandom number
  */
 uint64_t sfmt_gen_rand64(sfmt_t *sfmt) {
@@ -369,9 +367,13 @@ uint64_t sfmt_gen_rand64(sfmt_t *sfmt) {
 #endif
 
     //assert(initialized);
-    assert(sfmt->idx % 2 == 0);
+    //assert(sfmt->idx % 2 == 0);
 
+#if defined(BIG_ENDIAN64) && !defined(ONLY64)
     if (sfmt->idx >= SFMT_N32) {
+#else
+    if (sfmt->idx >= SFMT_N32-1) {
+#endif
 	sfmt_gen_rand_all(sfmt);
 	sfmt->idx = 0;
     }
@@ -381,8 +383,8 @@ uint64_t sfmt_gen_rand64(sfmt_t *sfmt) {
     sfmt->idx += 2;
     return ((uint64_t)r2 << 32) | r1;
 #else
-    r = psfmt64(sfmt)[sfmt->idx / 2];
-    sfmt->idx += 2;
+    r = psfmt64(sfmt)[(sfmt->idx+1) / 2];
+    sfmt->idx += 2 + (sfmt->idx&1);
     return r;
 #endif
 }

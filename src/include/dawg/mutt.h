@@ -26,6 +26,7 @@ namespace dawg {
 class mutt {
 public:
 	//typedef details::dsfmt_mutt_gen generator;
+	//typedef details::sfmt_mutt_gen generator;
 	//typedef details::shr3a_mutt_gen generator;
 	typedef details::shr3b_mutt_gen generator;
 	
