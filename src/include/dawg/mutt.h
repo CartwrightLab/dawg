@@ -25,10 +25,7 @@ namespace dawg {
 
 class mutt {
 public:
-	//typedef details::dsfmt_mutt_gen generator;
-	//typedef details::sfmt_mutt_gen generator;
-	//typedef details::shr3a_mutt_gen generator;
-	typedef details::shr3b_mutt_gen generator;
+	typedef RANDOM_GEN_CLASS generator;
 	
 	inline void seed(uint32_t s) { 
 		_seed.assign(1, s);

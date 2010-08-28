@@ -134,7 +134,7 @@ public:
 		static residue::data_type dna[] = {0,1,3,2};
 		if(_model == DNA || _model == RNA)
 			return dna[(ch&6u) >> 1];
-		return ~0;
+		return static_cast<residue::data_type>(~0);
 	}
 	
 	inline str_type decode(residue::data_type r) const {

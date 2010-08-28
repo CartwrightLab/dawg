@@ -2,7 +2,7 @@
 #ifndef DAWG_DETAILS_MUTT_H
 #define DAWG_DETAILS_MUTT_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #ifndef __STDC_CONSTANT_MACROS
@@ -77,7 +77,6 @@ inline double to_real53_oc(uint32_t x, uint32_t y) {
     return to_real53_oc(to_uint64(x,y));
 }
 
-
 /* generate a random number on (0,1) with 53-bit resolution*/
 inline double to_real53_oo(uint64_t v) {
 	union {	boost::uint64_t u;	double d; } a;
@@ -95,8 +94,6 @@ struct sfmt_mutt_gen {
 	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
 	double rand_real()   { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
 	
 	void seed(uint32_t x) { sfmt_init_gen_rand(&state, x); }
 	template<int _N>
@@ -129,8 +126,6 @@ struct shr3a_mutt_gen {
 	}
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
 	double rand_real()   { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;
@@ -158,46 +153,6 @@ struct shr3a_mutt_gen {
 	
 	private:
 		boost::uint32_t x,y;
-};
-
-// 0 never seen
-struct shr3b_mutt_gen {
-	inline boost::uint32_t rand_uint32() {
-		return static_cast<boost::uint32_t>(rand_uint64());
-	}
-	inline boost::uint64_t rand_uint64() {
-		y ^= (y << 13);
-		y ^= (y >> 7);
-		y ^= (y << 17);
-		return y;
-	}
-	// doubles with 53-bits worth of precision
-	double rand_real()   { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oo() { return to_real53_oo(rand_uint64()); }
-	//double rand_real_oc() { return to_real53_oc(rand_uint64()); }
-
-	inline void seed(boost::uint32_t xx) { 
-		y = xx;
-	}
-	template<int _N>
-	inline void seed(boost::uint32_t (&xx)[_N]) {
-		seed(&xx[0],&xx[_N]);
-	}
-	template<typename _It>
-	inline void seed(_It first, _It last) {
-		if(first == last)
-			return; // nothing to do
-		y = *first++;
-		if(first == last)
-			return;
-		// use hash to make every element matter
-		std::size_t h = static_cast<std::size_t>(*first++);
-		boost::hash_range(h, first, last);
-		y |= (static_cast<boost::uint64_t>(h) << 32);
-	}
-	
-	private:
-		boost::uint64_t y;
 };
 
 #ifdef USE_DSFMT
@@ -305,5 +260,6 @@ protected:
 
 }} /* namespace dawg::details */
 
-#endif /* DAWG_DETAILS_MUTT_H */
+#include RANDOM_GEN_HEADER
 
+#endif /* DAWG_DETAILS_MUTT_H */

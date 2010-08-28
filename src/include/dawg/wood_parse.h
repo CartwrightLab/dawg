@@ -29,7 +29,7 @@ struct make_inode_impl {
 	template<typename V, typename C>
 	void operator()(V &vec, const C& width) const {
 		vec.back().anc = 1;
-		C w = width+1;
+		wood_node::id_t w = static_cast<wood_node::id_t>(width+1);
 		(vec.end()-w)->anc = w;
 		vec.push_back(wood_node(w));
 	}

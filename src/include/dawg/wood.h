@@ -14,13 +14,14 @@
 namespace dawg {
 
 struct wood_node {
+	typedef unsigned short id_t;
 	std::string label;
 	float length;
-	unsigned short anc;
-	unsigned short right;
+	id_t anc;
+	id_t right;
 
 	wood_node() : label(), length(), anc(), right() { }
-	wood_node(short r) : label(), length(), anc(), right(r) { }
+	wood_node(id_t r) : label(), length(), anc(), right(r) { }
 	wood_node(const std::string &lab, float len=0.0f) : label(lab), length(len), anc(0), right(0) { }
 	wood_node(const std::string &lab, const boost::optional<float> &len) :
 		label(lab), length(len.get_value_or(0.0f)), anc(0), right(0) {
