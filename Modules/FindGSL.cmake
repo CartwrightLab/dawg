@@ -33,8 +33,8 @@ IF(WIN32)
     $ENV{GSL_DIR}
     $ENV{GSL_HOME}
     $ENV{EXTRA}
-    "C:/home/jw/source2/gsl-1.8"
     "C:/Programs/gsl/"
+    "C:/Program Files (x86)/gsl/"
     "C:/Program Files/gsl/"
     "C:/Programs/"
     "C:/Program Files/"

@@ -2,6 +2,10 @@
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
+#if _MSC_VER
+#	pragma warning(disable: 4127)
+#endif
+
 #include <dawg/pile_parse.h>
 #include <dawg/wood_parse.h>
 

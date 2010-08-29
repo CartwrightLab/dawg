@@ -74,7 +74,7 @@ private:
 		return r;
 	}
 	boost::uint32_t do_user(mutt &m) const {
-		return search_binary_cont(udata.begin(), udata.end(), m());
+		return (boost::uint32_t)search_binary_cont(udata.begin(), udata.end(), m());
 	}
 	
 	template<typename It>

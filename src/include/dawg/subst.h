@@ -48,16 +48,16 @@ private:
 	base_type (subst_model::*do_op_s)(mutt &m, base_type n) const;
  
 	inline base_type do_gtr_f(mutt &m) const {
-		return search_binary_cont(&freqs[0], &freqs[4], m());
+		return (base_type)search_binary_cont(&freqs[0], &freqs[4], m());
 	}
 	inline base_type do_gtr_s(mutt &m, base_type n) const {
-		return search_binary_cont(&table[n][0], &table[n][4], m());
+		return (base_type)search_binary_cont(&table[n][0], &table[n][4], m());
 	}
 	inline base_type do_aagtr_f(mutt &m) const {
-		return search_binary_cont(&freqs[0], &freqs[32], m());
+		return (base_type)search_binary_cont(&freqs[0], &freqs[32], m());
 	}
 	inline base_type do_aagtr_s(mutt &m, base_type n) const {
-		return search_binary_cont(&table[n][0], &table[n][32], m());
+		return (base_type)search_binary_cont(&table[n][0], &table[n][32], m());
 	}	
 
 	// DNA Models
