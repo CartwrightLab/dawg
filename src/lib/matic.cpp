@@ -235,7 +235,7 @@ void dawg::details::matic_section::evolve_upstream(
 	double dM, d;
 	//insertion and deletion rates
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
-	double indel_rate = ins_rate+del_rate;
+	//double indel_rate = ins_rate+del_rate;
 	
 	indels.clear();
 	
@@ -289,7 +289,7 @@ dawg::details::matic_section::evolve_indels(
 		mutt &m) const {
 	double f, t;
 	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
-	double indel_rate = ins_rate+del_rate;
+	//double indel_rate = ins_rate+del_rate;
 
 	for(;;) {
 		// Is there a deletion that needs to be processed?
@@ -462,7 +462,7 @@ struct aligner_data {
 void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const residue_exchange &rex) {
 	assert(aln.size() <= seqs.size());
 	
-	unsigned uFlags = 0; //temporary
+	//unsigned uFlags = 0; //temporary
 	
 	// construct a table to hold alignment information
 	// TODO: Cache this?

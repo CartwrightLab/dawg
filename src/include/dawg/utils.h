@@ -38,7 +38,7 @@ inline std::size_t search_binary_cont(_V (&a)[_N], const _V &v) {
 template<typename T>
 inline T upper_binary(T u) {
 	u--;
-	for(int i=1;i<8*sizeof(u);i*=2)
+	for(unsigned int i=1;i<8*sizeof(u);i*=2)
 		u |= u >> i;
 	u++;
 	return u;
