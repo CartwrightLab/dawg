@@ -27,7 +27,7 @@ struct shr3b_mutt_gen {
 		return y;
 	}
 	// doubles with 53-bits worth of precision
-	double rand_real()   { return to_real53_oo(rand_uint64()); }
+	double rand_real()   { return to_real52_oo(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) { y = xx; }
 	template<int _N>

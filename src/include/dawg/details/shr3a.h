@@ -24,7 +24,7 @@ struct shr3a_mutt_gen {
 		return y;
 	}
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
-	double rand_real()   { return to_real53_oo(rand_uint64()); }
+	double rand_real()   { return to_real52_oo(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) { 
 		y = xx;
