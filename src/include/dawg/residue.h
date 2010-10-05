@@ -90,83 +90,110 @@ operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
 
 class residue_exchange {
 public:
-	enum { DNA = 0, RNA, AA, CODON, MODEND,
-	       WIDTH_MAX=3
-	     };
+	enum { DNA = 0, RNA, AA, CODON, MODEND};
 
 	typedef residue_exchange self_type;
-	typedef boost::sub_range< const char [64] > str_type;
 
-	inline void model(int a, bool lc=false, bool markins=false, bool keepempty=true) {
+	inline void model(int a, int t=0, bool lc=false, bool markins=false, bool keepempty=true, bool translate=false) {
 		if(a >= MODEND)
 			return;
 		_model = a;
+		_type = t;
+		if(_model == DNA && _type != 1)
+			_model = RNA;
 		if(lc) // use lowercase translations
 			_model += MODEND;
 		_markins = markins;
 		_keepempty = keepempty;
-		// ??- is a trigraph; add a slash to prevent it
-		static const char DNA[] = "ACGT??????????????????????????????????????????????????????????\?-";
-		static const char dna[] = "acgt??????????????????????????????????????????????????????????\?-";
-		static const char RNA[] = "ACGU??????????????????????????????????????????????????????????\?-";
-		static const char rna[] = "acgu??????????????????????????????????????????????????????????\?-";
-		// Include O & U, two rare amino acids
-		static const char AA[]  = "ACDEFGHIKLMNPQRSTVWYOU????????????????????????????????????????\?-";
-		static const char aa[]  = "acdefghiklmnpqrstvwyou????????????????????????????????????????\?-";
-		static const char ins[] = "---+++";
+		_translate = translate;
+
+		static const char DNA[] = "ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		static const char dna[] = "acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		static const char RNA[] = "ACGU!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		static const char rna[] = "acgu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		static const char AA[]  = "ACDEFGHIKLMNPQRSTVWY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		static const char aa[]  = "acdefghiklmnpqrstvwy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-";
+		// codons are complicating depending on translation tables
+		// here we will base64 encode codons and translate them somewhere else
+		static const char Cod[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
+		static const char ins[] = "-+";
+		//  FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG
+		// "ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 				
-		static const char* mods[] = { &DNA[0], &RNA[0], &AA[0], &AA[0],
-		                              &dna[0], &rna[0], &aa[0], &aa[0]
+		static const char* mods[] = { &DNA[0], &RNA[0], &AA[0], &Cod[0],
+		                              &dna[0], &rna[0], &aa[0], &Cod[0]
 		                            };
 		
 		cs_decode = mods[_model];
-		cs_ins = &ins[(_markins ? 3 : 0)];
-		width = (a != CODON) ? 1 : 3;
+		cs_ins = &ins[(_markins ? 1 : 0)];
 	};
-	inline bool is_same_model(int a, bool lc, bool markins, bool keepempty) const {
+	inline bool is_same_model(int a, int t, bool lc, bool markins, bool keepempty, bool translate) const {
 		if(lc)
 			a += MODEND;
-		return (a == _model && markins == _markins && keepempty == _keepempty);
+		return (a == _model && t == _type && markins == _markins
+			&& keepempty == _keepempty && translate == _translate);
 	}
 	inline bool is_keep_empty() const { return _keepempty; }
 
 	inline residue::data_type encode(char ch) const {
 		static residue::data_type dna[] = {0,1,3,2};
+		static residue::data_type aa[] = {
+			20, 0,20, 1, 2, 3, 4, 5, 6, 7,20, 8, 9,10,11,20,
+			12,13,14,15,16,20,17,18,20,19,20,20,20,20,20,20
+		};
+		static residue::data_type tri[] = {
+			54,55,56,57,58,59,60,61,62,63,11,10,10,10,10,10,
+			10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,12,13,14,15,16,
+			17,18,19,20,21,22,23,24,25,26,27,10,10,10,10,10,
+			10,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
+			43,44,45,46,47,48,49,50,51,52,53,10,10,10,10,10
+		};
+			
 		if(_model == DNA || _model == RNA)
 			return dna[(ch&6u) >> 1];
+		if(_model == AA) 
+			return aa[(ch&95u)-'@'];
+			
 		return static_cast<residue::data_type>(~0);
 	}
 	
-	inline str_type decode(residue::data_type r) const {
-		r &= 63;
-		return std::make_pair(&cs_decode[r],&cs_decode[r+width]);
+	inline char decode(residue::data_type r) const {
+		return cs_decode[r & 63];
 	}
 	
-	inline str_type decode(const residue &r) const {
+	inline char decode(const residue &r) const {
 		return decode(r.base());
 	}
 	
-	inline str_type decode_ins() const {
-		return std::make_pair(&cs_ins[0], &cs_ins[width]);
+	inline char decode_ins() const {
+		return cs_ins[0];
 	}
 	
 	template<typename It1, typename It2>
 	It2 decode_array(It1 afirst, It1 alast, It2 bfirst) const {
 		for(;afirst != alast;++afirst) {
-			str_type r = decode(*afirst);
-			bfirst = std::copy(r.begin(), r.end(), bfirst);
+			*bfirst++ = decode(*afirst);
 		}
 		return bfirst;
 	}
+	
+	template<typename It1, typename It2>
+	It2 encode_array(It1 afirst, It1 alast, It2 bfirst) const {
+	
+		for(;afirst != alast;++afirst) {
+			*bfirst++ = decode(*afirst);
+		}
+		return bfirst;
+	}
+	
 
 	residue_exchange() { model(DNA); }
 
 protected:
-	int _model;
-	bool _markins, _keepempty;
+	int _model, _type;
+	bool _markins, _keepempty, _translate;
 	const char* cs_decode;
 	const char* cs_ins;
-	int width;
 };
 
 }

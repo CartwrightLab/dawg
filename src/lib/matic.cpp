@@ -43,10 +43,10 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("substitution model could not be created.");
 	
 	if(seg.empty()) { // new segment
-		seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase,
-			ma.output_markins, ma.output_keepempty);
-	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(),
-	           ma.output_lowercase, ma.output_markins, ma.output_keepempty)) {
+		seg.rex.model(info->sub_mod.seq_type(), ma.root_type, ma.output_lowercase,
+			ma.output_markins, ma.output_keepempty, ma.output_translate);
+	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), ma.root_type,
+	           ma.output_lowercase, ma.output_markins, ma.output_keepempty, ma.output_translate)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}	
 	
@@ -506,11 +506,9 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 			case 0: // Unempty column
 				foreach(aligner_data &v, aln_table) {
 					if(v.it == v.last || v.it->branch() != uBranch) {
-						residue_exchange::str_type s = rex.decode_ins();
-						v.str->append(s.begin(), s.end());
+						v.str->append(1,rex.decode_ins());
 					} else {
-						residue_exchange::str_type s = rex.decode(*v.it);
-						v.str->append(s.begin(), s.end());
+						v.str->append(1,rex.decode(*v.it));
 						++v.it;
 					}
 				}

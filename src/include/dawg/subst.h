@@ -59,6 +59,12 @@ private:
 	inline base_type do_aagtr_s(mutt &m, base_type n) const {
 		return (base_type)search_binary_cont(&table[n][0], &table[n][32], m());
 	}	
+	inline base_type do_codgtr_f(mutt &m) const {
+		return (base_type)search_binary_cont(&freqs[0], &freqs[64], m());
+	}
+	inline base_type do_codgtr_s(mutt &m, base_type n) const {
+		return (base_type)search_binary_cont(&table[n][0], &table[n][64], m());
+	}	
 
 	// DNA Models
 	template<typename It1, typename It2>
@@ -112,13 +118,21 @@ private:
 
 	template<typename It1, typename It2>
 	bool create_molphy(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	// Codon Models	
+	template<typename It1, typename It2>
+	bool create_codgtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_codequ(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2);	
 };
 
 template<typename It1, typename It2>
 bool subst_model::create(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
-		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy"
+		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
+		"codequ", "codgtr"
 	};
 	
 	static bool (subst_model::*create_ops[])(const char *, It1, It1, It2, It2) = {
@@ -127,7 +141,8 @@ bool subst_model::create(const char *mod_name, It1 first1, It1 last1, It2 first2
 		&subst_model::create_tn,  &subst_model::create_tn_f04,
 		&subst_model::create_equ, &subst_model::create_aagtr, &subst_model::create_lg,
 		&subst_model::create_wag, &subst_model::create_wagstar, &subst_model::create_jtt,
-		&subst_model::create_dayhoff, &subst_model::create_molphy
+		&subst_model::create_dayhoff, &subst_model::create_molphy,
+		&subst_model::create_codequ, &subst_model::create_codgtr
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
 	if(pos == (std::size_t)-1)
@@ -158,6 +173,7 @@ bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 
 
 #include <dawg/details/subst_dna.h>
 #include <dawg/details/subst_aa.h>
+#include <dawg/details/subst_cod.h>
  
 #endif /* DAWG_SUBST_H */
  
