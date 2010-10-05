@@ -26,7 +26,7 @@
 #include "dawg_app.h"
 
 #include <dawg/ma.h>
-#include <dawg/pile.h>
+#include <dawg/trick.h>
 #include <dawg/utils/foreach.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
@@ -115,11 +115,11 @@ int dawg_app::run() {
 	}
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
-	pile input;
+	trick input;
 		
 	bool ret = true;
 	foreach(string &ss, arg.input) {
-		ret &= pile::parse_file(input, ss.c_str());
+		ret &= trick::parse_file(input, ss.c_str());
 	}
 	if(!ret)
 		return EXIT_FAILURE;	
@@ -152,7 +152,7 @@ int dawg_app::run() {
 	);		
 
 	vector<dawg::ma> configs;
-	if(!dawg::ma::from_pile(input, configs)) {
+	if(!dawg::ma::from_trick(input, configs)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}

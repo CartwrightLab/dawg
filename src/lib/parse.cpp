@@ -6,7 +6,7 @@
 #	pragma warning(disable: 4127)
 #endif
 
-#include <dawg/pile_parse.h>
+#include <dawg/trick_parse.h>
 #include <dawg/wood_parse.h>
 
 #include <iostream>
@@ -14,7 +14,7 @@
 
 using namespace dawg;
 
-bool pile::parse_file(pile& p, const char *cs) {
+bool trick::parse_file(trick& p, const char *cs) {
 	bool ret;
 	if(cs == NULL || strcmp(cs, "")==0 || strcmp(cs, "-")==0) {
 		ret = p.parse_stream(std::cin);

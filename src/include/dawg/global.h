@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <dawg/pile.h>
+#include <dawg/trick.h>
 
 namespace dawg {
 
@@ -24,7 +24,7 @@ struct global_options {
 	_unused()
 	{ }
 	
-	void read_section(const pile::data_type::value_type &sec) {
+	void read_section(const trick::data_type::value_type &sec) {
 #	define XM(name, type, def) sec.get(_P(name), _V(name));
 #	include <dawg/details/global.xmh>
 #	undef XM

@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#include <dawg/pile.h>
+#include <dawg/trick.h>
 #include <dawg/utils/vecio.h>
 
 namespace dawg {
@@ -28,9 +28,9 @@ struct ma {
 	name(_n)
 	{ }
 	
-	static bool from_pile(const dawg::pile &pyle, std::vector<dawg::ma> &v);
+	static bool from_trick(const dawg::trick &trk, std::vector<dawg::ma> &v);
 	
-	void read_section(const pile::data_type::value_type &sec);
+	void read_section(const trick::data_type::value_type &sec);
 private:
 };
 

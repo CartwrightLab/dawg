@@ -26,8 +26,6 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
-#include <dawg/pile.h>
-
 /****************************************************************************
  *    class dawg_app                                                        *
  ****************************************************************************/

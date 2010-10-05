@@ -1,13 +1,13 @@
 #pragma once
-#ifndef DAWG_PILE_PARSE_H
-#define DAWG_PILE_PARSE_H
+#ifndef DAWG_TRICK_PARSE_H
+#define DAWG_TRICK_PARSE_H
 /****************************************************************************
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #include <iterator>
 
-#include <dawg/pile.h>
+#include <dawg/trick.h>
  
 #include <boost/spirit/include/version.hpp>
 #if SPIRIT_VERSION < 0x2020
@@ -34,7 +34,7 @@ namespace details {
 	typedef std::vector<subsection_type> section_body_type;
 	typedef std::pair<std::string, std::string> section_header_type;
 	typedef std::pair<section_header_type, section_body_type> section_type;
-	typedef std::vector<section_type> pile_raw_type;
+	typedef std::vector<section_type> trick_raw_type;
 }
 
 template<typename Iterator>
@@ -48,8 +48,8 @@ struct white_space : qi::grammar<Iterator> {
 };
 
 template <typename Iterator, typename skip_type>
-struct pile_grammar : qi::grammar<Iterator, details::pile_raw_type(), skip_type> {
-	pile_grammar() : pile_grammar::base_type(start) {
+struct trick_grammar : qi::grammar<Iterator, details::trick_raw_type(), skip_type> {
+	trick_grammar() : trick_grammar::base_type(start) {
 		using standard::space; using standard::alnum;
 		using standard::graph; using standard::print;
 		using standard::char_;
@@ -62,16 +62,16 @@ struct pile_grammar : qi::grammar<Iterator, details::pile_raw_type(), skip_type>
 		subsection = subsection_header || subsection_body;
 		subsection_header = '[' >> -id >> ']';
 		subsection_body = +line;
-		line = id >> '=' >> (pile_string % ',');
+		line = id >> '=' >> (trick_string % ',');
 		id = lexeme[+(alnum | char_("._-"))];
-		pile_string     = qqquoted_string | quoted_string | tree_string | bare_string;
+		trick_string     = qqquoted_string | quoted_string | tree_string | bare_string;
 		bare_string     = lexeme[+(graph - char_(",#\"[]=()"))];
 		tree_string     = lexeme[char_("(") >> +(char_ - ';') >> char_(";")];
 		quoted_string   = lexeme['"' >> *(print - '"') >> '"'];
 		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];		
 	}
 	
-	qi::rule<Iterator, details::pile_raw_type(), skip_type> start;
+	qi::rule<Iterator, details::trick_raw_type(), skip_type> start;
 	qi::rule<Iterator, details::section_type(), skip_type> section;
 	qi::rule<Iterator, details::section_header_type(), skip_type> section_header;
 	qi::rule<Iterator, details::section_body_type(), skip_type> section_body;
@@ -80,7 +80,7 @@ struct pile_grammar : qi::grammar<Iterator, details::pile_raw_type(), skip_type>
 	qi::rule<Iterator, details::line_type(), skip_type> line;
 	qi::rule<Iterator, std::string(), skip_type> subsection_header;
 	qi::rule<Iterator, std::string(), skip_type> id;
-	qi::rule<Iterator, std::string(), skip_type> pile_string;
+	qi::rule<Iterator, std::string(), skip_type> trick_string;
 	qi::rule<Iterator, std::string(), skip_type> bare_string;
 	qi::rule<Iterator, std::string(), skip_type> tree_string;
 	qi::rule<Iterator, std::string(), skip_type> quoted_string;
@@ -88,19 +88,19 @@ struct pile_grammar : qi::grammar<Iterator, details::pile_raw_type(), skip_type>
 };
 
 template<typename Iterator>
-bool pile::parse(Iterator first, Iterator last) {
+bool trick::parse(Iterator first, Iterator last) {
 	using boost::algorithm::starts_with;
 	using boost::algorithm::to_lower;
-	details::pile_raw_type pyle;
+	details::trick_raw_type pyle;
 	white_space<Iterator> wasp;
-	pile_grammar<Iterator, dawg::white_space<Iterator> > pyler;
+	trick_grammar<Iterator, dawg::white_space<Iterator> > pyler;
 	bool r = qi::phrase_parse(first, last, pyler, wasp, pyle);
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
 	int autonum = 1;
 	section *psec = &data.front();
-	for(details::pile_raw_type::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
+	for(details::trick_raw_type::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
 		// if section header is not blank, we have a new section
 		if(!sec.first.first.empty()) {
@@ -163,7 +163,7 @@ bool pile::parse(Iterator first, Iterator last) {
 }
 
 template<typename Char, typename Traits>
-inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
+inline bool trick::parse_stream(std::basic_istream<Char, Traits>& is) {
 	is.unsetf(std::ios::skipws);
 	boost::spirit::basic_istream_iterator<Char, Traits> first(is), last;
 	return parse(first, last);	
@@ -171,4 +171,4 @@ inline bool pile::parse_stream(std::basic_istream<Char, Traits>& is) {
 
 }
  
-#endif // DAWG_PILE_PARSE_H
+#endif // DAWG_TRICK_PARSE_H
