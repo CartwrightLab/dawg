@@ -9,7 +9,7 @@ namespace dawg {
  
 // name, followed by params, then freqs
 template<typename It1, typename It2>
-bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_aagtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
 	_model = residue_exchange::AA;
@@ -94,7 +94,7 @@ bool subst_model::create_aagtr(const char *mod_name, It1 first1, It1 last1, It2 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_equ(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_equ(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 		1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -121,13 +121,13 @@ bool subst_model::create_equ(const char *, It1 first1, It1 last1, It2 first2, It
 		1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("equ+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("equ+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("equ", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("equ", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_wag(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_wag(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.0270400, 0.7389980, 1.5828500, 0.2104940, 1.4167200, 0.3169540, 0.1933350, 0.9062650, 0.3979150, 0.8934960,
 		0.5098480, 1.4385500, 0.9085980, 0.5515710, 3.3707900, 2.1211100, 2.0060100, 0.1131330, 0.2407350, 0.0302949,
@@ -154,13 +154,13 @@ bool subst_model::create_wag(const char *, It1 first1, It1 last1, It2 first2, It
 		0.0195027, 0.0390894, 0.0457631, 0.0367281, 0.0439720, 0.0695179, 0.0610127, 0.0708956, 0.0143859, 0.0352742
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("wag+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("wag+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("wag", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("wag", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_wagstar(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_wagstar(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.2132400, 0.7311520, 1.5578800, 0.2131790, 1.4199300, 0.3176840, 0.2145960, 0.8816390, 0.4008220, 0.8874580,
 		0.5143470, 1.5186100, 1.0334400, 0.5897180, 3.5249900, 2.2416100, 1.9249600, 0.1353950, 0.2703210, 0.0379056,
@@ -187,13 +187,13 @@ bool subst_model::create_wagstar(const char *, It1 first1, It1 last1, It2 first2
 		0.0195027, 0.0390894, 0.0457631, 0.0367281, 0.0439720, 0.0695179, 0.0610127, 0.0708956, 0.0143859, 0.0352742
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("wagstar+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("wagstar+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("wagstar", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("wagstar", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_lg(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_lg(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		2.4890840, 0.3951440, 1.0385450, 0.2537010, 2.0660400, 0.3588580, 0.1498300, 0.5365180, 0.3953370, 1.1240350,
 		0.2768180, 1.1776510, 0.9698940, 0.4250930, 4.7271820, 2.1395010, 2.5478700, 0.1807170, 0.2189590, 0.0625560,
@@ -220,13 +220,13 @@ bool subst_model::create_lg(const char *, It1 first1, It1 last1, It2 first2, It2
 		0.0229510, 0.0419770, 0.0440400, 0.0407670, 0.0559410, 0.0611970, 0.0532870, 0.0691470, 0.0120660, 0.0341550
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("lg+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("lg+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("lg", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("lg", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_jtt(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_jtt(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.5744780, 0.8274450, 1.0666810, 0.1382930, 1.7401590, 0.2199700, 0.3616840, 0.3694370, 0.3100070, 0.4693950,
 		0.5579670, 1.9595990, 0.5567250, 0.5316780, 3.8870950, 4.5825650, 2.9241610, 0.0843290, 0.1394920, 0.1056250,
@@ -253,13 +253,13 @@ bool subst_model::create_jtt(const char *, It1 first1, It1 last1, It2 first2, It
 		0.0234140, 0.0425460, 0.0505320, 0.0410610, 0.0510570, 0.0682250, 0.0585180, 0.0663740, 0.0143360, 0.0323030
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("jtt+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("jtt+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("jtt", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("jtt", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_dayhoff(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_dayhoff(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.3600160, 1.1998050, 1.9611670, 0.1836410, 2.3861110, 0.2281160, 0.6534160, 0.2586350, 0.4064310, 0.7178400,
 		0.9844740, 2.4859200, 0.8877530, 0.2678280, 4.0518700, 3.6803650, 2.0595640, 0.0000000, 0.2441390, 0.0000000,
@@ -286,13 +286,13 @@ bool subst_model::create_dayhoff(const char *, It1 first1, It1 last1, It2 first2
 		0.0147530, 0.0404320, 0.0506800, 0.0382550, 0.0409040, 0.0695770, 0.0585420, 0.0647180, 0.0104940, 0.0299160
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("dayhoff+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("dayhoff+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("dayhoff", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("dayhoff", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_molphy(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_molphy(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.3652550, 1.1967940, 1.9431560, 0.1826270, 2.3762090, 0.2255960, 0.6515340, 0.2602440, 0.4082230, 0.7061620,
 		0.9953190, 2.4708390, 0.8939100, 0.2672570, 4.0282420, 3.7155250, 2.0510450, 0.0106730, 0.2435010, 0.0070720,
@@ -319,9 +319,9 @@ bool subst_model::create_molphy(const char *, It1 first1, It1 last1, It2 first2,
 		0.0150000, 0.0400000, 0.0510000, 0.0380000, 0.0410000, 0.0700000, 0.0580000, 0.0650000, 0.0100000, 0.0300000
 	};
 	if(first2 != last2) { //+F model
-		return create_aagtr("molphy+f", &s[0], &s[190], first2, last2);
+		return create_aagtr("molphy+f", code, &s[0], &s[190], first2, last2);
 	}
-	return create_aagtr("molphy", &s[0], &s[190], &p[0], &p[20]);
+	return create_aagtr("molphy", code, &s[0], &s[190], &p[0], &p[20]);
 }
 
 } // namespace dawg

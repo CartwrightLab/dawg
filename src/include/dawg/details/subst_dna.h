@@ -9,10 +9,11 @@ namespace dawg {
 
 // name, followed by params, then freqs
 template<typename It1, typename It2>
-bool subst_model::create_gtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_gtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
-	_model = residue_exchange::DNA;
+	_model = (code == 1) ? residue_exchange::DNA : residue_exchange::RNA;
+	
 	// do freqs first
 	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[4]))
 		return false;
@@ -88,19 +89,19 @@ bool subst_model::create_gtr(const char *mod_name, It1 first1, It1 last1, It2 fi
 }
 	
 template<typename It1, typename It2>
-bool subst_model::create_jc(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_jc(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	// equal rates and frequencies
 	static const double ones[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
-	return create_gtr("jc", &ones[0], &ones[6], &ones[0], &ones[4]);
+	return create_gtr("jc", code, &ones[0], &ones[6], &ones[0], &ones[4]);
 }
 template<typename It1, typename It2>
-bool subst_model::create_f81(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_f81(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	// equal rates and frequencies
 	static const double ones[6] = {1.0,1.0,1.0,1.0,1.0,1.0};
-	return create_gtr("f81", &ones[0], &ones[6], first2, last2);
+	return create_gtr("f81", code, &ones[0], &ones[6], first2, last2);
 }
 template<typename It1, typename It2>
-bool subst_model::create_k2p(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_k2p(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	// equal rates and frequencies
 	static const double ones[4] = {1.0,1.0,1.0,1.0};
 	double p[6], a, b=0.5;  // this default for b means that a=r if b is not specified
@@ -111,10 +112,10 @@ bool subst_model::create_k2p(const char *, It1 first1, It1 last1, It2 first2, It
 		b = *first1;
 	p[1] = p[4] = a;
 	p[0] = p[2] = p[3] = p[5] = b;
-	return create_gtr("k2p", &p[0], &p[6], &ones[0], &ones[4]);
+	return create_gtr("k2p", code, &p[0], &p[6], &ones[0], &ones[4]);
 }
 template<typename It1, typename It2>
-bool subst_model::create_tn(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_tn(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[6], f[4], fr, fy, d, ay, ar, b;
 	int u;
 	u = 0;
@@ -147,11 +148,11 @@ bool subst_model::create_tn(const char *mod_name, It1 first1, It1 last1, It2 fir
 	p[1] = ar;
 	p[4] = ay;
 	p[0] = p[2] = p[3] = p[5] = b;	
-	return create_gtr(mod_name, &p[0], &p[6], &f[0], &f[4]);
+	return create_gtr(mod_name, code, &p[0], &p[6], &f[0], &f[4]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_tn_f04(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_tn_f04(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[6], f[4], fr, fy, d, ay, ar, b;
 	int u;
 	u = 0;
@@ -181,11 +182,11 @@ bool subst_model::create_tn_f04(const char *mod_name, It1 first1, It1 last1, It2
 	p[1] = ar/fr+b;
 	p[4] = ay/fy+b;
 	p[0] = p[2] = p[3] = p[5] = b;	
-	return create_gtr(mod_name, &p[0], &p[6], &f[0], &f[4]);
+	return create_gtr(mod_name, code, &p[0], &p[6], &f[0], &f[4]);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_f84(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_f84(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[3];
 	if(first1 == last1)
 		return DAWG_ERROR("Invalid subst model; f84 requires one or two parameters.");
@@ -193,16 +194,16 @@ bool subst_model::create_f84(const char *, It1 first1, It1 last1, It2 first2, It
 	if(first1 == last1) {
 		p[0] = a;
 		p[1] = 1.0;
-		return create_tn_f04("f84", &p[0], &p[2], first2, last2);
+		return create_tn_f04("f84", code, &p[0], &p[2], first2, last2);
 	}
 	double b = *first1;
 	p[0] = p[1] = a;
 	p[2] = b;
-	return create_tn_f04("f84", &p[0], &p[3], first2, last2);
+	return create_tn_f04("f84", code, &p[0], &p[3], first2, last2);
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_hky(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_hky(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[3];
 	if(first1 == last1)
 		return DAWG_ERROR("Invalid subst model; hky requires one or two parameters.");
@@ -210,12 +211,12 @@ bool subst_model::create_hky(const char *, It1 first1, It1 last1, It2 first2, It
 	if(first1 == last1) {
 		p[0] = a;
 		p[1] = 1.0;
-		return create_tn("hky", &p[0], &p[2], first2, last2);
+		return create_tn("hky", code, &p[0], &p[2], first2, last2);
 	}
 	double b = *first1;
 	p[0] = p[1] = a;
 	p[2] = b;
-	return create_tn("hky", &p[0], &p[3], first2, last2);
+	return create_tn("hky", code, &p[0], &p[3], first2, last2);
 }
 
 };

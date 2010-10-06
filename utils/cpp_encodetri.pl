@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-my @a = split(#, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+my @a = split(//, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
 
 my @b = map {ord($_)-ord('0');} @a;
 
@@ -12,7 +12,7 @@ $q[$_] = $i++ foreach @b;
 
 @q = map { sprintf("%2d", $_) } @q;
 
-print "# char -> triplet\n";
+print "\n// char -> triplet\n";
 print join(",", @q[ 0..15]) . ",\n" . 
       join(",", @q[16..31]) . ",\n" .
       join(",", @q[32..47]) . ",\n" .
@@ -64,3 +64,40 @@ my @codes = (
 	#23 The Thraustochytrium Mitochondrial Code
 	"FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
 );
+
+@a = split(//, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-');
+
+
+print("\n// base -> char\n");
+foreach(@codes) {
+	my @c = split(//);
+	my $j = 0;
+	my $i = 0;
+	my @x = (64) x 64;
+	foreach(@c) {
+		$x[$j++] = $i if($_ ne '*');
+		$i++;
+	}
+	$x[63] = 65;
+	print '"' . join('', @a[@x]) . "\"\n";	
+}
+
+print("\n// char -> base\n");
+foreach(@codes) {
+	my @c = split(//);
+	my $j = 0;
+	my $i = 0;
+	my @x = (63) x 80;
+	foreach(@c) {
+		$x[ord($a[$i])-ord('0')] = $j++ if($_ ne '*');
+		$i++;
+	}
+	@x = map { sprintf("% 2s", $_) } @x;
+	print join(",", @x[ 0..19]) . ",\n" . 
+		join(",", @x[20..39]) . ",\n" .
+		join(",", @x[40..59]) . ",\n" .
+		join(",", @x[60..79]) . "\n"
+      ;
+}
+
+

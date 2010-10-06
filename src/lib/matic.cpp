@@ -37,15 +37,16 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	std::auto_ptr<section> info(new section);
 	
 	// construct models
-	if(!info->sub_mod.create(ma.subst_model.c_str(),
+	if(!info->sub_mod.create(ma.subst_model.c_str(), ma.root_code,
 		ma.subst_params.begin(), ma.subst_params.end(),
 		ma.subst_freqs.begin(), ma.subst_freqs.end()))
 		return DAWG_ERROR("substitution model could not be created.");
 	
 	if(seg.empty()) { // new segment
-		seg.rex.model(info->sub_mod.seq_type(), ma.root_type, ma.output_lowercase,
-			ma.output_markins, ma.output_keepempty, ma.output_translate);
-	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), ma.root_type,
+		if(!seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase,
+			ma.output_markins, ma.output_keepempty, ma.output_translate))
+			return DAWG_ERROR("failed to create sequence type or format object.");
+	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(),
 	           ma.output_lowercase, ma.output_markins, ma.output_keepempty, ma.output_translate)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}	

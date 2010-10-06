@@ -13,10 +13,10 @@ namespace dawg {
 // the 64th will need to be one unmodeled stop codon
 // we use the pos=63 to encode a deletion
 template<typename It1, typename It2>
-bool subst_model::create_codgtr(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_codgtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
-	_model = residue_exchange::CODON;
+	_model = residue_exchange::CODON + code;
 	// do freqs first
 	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[63]))
 		return false;
@@ -98,15 +98,15 @@ bool subst_model::create_codgtr(const char *mod_name, It1 first1, It1 last1, It2
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_codequ(const char *, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_codequ(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	std::vector<double> s(1953,1.0);
 	std::vector<double> p(61,1.0);
 	p.push_back(0.0);
 	p.push_back(0.0);
 	if(first2 != last2) { //+F model
-		return create_codgtr("codequ+f", s.begin(), s.end(), first2, last2);
+		return create_codgtr("codequ+f", code, s.begin(), s.end(), first2, last2);
 	}
-	return create_codgtr("codequ", s.begin(), s.end(), p.begin(), p.end());
+	return create_codgtr("codequ", code, s.begin(), s.end(), p.begin(), p.end());
 }
 
 } // namesapce dawg

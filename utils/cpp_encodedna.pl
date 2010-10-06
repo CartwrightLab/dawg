@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-my @a = qw(A C D E F G H I K L M N P Q R S T V W Y);
+my @a = qw(A C G T);
 my @b = map {ord($_)-ord('0')} @a;
 my @q = (63) x 80;
 
@@ -13,6 +13,8 @@ foreach(@a) {
 	$x[ord($_)-ord('0')] = $j;
 	$j++;
 }
+$x[ord('u')-ord('0')] = 3;
+$x[ord('U')-ord('0')] = 3;
 
 @x = map { sprintf("% 2s", $_) } @x;
 print join(",", @x[ 0..19]) . ",\n" . 
