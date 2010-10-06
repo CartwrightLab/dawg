@@ -130,7 +130,7 @@ public:
 	inline bool is_same_model(int a, int t, bool lc, bool markins, bool keepempty, bool translate) const {
 		if(lc)
 			a += MODEND;
-		return (a == _model && t == _type && markins == _markins
+		return (a == _model && (_model != CODON || t == _type) && markins == _markins
 			&& keepempty == _keepempty && translate == _translate);
 	}
 	inline bool is_keep_empty() const { return _keepempty; }
@@ -141,6 +141,7 @@ public:
 			20, 0,20, 1, 2, 3, 4, 5, 6, 7,20, 8, 9,10,11,20,
 			12,13,14,15,16,20,17,18,20,19,20,20,20,20,20,20
 		};
+		// char -> triplet num
 		static residue::data_type tri[] = {
 			54,55,56,57,58,59,60,61,62,63,11,10,10,10,10,10,
 			10, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,12,13,14,15,16,
@@ -148,11 +149,18 @@ public:
 			10,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
 			43,44,45,46,47,48,49,50,51,52,53,10,10,10,10,10
 		};
-			
-		if(_model == DNA || _model == RNA)
+		
+		switch(_model) {
+		case DNA:
+		case RNA:
 			return dna[(ch&6u) >> 1];
-		if(_model == AA) 
-			return aa[(ch&95u)-'@'];
+		case AA:
+			return aa[((ch&95u)-'@')&31];
+		case CODON:
+			if('0' <= ch)
+				return tri[ ch - '0'];
+		default:
+		};
 			
 		return static_cast<residue::data_type>(~0);
 	}
