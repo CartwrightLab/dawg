@@ -94,7 +94,7 @@ public:
 
 	typedef residue_exchange self_type;
 
-	inline bool model(unsigned int a, bool markins=false, bool keepempty=true, bool translate=false) {
+	inline bool model(unsigned int a, bool markins=false, bool keepempty=true) {
 		static const char sIns[] = "-+";
 		// table for going from base->char
 		static const char mods[] =
@@ -253,22 +253,19 @@ public:
 		_model = a;
 		_markins = markins;
 		_keepempty = keepempty;
-		_translate = translate;
 
 		// codons are complicating depending on translation tables
 		// here we will base64 encode codons and translate them somewhere else
 		//  FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG
 		// "ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-				
-		
+
 		cs_decode = &mods[_model*64];
 		cs_ins = &sIns[(_markins ? 1 : 0)];
 		cs_encode = &rmods[_model*80];
 		return true;
 	};
-	inline bool is_same_model(unsigned int a, bool markins, bool keepempty, bool translate) const {
-		return (a == _model && markins == _markins
-			&& keepempty == _keepempty && translate == _translate);
+	inline bool is_same_model(unsigned int a, bool markins, bool keepempty) const {
+		return (a == _model && markins == _markins && keepempty == _keepempty);
 	}
 	inline bool is_keep_empty() const { return _keepempty; }
 
@@ -289,6 +286,44 @@ public:
 		return cs_ins[0];
 	}
 	
+	// codon number -> cod64
+	static inline char codon_to_cod64(unsigned int p) {
+		const char s[] = "ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		return s[p&63];
+	}
+
+	// cod64 -> codon number
+	static inline unsigned int cod64_to_codon(char c) {
+		static const char a[] = {
+			// cod64 -> codon number
+			54,55,56,57,58,59,60,61,62,63,11,-1,-1,-1,-1,-1,
+			-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,12,13,14,15,16,
+			17,18,19,20,21,22,23,24,25,26,27,-1,-1,-1,-1,10,
+			-1,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
+			43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
+		};
+		return (c >= '0') ? a[c-'0'] : -1;
+	}
+
+	// codon number -> triplet
+	static inline unsigned int codon_to_triplet(unsigned int p, int type=0) {
+		const char ss[] = "TCAGtcagUCAGucag";
+		const char *s = &ss[(type&3)*4];
+		unsigned int u = s[p&3];
+		u = (u << 8) | s[(p>>2)&3];
+		u = (u << 8) | s[(p>>4)&3];
+		return u;
+	}
+
+	// triplet -> codon number
+	static inline unsigned int triplet_to_codon(unsigned int p) {
+		unsigned int u = p & 0x060606;
+		u = u+(u/2)+0x020202;
+		u &= 0x030303;
+		return ((u*1049601)/65536) % 64;
+	}
+
+
 	template<typename It1, typename It2>
 	It2 decode_array(It1 afirst, It1 alast, It2 bfirst) const {
 		for(;afirst != alast;++afirst) {

@@ -5,14 +5,14 @@ my @a = split(//, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 
 my @b = map {ord($_)-ord('0');} @a;
 
-my @q = (10) x 80;
+my @q = (-1) x 80;
 
 my $i = 0;
 $q[$_] = $i++ foreach @b;
 
 @q = map { sprintf("%2d", $_) } @q;
 
-print "\n// char -> triplet\n";
+print "\n// cod64 -> codon number\n";
 print join(",", @q[ 0..15]) . ",\n" . 
       join(",", @q[16..31]) . ",\n" .
       join(",", @q[32..47]) . ",\n" .
