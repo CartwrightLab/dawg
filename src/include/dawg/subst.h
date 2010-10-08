@@ -18,7 +18,7 @@ namespace dawg {
 class subst_model {
 public:
 	typedef boost::uint32_t base_type;
-	
+		
 	// return random base from stat. dist.
 	inline base_type operator()(mutt &m) const {
 		return (this->*do_op_f)(m);
@@ -41,7 +41,7 @@ private:
 	double table[64][64];
 	double uni_scale;
 	std::string name;
-	int _model;
+	unsigned int _model;
 
 	static void remove_stops(unsigned int code, double (&f)[64], double (&s)[64][64]);
 

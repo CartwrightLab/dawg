@@ -14,10 +14,11 @@ template<typename It1, typename It2>
 bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
-	code = (code==0) ? 0 : code-1;
-	if(code > 22)
-		return DAWG_ERROR("Invalid genetic code.");
+	
 	_model = residue_exchange::CODON + code;
+	unsigned int gcode = code%100;
+	if(gcode >= 24)
+		return DAWG_ERROR("Invalid genetic code.");
 	// do freqs first
 	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[64]))
 		return false;
@@ -47,7 +48,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	}
 	
 	// remove stop codons
-	remove_stops(code, freqs, s);
+	remove_stops(gcode, freqs, s);
 	
 	// scale the matrix to substitution time and uniformize
 	d = 0.0;
@@ -91,7 +92,6 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 		// so fill them with 1.0
 		table[i][63] = 1.0;
 	}
-	
 	
 	name = mod_name;
 	do_op_f = &subst_model::do_codgtr_f;

@@ -505,10 +505,9 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 			case 0: // Unempty column
 				foreach(aligner_data &v, aln_table) {
 					if(v.it == v.last || v.it->branch() != uBranch) {
-						v.str->append(1,rex.decode_ins());
+						rex.append_ins(*v.str);
 					} else {
-						v.str->append(1,rex.decode(*v.it));
-						++v.it;
+						rex.append_residue(*v.str, *(v.it++));
 					}
 				}
 		};
@@ -521,6 +520,7 @@ ENDFOR:
 // code=0 equals genetic code table 1
 void subst_model::remove_stops(unsigned int code, double (&f)[64], double (&s)[64][64]) {
 	static const char stops[] = {
+		14,11,10, 0, 0,
 		14,11,10, 0, 0,
 		47,46,11,10, 0,
 		11,10, 0, 0, 0,

@@ -93,8 +93,10 @@ public:
 	enum { DNA = 0, RNA=2, AA=4, CODON=6, MODEND=30};
 
 	typedef residue_exchange self_type;
+	
+	typedef boost::sub_range< const char [64] > str_type;
 
-	inline bool model(unsigned int a, bool markins=false, bool keepempty=true) {
+	inline bool model(unsigned int code, bool markins=false, bool keepempty=true) {
 		static const char sIns[] = "-+";
 		// table for going from base->char
 		static const char mods[] =
@@ -105,6 +107,7 @@ public:
 			"ACDEFGHIKLMNPQRSTVWY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // AA
 			"acdefghiklmnpqrstvwy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // aa
 			"ABCDEFGHIJKLNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!!-" // Codons
+			"ABCDEFGHIJKLNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!!-"
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqruvwxyz0123456789!!!-" 
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-" 
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-"
@@ -156,6 +159,10 @@ public:
 			63,19,63,63,63,63,63,63,63, 0,63, 1, 2, 3, 4, 5, 6, 7,63, 8,
 			 9,10,11,63,12,13,14,15,16,63,17,18,63,19,63,63,63,63,63,63,
 			51,52,53,54,55,56,57,58,59,60,63,63,63,63,63,63,63, 0, 1, 2, // Codons
+			 3, 4, 5, 6, 7, 8, 9,10,11,63,12,13,14,15,16,17,18,19,20,21,
+			22,23,24,63,63,63,63,63,63,25,26,27,28,29,30,31,32,33,34,35,
+			36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,63,63,63,63,63,
+			51,52,53,54,55,56,57,58,59,60,63,63,63,63,63,63,63, 0, 1, 2,
 			 3, 4, 5, 6, 7, 8, 9,10,11,63,12,13,14,15,16,17,18,19,20,21,
 			22,23,24,63,63,63,63,63,63,25,26,27,28,29,30,31,32,33,34,35,
 			36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,63,63,63,63,63,
@@ -248,20 +255,27 @@ public:
 			21,22,23,63,63,63,63,63,63,24,25,26,27,28,29,30,31,32,33,34,
 			35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,63,63,63,63,63
 		};
+		
+		unsigned int a = code%100;
+		unsigned int b = code/100;
+		
 		if(a >= MODEND || mods[a*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
-		_model = a;
+		_model = code;
 		_markins = markins;
 		_keepempty = keepempty;
-
-		// codons are complicating depending on translation tables
-		// here we will base64 encode codons and translate them somewhere else
-		//  FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG
-		// "ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-		cs_decode = &mods[_model*64];
+				
+		cs_decode = &mods[a*64];
+		cs_encode = &rmods[a*80];
 		cs_ins = &sIns[(_markins ? 1 : 0)];
-		cs_encode = &rmods[_model*80];
+		
+		do_op_append =  (a >= CODON && b < AA) ?
+			&residue_exchange::do_op_append_cod :
+			&residue_exchange::do_op_append_res ;
+		do_op_appendi = (a >= CODON && b < AA) ? 
+			&residue_exchange::do_op_appendi_cod :
+			&residue_exchange::do_op_appendi_res ;
+		
 		return true;
 	};
 	inline bool is_same_model(unsigned int a, bool markins, bool keepempty) const {
@@ -330,28 +344,41 @@ public:
 		return ((u*1049601)/65536) % 64;
 	}
 
+	void append_residue(std::string &ss, const residue &r) const {
+		return (this->*do_op_append)(ss,r);
+	}
 
-	template<typename It1, typename It2>
-	It2 decode_array(It1 afirst, It1 alast, It2 bfirst) const {
-		for(;afirst != alast;++afirst) {
-			*bfirst++ = decode(*afirst);
-		}
-		return bfirst;
+	void append_ins(std::string &ss) const {
+		return (this->*do_op_appendi)(ss);
 	}
-	
-	template<typename It1, typename It2>
-	It2 encode_array(It1 afirst, It1 alast, It2 bfirst) const {
-	
-		for(;afirst != alast;++afirst) {
-			*bfirst++ = decode(*afirst);
-		}
-		return bfirst;
-	}
-	
 
 	residue_exchange() { model(DNA); }
 
 protected:
+	void (residue_exchange::*do_op_append)(std::string &ss, const residue &r) const;
+	void (residue_exchange::*do_op_appendi)(std::string &ss) const;
+	
+	void do_op_append_res(std::string &ss, const residue &r) const {
+		ss.append(1, decode(r));
+	}
+	void do_op_append_cod(std::string &ss, const residue &r) const {
+		char n = decode(r);
+		if(n == '-')
+			ss.append(3, '-');
+		else {
+			unsigned int u = codon_to_triplet(cod64_to_codon(n), _model%100);
+			ss.append(1, (char)(u>>16));
+			ss.append(1, (char)(u>>8));
+			ss.append(1, (char)(u));
+		}
+	}
+	void do_op_appendi_res(std::string &ss) const {
+		ss.append(1, decode_ins());
+	}
+	void do_op_appendi_cod(std::string &ss) const {
+		ss.append(3, decode_ins());
+	}
+
 	unsigned int _model;
 	bool _markins, _keepempty, _translate;
 	const char *cs_decode, *cs_ins, *cs_encode;

@@ -22,6 +22,8 @@ print join(",", @q[ 0..15]) . ",\n" .
 
 my @nord = ('T', 'C', 'A', 'G'); 	  
 my @codes = (
+	# 0 The Standard Code
+	"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
 	# 1 The Standard Code
 	"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
     # 2 The Vertebrate Mitochondrial Code
