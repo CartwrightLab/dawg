@@ -43,11 +43,11 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("substitution model could not be created.");
 	
 	if(seg.empty()) { // new segment
-		if(!seg.rex.model(info->sub_mod.seq_type(), ma.output_lowercase,
-			ma.output_markins, ma.output_keepempty, ma.output_translate))
+		if(!seg.rex.model(info->sub_mod.seq_type(), ma.output_markins,
+			ma.output_keepempty, ma.output_translate))
 			return DAWG_ERROR("failed to create sequence type or format object.");
 	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(),
-	           ma.output_lowercase, ma.output_markins, ma.output_keepempty, ma.output_translate)) {
+	           ma.output_markins, ma.output_keepempty, ma.output_translate)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}	
 	
@@ -518,4 +518,84 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 ENDFOR:
 	/*noop*/;
 }
+
+// remove codons that correspond to stop codons
+// code=0 equals genetic code table 1
+void subst_model::remove_stops(unsigned int code, double (&f)[64], double (&s)[64][64]) {
+	static const char stops[] = {
+		14,11,10, 0, 0,
+		47,46,11,10, 0,
+		11,10, 0, 0, 0,
+		11,10, 0, 0, 0,
+		11,10, 0, 0, 0,
+		14, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		11,10, 0, 0, 0,
+		11,10, 0, 0, 0,
+		14,11,10, 0, 0,
+		14,11,10, 0, 0,
+		11,10, 0, 0, 0,
+		11, 0, 0, 0, 0,
+		14,10, 0, 0, 0,
+		14,10, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0,
+		11,10, 0, 0, 0,
+		14,10, 6, 0, 0,
+		14,11,10, 2, 0,
+	};
+
+	const char *p = &stops[code*5];
+	// invalid genetic code
+	if(*p == 0)
+		return;
+	// frequencies
+	double a = 0.0;
+	int w=64;
+	for(const char *q=p; *q != 0;++q)
+		a += f[(int)*q];
+	for(const char *q=p;*q != 0;++q) {
+		double *fff = &f[(int)*q+1];
+		for(;*(q+1) == *q-1;++q)
+			--w;
+		--w;
+		double *ff = &f[(int)*q];
+		memmove(ff, fff, sizeof(double)*(64-*q-1));
+	}
+	a = 1.0-a;
+	for(int i=0;i<w;++i)
+		f[i] /= a;
+	for(int i=w;i<64;++i)
+		f[i] = 0.0;
+	
+	// table rows
+	for(int i=0;i<64;++i) {
+		for(const char *q=p;*q != 0;++q) {
+			double *fff = &s[i][(int)*q+1];
+			for(;*(q+1) == *q-1;++q)
+				/*noop*/;
+			double *ff = &s[i][(int)*q];
+			memmove(ff, fff, sizeof(double)*(64-*q-1));
+		}
+		for(int j=w;j<64;++j)
+			s[i][j] = 1.0;
+	}
+	
+	// table columns
+	for(const char *q=p;*q != 0;++q) {
+		double *fff = &s[(int)*q+1][0];
+		for(;*(q+1) == *q-1;++q)
+			/*noop*/;
+		double *ff = &s[(int)*q][0];
+		memmove(ff, fff, 64*sizeof(double)*(64-*q-1));
+	}
+	for(int i=w;i<64;++i) {
+		for(int j=0;j<64;++j)
+			s[i][j] = 1.0;
+	}
+}
+
 

@@ -94,7 +94,7 @@ public:
 
 	typedef residue_exchange self_type;
 
-	inline bool model(int a, bool lc=false, bool markins=false, bool keepempty=true, bool translate=false) {
+	inline bool model(unsigned int a, bool markins=false, bool keepempty=true, bool translate=false) {
 		static const char sIns[] = "-+";
 		// table for going from base->char
 		static const char mods[] =
@@ -104,8 +104,7 @@ public:
 			"acgu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // rna
 			"ACDEFGHIKLMNPQRSTVWY!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // AA
 			"acdefghiklmnpqrstvwy!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // aa
-			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // Codons
-			"ABCDEFGHIJKLNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!!-" 
+			"ABCDEFGHIJKLNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!!-" // Codons
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqruvwxyz0123456789!!!-" 
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-" 
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-"
@@ -156,11 +155,7 @@ public:
 			 2, 3, 4, 5, 6, 7,63, 8, 9,10,11,63,12,13,14,15,16,63,17,18,
 			63,19,63,63,63,63,63,63,63, 0,63, 1, 2, 3, 4, 5, 6, 7,63, 8,
 			 9,10,11,63,12,13,14,15,16,63,17,18,63,19,63,63,63,63,63,63,
-			63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63, // codons
-			63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,
-			63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,
-			63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,
-			51,52,53,54,55,56,57,58,59,60,63,63,63,63,63,63,63, 0, 1, 2,
+			51,52,53,54,55,56,57,58,59,60,63,63,63,63,63,63,63, 0, 1, 2, // Codons
 			 3, 4, 5, 6, 7, 8, 9,10,11,63,12,13,14,15,16,17,18,19,20,21,
 			22,23,24,63,63,63,63,63,63,25,26,27,28,29,30,31,32,33,34,35,
 			36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,63,63,63,63,63,
@@ -253,11 +248,9 @@ public:
 			21,22,23,63,63,63,63,63,63,24,25,26,27,28,29,30,31,32,33,34,
 			35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,63,63,63,63,63
 		};
-		if(a >= MODEND || mods[a*64] == '!' || a < 0)
+		if(a >= MODEND || mods[a*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
 		_model = a;
-		if(lc && _model < CODON) // use lowercase translations
-			_model += 1;
 		_markins = markins;
 		_keepempty = keepempty;
 		_translate = translate;
@@ -273,9 +266,7 @@ public:
 		cs_encode = &rmods[_model*80];
 		return true;
 	};
-	inline bool is_same_model(int a, bool lc, bool markins, bool keepempty, bool translate) const {
-		if(lc && _model < CODON)
-			a += 1;
+	inline bool is_same_model(unsigned int a, bool markins, bool keepempty, bool translate) const {
 		return (a == _model && markins == _markins
 			&& keepempty == _keepempty && translate == _translate);
 	}
@@ -319,7 +310,7 @@ public:
 	residue_exchange() { model(DNA); }
 
 protected:
-	int _model, _type;
+	unsigned int _model;
 	bool _markins, _keepempty, _translate;
 	const char *cs_decode, *cs_ins, *cs_encode;
 };

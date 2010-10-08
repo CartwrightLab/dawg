@@ -22,7 +22,6 @@ print join(",", @q[ 0..15]) . ",\n" .
 
 my @nord = ('T', 'C', 'A', 'G'); 	  
 my @codes = (
-	"",
 	# 1 The Standard Code
 	"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
     # 2 The Vertebrate Mitochondrial Code
@@ -99,5 +98,18 @@ foreach(@codes) {
 		join(",", @x[60..79]) . "\n"
       ;
 }
+
+print("\n// removing stops\n");
+foreach(@codes) {
+	my @x = ();
+	while(/([*])/g) {
+		push(@x, pos()-length($1));
+	}
+	@x = reverse(@x);
+	push(@x, 0) while(@x < 5);
+	@x = map { sprintf("% 2s", $_) } @x;
+	print "\t\t" . join(',', @x) . ",\n";
+}
+
 
 

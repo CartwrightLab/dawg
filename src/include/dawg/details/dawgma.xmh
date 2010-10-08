@@ -38,7 +38,7 @@ XM((root)(segment), unsigned int, 0)
 XM((root)(gapoverlap), bool, true)
 
 XM((output)(markins), bool, false)
-XM((output)(lowercase), bool, false)
+//XM((output)(lowercase), bool, false)
 XM((output)(keepempty), bool, true)
 XM((output)(translate), bool, false)
 //XM((output)(gapsinglechar), bool, false)

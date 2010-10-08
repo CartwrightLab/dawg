@@ -33,7 +33,7 @@ public:
 	inline int seq_type() const { return _model; }
 	
 	template<typename It1, typename It2>
-	bool create(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 	
 private:
 	// must hold at least 64 different characters
@@ -42,6 +42,8 @@ private:
 	double uni_scale;
 	std::string name;
 	int _model;
+
+	static void remove_stops(unsigned int code, double (&f)[64], double (&s)[64][64]);
 
 	// pointer that will hold our method
 	base_type (subst_model::*do_op_f)(mutt &m) const;
@@ -71,71 +73,71 @@ private:
 	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) const;
 	
 	template<typename It1, typename It2>
-	bool create_gtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_gtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 	
 	template<typename It1, typename It2>
-	bool create_jc(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_jc(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_f81(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_f81(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_k2p(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_k2p(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_tn(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_tn(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_tn_f04(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_tn_f04(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_f84(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_f84(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_hky(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_hky(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	// Protein Models
 	template<typename It1, typename It2>
-	bool create_equ(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_equ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_aagtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_aagtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_lg(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_lg(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_wag(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_wag(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_wagstar(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_wagstar(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 	
 	template<typename It1, typename It2>
-	bool create_jtt(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_jtt(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_dayhoff(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_dayhoff(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_molphy(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_molphy(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	// Codon Models	
 	template<typename It1, typename It2>
-	bool create_codgtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_codgtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_codequ(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2);	
+	bool create_codequ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);	
 };
 
 template<typename It1, typename It2>
-bool subst_model::create(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
 		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
 		"codequ", "codgtr"
 	};
 	
-	static bool (subst_model::*create_ops[])(const char *, int, It1, It1, It2, It2) = {
+	static bool (subst_model::*create_ops[])(const char *, unsigned int, It1, It1, It2, It2) = {
 		&subst_model::create_jc,  &subst_model::create_gtr, &subst_model::create_k2p,
 		&subst_model::create_hky, &subst_model::create_f84, &subst_model::create_f81,
 		&subst_model::create_tn,  &subst_model::create_tn_f04,

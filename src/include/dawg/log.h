@@ -5,7 +5,8 @@
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <iostream> 
+#include <iostream>
+#include <iomanip>
 
 #ifdef NDEBUG
 #	define DAWG_ERROR(err_msg) ((std::cerr << "ERROR: " << err_msg << std::endl), false)

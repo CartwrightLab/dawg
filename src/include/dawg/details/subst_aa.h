@@ -9,10 +9,11 @@ namespace dawg {
  
 // name, followed by params, then freqs
 template<typename It1, typename It2>
-bool subst_model::create_aagtr(const char *mod_name, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
-	_model = residue_exchange::AA;
+	code = (code==0) ? 0 : code-1;
+	_model = residue_exchange::AA + code;
 	// do freqs first
 	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[20]))
 		return false;
@@ -34,12 +35,10 @@ bool subst_model::create_aagtr(const char *mod_name, int code, It1 first1, It1 l
 	double s[20][20];
 	double rs[20];
 	u = 0;
-	double aa = 0.0;
 	for(int i=0;i<20;++i) {
 		s[i][i] = 0.0;
 		for(int j=i+1;j<20;++j) {
 			s[i][j] = s[j][i] = params[u++];
-			aa = std::max(aa,s[i][j]);
 		}
 	}
 	// scale the matrix to substitution time and uniformize
@@ -94,7 +93,7 @@ bool subst_model::create_aagtr(const char *mod_name, int code, It1 first1, It1 l
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_equ(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_equ(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 		1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -127,7 +126,7 @@ bool subst_model::create_equ(const char *, int code, It1 first1, It1 last1, It2 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_wag(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_wag(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.0270400, 0.7389980, 1.5828500, 0.2104940, 1.4167200, 0.3169540, 0.1933350, 0.9062650, 0.3979150, 0.8934960,
 		0.5098480, 1.4385500, 0.9085980, 0.5515710, 3.3707900, 2.1211100, 2.0060100, 0.1131330, 0.2407350, 0.0302949,
@@ -160,7 +159,7 @@ bool subst_model::create_wag(const char *, int code, It1 first1, It1 last1, It2 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_wagstar(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_wagstar(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		1.2132400, 0.7311520, 1.5578800, 0.2131790, 1.4199300, 0.3176840, 0.2145960, 0.8816390, 0.4008220, 0.8874580,
 		0.5143470, 1.5186100, 1.0334400, 0.5897180, 3.5249900, 2.2416100, 1.9249600, 0.1353950, 0.2703210, 0.0379056,
@@ -193,7 +192,7 @@ bool subst_model::create_wagstar(const char *, int code, It1 first1, It1 last1, 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_lg(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_lg(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		2.4890840, 0.3951440, 1.0385450, 0.2537010, 2.0660400, 0.3588580, 0.1498300, 0.5365180, 0.3953370, 1.1240350,
 		0.2768180, 1.1776510, 0.9698940, 0.4250930, 4.7271820, 2.1395010, 2.5478700, 0.1807170, 0.2189590, 0.0625560,
@@ -226,7 +225,7 @@ bool subst_model::create_lg(const char *, int code, It1 first1, It1 last1, It2 f
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_jtt(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_jtt(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.5744780, 0.8274450, 1.0666810, 0.1382930, 1.7401590, 0.2199700, 0.3616840, 0.3694370, 0.3100070, 0.4693950,
 		0.5579670, 1.9595990, 0.5567250, 0.5316780, 3.8870950, 4.5825650, 2.9241610, 0.0843290, 0.1394920, 0.1056250,
@@ -259,7 +258,7 @@ bool subst_model::create_jtt(const char *, int code, It1 first1, It1 last1, It2 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_dayhoff(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_dayhoff(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.3600160, 1.1998050, 1.9611670, 0.1836410, 2.3861110, 0.2281160, 0.6534160, 0.2586350, 0.4064310, 0.7178400,
 		0.9844740, 2.4859200, 0.8877530, 0.2678280, 4.0518700, 3.6803650, 2.0595640, 0.0000000, 0.2441390, 0.0000000,
@@ -292,7 +291,7 @@ bool subst_model::create_dayhoff(const char *, int code, It1 first1, It1 last1, 
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_molphy(const char *, int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+bool subst_model::create_molphy(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	static const double s[190] = {
 		0.3652550, 1.1967940, 1.9431560, 0.1826270, 2.3762090, 0.2255960, 0.6515340, 0.2602440, 0.4082230, 0.7061620,
 		0.9953190, 2.4708390, 0.8939100, 0.2672570, 4.0282420, 3.7155250, 2.0510450, 0.0106730, 0.2435010, 0.0070720,
