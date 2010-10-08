@@ -317,9 +317,16 @@ public:
 
 	// triplet -> codon number
 	static inline unsigned int triplet_to_codon(unsigned int p) {
+		// randomly cryptic code:
+		// In ncbi descriptions of genetic code,
+		//     T|U=0,C=1,A=2,G=3
+		// Let f(p) = (p&6)/2.  For ASCII:
+		//     f(T|U)= 2, f(C) = 1, f(A)=0, f(G)=3
+		// To convert ascii to ncbi: g(p)= (3*p+2)%4
 		unsigned int u = p & 0x060606;
-		u = u+(u/2)+0x020202;
-		u &= 0x030303;
+		u = (u+(u/2)+0x020202) & 0x030303;
+		// reverse bytes and pack into lower 8 bits
+		// replaces three shifts, three masks, and two ors
 		return ((u*1049601)/65536) % 64;
 	}
 
