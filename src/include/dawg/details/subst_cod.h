@@ -134,7 +134,7 @@ bool subst_model::create_codgy(const char *, unsigned int code, It1 first1, It1 
 			k = (k+k/4+k/16)%4;
 			double d = (k>1) ? 0.0 : 1.0;
 			// transition or transversion
-			if((kk/2+kk/8+kk/32)&1)
+			if(((kk/2)|(kk/8)|(kk/32))&1==0)
 				d *= kappa;
 			// synonmymous
 			if(cs_code[i] != cs_code[j])
