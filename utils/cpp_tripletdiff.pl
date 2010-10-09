@@ -16,9 +16,9 @@ foreach my $i(0..63) {
 		++$x if($a[2] ne $b[2]);
 		push(@row, $x);
 	}
-	push(@d, join(",", @row));
+	push(@d, join(" ", @row));
 }
 
-print join(",\n", @d);
+print join("\n", @d);
 print "\n";
 

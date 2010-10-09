@@ -43,7 +43,7 @@ private:
 	std::string name;
 	unsigned int _model;
 
-	static void remove_stops(unsigned int code, double (&f)[64], double (&s)[64][64]);
+	static void remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]);
 
 	// pointer that will hold our method
 	base_type (subst_model::*do_op_f)(mutt &m) const;
@@ -127,6 +127,10 @@ private:
 
 	template<typename It1, typename It2>
 	bool create_codequ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);	
+
+	template<typename It1, typename It2>
+	bool create_codgy(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+
 };
 
 template<typename It1, typename It2>
@@ -134,7 +138,7 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
 		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
-		"codequ", "codgtr"
+		"codequ", "codgtr", "codgy"
 	};
 	
 	static bool (subst_model::*create_ops[])(const char *, unsigned int, It1, It1, It2, It2) = {
@@ -144,7 +148,7 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 		&subst_model::create_equ, &subst_model::create_aagtr, &subst_model::create_lg,
 		&subst_model::create_wag, &subst_model::create_wagstar, &subst_model::create_jtt,
 		&subst_model::create_dayhoff, &subst_model::create_molphy,
-		&subst_model::create_codequ, &subst_model::create_codgtr
+		&subst_model::create_codequ, &subst_model::create_codgtr, &subst_model::create_codgy
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
 	if(pos == (std::size_t)-1)

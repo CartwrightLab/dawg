@@ -48,7 +48,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	}
 	
 	// remove stop codons
-	remove_stops(gcode, freqs, s);
+	remove_stops(gcode, s, freqs);
 	
 	// scale the matrix to substitution time and uniformize
 	d = 0.0;
@@ -104,13 +104,60 @@ template<typename It1, typename It2>
 bool subst_model::create_codequ(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	std::vector<double> s(2016,1.0);
 	std::vector<double> p(64,1.0);
-	p.push_back(0.0);
-	p.push_back(0.0);
 	if(first2 != last2) { //+F model
 		return create_codgtr("codequ+f", code, s.begin(), s.end(), first2, last2);
 	}
 	return create_codgtr("codequ", code, s.begin(), s.end(), p.begin(), p.end());
 }
+
+template<typename It1, typename It2>
+bool subst_model::create_codgy(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
+	std::vector<double> p(64,1.0);
+	std::vector<double> s(2016,0.0);
+	double kappa, omega;	
+	if(first1 == last1)
+		return DAWG_ERROR("Invalid subst model; codgy requires two parameters.");
+	kappa = *first1++;
+	if(first1 == last1)
+		return DAWG_ERROR("Invalid subst model; codgy requires two parameters.");
+	omega = *first1++;
+	
+	const char *cs_code = residue_exchange::get_protein_code(code);
+	
+	// create substitution table
+	unsigned int u=0;
+	for(unsigned int i=0;i<63;++i) {
+		for(unsigned int j=i+1;j<64;++j) {
+			unsigned int kk = i^j;
+			// find number of substitutions
+			unsigned int k = ((kk/2)|kk)&21;
+			k = (k+k/4+k/16)%4;
+			double d = (k>1) ? 0.0 : 1.0;
+			// transition or transversion
+			if((kk/2+kk/8+kk/32)&1)
+				d *= kappa;
+			// synonmymous
+			if(cs_code[i] != cs_code[j])
+				d *= omega;
+			s[u++] = d;
+		}
+	}
+	
+	if(std::distance(first2,last2) > 4)
+		return create_codgtr("codgy+f", code, s.begin(), s.end(), first2, last2);
+	double f[4];
+	if(first2 == last2)
+		f[0] = f[1] = f[2] = f[3] = 0.25;
+	else if(!create_freqs("codgy", first2, last2, &f[0], &f[4]))
+		return false;
+	
+	// convert A C G T -> T C A G
+	std::swap(f[1], f[3]);
+	for(int i=0;i<64;++i)
+		p[i] = f[(i)%4]*f[(i/4)%4]*f[(i/16)%4];
+	return create_codgtr("codgy", code, s.begin(), s.end(), p.begin(), p.end());
+}
+
 
 } // namesapce dawg
 

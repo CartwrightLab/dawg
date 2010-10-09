@@ -126,10 +126,10 @@ bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1,
 	fr = f[0]+f[2];
 	fy = f[1]+f[3];
 	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " tn requires two or three parameters.");
+		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
 	ay = *first1++;
 	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " tn requires two or three parameters.");
+		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
 	ar = *first1++;
 	if(first1 == last1) {
 		// two parameters

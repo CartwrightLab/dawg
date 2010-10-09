@@ -352,7 +352,10 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
+	static const char* get_protein_code(unsigned int code=0);
+
 	residue_exchange() { model(DNA); }
+	
 
 protected:
 	void (residue_exchange::*do_op_append)(std::string &ss, const residue &r) const;
@@ -366,7 +369,7 @@ protected:
 		if(n == '-')
 			ss.append(3, '-');
 		else {
-			unsigned int u = codon_to_triplet(cod64_to_codon(n), _model%100);
+			unsigned int u = codon_to_triplet(cod64_to_codon(n), _model/100);
 			ss.append(1, (char)(u>>16));
 			ss.append(1, (char)(u>>8));
 			ss.append(1, (char)(u));
