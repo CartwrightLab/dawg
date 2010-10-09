@@ -61,7 +61,7 @@ private:
 	boost::uint32_t (indel_model::*do_op)(mutt &m) const;
 
 	boost::uint32_t do_geo(mutt &m) const {
-		return m.rand_geometric(qorz);
+		return m.rand_geometric_q(qorz);
 	}
 	boost::uint32_t do_zeta(mutt &m) const {
 		return m.rand_zeta(qorz);
@@ -81,13 +81,16 @@ private:
 	inline bool create_geo(It &first, It last) {
 		if(first == last) 
 			return DAWG_ERROR("Invalid indel model; geo requires 1 parameter");
-		qorz = 1.0-*first++;
-		if(qorz <= 0.0 || qorz >= 1.0)
-			return DAWG_ERROR("Invalid indel model; geo parameter '" <<qorz
-				<< "' is not between (0,1)");
+		qorz = *first++;
+		if(qorz >= 1.0)
+			qorz = 1.0/qorz;
+		if(qorz <= 0.0)
+			return DAWG_ERROR("Invalid indel model; geo parameter '" << qorz
+				<< "' must be positive.");
 		name = "geom";
+		mean = 1.0/qorz;
+		qorz = -log(1.0-qorz);
 		do_op = &dawg::indel_model::do_geo;
-		mean = 1.0/(1.0-qorz);
 		return true;
 	}
 
@@ -180,7 +183,7 @@ public:
 		therate = 0.0;
 		mean = 0.0;
 		for(;first_r!=last_r;++first_r) {
-			if(*first_r <= 0.0)
+			if(*first_r < 0.0)
 				return DAWG_ERROR("invalid indel model; rate '" << *first_r << "' must be positive");
 			therate += *first_r;
 			mix.push_back(therate);
@@ -194,6 +197,14 @@ public:
 			mean += mix[u]*models[u].meansize();
 			if(++itn == last_n)
 				itn = first_n;
+		}
+		for(std::size_t u=0;u<mix.size();) {
+			if(mix[u] > 0.0) {
+				++u;
+				continue;
+			}
+			mix.erase(mix.begin()+u);
+			models.erase(models.begin()+u);
 		}
 		if(!mix.empty()) {
 			mix.back() = 1.0;

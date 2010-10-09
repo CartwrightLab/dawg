@@ -63,9 +63,11 @@ public:
 	inline double rand_exp_inv();
 	
 	// random geometric with succcess rate p in (0,1)
-	// p(1 - p)^(k-1) for k >= 1; q = 1-p
-	inline boost::uint32_t rand_geometric(double q) {
-		return 1+static_cast<boost::uint32_t>(rand_exp(-log(q)));
+	// p(1 - p)^(k-1) for k >= 1; q = -log(1-p)
+	// mean is 1/p
+	
+	inline boost::uint32_t rand_geometric_q(double q) {
+		return 1+static_cast<boost::uint32_t>(rand_exp(q));
 	}
 
 	// random zeta with slope z
