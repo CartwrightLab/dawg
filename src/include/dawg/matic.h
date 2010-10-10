@@ -57,6 +57,8 @@ struct matic_section {
 	root_model      rut_mod;
 	indel_mix_model ins_mod;
 	indel_mix_model del_mod;
+
+	residue::data_type gap_base;
 	
 	void evolve(sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,

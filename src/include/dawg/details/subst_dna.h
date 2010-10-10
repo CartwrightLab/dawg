@@ -143,7 +143,7 @@ bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1,
 		
 	} else {
 		// three parameters
-		b = *first1;			
+		b = *first1;
 	}
 	p[1] = ar;
 	p[4] = ay;

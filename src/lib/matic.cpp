@@ -47,7 +47,8 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 			return DAWG_ERROR("failed to create sequence type or format object.");
 	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), ma.output_markins, ma.output_keepempty)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
-	}	
+	}
+	info->gap_base = seg.rex.gap_base();
 	
 	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
 		ma.subst_rate_params.end()))
@@ -316,7 +317,7 @@ dawg::details::matic_section::evolve_indels(
 					}
 				}
 				// insert u "deleted insertions" into buffer
-				child.insert(child.end(), u, residue(residue::deleted_base,
+				child.insert(child.end(), u, residue(gap_base,
 					residue::rate_type(0.0), branch_color));
 				// remove u sites from both stacks, pop if empty
 				r.second -= u;
@@ -347,9 +348,9 @@ dawg::details::matic_section::evolve_indels(
 				boost::uint32_t uu;
 				for(uu=0;uu != u && first != last;++first) {
 					child.push_back(*first);
-					if(first->is_deleted())
+					if(first->base() == gap_base)
 						continue;
-					child.back().base(residue::deleted_base);
+					child.back().base(gap_base);
 					child.back().rate_scalar(0.0);
 					++uu;
 				}
@@ -413,7 +414,7 @@ void dawg::details::matic_section::evolve(
 		// TODO: Optimzie out uni_scale multiplication by changing T and indel_rate
 		// TODO: Move to residue_model class
 		for(;first != last; ++first) {
-			if(first->is_deleted())
+			if(first->base() == gap_base)
 				continue;
 			if(d < indel_rate+first->rate_scalar()*uni_scale)
 				break;
@@ -474,8 +475,8 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	unsigned int uStateQuit = rex.is_keep_empty() ? (residue::deleted_base+1)*2
-		                                          : (residue::deleted_base+1)*2-1 ;
+	unsigned int uStateQuit = rex.is_keep_empty() ? (residue::base_mask+1)*2
+		                                          : (residue::base_mask+1)*2-1 ;
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
 	// Go through each column, adding gaps where neccessary
@@ -516,84 +517,22 @@ ENDFOR:
 	/*noop*/;
 }
 
-// remove codons that correspond to stop codons
-// code=0 equals genetic code table 1
-void subst_model::remove_stops(unsigned int code, double (&s)[64][64],double (&f)[64]) {
-	static const char stops[] = {
-		14,11,10, 0, 0,
-		14,11,10, 0, 0,
-		47,46,11,10, 0,
-		11,10, 0, 0, 0,
-		11,10, 0, 0, 0,
-		11,10, 0, 0, 0,
-		14, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		11,10, 0, 0, 0,
-		11,10, 0, 0, 0,
-		14,11,10, 0, 0,
-		14,11,10, 0, 0,
-		11,10, 0, 0, 0,
-		11, 0, 0, 0, 0,
-		14,10, 0, 0, 0,
-		14,10, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		 0, 0, 0, 0, 0,
-		11,10, 0, 0, 0,
-		14,10, 6, 0, 0,
-		14,11,10, 2, 0,
-	};
-
-	const char *p = &stops[code*5];
-	// invalid genetic code
-	if(*p == 0)
+void subst_model::remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]) {
+	const char *p = residue_exchange::get_protein_code(code);
+	if(p[0] == '!')
 		return;
-	// frequencies
 	double a = 0.0;
-	int w=64;
-	for(const char *q=p; *q != 0;++q)
-		a += f[(int)*q];
-	for(const char *q=p;*q != 0;++q) {
-		double *fff = &f[(int)*q+1];
-		for(;*(q+1) == *q-1;++q)
-			--w;
-		--w;
-		double *ff = &f[(int)*q];
-		memmove(ff, fff, sizeof(double)*(64-*q-1));
+	for(int n=0;n<64;++n) {
+		if(p[n] != '*')
+			continue;
+		a += f[n];
+		f[n] = 0.0;
+		for(int i=0;i<64;++i)
+			s[n][i] = s[i][n] = 1.0;
 	}
 	a = 1.0-a;
-	for(int i=0;i<w;++i)
+	for(int i=0;i<64;++i)
 		f[i] /= a;
-	for(int i=w;i<64;++i)
-		f[i] = 0.0;
-	
-	// table rows
-	for(int i=0;i<64;++i) {
-		for(const char *q=p;*q != 0;++q) {
-			double *fff = &s[i][(int)*q+1];
-			for(;*(q+1) == *q-1;++q)
-				/*noop*/;
-			double *ff = &s[i][(int)*q];
-			memmove(ff, fff, sizeof(double)*(64-*q-1));
-		}
-		for(int j=w;j<64;++j)
-			s[i][j] = 1.0;
-	}
-	
-	// table columns
-	for(const char *q=p;*q != 0;++q) {
-		double *fff = &s[(int)*q+1][0];
-		for(;*(q+1) == *q-1;++q)
-			/*noop*/;
-		double *ff = &s[(int)*q][0];
-		memmove(ff, fff, 64*sizeof(double)*(64-*q-1));
-	}
-	for(int i=w;i<64;++i) {
-		for(int j=0;j<64;++j)
-			s[i][j] = 1.0;
-	}
 }
 
 const char* residue_exchange::get_protein_code(unsigned int code) {
@@ -625,5 +564,3 @@ const char* residue_exchange::get_protein_code(unsigned int code) {
 	;
 	return &s[64*(code%24)];
 }
-
-

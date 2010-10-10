@@ -134,7 +134,7 @@ bool subst_model::create_codgy(const char *, unsigned int code, It1 first1, It1 
 			k = (k+k/4+k/16)%4;
 			double d = (k>1) ? 0.0 : 1.0;
 			// transition or transversion
-			if(((kk/2)|(kk/8)|(kk/32))&1==0)
+			if((((kk/2)|(kk/8)|(kk/32))&1)==0)
 				d *= kappa;
 			// synonmymous
 			if(cs_code[i] != cs_code[j])
@@ -152,7 +152,8 @@ bool subst_model::create_codgy(const char *, unsigned int code, It1 first1, It1 
 		return false;
 	
 	// convert A C G T -> T C A G
-	std::swap(f[1], f[3]);
+	std::swap(f[0], f[2]);
+	std::swap(f[0], f[3]);
 	for(int i=0;i<64;++i)
 		p[i] = f[(i)%4]*f[(i/4)%4]*f[(i/16)%4];
 	return create_codgtr("codgy", code, s.begin(), s.end(), p.begin(), p.end());

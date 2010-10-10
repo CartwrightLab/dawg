@@ -150,7 +150,7 @@ private:
 			++first;
 			udata.push_back(d);
 		}
-		if(*first < 0.0)
+		if(first != last)
 			++first;
 		if(udata.size() == 1)
 			return DAWG_ERROR("Invalid indel model; no parameters for user model.");

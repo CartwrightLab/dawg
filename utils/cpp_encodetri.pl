@@ -1,7 +1,8 @@
+#!/bin/perl -w
 use strict;
 use warnings;
 
-my @a = split(//, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+my @a = split(//, 'ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
 
 my @b = map {ord($_)-ord('0');} @a;
 
@@ -13,11 +14,10 @@ $q[$_] = $i++ foreach @b;
 @q = map { sprintf("%2d", $_) } @q;
 
 print "\n// cod64 -> codon number\n";
-print join(",", @q[ 0..15]) . ",\n" . 
-      join(",", @q[16..31]) . ",\n" .
-      join(",", @q[32..47]) . ",\n" .
-      join(",", @q[48..63]) . ",\n" .
-      join(",", @q[64..79]) . "\n"
+print join(",", @q[ 0..19]) . ",\n" . 
+      join(",", @q[20..39]) . ",\n" .
+      join(",", @q[40..59]) . ",\n" .
+      join(",", @q[60..79]) . "\n"
       ;
 
 my @nord = ('T', 'C', 'A', 'G'); 	  
@@ -66,7 +66,7 @@ my @codes = (
 	"FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
 );
 
-@a = split(//, 'ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-');
+@a = split(//, 'ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!-');
 
 
 print("\n// base -> char\n");
@@ -75,12 +75,20 @@ foreach(@codes) {
 	my $j = 0;
 	my $i = 0;
 	my @x = (64) x 64;
+	my $gap = 0;
 	foreach(@c) {
-		$x[$j++] = $i if($_ ne '*');
+		if($_ ne '*') {
+			$x[$j] = $i;
+		} elsif($gap) {
+			$x[$j] = 64;
+		} else {
+			$x[$j] = 65;
+			$gap = 1;
+		}
 		$i++;
+		$j++;
 	}
-	$x[63] = 65;
-	print '"' . join('', @a[@x]) . "\"\n";	
+	print "\t\t\"" . join('', @a[@x]) . "\"\n";	
 }
 
 print("\n// char -> base\n");
@@ -88,7 +96,7 @@ foreach(@codes) {
 	my @c = split(//);
 	my $j = 0;
 	my $i = 0;
-	my @x = (63) x 80;
+	my @x = (-1) x 80;
 	foreach(@c) {
 		$x[ord($a[$i])-ord('0')] = $j++ if($_ ne '*');
 		$i++;
