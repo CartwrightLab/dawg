@@ -203,7 +203,7 @@ public:
 	
 	// codon number -> cod64
 	static inline char codon_to_cod64(unsigned int p) {
-		const char s[] = "ABCDEFGHIJ_:KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		const char s[] = "ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		return s[p&63];
 	}
 
@@ -211,11 +211,10 @@ public:
 	static inline unsigned int cod64_to_codon(char c) {
 		static const char a[] = {
 			// cod64 -> codon number
-			54,55,56,57,58,59,60,61,62,63,11,-1,-1,-1,-1,-1,
-			-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,12,13,14,15,16,
-			17,18,19,20,21,22,23,24,25,26,27,-1,-1,-1,-1,10,
-			-1,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
-			43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
+			54,55,56,57,58,59,60,61,62,63,-1,-1,-1,11,-1,-1,10, 0, 1, 2,
+			 3, 4, 5, 6, 7, 8, 9,12,13,15,16,14,17,18,19,20,21,22,23,24,
+			25,26,27,-1,-1,-1,-1,-1,-1,28,29,30,31,32,33,34,35,36,37,38,
+			39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
 		};
 		return (c >= '0') ? a[c-'0'] : -1;
 	}
@@ -253,10 +252,37 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
-	static const char* get_protein_code(unsigned int code=0);
-
 	residue_exchange() { model(DNA); }
 	
+	inline static const char* get_protein_code(unsigned int code) {
+		static const char s[] = 
+			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSS**VVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSSSVVVVAAAADDEEGGGG"
+			"FFLLSSSSYYQQCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCCWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CC*WLLLSPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSGGVVVVAAAADDEEGGGG"
+			"FFLLSSSSYYY*CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY*QCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FFLLSSSSYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNNKSSSSVVVVAAAADDEEGGGG"
+			"FFLLSS*SYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+			"FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+		;
+		return &s[64*(code%24)];
+	}
 
 protected:
 	void (residue_exchange::*do_op_append)(std::string &ss, const residue &r) const;
@@ -266,14 +292,16 @@ protected:
 		ss.append(1, decode(r));
 	}
 	void do_op_append_cod(std::string &ss, const residue &r) const {
-		char n = decode(r);
-		if(n == '-')
+		unsigned int b = r.base()&63;
+		if(b == _gap)
 			ss.append(3, '-');
+		else if(cs_decode[b] == '!')
+			ss.append(3, '*');
 		else {
-			unsigned int u = codon_to_triplet(cod64_to_codon(n), _model/100);
-			ss.append(1, (char)(u>>16));
-			ss.append(1, (char)(u>>8));
+			unsigned int u = codon_to_triplet(b, _model/100);
 			ss.append(1, (char)(u));
+			ss.append(1, (char)(u>>8));
+			ss.append(1, (char)(u>>16));
 		}
 	}
 	void do_op_appendi_res(std::string &ss) const {

@@ -43,7 +43,8 @@ private:
 	std::string name;
 	unsigned int _model;
 
-	static void remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]);
+	inline static void remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]);
+	inline static const char* get_codon_diff_upper();
 
 	// pointer that will hold our method
 	base_type (subst_model::*do_op_f)(mutt &m) const;
