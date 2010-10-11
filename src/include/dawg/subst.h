@@ -71,7 +71,7 @@ private:
 
 	// DNA Models
 	template<typename It1, typename It2>
-	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) const;
+	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2, unsigned int ncol=0) const;
 	
 	template<typename It1, typename It2>
 	bool create_gtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
@@ -124,13 +124,19 @@ private:
 
 	// Codon Models	
 	template<typename It1, typename It2>
-	bool create_codgtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+	bool create_codgy_equ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 	template<typename It1, typename It2>
-	bool create_codequ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);	
+	bool create_codgtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);	
 
 	template<typename It1, typename It2>
 	bool create_codgy(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_codmg(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_codmg_equ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
 };
 
@@ -139,7 +145,7 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
 		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
-		"codequ", "codgtr", "codgy"
+		"codgtr", "codmg", "codmg-equ", "codgy", "codgy-equ"
 	};
 	
 	static bool (subst_model::*create_ops[])(const char *, unsigned int, It1, It1, It2, It2) = {
@@ -149,7 +155,9 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 		&subst_model::create_equ, &subst_model::create_aagtr, &subst_model::create_lg,
 		&subst_model::create_wag, &subst_model::create_wagstar, &subst_model::create_jtt,
 		&subst_model::create_dayhoff, &subst_model::create_molphy,
-		&subst_model::create_codequ, &subst_model::create_codgtr, &subst_model::create_codgy
+		&subst_model::create_codgtr,
+		&subst_model::create_codmg, &subst_model::create_codgy_equ,
+		&subst_model::create_codgy, &subst_model::create_codgy_equ
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
 	if(pos == (std::size_t)-1)
@@ -158,21 +166,28 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 }
 
 template<typename It1, typename It2>
-bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2) const {
-	It2 result = first2;
+bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2, unsigned int ncol) const {
+	It2 result = first2, alpha = first2;
+	unsigned int u=0,n=0;
 	double d=0.0;
-	for(int u=0;first1 != last1 && result != last2;++first1,++result,++u) {
+	for(;first1 != last1 && result != last2;++first1,++u) {
 		if(*first1 < 0)
 			return DAWG_ERROR("Invalid subst model; " << mod_name << "frequency #" << u
 				<< " '" << *first1 << "' is not >= 0.");
 		d += *first1;
-		*result = *first1;
+		*(result++) = *first1;
+		if(++n == ncol) {
+			for(;alpha != result;++alpha)
+				*alpha /= d;
+			d = 0.0;
+			n = 0;
+		}
 	}
+	for(;alpha != result;++alpha)
+		*alpha /= d;
 	if(result != last2)
 		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires "
 			<< std::distance(first2, last2) << " frequencies.");
-	for(;first2 != last2;++first2)
-		*first2 /= d;
 	return true;
 }
 
