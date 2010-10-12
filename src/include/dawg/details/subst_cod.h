@@ -20,7 +20,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	if(gcode >= 24)
 		return DAWG_ERROR("Invalid genetic code.");
 	// do freqs first
-	if(!create_freqs("codgy_gen", first2, last2, &freqs[0], &freqs[64]))
+	if(!create_freqs("codgtr", first2, last2, &freqs[0], &freqs[64]))
 		return false;
 	
 	// fill params array
@@ -28,12 +28,12 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	u = 0;
 	for(;first1 != last1 && u<2016;++first1,++u) {
 		if(*first1 < 0)
-			return DAWG_ERROR("Invalid subst model; codgy_gen parameter #" << u
+			return DAWG_ERROR("Invalid subst model; codgtr parameter #" << u
 				<< " '" << *first1 << "' is not >= 0.");
 		params[u] = *first1;
 	}
 	if(u != 2016)
-		return DAWG_ERROR("Invalid subst model; codgy_gen requires 2016 parameters.");
+		return DAWG_ERROR("Invalid subst model; codgtr requires 2016 parameters.");
 	
 	// construct substitution matrix
 	// do this locally to enable possible optimizations?
@@ -112,12 +112,12 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 	std::vector<double> s(2016,0.0);
 	
 	std::size_t sz = std::distance(first2, last2);
-	std::string mname(mod_name);
+	std::string mod_namex(mod_name);
 	
 	if(sz == 4) {
 		double df[4];
-		mname += "+f4";
-		if(!create_freqs(mname.c_str(), first2, last2, &df[0], &df[4]))
+		mod_namex += "+f4";
+		if(!create_freqs(mod_namex.c_str(), first2, last2, &df[0], &df[4]))
 			return false;
 		// ACGT -> TCAG
 		std::swap(df[0], df[2]); std::swap(df[0], df[3]);
@@ -125,8 +125,8 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 			p[i] = df[(i)%4]*df[(i/4)%4]*df[(i/16)%4];		
 	} else if(sz == 12) {
 		double df[12];
-		mname += "+f12";
-		if(!create_freqs(mname.c_str(), first2, last2, &df[0], &df[12], 4))
+		mod_namex += "+f12";
+		if(!create_freqs(mod_namex.c_str(), first2, last2, &df[0], &df[12], 4))
 			return false;
 		// ACGT -> TCAG
 		std::swap(df[0], df[2]);  std::swap(df[0], df[3]);
@@ -137,17 +137,17 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 		for(int i=0;i<64;++i)
 			p[i] = df[(i)%4]*df[(i/4)%4+4]*df[(i/16)%4+8];
 	} else {
-		mname += "+f64";
-		if(!create_freqs(mname.c_str(), first2, last2, p.begin(), p.end()))
+		mod_namex += "+f64";
+		if(!create_freqs(mod_namex.c_str(), first2, last2, p.begin(), p.end()))
 			return false;
 	}
 	
 	double kappa, omega;
 	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mname << " requires two parameters.");
+		return DAWG_ERROR("Invalid subst model; " << mod_namex << " requires two parameters.");
 	kappa = *first1++;
 	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mname << " requires two parameters.");
+		return DAWG_ERROR("Invalid subst model; " << mod_namex << " requires two parameters.");
 	omega = *first1++;
 	
 	const char *cs_code = residue_exchange::get_protein_code(code);
@@ -168,7 +168,7 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 			++u;
 		}
 	}
-	return create_codgtr(mname.c_str(), code, s.begin(), s.end(), first2, last2);
+	return create_codgtr(mod_namex.c_str(), code, s.begin(), s.end(), first2, last2);
 }
 
 // name, followed by params, then freqs
