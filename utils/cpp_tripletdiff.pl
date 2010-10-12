@@ -17,23 +17,24 @@ foreach my $i(0..62) {
 		++$x if($a[1] ne $b[1]);
 		++$x if($a[2] ne $b[2]);
 		if($x > 1) {
-			push(@row, 9);
+			push(@row, -1);
 		} elsif($a[0] ne $b[0]) {
-			push(@row, $e[$n{$a[0]}][$n{$b[0]}]);
+			push(@row, 0+$e[$n{$a[0]}][$n{$b[0]}]);
 		} elsif($a[1] ne $b[1]) {
-			push(@row, $e[$n{$a[1]}][$n{$b[1]}]);
+			push(@row, 8+$e[$n{$a[1]}][$n{$b[1]}]);
 		} else {
-			push(@row, $e[$n{$a[2]}][$n{$b[2]}]);
+			push(@row, 16+$e[$n{$a[2]}][$n{$b[2]}]);
 		}
 	}
 }
-print STDERR @row . "\n";
+
+@row = map { sprintf("% 2s", $_) } @row;
 
 my @rrow = ();
-my $y = int($#row / 36);
+my $y = int($#row / 24);
 foreach my $r(0..$y) {
-	my $a = ($r*36);
-	my $b = (($r+1)*36-1);
+	my $a = ($r*24);
+	my $b = (($r+1)*24-1);
 	$b = @row-1 if($b >= @row);
 	push(@rrow, join(",", @row[$a..$b]));
 }
