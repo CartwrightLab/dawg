@@ -252,7 +252,7 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
-	residue_exchange() { model(DNA); }
+	explicit residue_exchange(int m=DNA) { model(m); }
 	
 	inline static const char* get_protein_code(unsigned int code) {
 		static const char s[] = 

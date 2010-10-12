@@ -138,6 +138,12 @@ private:
 	template<typename It1, typename It2>
 	bool create_codmg_equ(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 
+	template<typename It1, typename It2>
+	bool create_codmg_aap(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+
+	template<typename It1, typename It2>
+	bool create_codmg_cp(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
+
 };
 
 template<typename It1, typename It2>
@@ -145,7 +151,8 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 	static const char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
 		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
-		"codgtr", "codmg", "codmg-equ", "codgy", "codgy-equ"
+		"codgtr", "codmg", "codmg-equ", "codmg-aap", "codmg-cp",
+		"codgy", "codgy-equ"
 	};
 	
 	static bool (subst_model::*create_ops[])(const char *, unsigned int, It1, It1, It2, It2) = {
@@ -156,7 +163,8 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 		&subst_model::create_wag, &subst_model::create_wagstar, &subst_model::create_jtt,
 		&subst_model::create_dayhoff, &subst_model::create_molphy,
 		&subst_model::create_codgtr,
-		&subst_model::create_codmg, &subst_model::create_codgy_equ,
+		&subst_model::create_codmg, &subst_model::create_codmg_equ,
+		&subst_model::create_codmg_aap, &subst_model::create_codmg_cp,
 		&subst_model::create_codgy, &subst_model::create_codgy_equ
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
