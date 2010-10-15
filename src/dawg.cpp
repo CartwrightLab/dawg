@@ -38,13 +38,8 @@ using namespace boost;
 using namespace dawg;
 
 #define VERSION_MSG PACKAGE_STRING "\n" \
-	"    Copyright (C) 2005-2010  Reed A. Cartwright, PhD <reed@scit.us>\n" \
+	"    Copyright (C) 2004-2010  Reed A. Cartwright, PhD <reed@scit.us>\n" \
 	"    Report bugs to " PACKAGE_BUGREPORT
-
-// Help Information
-char g_csDawgTxt[] =
-#include "dawgtxt.h"
-;
 
 int main(int argc, char *argv[])
 {
@@ -108,11 +103,16 @@ int dawg_app::run() {
 	if(arg.help || arg.input.empty()) {
 		cerr << endl << VERSION_MSG << endl << endl;
 		cerr << "Usage:\n  "
-		     << runname << " [options] input-1.dawg input-2.dawg"
+		     << runname << " [options] trick-1.dawg trick-2.dawg ..."
 			 << endl << endl;
 		cerr << desc << endl;
 		return EXIT_SUCCESS;
 	}
+	if(arg.help_trick) {
+		cerr << endl << VERSION_MSG << endl << endl;
+		return EXIT_SUCCESS;
+	}
+	
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
 	trick input;

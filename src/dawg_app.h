@@ -58,11 +58,11 @@ protected:
 namespace boost { namespace program_options {
 template<>
 typed_value<bool>* value(bool* v) {
-	//return bool_switch(v);
-	typed_value<bool>* r = new typed_value<bool>(v);
+	return bool_switch(v);
+	//typed_value<bool>* r = new typed_value<bool>(v);
     //r->default_value(0, "off");
-    r->implicit_value(1, "on");
-	return r;
+    //r->implicit_value(1, "on");
+	//return r;
 }
 template<>
 typed_value<boost::tribool>* value(boost::tribool* v) {

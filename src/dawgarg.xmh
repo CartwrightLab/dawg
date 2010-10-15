@@ -25,6 +25,7 @@
 
 XM((version),        , "display version information", bool, _DL(false, "off"))
 XM((help),           , "display help message", bool, _DL(false, "off"))
+XM((help)(trick),    , "display description of common control variables", bool, _DL(false, "off"))
 
 //XCMD((serial),  (s), "Process input files serially", bool, true)
 //XCMD((combined),(c), "process input files together", bool, false)
@@ -37,9 +38,9 @@ XM((split),        ,  "split output into separate files", boost::tribool, _DL(bo
 XM((append),       ,  "append output to file", boost::tribool, _DL(boost::indeterminate, "null"))
 
 // Standard options
-XM((quiet),       (q), "disable all warnings and error messages", bool, _DL(false, "off"))
-XM((warn),        (w), "dsable warnings", bool, _DL(false, "off"))
-XM((error),       (e), "disable error messages", bool, _DL(false, "off"))
+//XM((quiet),       (q), "disable all warnings and error messages", bool, _DL(false, "off"))
+//XM((warn),        (w), "dsable warnings", bool, _DL(false, "off"))
+//XM((error),       (e), "disable error messages", bool, _DL(false, "off"))
 XM((arg)(file),      , "read arguments from file", std::string, std::string(""))
 //XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(1, std::string("-")), "-") )
 //XM((input),          , "input files", std::vector< std::string >, _DL(std::vector< std::string >(), "") )

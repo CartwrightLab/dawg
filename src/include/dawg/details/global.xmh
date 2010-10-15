@@ -18,7 +18,7 @@ XM( (output)(block)(before),  std::string, )
 XM( (output)(block)(after),   std::string, )
 XM( (output)(block)(between), std::string, )
 
-XM( (output)(vars),   bool, true)
+//XM( (output)(vars),   bool, true)
 XM( (output)(file),   std::string, )
 XM( (output)(split),  bool, false)
 XM( (output)(append), bool, false)
