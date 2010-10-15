@@ -100,16 +100,17 @@ int dawg_app::run() {
 		cerr << endl << VERSION_MSG << endl << endl;
 		return EXIT_SUCCESS;
 	}
+	if(arg.help_trick) {
+		cerr << endl << VERSION_MSG << endl << endl;
+		ma::help(cerr);
+		return EXIT_SUCCESS;
+	}
 	if(arg.help || arg.input.empty()) {
 		cerr << endl << VERSION_MSG << endl << endl;
 		cerr << "Usage:\n  "
 		     << runname << " [options] trick-1.dawg trick-2.dawg ..."
 			 << endl << endl;
 		cerr << desc << endl;
-		return EXIT_SUCCESS;
-	}
-	if(arg.help_trick) {
-		cerr << endl << VERSION_MSG << endl << endl;
 		return EXIT_SUCCESS;
 	}
 	

@@ -32,7 +32,8 @@ public:
 			std::string("user"),
 			std::string("geom"),
 			std::string("zeta"),
-			std::string("zipf"), std::string("pl")
+			std::string("zipf"),
+			std::string("power-law")
 		};
 		switch(key_switch(rname, name_keys)) {
 		case 0: // user model

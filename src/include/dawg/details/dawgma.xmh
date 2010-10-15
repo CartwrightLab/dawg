@@ -9,36 +9,66 @@
  *    Defines the core model for Dawg, simulate sequences down a tree      *
  *    using substitution and indel models                                  *
  *                                                                         *
- *    XM(name, type, def)                                                  *
+ *    XM(name, type, def, help)                                            *
  ***************************************************************************/
 
-XM((subst)(model),        std::string, "jc")
-XM((subst)(params),       std::vector<double>, )
-XM((subst)(freqs),        std::vector<double>, )
-XM((subst)(rate)(model),  std::string, "const")
-XM((subst)(rate)(params), std::vector<double>, )
+XM((subst)(model),        std::string, "jc",
+	"The identifier of the substitution model, e.g. JC, GTR, WAG,\n"
+	"  CODGY."  )
+XM((subst)(params),       std::vector<double>, ,
+	"A list specifying the parameters of the substitution model.\n"
+	"  Model Dependant." )
+XM((subst)(freqs),        std::vector<double>, ,
+	"A list specifying the stationary frequencies of nucleotides,\n"
+	"  amino acids, or codons. Model Dependant.")
+XM((subst)(rate)(model),  std::string, "const",
+	"The identifier of the heterogeneous rate model, e.g.\n"
+	"  CONST, GAMMA." )
+XM((subst)(rate)(params), std::vector<double>, ,
+	"The parameters of the rate model.  Model Dependant.")
 
-XM((indel)(model)(ins),  std::vector<std::string>, _DL(1, "user"))
-XM((indel)(params)(ins), std::vector<double>, _DL(1, 1.0))
-XM((indel)(rate)(ins),   std::vector<double>,  )
-XM((indel)(model)(del),  std::vector<std::string>, _DL(1, "user"))
-XM((indel)(params)(del), std::vector<double>, _DL(1, 1.0))
-XM((indel)(rate)(del),   std::vector<double>, )
+XM((indel)(model)(ins),  std::vector<std::string>, _DL(1, "user"),
+	"The identifiers of the insertion models, e.g. USER, GEO,\n"
+	"  POWER-LAW.")
+XM((indel)(params)(ins), std::vector<double>, _DL(1, 1.0),
+	"The parameters of the insertion models.  Model Dependant.")
+XM((indel)(rate)(ins),   std::vector<double>,  ,
+	"The per-substitution rates of the mixture of insertion models.")
 
-XM((tree)(model),  std::string, "user")
-XM((tree)(params), std::vector<double>, )
-XM((tree)(tree),   std::string, )
-XM((tree)(scale),  double, 1.0)
+XM((indel)(model)(del),  std::vector<std::string>, _DL(1, "user"),
+	"The identifiers of the deletion models, e.g. USER, GEO,\n"
+	"  POWER-LAW.")
+XM((indel)(params)(del), std::vector<double>, _DL(1, 1.0),
+	"The parameters of the deletion models.  Model Dependant.")
+XM((indel)(rate)(del),   std::vector<double>, ,
+	"The per-substitution rates of the mixture of deletion models.")
 
-XM((root)(length),  unsigned int, 0)
-XM((root)(seq),     std::string, )
-XM((root)(rates),   std::vector<double>, )
-XM((root)(code),    unsigned int, 0)
-XM((root)(segment), unsigned int, 0)
-XM((root)(gapoverlap), bool, true)
+XM((tree)(model),  std::string, "user",
+	"The identifier of the tree model.")
+XM((tree)(params), std::vector<double>, ,
+	"The parameters of the tree model.  Model Dependant.")
+XM((tree)(tree),   std::string, ,
+	"The tree or tree template.")
+XM((tree)(scale),  double, 1.0,
+	"Branch-lengths are scaled by this number in the simulation.")
 
-XM((output)(markins), bool, false)
-XM((output)(keepempty), bool, true)
+XM((root)(length),  unsigned int, 0,
+	"The length of a randomly generated root sequence.")
+XM((root)(seq),     std::string, ,
+	"A specific root sequence.")
+XM((root)(rates),   std::vector<double>, ,
+	"The heterogeneous rates of the root sequence.")
+XM((root)(code),    unsigned int, 0,
+	"The root's type of sequence and genetic code (for codon data).")
+XM((root)(segment), unsigned int, 0,
+	"The segment number that the root belongs too.")
+XM((root)(gapoverlap), bool, true,
+	"Allow upstream deletions to affect this segment.")
+
+XM((output)(markins), bool, false,
+	"Distinguish insertions from deletions.")
+XM((output)(keepempty), bool, true,
+	"Keep empty columns instead of deleting them in the alignment.")
 //XM((output)(lowercase), bool, false)
 //XM((output)(translate), bool, false)
 //XM((output)(gapsinglechar), bool, false)
