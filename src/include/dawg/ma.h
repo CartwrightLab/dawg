@@ -72,10 +72,17 @@ inline std::string ma_help_name(const char *cs) {
 
 template<class CharType, class CharTrait>
 void ma::help(std::basic_ostream<CharType, CharTrait>& o) {
+	o << "[REGULAR PARAMETERS]" << std::endl;
 #	define XM(name, type, def, desc) o << details::ma_help_name(_P(name)) \
 	<< " - " << (desc) << std::endl;
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
+	o << "\n[GLOBAL PARAMETERS]" << std::endl;
+#	define XM(name, type, def, desc) o << details::ma_help_name(_P(name)) \
+	<< " - " << (desc) << std::endl;
+#	include <dawg/details/global.xmh>
+#	undef XM
+	
 }
 
 

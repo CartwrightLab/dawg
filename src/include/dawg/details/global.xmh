@@ -9,22 +9,32 @@
  *    Defines the core model for Dawg, simulate sequences down a tree      *
  *    using substitution and indel models                                  *
  *                                                                         *
- *    XM(name, type, def)                                                  *
+ *    XM(name, type, def, help)                                            *
  ***************************************************************************/
 
-XM( (output)(block)(head),    std::string, )
-XM( (output)(block)(tail),    std::string, )
-XM( (output)(block)(before),  std::string, )
-XM( (output)(block)(after),   std::string, )
-XM( (output)(block)(between), std::string, )
+XM( (output)(block)(head),    std::string, ,
+	"Text that will be written to the beginning of output.")
+XM( (output)(block)(tail),    std::string, ,
+	"Text that will be written to the end of output.")
+XM( (output)(block)(before),  std::string, ,
+	"Text that will be written before every replicate.")
+XM( (output)(block)(after),   std::string, ,
+	"Text that will be written after every replicate.")
+XM( (output)(block)(between), std::string, ,
+	"Text that will be written betwee replicates.")
 
 //XM( (output)(vars),   bool, true)
-XM( (output)(file),   std::string, )
-XM( (output)(split),  bool, false)
-XM( (output)(append), bool, false)
+XM( (output)(file),   std::string, ,
+	"Path to the output file.")
+XM( (output)(split),  bool, false,
+	"Ouput each replicate to its own file.")
+XM( (output)(append), bool, false,
+	"Append results to existing file.")
 
-XM( (sim)(reps),  unsigned int, 1)
-XM( (sim)(seed),  std::vector<unsigned int>, )
+XM( (sim)(reps),  unsigned int, 1,
+	"Number of simulation replicates.")
+XM( (sim)(seed),  std::vector<unsigned int>, ,
+	"The seed of the random number generator")
 
 /***************************************************************************
  *    cleanup                                                              *
