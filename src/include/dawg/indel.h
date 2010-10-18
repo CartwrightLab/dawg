@@ -186,7 +186,7 @@ public:
 	    if(first_n == last_n)
 	    	return DAWG_ERROR("invalid indel model; no model type specified");
 
-		double d = 0.0, q=0.0;
+		double d = 0.0;
 		therate = 0.0;
 		mean = 0.0;
 		std::size_t sz=0,u=0;
