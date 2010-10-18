@@ -26,7 +26,8 @@ namespace dawg {
 class mutt {
 public:
 	typedef RANDOM_GEN_CLASS generator;
-	
+	typedef generator::native_t uint_t;
+
 	inline void seed(boost::uint32_t s) { 
 		_seed.assign(1, s);
 		gen.seed(_seed.begin(), _seed.end());
@@ -42,11 +43,13 @@ public:
 	}
 	
 	// returns a random double between (0,1)
-	inline double operator()() { return rand_real(); }
+	//inline double operator()() { return rand_real(); }
 	inline double rand_real() { return gen.rand_real(); }
 	// between (0,1] and (0,1)
 	// inline double rand_real_oc() { return gen.rand_real_oc(); }
 	// inline double rand_real_oo() { return gen.rand_real_oo(); }
+	// returns random 32 or 64-bit number
+	uint_t rand_uint() { return gen.rand_native(); }
 	// returns random 64-bit number
 	boost::uint64_t rand_uint64() { return gen.rand_uint64(); }
 	// returns random 32-bit number

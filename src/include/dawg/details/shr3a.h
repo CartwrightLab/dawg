@@ -17,6 +17,8 @@ namespace dawg { namespace details {
 // 64-bit period
 // 0,0 never seen
 struct shr3a_mutt_gen {
+	typedef boost::uint32_t native_t;
+	inline native_t rand_native() { return rand_uint32(); }
 	inline boost::uint32_t rand_uint32() {
 		boost::uint32_t t = x^(x<<2);
 		x=y;

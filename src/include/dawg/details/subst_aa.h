@@ -14,7 +14,8 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	int u = 0;
 	_model = residue_exchange::AA + code%2;
 	// do freqs first
-	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[20]))
+	double ff[20];
+	if(!create_freqs(mod_name, first2, last2, &ff[0], &ff[20]))
 		return false;
 	
 	// fill params array
@@ -45,8 +46,8 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	uni_scale = 0.0;
 	for(int i=0;i<20;++i) {
 		for(int j=0;j<20;++j) {
-			s[i][j] *= freqs[j];
-			d += s[i][j]*freqs[i];
+			s[i][j] *= ff[j];
+			d += s[i][j]*ff[i];
 		}
 	}
 	for(int i=0;i<20;++i) {
@@ -67,22 +68,23 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	
 	// create cumulative frequencies
 	d = 0.0;
+	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
 	for(int i=0;i<19;++i) {
-		d += freqs[i];
-		freqs[i] = d;
+		d += ff[i];
+		freqs[i] = static_cast<mutt::uint_t>(d*mx);
 	}
 	// we will include 32 sites in our binary search
-	// so fill them with 1.0
-	std::fill(&freqs[19],&freqs[32], 1.0);
+	// so fill them with mx
+	std::fill(&freqs[19],&freqs[32], mx);
 	for(int i=0;i<20;++i) {
 		d = 0.0;
 		for(int j=0;j<19;++j) {
 			d += s[i][j];
-			table[i][j] = d;
+			table[i][j] = static_cast<mutt::uint_t>(d*mx);;
 		}
 		// we will include 32 sites in our binary search
 		// so fill them with 1.0
-		std::fill(&table[i][19],&table[i][32], 1.0);
+		std::fill(&table[i][19],&table[i][32], mx);
 	}
 	name = mod_name;
 	do_op_f = &subst_model::do_aagtr_f;

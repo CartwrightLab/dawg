@@ -21,6 +21,8 @@ using boost::uint64_t;
 namespace dawg { namespace details {
 
 struct sfmt_mutt_gen {
+	typedef boost::uint32_t native_t;
+	inline native_t rand_native() { return rand_uint32(); }
 	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
 	double rand_real()   { return to_real52_oo(rand_uint64()); }

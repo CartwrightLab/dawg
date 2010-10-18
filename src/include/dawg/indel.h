@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <limits>
 #include <boost/cstdint.hpp>
 
 #include <dawg/utils/foreach.h>
@@ -75,7 +76,7 @@ private:
 		return r;
 	}
 	boost::uint32_t do_user(mutt &m) const {
-		return (boost::uint32_t)search_binary_cont(udata.begin(), udata.end(), m());
+		return (boost::uint32_t)search_binary_cont(udata.begin(), udata.end(), m.rand_uint());
 	}
 	
 	template<typename It>
@@ -140,37 +141,40 @@ private:
 	
 	template<typename It>
 	inline bool create_user(It &first, It last) {
-		udata.assign(1,0.0);
-		double d = 0.0;
-		double n = 1.0;
-		double m = 0.0;
-		while(first != last && *first >= 0.0) {
-			m += *first*n;
-			d += *first;
+		udata.assign(1,0);
+		double m = 0.0, d=0.0, n=1.0;
+		mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
+		It it=first;
+		// find sum and mean
+		for(;it != last && *it >= 0.0;++it) {
+			m += *it*n;
+			d += *it;
 			n += 1.0;
-			++first;
-			udata.push_back(d);
 		}
-		if(first != last)
-			++first;
+		mean = m/d;
+		m = 0.0;
+		for(It jt=first;jt != it;++jt) {
+			m += *jt;
+			udata.push_back(static_cast<mutt::uint_t>(mx*(m/d)));
+		}
 		if(udata.size() == 1)
 			return DAWG_ERROR("Invalid indel model; no parameters for user model.");
-		foreach(double &p, udata) {
-			p /= d;
-		}
-		udata.back() = 1.0;
-		udata.resize(upper_binary(udata.size()), 1.0);
 		
+		udata.back() = mx;
+		udata.resize(upper_binary(udata.size()), mx);
+
+		// skip the '-1' terminator if it exists
+		if(it != last)
+			++it;
 		name = "user";
 		do_op = &dawg::indel_model::do_user;
-		mean = m / d;
 		return true;
 	}
 	
 	double qorz, mean;
 	std::string name;
 	boost::uint32_t zmax;
-	std::vector<double> udata;
+	std::vector<mutt::uint_t> udata;
 };
 
 // TODO: optimize for 1 and 2 components?
@@ -181,25 +185,34 @@ public:
 	            It3 first_p, It3 last_p) {
 	    if(first_n == last_n)
 	    	return DAWG_ERROR("invalid indel model; no model type specified");
+
+		double d = 0.0, q=0.0;
 		therate = 0.0;
 		mean = 0.0;
-		for(;first_r!=last_r;++first_r) {
-			if(*first_r < 0.0)
-				return DAWG_ERROR("invalid indel model; rate '" << *first_r << "' must be positive");
-			therate += *first_r;
-			mix.push_back(therate);
+		std::size_t sz=0,u=0;
+		mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
+
+		for(It2 it=first_r;it!=last_r;++it,++sz) {
+			if(*it < 0.0)
+				return DAWG_ERROR("invalid indel model; rate '" << *it << "' must be positive");
+			therate += *it;
 		}
-		models.resize(mix.size());
+		mix.resize(sz, mx);
+		models.resize(sz);
 		It1 itn = first_n;
-		for(std::size_t u = 0;u<mix.size();++u) {
-			mix[u] /= therate;
+		u = 0;
+		d = 0.0;
+		for(It2 it=first_r;it!=last_r;++it,++u) {
 			if(!models[u].create(*itn,first_p, last_p))
 				return false;
-			mean += mix[u]*models[u].meansize();
 			if(++itn == last_n)
 				itn = first_n;
+			mean += (*it/therate)*models[u].meansize();
+			d += *it;
+			mix[u] = static_cast<mutt::uint_t>((d/therate)*mx);
 		}
-		for(std::size_t u=0;u<mix.size();) {
+		u = 0;
+		while(u<mix.size()) {
 			if(mix[u] > 0.0) {
 				++u;
 				continue;
@@ -208,23 +221,20 @@ public:
 			models.erase(models.begin()+u);
 		}
 		if(!mix.empty()) {
-			mix.back() = 1.0;
-			std::size_t u=1;
-			for(;u < mix.size(); u*=2)
-				/*noop*/;
-			mix.resize(u, 0.0);
+			mix.back() = mx;
+			mix.resize(upper_binary(sz), mx);
 		}
-		return true;		
+		return true;
 	}
 	
 	boost::uint32_t operator()(mutt &m) const {
-		std::size_t x = search_binary_cont(mix.begin(), mix.end(), m());
+		std::size_t x = search_binary_cont(mix.begin(), mix.end(), m.rand_uint());
 		return models[x](m);
 	}
 	double rate() const { return therate; }
 	double meansize() const { return mean; }
 protected:
-	std::vector<double> mix;
+	std::vector<mutt::uint_t> mix;
 	std::vector<indel_model> models;
 	double therate;
 	double mean;

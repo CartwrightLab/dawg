@@ -37,8 +37,8 @@ public:
 	
 private:
 	// must hold at least 64 different characters
-	double freqs[64];
-	double table[64][64];
+	mutt::uint_t freqs[64];
+	mutt::uint_t table[64][64];
 	double uni_scale;
 	std::string name;
 	unsigned int _model;
@@ -51,22 +51,22 @@ private:
 	base_type (subst_model::*do_op_s)(mutt &m, base_type n) const;
  
 	inline base_type do_gtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[4], m());
+		return (base_type)search_binary_cont(&freqs[0], &freqs[4], m.rand_uint());
 	}
 	inline base_type do_gtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][4], m());
+		return (base_type)search_binary_cont(&table[n][0], &table[n][4], m.rand_uint());
 	}
 	inline base_type do_aagtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[32], m());
+		return (base_type)search_binary_cont(&freqs[0], &freqs[32], m.rand_uint());
 	}
 	inline base_type do_aagtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][32], m());
+		return (base_type)search_binary_cont(&table[n][0], &table[n][32], m.rand_uint());
 	}	
 	inline base_type do_codgtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[64], m());
+		return (base_type)search_binary_cont(&freqs[0], &freqs[64], m.rand_uint());
 	}
 	inline base_type do_codgtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][64], m());
+		return (base_type)search_binary_cont(&table[n][0], &table[n][64], m.rand_uint());
 	}	
 
 	// DNA Models

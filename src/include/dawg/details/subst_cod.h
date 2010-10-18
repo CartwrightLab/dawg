@@ -20,7 +20,8 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	if(gcode >= 24)
 		return DAWG_ERROR("Invalid genetic code.");
 	// do freqs first
-	if(!create_freqs("codgtr", first2, last2, &freqs[0], &freqs[64]))
+	double ff[64];
+	if(!create_freqs("codgtr", first2, last2, &ff[0], &ff[64]))
 		return false;
 	
 	// fill params array
@@ -48,15 +49,15 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	}
 	
 	// remove stop codons
-	remove_stops(gcode, s, freqs);
+	remove_stops(gcode, s, ff);
 	
 	// scale the matrix to substitution time and uniformize
 	d = 0.0;
 	uni_scale = 0.0;
 	for(int i=0;i<64;++i) {
 		for(int j=0;j<64;++j) {
-			s[i][j] *= freqs[j];
-			d += s[i][j]*freqs[i];
+			s[i][j] *= ff[j];
+			d += s[i][j]*ff[i];
 		}
 	}
 	for(int i=0;i<64;++i) {
@@ -77,20 +78,19 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	
 	// create cumulative frequencies
 	d = 0.0;
+	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
 	for(int i=0;i<63;++i) {
-		d += freqs[i];
-		freqs[i] = d;
+		d += ff[i];
+		freqs[i] = static_cast<mutt::uint_t>(d*mx);
 	}
-	freqs[63] = 1.0;
+	freqs[63] = mx;
 	for(int i=0;i<64;++i) {
 		d = 0.0;
 		for(int j=0;j<63;++j) {
 			d += s[i][j];
-			table[i][j] = d;
+			table[i][j] = static_cast<mutt::uint_t>(d*mx);
 		}
-		// we will include 32 sites in our binary search
-		// so fill them with 1.0
-		table[i][63] = 1.0;
+		table[i][63] = mx;
 	}
 	
 	uni_scale *= 3; // adjust for codon mutations
