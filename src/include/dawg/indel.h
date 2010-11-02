@@ -202,24 +202,25 @@ public:
 		It1 itn = first_n;
 		u = 0;
 		d = 0.0;
-		for(It2 it=first_r;it!=last_r;++it,++u) {
+
+		for(It2 it=first_r;it!=last_r;++it) {
+			// we have to try to create a model to consume parameters
 			if(!models[u].create(*itn,first_p, last_p))
 				return false;
 			if(++itn == last_n)
 				itn = first_n;
-			mean += (*it/therate)*models[u].meansize();
-			d += *it;
-			mix[u] = static_cast<mutt::uint_t>((d/therate)*mx);
-		}
-		u = 0;
-		while(u<mix.size()) {
-			if(mix[u] > 0.0) {
-				++u;
+			if(*it == 0.0) {
+				models.erase(models.begin()+u);
 				continue;
 			}
-			mix.erase(mix.begin()+u);
-			models.erase(models.begin()+u);
+				
+			mean += (*it/therate)*models[u].meansize();
+			d += *it;
+
+			mix[u] = static_cast<mutt::uint_t>((d/therate)*mx);
+			u++;
 		}
+		mix.resize(models.size());
 		if(!mix.empty()) {
 			mix.back() = mx;
 			mix.resize(upper_binary(sz), mx);
@@ -229,7 +230,9 @@ public:
 	
 	boost::uint32_t operator()(mutt &m) const {
 		std::size_t x = search_binary_cont(mix.begin(), mix.end(), m.rand_uint());
-		return models[x](m);
+		boost::uint32_t u = models[x](m);
+		std::cerr << x << "\t" << u << std::endl;
+		return u;
 	}
 	double rate() const { return therate; }
 	double meansize() const { return mean; }
