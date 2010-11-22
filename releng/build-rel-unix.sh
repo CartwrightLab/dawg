@@ -1,7 +1,7 @@
 #!/bin/sh
 
 PROJ=dawg
-PROJ_DISTS=dawg-1*
+PROJ_DISTS=dawg-2*
 MAKE=make
 CMAKE=cmake
 REPOS=`svn info | grep URL: | perl -pe 's!^URL: (.+)/releng$!$1!'`
