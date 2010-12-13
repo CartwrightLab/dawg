@@ -24,8 +24,8 @@
  ***************************************************************************/
 
 XM((version),        , "display version information", bool, _DL(false, "off"))
-XM((help),           , "display help message", bool, _DL(false, "off"))
 XM((help)(trick),    , "display description of common control variables", bool, _DL(false, "off"))
+XM((help),           , "display help message", bool, _DL(false, "off"))
 
 //XCMD((serial),  (s), "Process input files serially", bool, true)
 //XCMD((combined),(c), "process input files together", bool, false)
