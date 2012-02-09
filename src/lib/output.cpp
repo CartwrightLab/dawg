@@ -108,7 +108,7 @@ bool dawg::output::open_next() {
 	using boost::spirit::karma::right_align;
 
 	string::iterator it = split_file_name.begin()+split_id_offset;
-	generate(it, right_align(split_width, lit("0"))[uint_], rep);
+	generate(it, right_align(split_width, lit('0'))[uint_], rep);
 	
 	if(!open_file(split_file_name.c_str()))
 		return DAWG_ERROR("unable to open output file \'" << split_file_name << "\'.");

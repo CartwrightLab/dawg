@@ -6,6 +6,7 @@
 #include <dawg/residue.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
+#include <dawg/wood_parse.h>
 
 #include <dawg/utils/foreach.h>
 #include <dawg/utils/vecio.h>
