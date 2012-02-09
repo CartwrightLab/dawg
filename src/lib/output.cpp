@@ -2,20 +2,20 @@
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <dawg/log.h>
-
-#include <dawg/output.h>
-#include <dawg/utils/foreach.h>
+#include <boost/range/iterator_range.hpp>
+#include <boost/spirit/include/karma_char_.hpp>
+#include <boost/spirit/include/karma_generate.hpp>
+#include <boost/spirit/include/karma_uint.hpp>
+#include <boost/spirit/include/karma_right_alignment.hpp>
 
 #include <cstring>
 #include <iostream>
 #include <iomanip>
 
-#include <boost/range/iterator_range.hpp>
-#include <boost/spirit/include/karma_generate.hpp>
-#include <boost/spirit/include/karma_uint.hpp>
-#include <boost/spirit/include/karma_right_alignment.hpp>
-#include <boost/spirit/include/karma_char_.hpp>
+#include <dawg/log.h>
+
+#include <dawg/output.h>
+#include <dawg/utils/foreach.h>
 
 using namespace dawg;
 using namespace std;
