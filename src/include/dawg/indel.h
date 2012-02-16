@@ -231,7 +231,7 @@ public:
 	boost::uint32_t operator()(mutt &m) const {
 		std::size_t x = search_binary_cont(mix.begin(), mix.end(), m.rand_uint());
 		boost::uint32_t u = models[x](m);
-		std::cerr << x << "\t" << u << std::endl;
+		//std::cerr << x << "\t" << u << std::endl;
 		return u;
 	}
 	double rate() const { return therate; }
