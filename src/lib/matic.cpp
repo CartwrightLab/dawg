@@ -1,6 +1,9 @@
 /****************************************************************************
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif
 
 #include <dawg/matic.h>
 #include <dawg/residue.h>

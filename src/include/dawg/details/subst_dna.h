@@ -2,7 +2,7 @@
 #ifndef DAWG_SUBST_DNA_H
 #define DAWG_SUBST_DNA_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 namespace dawg {
@@ -118,10 +118,7 @@ bool subst_model::create_k2p(const char *, unsigned int code, It1 first1, It1 la
 }
 template<typename It1, typename It2>
 bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
-	double p[6], f[4], fr, fy, d, ay, ar, b;
-	int u;
-	u = 0;
-	d = 0.0;
+	double p[6], f[4], fr, fy, ay, ar, b;
 	// read frequencies
 	if(!create_freqs(mod_name, first2, last2, &f[0], &f[4]))
 		return false;
@@ -155,10 +152,7 @@ bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1,
 
 template<typename It1, typename It2>
 bool subst_model::create_tn_f04(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
-	double p[6], f[4], fr, fy, d, ay, ar, b;
-	int u;
-	u = 0;
-	d = 0.0;
+	double p[6], f[4], fr, fy, ay, ar, b;
 	// read frequencies
 	if(!create_freqs(mod_name, first2, last2, &f[0], &f[4]))
 		return false;

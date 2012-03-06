@@ -2,22 +2,29 @@
 #ifndef DAWG_DETAILS_MUTT_H
 #define DAWG_DETAILS_MUTT_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
 #endif
+#ifndef __STDC_LIMIT_MACROS
+#	define __STDC_LIMIT_MACROS 1
+#endif
+
+#include <dawg/details/config.h>
+
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
 #include <cmath>
 #include <cfloat>
 
 #ifndef RANDOM_GEN_HEADER
-#	define RANDOM_GEN_HEADER <dawg/details/shr3a.h>
+#ifndef _NDEBUG
+#	define RANDOM_GEN_HEADER <dawg/details/shr3.h>
+#elif
+#	error RANDOM_GEN_HEADER is not defined.
 #endif
-#ifndef RANDOM_GEN_CLASS
-#	define RANDOM_GEN_CLASS dawg::details::shr3a_mutt_gen
 #endif
 
 namespace dawg { namespace details {

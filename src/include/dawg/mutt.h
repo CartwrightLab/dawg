@@ -19,13 +19,14 @@
 
 #ifdef BOOST_WINDOWS
 #	include <process.h>
+#	define getpid _getpid
 #endif
 
 namespace dawg {
 
 class mutt {
 public:
-	typedef RANDOM_GEN_CLASS generator;
+	typedef details::mutt_gen generator;
 	typedef generator::native_t uint_t;
 
 	inline void seed(boost::uint32_t s) { 

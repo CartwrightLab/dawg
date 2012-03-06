@@ -1,6 +1,9 @@
 /****************************************************************************
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
+#ifdef HAVE_CONFIG_H
+#	include "config.h"
+#endif
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/spirit/include/karma_char_.hpp>

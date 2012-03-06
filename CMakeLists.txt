@@ -107,7 +107,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
   "_CPACK_PACKAGES"  "_CPack_Packages"
   "\\\\.vcproj"  "\\\\.dir"  "\\\\.ncb$"  "\\\\.sln$"  "\\\\.suo$"
   "Makefile$" "\\\\.ilk"  "\\\\.pdb"
-  "/releng/"
+  "/releng/" "/build/" "\\\\.a$"
   "${PROJ_NAME}[-]${PROJ_VERSION_MAJOR}" "${PROJ_NAME}$" "${PROJ_NAME}\\\\.exe"
 )
 

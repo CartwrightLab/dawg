@@ -1,12 +1,15 @@
 #pragma once
-#ifndef DAWG_DETAILS_SHR3B_H
-#define DAWG_DETAILS_SHR3B_H
+#ifndef DAWG_DETAILS_MUTT_GEN_H
+#define DAWG_DETAILS_MUTT_GEN_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
+#endif
+#ifndef __STDC_LIMIT_MACROS
+#	define __STDC_LIMIT_MACROS 1
 #endif
 #include <boost/cstdint.hpp>
 
@@ -53,6 +56,8 @@ struct shr3b_mutt_gen {
 	private:
 		boost::uint64_t y;
 };
+
+typedef shr3b_mutt_gen mutt_gen;
 
 }} //namespace dawg::details
 #endif

@@ -7,28 +7,6 @@
 #	include "config.h"
 #endif
 
-#if !defined(HAVE_COPYSIGN) && defined(HAVE__COPYSIGN)
-#		define copysign _copysign
-#endif
-
-#if _MSC_VER >= 1400
-#	define	snprintf _snprintf_s
-#elif !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
-#	define snprintf _snprintf
-#endif
-
-#ifdef HAVE_PROCESS_H
-#	include <process.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#	include <unistd.h>
-#endif
-
-#if !defined(HAVE_GETPID) && defined(HAVE__GETPID)
-#	define getpid _getpid
-#endif
-
-
 #include <cstdlib>
 #include <cstddef>
 #include <cstdio>

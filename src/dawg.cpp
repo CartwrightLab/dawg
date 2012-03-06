@@ -1,5 +1,5 @@
 /*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
-    Copyright (c) 2004-2009  Reed A. Cartwright, PhD
+    Copyright (c) 2004-2012  Reed A. Cartwright, PhD
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include "dawg.h"
+
 #include <dawg/matic.h>
 
 #include <boost/preprocessor.hpp>
@@ -22,7 +24,6 @@
 
 #include <exception>
 
-#include "dawg.h"
 #include "dawg_app.h"
 
 #include <dawg/ma.h>
@@ -38,7 +39,7 @@ using namespace boost;
 using namespace dawg;
 
 #define VERSION_MSG PACKAGE_STRING "\n" \
-	"    Copyright (C) 2004-2010  Reed A. Cartwright, PhD <reed@scit.us>\n" \
+	"    Copyright (C) 2004-2012  Reed A. Cartwright, PhD <reed@scit.us>\n" \
 	"    Report bugs to " PACKAGE_BUGREPORT
 
 int main(int argc, char *argv[])
