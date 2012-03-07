@@ -29,15 +29,15 @@ IF(WIN32)
     ${GSL_ROOT_DIR}
     $ENV{GSL_ROOT_DIR}
     ${GSL_DIR}
-    ${GSL_HOME}    
+    ${GSL_HOME}
     $ENV{GSL_DIR}
     $ENV{GSL_HOME}
     $ENV{EXTRA}
-    "C:/Programs/gsl/"
-    "C:/Program Files (x86)/gsl/"
     "C:/Program Files/gsl/"
-    "C:/Programs/"
+    "C:/Program Files (x86)/gsl/"
+    "C:/Programs/gsl/"
     "C:/Program Files/"
+    "C:/Programs/"
     )
   FIND_PATH(GSL_INCLUDE_DIR
     NAMES gsl/gsl_cdf.h gsl/gsl_randist.h
@@ -65,7 +65,6 @@ IF(WIN32)
 	GSL_GSL_LIBRARY
 	GSL_INCLUDE_DIR
   )
-
 
 ELSE(WIN32)
   
