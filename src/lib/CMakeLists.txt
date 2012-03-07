@@ -1,0 +1,26 @@
+SET(DAWG_LIB_SOURCES
+	ma.cpp
+	matic.cpp
+	output.cpp
+	mutt.cpp
+	parse.cpp
+	"${CMAKE_CURRENT_BINARY_DIR}/../include/dawg/details/config.h"
+)
+
+ADD_LIBRARY(libdawg2 SHARED ${DAWG_LIB_SOURCES})
+SET_TARGET_PROPERTIES(libdawg2 PROPERTIES
+	OUTPUT_NAME "dawg2"
+	SOVERSION 1
+)
+
+ADD_LIBRARY(libdawg2-static STATIC ${DAWG_LIB_SOURCES})
+SET_TARGET_PROPERTIES(libdawg2-static PROPERTIES
+	OUTPUT_NAME "dawg2"
+	PREFIX "lib"
+)
+
+INSTALL(TARGETS libdawg2 libdawg2-static
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+	${PROJ_INSTALL_EXTRA_ARGS})
