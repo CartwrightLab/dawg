@@ -8,5 +8,7 @@
 #	define RANDOM_GEN_HEADER RANDOM_GEN_HEADER_X
 #endif
 
+#cmakedefine PACKAGE_STRING "@PACKAGE_STRING@"
+
 #endif
 

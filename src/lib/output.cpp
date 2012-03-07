@@ -1,10 +1,6 @@
 /****************************************************************************
- *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2010-2012 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
-#ifdef HAVE_CONFIG_H
-#	include "config.h"
-#endif
-
 #include <boost/range/iterator_range.hpp>
 #include <boost/spirit/include/karma_char_.hpp>
 #include <boost/spirit/include/karma_generate.hpp>
@@ -15,6 +11,7 @@
 #include <iostream>
 #include <iomanip>
 
+#include <dawg/details/config.h>
 #include <dawg/log.h>
 
 #include <dawg/output.h>
