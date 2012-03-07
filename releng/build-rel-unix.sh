@@ -47,7 +47,7 @@ CMAKE_ARGS="\
 
 if test $build_mingw32; then
 	$CMAKE $SOURCE_DIR ${CMAKE_ARGS} \
-		-DCMAKE_TOOLCHAIN_FILE="${SOURCE_DIR}/releng/iX86-mingw32msvc.cmake"
+		-DCMAKE_TOOLCHAIN_FILE="${SOURCE_DIR}/releng/mingw32.cmake"
 elif test $build_m32; then
 	$CMAKE $SOURCE_DIR ${CMAKE_ARGS} \
 		-DCMAKE_CXX_FLAGS=-m32 \
