@@ -1,0 +1,15 @@
+# Example: Using sections simulate both coding and noncoding sequences
+
+Tree.Tree = "(A:0.1)D;"
+
+[[Noncoding]]
+Root.Segment = 1
+Root.Length = 10
+Subst.Model = JC
+
+[[Coding]]
+Root.Segment = 2
+Root.Length = 10
+Subst.Model = codemg
+Subst.Params = 
+
