@@ -1,6 +1,7 @@
 # Example: Using sections simulate both coding and noncoding sequences
 
-Tree.Tree = "(A:0.1)D;"
+Tree.Tree = "(A:0.3)D;"
+Sim.Reps = 5
 
 [[Noncoding]]
 Root.Segment = 1
@@ -10,6 +11,10 @@ Subst.Model = JC
 [[Coding]]
 Root.Segment = 2
 Root.Length = 10
-Subst.Model = codemg
-Subst.Params = 
+Subst.Model = codmg
+Subst.Params = 0.1, 1, 1, 1, 1, 1, 1
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Root.Code = 100
 
+[[Noncoding2 = Noncoding]]
+Root.Segment = 3

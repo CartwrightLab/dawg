@@ -183,6 +183,8 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	std::size_t sz = std::distance(first2, last2);
 	std::string mod_namex(mod_name);
 	
+	// df holds the nucleotide frequences for each position in the format
+	// T1, C1, A1, G1, T2, C2, A2, G2, T3, C3, A3, G3
 	double df[12];
 	
 	if(sz == 4) {
@@ -208,19 +210,18 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	
 	unsigned int u=0;
 	double omega, ds[6], dp[64];
-
 	
 	omega = *first1++;
 	if(first1 == last1)
 		return DAWG_ERROR("Invalid subst model; codmg-cp requires 71 parameters.");
 	for(u=0;first1 != last1 && u < 6;++first1)
 		ds[u++] = *first1;
+	if(u != 6)
+		return DAWG_ERROR("Invalid subst model; codmg-cp requires 71 parameters.");
 	// create substitution table (T,C,A,G)
 	// TC, TA, TG, CA, CG, AG		
 	std::swap(ds[0],ds[4]); std::swap(ds[1],ds[2]);
 	std::swap(ds[2],ds[5]); std::swap(ds[3],ds[4]);
-	if(u != 6)
-		return DAWG_ERROR("Invalid subst model; codmg-cp requires 71 parameters.");
 	for(u=0;first1 != last1 && u < 64;++first1)
 		dp[u++] = *first1;
 	if(u != 64)
@@ -228,13 +229,14 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	
 	// Stationary frequencies
 	for(int i=0;i<64;++i)
-		p[i] = dp[i]*df[(i)%4]*df[(i/4)%4+4]*df[(i/16)%4+8];
+		p[i] = dp[i]*df[(i/16)%4]*df[(i/4)%4+4]*df[(i)%4+8];
 	
 	
 	const char *cs_code = residue_exchange::get_protein_code(code);
 	const char *cs_diff = get_codon_diff_upper();
 
 	u = 0;
+	// i & j represent a codon in 112233 format
 	for(unsigned int i=0;i<63;++i) {
 		for(unsigned int j=i+1;j<64;++j,++u) {
 			int d = cs_diff[u];
@@ -243,15 +245,16 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 				continue;
 			}
 			s[u] = ds[(d%8)]/sqrt(dp[i]*dp[j]);
+			// correct for constant positions
 			switch(d/8) {
-			case 0:
-				s[u] /= df[(u/4)%4+4]*df[(u/16)%4+8];
+			case 0: // First position (high bits) differs
+				s[u] /= df[(j/4)%4+4]*df[(j)%4+8];
 				break;
-			case 1:
-				s[u] /= df[(u)%4]*df[(u/16)%4+8];
+			case 1: // Second position (mid bits) differs
+				s[u] /= df[(j/16)%4]*df[(j)%4+8];
 				break;
-			case 2:
-				s[u] /= df[(u)%4]*df[(u/4)%4+4];
+			case 2: // Third position (low bits) differs
+				s[u] /= df[(j/16)%4]*df[(j/4)%4+4];
 				break;
 			default:
 				return DAWG_ERROR("Unexpected error.");
@@ -324,6 +327,11 @@ void subst_model::remove_stops(unsigned int code, double (&s)[64][64], double (&
 		f[i] /= a;
 }
 
+/* The upper triangle of a matrix that encodes how the 64 codons differ from
+   each other.  Value is -1 if they differ by more than one mutation.  Otherwise
+   it is a 5-bit number (aabbb) in which (aa) represents the position of the
+   difference, and (bbb) encodes the type of nucleotide difference.
+*/
 const char* subst_model::get_codon_diff_upper() {
 	static const char s[] = {
 		16,17,18, 8,-1,-1,-1, 9,-1,-1,-1,10,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1,

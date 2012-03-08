@@ -97,6 +97,9 @@ public:
 	inline bool model(unsigned int code, bool markins=false, bool keepempty=true) {
 		static const char sIns[] = "-+";
 		// table for going from base->char
+		// TODO: standardize Root.Code = xyz so that xy picks the type/translation
+		// table and z picks upper or lowercase
+		// TODO: Allow codons to be translated into aa
 		static const char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
 			"acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // dna

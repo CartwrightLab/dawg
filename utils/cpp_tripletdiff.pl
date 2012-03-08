@@ -8,14 +8,21 @@ my @e = ([-1,0,1,2], [-1,-1,3,4], [-1,-1,-1,5], [-1,-1,-1,-1]);
 my @d;
 
 my @row = ();
+# enumerate over upper triangle of 64x64 codon matrix
 foreach my $i(0..62) {
+	# convert codon to triplet
 	my @a = @n[int($i/16)%4, int($i/4) % 4, $i % 4];
 	foreach my $j(($i+1)..63) {
+		# convert codon to triplet
 		my @b = @n[int($j/16)%4, int($j/4) % 4, $j % 4];
+		# count differences between codons
 		my $x = 0;
 		++$x if($a[0] ne $b[0]);
 		++$x if($a[1] ne $b[1]);
 		++$x if($a[2] ne $b[2]);
+		# if differences are more than one return -1
+		# else use 5 bits (aabbb) to encode the position of the difference (aa)
+		# and the substitution type of the difference (bbb)
 		if($x > 1) {
 			push(@row, -1);
 		} elsif($a[0] ne $b[0]) {

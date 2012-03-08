@@ -242,10 +242,15 @@ based on the filename in the output option.
 NOTES
 
 The meaning of the "Params" vector is different for each substitution model.
-GTR: Substitution rates A-C, A-G, A-T, C-G, C-T, G-T JC: Ignored K2P: Transition
-rate, Transversion rate K3P: Alpha (Transitions), Beta (A-T & G-C), Gamma (A-C &
-G-T) HKY: Transition rate, Transversion rate F81: Ignored F84: Kappa TN: Alpha1
-(A-G), Alpha2 (C-T), Beta (Transversions)
+
+  GTR: Substitution rates A-C, A-G, A-T, C-G, C-T, G-T
+  JC: Ignored
+  K2P: Transition rate, Transversion rate
+  K3P: Alpha (Transitions), Beta (A-T & G-C), Gamma (A-C & G-T)
+  HKY: Transition rate, Transversion rate
+  F81: Ignored
+  F84: Kappa
+  TN: Alpha1 (A-G), Alpha2 (C-T), Beta (Transversions)
 
 Parameter "Freqs" is ignored by the models "JC", "K2P", and "K3P".
 
