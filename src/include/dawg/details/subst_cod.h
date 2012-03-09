@@ -123,7 +123,7 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 		// ACGT -> TCAG
 		std::swap(df[0], df[2]); std::swap(df[0], df[3]);
 		for(int i=0;i<64;++i)
-			p[i] = df[(i)%4]*df[(i/4)%4]*df[(i/16)%4];		
+			p[i] = df[(i/16)%4]*df[(i/4)%4]*df[(i)%4]*;		
 	} else if(sz == 12) {
 		double df[12];
 		mod_namex += "+f12";
@@ -136,7 +136,7 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 		// ACGT -> TCAG
 		std::swap(df[8], df[10]); std::swap(df[8], df[11]);
 		for(int i=0;i<64;++i)
-			p[i] = df[(i)%4]*df[(i/4)%4+4]*df[(i/16)%4+8];
+			p[i] = df[(i/16)%4]*df[(i/4)%4+4]*df[(i)%4+8];
 	} else {
 		mod_namex += "+f64";
 		if(!create_freqs(mod_namex.c_str(), first2, last2, p.begin(), p.end()))
@@ -230,7 +230,6 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	// Stationary frequencies
 	for(int i=0;i<64;++i)
 		p[i] = dp[i]*df[(i/16)%4]*df[(i/4)%4+4]*df[(i)%4+8];
-	
 	
 	const char *cs_code = residue_exchange::get_protein_code(code);
 	const char *cs_diff = get_codon_diff_upper();
