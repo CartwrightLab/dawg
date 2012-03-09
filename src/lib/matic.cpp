@@ -162,6 +162,8 @@ void dawg::matic::pre_walk(alignment& aln) {
 		aln[uu].label = lab;
 		++it;
 	}
+	// TODO: We need to either initialize "empty" segments or skip over them
+	// Or prune them
 	aln.seq_type = configs[0][0].sub_mod.seq_type();
 }
 

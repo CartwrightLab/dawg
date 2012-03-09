@@ -98,7 +98,7 @@ bool trick::parse(Iterator first, Iterator last) {
 	if( first != last || !r )
 		return DAWG_ERROR("parsing failed.");
 	std::string header("_initial_"), subheader("");
-	int autonum = 1;
+	int autonum = 1; //TODO: What happens with multiple trick files?
 	section *psec = &data.front();
 	for(details::trick_raw_type::const_iterator it = pyle.begin(); it != pyle.end(); ++it) {
 		const details::section_type &sec = *it;
@@ -106,7 +106,7 @@ bool trick::parse(Iterator first, Iterator last) {
 		if(!sec.first.first.empty()) {
 			data.push_back(section());
 			psec = &data.back();
-			// if section parent is black, inherit from previous
+			// if section parent is blank, inherit from previous
 			psec->inherits = sec.first.second.empty() ? header : sec.first.second;
 			// set new header and reset subheader
 			if(sec.first.first != "-") {
