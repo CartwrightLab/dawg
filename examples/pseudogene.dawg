@@ -1,0 +1,20 @@
+# Example: How to simulate using multiple models on a tree.
+
+# Our phylogeny is ((Man:0.1,Monkey:0.1):0.2,Dawg:0.25).  And we want the
+# primate lineage to contain a pseudogene.  We will thus partititon the
+# simulation into multiple sections (tasks).
+
+# NOT YET IMPLEMENTED
+
+[[Gene]]
+Root.Length = 40
+Tree.Tree = (~Primate:0.1,Dawg:0.25);
+Subst.Model = codmg
+Subst.Params = 0.1, 1, 1, 1, 1, 1, 1
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+
+[[Pseudogene]]
+Tree.Tree = ((Man:0.1,Monkey:0.1):0.1)~Primate;
+Subst.Model = F81
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+

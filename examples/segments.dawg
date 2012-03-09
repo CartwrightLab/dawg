@@ -3,6 +3,8 @@
 # Use "_initial_" section to specify tree and reps
 Tree.Tree = "(A:0.3)D;"
 Sim.Reps = 5
+#Root.Segment = 0
+#Root.Length = 0
 
 # "Noncoding" section to control segment 1 of the sequence
 [[Noncoding]]

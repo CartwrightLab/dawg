@@ -1,0 +1,25 @@
+# Example: How to simulate using multiple models on a tree.
+
+# Our phylogeny is ((Man:0.02,Monkey:0.02):0.1,(Katt:0.02,Dawg:0.02):0.1).
+# And we want the primate branch to contain a signal of selection.
+# We will thus partititon the simulation into multiple sections (tasks).
+#
+# Node names that begin with ~ are not printed in the alignment.
+
+Root.Length = 100
+Subst.Model = codmg
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+
+[[Ancestor]]
+Tree.Tree = (~PrimateA:0.01,(Katt:0.02,Dawg:0.02):0.1)~Root;
+Subst.Params = 0.1, 1, 1, 1, 1, 1, 1
+
+[[Adaptation]]
+Tree.Tree = (~PrimateB:0.08)~PrimateA;
+Subst.Params = 1.1, 1, 1, 1, 1, 1, 1
+
+
+[[Primates]]
+Tree.Tree = ((Man:0.02,Monkey:0.02):0.01)~PrimateB;
+Subst.Params = 0.1, 1, 1, 1, 1, 1, 1
+
