@@ -8,6 +8,9 @@
 #include <set>
 #include <iterator>
 #include <functional>
+#include <vector>
+
+#include <dawg/log.h>
 
 #include <boost/optional.hpp>
 

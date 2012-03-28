@@ -1,13 +1,14 @@
 # Example: Using sections simulate both coding and noncoding sequences
 
 # Use "_initial_" section to specify tree and reps
-Tree.Tree = "(A:0.3)D;"
+#Tree.Tree = "(A:0.3)D;"
 Sim.Reps = 5
-#Root.Segment = 0
+Root.Segment = 1
 #Root.Length = 0
 
 # "Noncoding" section to control segment 1 of the sequence
 [[Noncoding]]
+Tree.Tree = "(A:0.3)D;"
 Root.Segment = 1
 Root.Length = 10
 Subst.Model = JC

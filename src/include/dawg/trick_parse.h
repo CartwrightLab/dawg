@@ -5,6 +5,10 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
+#include <boost/phoenix/core.hpp>
+
 #include <iterator>
 
 #include <dawg/trick.h>
@@ -18,8 +22,11 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/karma.hpp>
-#include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
+
+
+// #include <boost/spirit/include/phoenix.hpp>
+
 
 namespace dawg {
 

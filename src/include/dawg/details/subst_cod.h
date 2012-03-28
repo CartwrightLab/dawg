@@ -123,7 +123,7 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 		// ACGT -> TCAG
 		std::swap(df[0], df[2]); std::swap(df[0], df[3]);
 		for(int i=0;i<64;++i)
-			p[i] = df[(i/16)%4]*df[(i/4)%4]*df[(i)%4]*;		
+			p[i] = df[(i/16)%4]*df[(i/4)%4]*df[(i)%4];
 	} else if(sz == 12) {
 		double df[12];
 		mod_namex += "+f12";

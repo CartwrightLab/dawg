@@ -5,13 +5,20 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/object/construct.hpp>
+#include <boost/phoenix/bind/bind_member_variable.hpp>
+#include <boost/phoenix/stl/container.hpp>
+#include <boost/phoenix/operator.hpp>
+
 #include <boost/spirit/include/version.hpp>
-#if SPIRIT_VERSION < 0x2010
-#	error Spirit version 2.1 or greater required.
+#if SPIRIT_VERSION < 0x2020
+#	error Spirit version 2.2 or greater required.
 #endif
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
 
 #include<iterator>
 
@@ -24,8 +31,8 @@ namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 
 struct make_inode_impl {
-	template<typename V, typename C>
-	struct result {typedef void type; };
+	typedef void result_type;
+
 	template<typename V, typename C>
 	void operator()(V &vec, const C& width) const {
 		vec.back().anc = 1;
