@@ -10,7 +10,6 @@
 #include <dawg/utils/foreach.h>
 #include <dawg/utils/vecio.h>
 
-#include <boost/phoenix/stl/algorithm.hpp>
 #include <boost/phoenix/stl/container.hpp>
 
 using namespace dawg;
@@ -103,15 +102,11 @@ bool dawg::matic::finalize_configuration() {
 	label_union.clear();
 	label_to_index_type::value_type::second_type u = 1;
 	
-	{ // remove segments that lack sections
-		using namespace boost::phoenix;
-		using namespace boost::phoenix::arg_names;
-		cout << configs.size() << endl;
-		cout << configs[0].empty() << endl;
-		phoenix::remove_if(configs, empty(arg1));
-		cout << configs[0].empty() << endl;
-		cout << configs.size() << endl;
-	}
+	// remove segments that lack sections and resize vector
+	configs.erase(
+		remove_if(configs.begin(), configs.end(),
+		phoenix::empty(phoenix::arg_names::arg1)),
+		configs.end());
 	
 	// find the union of all labels in the configuration
 	foreach(segment &seg, configs) {
