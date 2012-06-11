@@ -70,16 +70,21 @@ bool subst_model::create_gtr(const char *mod_name, unsigned int code, It1 first1
 	// create cumulative frequencies
 	d = 0.0;
 	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
+	double dmx = static_cast<double>(mx);
+	// TODO: Kahan Sum
+	// TODO: chose dmx as the highest double that when converted is below mx
+	// TODO:  for 64-bit this is 18446744073709549568.0
+	// TODO: then adjust the comparison
 	for(int i=0;i<3;++i) {
 		d += ff[i];
-		freqs[i] = static_cast<mutt::uint_t>(d*mx);
+		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 	}
 	freqs[3] = mx;
 	for(int i=0;i<4;++i) {
 		d = 0.0;
 		for(int j=0;j<3;++j) {
 			d += s[i][j];
-			table[i][j] = static_cast<mutt::uint_t>(d*mx);
+			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 		}
 		table[i][3] = mx;
 	}

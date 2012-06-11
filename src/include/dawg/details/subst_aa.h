@@ -69,9 +69,10 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	// create cumulative frequencies
 	d = 0.0;
 	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
+	double dmx = static_cast<double>(mx);
 	for(int i=0;i<19;++i) {
 		d += ff[i];
-		freqs[i] = static_cast<mutt::uint_t>(d*mx);
+		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 	}
 	// we will include 32 sites in our binary search
 	// so fill them with mx
@@ -80,7 +81,7 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 		d = 0.0;
 		for(int j=0;j<19;++j) {
 			d += s[i][j];
-			table[i][j] = static_cast<mutt::uint_t>(d*mx);;
+			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 		}
 		// we will include 32 sites in our binary search
 		// so fill them with 1.0

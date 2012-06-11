@@ -82,7 +82,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	double dmx = static_cast<double>(mx);
 	for(int i=0;i<63;++i) {
 		d += ff[i];
-		freqs[i] = static_cast<mutt::uint_t>(d*mx);
+		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 	}
 	freqs[63] = mx;
 	for(int i=0;i<64;++i) {
@@ -92,7 +92,6 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 		}
 		table[i][63] = mx;
-		std::cerr << table[i][63] << std::endl;
 	}
 	
 	uni_scale *= 3; // adjust for codon mutations

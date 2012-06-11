@@ -459,7 +459,7 @@ void dawg::details::matic_section::evolve(
 			d = m.rand_exp(T);
 		} else
 			d -= ins_rate;
-	}	
+	}
 }
 
 struct aligner_data {
