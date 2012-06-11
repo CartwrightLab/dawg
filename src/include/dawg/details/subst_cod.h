@@ -79,6 +79,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	// create cumulative frequencies
 	d = 0.0;
 	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
+	double dmx = static_cast<double>(mx);
 	for(int i=0;i<63;++i) {
 		d += ff[i];
 		freqs[i] = static_cast<mutt::uint_t>(d*mx);
@@ -88,9 +89,10 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 		d = 0.0;
 		for(int j=0;j<63;++j) {
 			d += s[i][j];
-			table[i][j] = static_cast<mutt::uint_t>(d*mx);
+			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
 		}
 		table[i][63] = mx;
+		std::cerr << table[i][63] << std::endl;
 	}
 	
 	uni_scale *= 3; // adjust for codon mutations
