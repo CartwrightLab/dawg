@@ -10,7 +10,8 @@ SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 
 SET(USE_STATIC_LIBS OFF CACHE BOOL "Link against static libraries.")
 SET(LIBDAWG_USE_STATIC_LIBS OFF CACHE BOOL "Link against a static version of libdawg2.")
-SET(RANDOM_GEN "shr3" CACHE STRING "Pseudo-random number generator to use, options are mt, sfmt, shr3, shr3a, shr3b")
+SET(RANDOM_GEN "xorshift_64" CACHE STRING "Pseudo-random number generator to use.")
+MARK_AS_ADVANCED(RANDOM_GEN)
 
 IF(USE_STATIC_LIBS)
   SET(Boost_USE_STATIC_LIBS ON)
