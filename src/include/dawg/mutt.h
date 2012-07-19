@@ -26,7 +26,7 @@ namespace dawg {
 
 class mutt {
 public:
-	typedef details::mutt_gen generator;
+	typedef details::mutt_gen_default generator;
 	typedef generator::native_t uint_t;
 
 	inline void seed(boost::uint32_t s) { 
@@ -46,9 +46,6 @@ public:
 	// returns a random double between (0,1)
 	//inline double operator()() { return rand_real(); }
 	inline double rand_real() { return gen.rand_real(); }
-	// between (0,1] and (0,1)
-	// inline double rand_real_oc() { return gen.rand_real_oc(); }
-	// inline double rand_real_oo() { return gen.rand_real_oo(); }
 	// returns random 32 or 64-bit number
 	uint_t rand_uint() { return gen.rand_native(); }
 	// returns random 64-bit number
@@ -116,14 +113,13 @@ private:
 	}	
 };
 
-// George Marsaglia's quick but good generator
-// Short Period: 2^32-1
-
+// 32-bit xorshift generator; Short Period: 2^32-1
 inline boost::uint32_t create_random_seed() {
 	std::size_t v = static_cast<std::size_t>(getpid());
 	v += (v << 15) + (v >> 3); // Spread 5-decimal PID over 32-bit number
 	boost::hash_combine(v, time(NULL));
-	// finish with one round of shr3
+	v |= 1; // v can't be zero
+	// finish with one round of xorshift
 	return static_cast<boost::uint32_t>((v^=(v<<17), v^=(v>>13), v^=(v<<5)));
 }
 

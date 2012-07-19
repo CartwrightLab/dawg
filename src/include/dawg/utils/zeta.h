@@ -2,15 +2,15 @@
 #ifndef DAWG_ZETA_H
 #define DAWG_ZETA_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009,2012 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <gsl/gsl_sf_zeta.h>
+#include <boost/math/special_functions/zeta.hpp>
 
 namespace dawg {
 
 inline double zeta(double z) {
-	return gsl_sf_zeta(z);
+	return boost::math::zeta<double>(z);
 }
 
 };

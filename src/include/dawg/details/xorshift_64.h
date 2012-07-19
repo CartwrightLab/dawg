@@ -86,7 +86,7 @@ struct xorshift_64_mutt_gen {
 		native_t y,w;
 };
 
-typedef xorshift_64_mutt_gen mutt_gen;
+typedef xorshift_64_mutt_gen mutt_gen_default;
 
 }} //namespace dawg::details
 #endif
