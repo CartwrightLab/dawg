@@ -12,6 +12,7 @@
 #	define __STDC_LIMIT_MACROS 1
 #endif
 #include <boost/cstdint.hpp>
+#include <utility>
 
 namespace dawg { namespace details {
 
@@ -45,12 +46,15 @@ struct xorshift_64_mutt_gen {
 #endif
 	}
 	// doubles with 52-bits worth of precision
-	double rand_real()   { return to_real52_oo(rand_uint64()); }
+	double rand_real()   { return to_double52(rand_uint64()); }
 
 	inline void seed(boost::uint32_t xx) {
-		y = static_cast<native_t>(xx);
-		y = (y != 0) ? ((y << 32) | y) : UINT64_C(15191868757011070976);
+		y = UINT64_C(15191868757011070976);
 		w = UINT64_C(0x61C8864680B583EB);
+		if(xx != 0) {
+			rand_native();
+			y ^= static_cast<native_t>(xx);	
+		}
 		for(int i=0;i<128;++i)
 			rand_native();
 	}
@@ -71,7 +75,7 @@ struct xorshift_64_mutt_gen {
 	}
 
 	state_t state() const {
-		return make_pair(y,w);
+		return std::make_pair(y,w);
 	}
 	void state(state_t x) {
 		y = x.first;
