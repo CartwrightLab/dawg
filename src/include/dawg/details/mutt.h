@@ -50,6 +50,11 @@ inline double to_double52(boost::uint64_t v) {
 inline double to_double52(boost::uint32_t x, boost::uint32_t y) { 
     return to_double52(to_uint64(x,y));
 }
+/* alternative algorithm; seems to be equally fast */
+inline double to_double52i(boost::uint64_t v) {
+	int64_t x = v >> (64-(DBL_MANT_DIG-1));
+	return DBL_EPSILON*x + DBL_EPSILON/2.0;
+}
 
 /* generate a random number on [0,1) with 53-bit resolution*/
 /* my idea */
