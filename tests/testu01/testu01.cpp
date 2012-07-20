@@ -3,12 +3,14 @@
 #	define GEN <dawg/details/xorshift_64.h>
 #endif
 
+#define RANDOM_GEN_HEADER GEN
+
 #include <iostream>
-#include <cstdint>
+#include <stdint.h>
 
 #include <unif01.h>
 #include <bbattery.h>
-#include GEN
+#include <dawg/details/mutt.h>
 
 unsigned long get_bits(void *params, void *state) {
 	mutt_gen_default *g = static_cast<mutt_gen_default*>(state);
