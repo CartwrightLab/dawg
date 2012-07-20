@@ -30,7 +30,7 @@
 namespace dawg { namespace details {
 
 inline boost::uint64_t to_uint64(boost::uint32_t x, boost::uint32_t y) {
-	return y | ((boost::uint64_t)x << 32);
+	return (boost::uint64_t)x << 32) | y;
 }
 
 /* adapter to generate a random number on (0,1) with 32-bit resolution */

@@ -27,9 +27,9 @@ namespace dawg { namespace details {
 struct xorshift_64_mutt_gen {
 	typedef boost::uint64_t native_t;
 	typedef std::pair<native_t,native_t> state_t;
-	xorshift_64_mutt_gen() : y(UINT64_C(15191868757011070976)),
-	                         w(UINT64_C(0x61C8864680B583EB))
-		{ /* do nothing*/ }
+	xorshift_64_mutt_gen() {
+		seed(0);
+	}
 	
 	inline native_t rand_native() { return rand_uint64(); }
 
@@ -53,11 +53,11 @@ struct xorshift_64_mutt_gen {
 	}
 	inline void state(const state_t x) {
 		y = x.first;
-		w = x.second;		
+		w = x.second;
 	}
 
 	inline void seed(boost::uint32_t xx) {
-		y = UINT64_C(15191868757011070976);
+		y = UINT64_C(0x6A7BCC427F295846);
 		w = UINT64_C(0x61C8864680B583EB);
 		if(xx != 0) {
 			rand_native();
@@ -72,7 +72,7 @@ struct xorshift_64_mutt_gen {
 	}
 	template<typename _It>
 	inline void seed(_It first, _It last) {
-		y = UINT64_C(15191868757011070976);
+		y = UINT64_C(0x6A7BCC427F295846);
 		w = UINT64_C(0x61C8864680B583EB);
 		for(;first != last;++first) {
 			rand_native();
@@ -90,4 +90,3 @@ typedef xorshift_64_mutt_gen mutt_gen_default;
 
 }} //namespace dawg::details
 #endif
-
