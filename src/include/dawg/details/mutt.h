@@ -33,14 +33,13 @@ inline boost::uint64_t to_uint64(boost::uint32_t x, boost::uint32_t y) {
 	return y | ((boost::uint64_t)x << 32);
 }
 
-/* generate a random number on (0,1)-real-interval with 32-bit precision */
+/* adapter to generate a random number on (0,1) with 32-bit resolution */
 inline double to_double32(boost::uint32_t v) {
 	boost::int32_t x = static_cast<boost::int32_t>(v); // + 2147483648;
 	return (0.5+0.5/4294967296.0) + (x*(1.0/4294967296.0));
 }
 
-/* generate a random number on (0,1) with 52-bit resolution*/
-/* my idea, seems nearly unique */
+/* adapter to generate a random number on (0,1) with 52-bit resolution*/
 inline double to_double52(boost::uint64_t v) { 
 	union {	boost::uint64_t u;	double d; } a;
 	a.u = (v >> 12) | UINT64_C(0x3FF0000000000000);
@@ -50,23 +49,30 @@ inline double to_double52(boost::uint64_t v) {
 inline double to_double52(boost::uint32_t x, boost::uint32_t y) { 
     return to_double52(to_uint64(x,y));
 }
-/* alternative algorithm; seems to be equally fast */
-inline double to_double52i(boost::uint64_t v) {
-	int64_t x = v >> (64-(DBL_MANT_DIG-1));
-	return DBL_EPSILON*x + DBL_EPSILON/2.0;
-}
 
-/* generate a random number on [0,1) with 53-bit resolution*/
-/* my idea */
+/* adapter to generate a random number on [0,1) with 53-bit resolution*/
 inline double to_real53(boost::uint64_t v) {
-	union {	boost::uint64_t u;	double d; } a;
+	union {	uint64_t u;	double d; } a,b;
+	b.u = (v&2048)  ? UINT64_C(0x3FEFFFFFFFFFFFFF)
+	                : UINT64_C(0x3FF0000000000000);
 	a.u = (v >> 12) | UINT64_C(0x3FF0000000000000);
-	double b = (v&2048) ?  (1.0-(DBL_EPSILON/2.0)) : 1.0;
-	return a.d-b;
+	return a.d-b.d;
 }
 inline double to_real53(boost::uint32_t x, boost::uint32_t y) { 
     return to_real53(to_uint64(x,y));
 }
+
+/* alternative algorithms; speed (dis)advantage depends on architecture. */
+/* use more floating point math. */
+inline double to_double52f(boost::uint64_t v) {
+	boost::int64_t x = v >> (64-(DBL_MANT_DIG-1));
+	return DBL_EPSILON*x + DBL_EPSILON/2.0;
+}
+inline double to_double53f(boost::uint64_t v) {
+	boost::int64_t x = v >> (64-(DBL_MANT_DIG));
+	return (DBL_EPSILON/2.0)*x;
+}
+
 
 }} /* namespace dawg::details */
 
