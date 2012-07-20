@@ -46,7 +46,15 @@ struct xorshift_64_mutt_gen {
 #endif
 	}
 	// doubles with 52-bits worth of precision
-	double rand_real()   { return to_double52(rand_uint64()); }
+	inline double rand_real()   { return to_double52(rand_uint64()); }
+
+	inline state_t state() const {
+		return std::make_pair(y,w);
+	}
+	inline void state(const state_t x) {
+		y = x.first;
+		w = x.second;		
+	}
 
 	inline void seed(boost::uint32_t xx) {
 		y = UINT64_C(15191868757011070976);
@@ -72,14 +80,6 @@ struct xorshift_64_mutt_gen {
 		}
 		for(int i=0;i<128;++i)
 			rand_native();
-	}
-
-	state_t state() const {
-		return std::make_pair(y,w);
-	}
-	void state(state_t x) {
-		y = x.first;
-		w = x.second;		
 	}
 	
 	private:
