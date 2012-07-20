@@ -130,7 +130,7 @@ private:
 	std::size_t i;
 };
 
-typedef xorgen4096_64_mutt_gen mutt_gen_default;
+typedef xorgen4096_32_mutt_gen mutt_gen_default;
 
 }} //namespace dawg::details
 #endif

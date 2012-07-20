@@ -63,7 +63,7 @@ struct xorshift_32_mutt_gen {
 		return r;
 	}
 	inline void state(const state_t z) {
-		x = x.x; y = z.y; w = z.w;
+		x = z.x; y = z.y; w = z.w;
 	}
 
 	inline void seed(boost::uint32_t xx) {
