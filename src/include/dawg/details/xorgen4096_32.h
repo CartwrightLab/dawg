@@ -39,8 +39,8 @@ struct xorgen4096_32_mutt_gen {
 
 	inline boost::uint64_t rand_uint64() {
 		native_t a = rand_uint32();
-		native t b = rand_uint32();
-		return to_uint32(a,b);
+		native_t b = rand_uint32();
+		return to_uint64(a,b);
 	}
 		
 	inline native_t rand_uint32() {
