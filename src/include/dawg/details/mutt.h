@@ -12,7 +12,9 @@
 #	define __STDC_LIMIT_MACROS 1
 #endif
 
-#include <dawg/details/config.h>
+#ifndef DAWG_NO_CONFIG_H
+#	include <dawg/details/config.h>
+#endif
 
 #include <boost/cstdint.hpp>
 #include <boost/functional/hash.hpp>
@@ -30,7 +32,7 @@
 namespace dawg { namespace details {
 
 inline boost::uint64_t to_uint64(boost::uint32_t x, boost::uint32_t y) {
-	return (boost::uint64_t)x << 32) | y;
+	return ((boost::uint64_t)x << 32) | y;
 }
 
 /* adapter to generate a random number on (0,1) with 32-bit resolution */
