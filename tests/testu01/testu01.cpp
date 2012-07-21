@@ -1,31 +1,42 @@
 // Test for uniformity
 #define DAWG_NO_CONFIG_H
-#ifndef GEN
-#	define GEN <dawg/details/xorshift_64.h>
+#ifndef TEST_GEN
+#	define TEST_GEN <dawg/details/xorshift_64.h>
 #endif
 
-#define RANDOM_GEN_HEADER GEN
+#define RANDOM_GEN_HEADER TEST_GEN
 
-#define STRINGIZE(x) #x
-#define GEN_NAME STRINGIZE(GEN) 
+#define XSTR(s) XSTR_(s)
+#define XSTR_(s) #s
+#define GEN_NAME XSTR(RANDOM_GEN_HEADER) 
 
 #include <iostream>
 #include <stdint.h>
 
+extern "C" {
 #include <unif01.h>
 #include <bbattery.h>
+}
+
 #include <dawg/details/mutt.h>
 
 using namespace dawg;
 using namespace dawg::details;
 
+uint32_t to_32(uint32_t x) {
+	return x;
+}
+uint32_t to_32(uint64_t x) {
+#ifdef TEST_LOWER
+	return (x & 0xFFFFFFFFUL);
+#else
+	return ((x >> 32) & 0xFFFFFFFFUL);
+#endif
+}
+
 unsigned long get_bits(void *params, void *state) {
 	mutt_gen_default *g = static_cast<mutt_gen_default*>(state);
-	uint64_t u = g->rand_uint64();
-#ifndef LOWER
-	u >>= 32;
-#endif
-	return (u & 0xFFFFFFFFUL);
+	return to_32(g->rand_native());
 }
 
 double get_u01(void *params, void *state) {
@@ -34,11 +45,18 @@ double get_u01(void *params, void *state) {
 }
 
 void write_gen(void *state) {
-	printf("hidden");
+	printf("N/A");
 }
 
 unif01_Gen *create_gen(unsigned int u) {
-	static char name[] = GEN_NAME;
+	static char name[] = GEN_NAME
+#ifdef DAWG_DISABLE_WEYL_GENERATOR
+		"-now"
+#endif
+#ifdef TEST_LOWER
+		"-low"
+#endif
+	;
 	unif01_Gen *gen = new unif01_Gen;
 	mutt_gen_default *g = new mutt_gen_default;
 	g->seed(u);
