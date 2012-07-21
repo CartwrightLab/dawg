@@ -28,7 +28,7 @@ struct sfmt_mutt_gen {
 	inline native_t rand_native() { return rand_uint32(); }
 	boost::uint32_t rand_uint32() { return sfmt_gen_rand32(&state); }
 	boost::uint64_t rand_uint64() { return to_uint64(rand_uint32(),rand_uint32()); }
-	double rand_real()   { return to_real52_oo(rand_uint64()); }
+	double rand_real()   { return to_double52(rand_uint64()); }
 	
 	void seed(uint32_t x) { sfmt_init_gen_rand(&state, x); }
 	template<int _N>
@@ -48,7 +48,7 @@ private:
 	sfmt_t state;
 };
 
-typedef sfmt_mutt_gen mutt_gen;
+typedef sfmt_mutt_gen mutt_gen_default;
 
 }} //namespace dawg::details
 #endif

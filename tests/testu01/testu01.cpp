@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <stdint.h>
+#include <cstdio>
 
 extern "C" {
 #include <unif01.h>
