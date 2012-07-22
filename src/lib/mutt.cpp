@@ -6,7 +6,20 @@
 
 using namespace dawg;
  
-// random zeta distribution with slope z
+// random zeta distribution with slope z > 1.0
+#ifndef DAWG_USE_ZETA_RI
+// Devroye Luc (1986) Non-uniform random variate generation.
+//     Springer-Verlag: Berlin. p551
+boost::uint32_t dawg::mutt::rand_zeta(double z) {
+	double b = pow(2.0, z-1.0);
+	double x,t;
+	do {
+	 x = floor(pow(rand_real(), -1.0/(z-1.0)));
+	 t = pow(1.0+1.0/x, z-1.0);
+	} while( rand_real()*x*(t-1.0)*b > t*(b-1.0));
+	return static_cast<boost::uint32_t>(x);
+}
+#else
 // rejection-inversion method of H\"ormann and Derflinger (1996)
 // idea borrowed from Indelible
 // optimizations for usage in Dawg
@@ -30,6 +43,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
 	}
 	return static_cast<boost::uint32_t>(K);
 }
+#endif
 
 /* New version based on Marsaglia and Tsang, "A Simple Method for
  * generating gamma variables", ACM Transactions on Mathematical
