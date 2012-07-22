@@ -7,7 +7,7 @@
 using namespace dawg;
  
 // random zeta distribution with slope z > 1.0
-#ifndef DAWG_USE_ZETA_RI
+#ifdef DAWG_USE_ZETA_LUC
 // Devroye Luc (1986) Non-uniform random variate generation.
 //     Springer-Verlag: Berlin. p551
 boost::uint32_t dawg::mutt::rand_zeta(double z) {
@@ -32,7 +32,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
 	
 	double U, X,K;
 	for(;;) {
-		U = rand_real(); // [0,1)
+		U = rand_real();
 		U = Him+U*Hx0;
 		X = zHi(U,z1,z2);
 		K = floor(X+1.5);
