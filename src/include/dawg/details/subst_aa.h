@@ -2,7 +2,7 @@
 #ifndef DAWG_SUBST_AA_H
 #define DAWG_SUBST_AA_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
  
 namespace dawg {
@@ -14,10 +14,11 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	int u = 0;
 	_model = residue_exchange::AA + code%2;
 	// do freqs first
-	double ff[20];
-	if(!create_freqs(mod_name, first2, last2, &ff[0], &ff[20]))
+	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[20]))
 		return false;
-	
+	for(int i=20;i<64;++i)
+		freqs[i] = 0.0;
+			
 	// fill params array
 	double params[190];
 	u = 0;
@@ -31,14 +32,12 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 		return DAWG_ERROR("Invalid subst model; aagtr requires 190 parameters.");
 	
 	// construct substitution matrix
-	// do this locally to enable possible optimizations?
-	double s[20][20];
 	double rs[20];
 	u = 0;
 	for(int i=0;i<20;++i) {
-		s[i][i] = 0.0;
+		table[i][i] = 0.0;
 		for(int j=i+1;j<20;++j) {
-			s[i][j] = s[j][i] = params[u++];
+			table[i][j] = table[j][i] = params[u++];
 		}
 	}
 	// scale the matrix to substitution time and uniformize
@@ -46,51 +45,36 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	uni_scale = 0.0;
 	for(int i=0;i<20;++i) {
 		for(int j=0;j<20;++j) {
-			s[i][j] *= ff[j];
-			d += s[i][j]*ff[i];
+			table[i][j] *= freqs[j];
+			d += table[i][j]*freqs[i];
 		}
 	}
 	for(int i=0;i<20;++i) {
 		rs[i] = 0.0;
 		for(int j=0;j<20;++j) {
-			s[i][j] /= d;
-			rs[i] += s[i][j];
+			table[i][j] /= d;
+			rs[i] += table[i][j];
 		}
 		uni_scale = std::max(uni_scale, rs[i]);
 	}
 	// create pseudosubstitutions and transition frequencies
 	for(int i=0;i<20;++i)
-		s[i][i] = uni_scale - rs[i];
+		table[i][i] = uni_scale - rs[i];
 	for(int i=0;i<20;++i) {
 		for(int j=0;j<20;++j)
-			s[i][j] /= uni_scale;
+			table[i][j] /= uni_scale;
 	}
+	// fill in the rest of the table matrix
+	for(int i=0;i<20;++i)
+		for(int j=20;j<64;++j)
+			table[i][j] = 0.0;
+	for(int i=20;i<64;++i)
+		for(int j=0;j<64;++j)
+			table[i][j] = 1.0/64.0;
 	
-	// create cumulative frequencies
-	d = 0.0;
-	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
-	double dmx = static_cast<double>(mx);
-	for(int i=0;i<19;++i) {
-		d += ff[i];
-		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-	}
-	// we will include 32 sites in our binary search
-	// so fill them with mx
-	std::fill(&freqs[19],&freqs[32], mx);
-	for(int i=0;i<20;++i) {
-		d = 0.0;
-		for(int j=0;j<19;++j) {
-			d += s[i][j];
-			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-		}
-		// we will include 32 sites in our binary search
-		// so fill them with 1.0
-		std::fill(&table[i][19],&table[i][32], mx);
-	}
-	name = mod_name;
-	do_op_f = &subst_model::do_aagtr_f;
-	do_op_s = &subst_model::do_aagtr_s;
-	
+	if(!create_alias_tables())
+		return DAWG_ERROR("unable to create alias tables");
+	name = mod_name;	
 	return true;
 }
 

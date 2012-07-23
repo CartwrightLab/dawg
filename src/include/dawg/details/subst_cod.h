@@ -2,7 +2,7 @@
 #ifndef DAWG_SUBST_COD_H
 #define DAWG_SUBST_COD_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
  
 namespace dawg {
@@ -20,8 +20,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	if(gcode >= 24)
 		return DAWG_ERROR("Invalid genetic code.");
 	// do freqs first
-	double ff[64];
-	if(!create_freqs("codgtr", first2, last2, &ff[0], &ff[64]))
+	if(!create_freqs("codgtr", first2, last2, &freqs[0], &freqs[64]))
 		return false;
 	
 	// fill params array
@@ -38,66 +37,48 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	
 	// construct substitution matrix
 	// do this locally to enable possible optimizations?
-	double s[64][64];
 	double rs[64];
 	u = 0;
 	for(int i=0;i<64;++i) {
-		s[i][i] = 0.0;
+		table[i][i] = 0.0;
 		for(int j=i+1;j<64;++j) {
-			s[i][j] = s[j][i] = params[u++];
+			table[i][j] = table[j][i] = params[u++];
 		}
 	}
 	
 	// remove stop codons
-	remove_stops(gcode, s, ff);
+	remove_stops(gcode, table, freqs);
 	
 	// scale the matrix to substitution time and uniformize
 	d = 0.0;
 	uni_scale = 0.0;
 	for(int i=0;i<64;++i) {
 		for(int j=0;j<64;++j) {
-			s[i][j] *= ff[j];
-			d += s[i][j]*ff[i];
+			table[i][j] *= freqs[j];
+			d += table[i][j]*freqs[i];
 		}
 	}
 	for(int i=0;i<64;++i) {
 		rs[i] = 0.0;
 		for(int j=0;j<64;++j) {
-			s[i][j] /= d;
-			rs[i] += s[i][j];
+			table[i][j] /= d;
+			rs[i] += table[i][j];
 		}
 		uni_scale = std::max(uni_scale, rs[i]);
 	}
 	// create pseudosubstitutions and transition frequencies
 	for(int i=0;i<64;++i)
-		s[i][i] = uni_scale - rs[i];
+		table[i][i] = uni_scale - rs[i];
 	for(int i=0;i<64;++i) {
 		for(int j=0;j<64;++j)
-			s[i][j] /= uni_scale;
+			table[i][j] /= uni_scale;
 	}
-	
-	// create cumulative frequencies
-	d = 0.0;
-	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
-	double dmx = static_cast<double>(mx);
-	for(int i=0;i<63;++i) {
-		d += ff[i];
-		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-	}
-	freqs[63] = mx;
-	for(int i=0;i<64;++i) {
-		d = 0.0;
-		for(int j=0;j<63;++j) {
-			d += s[i][j];
-			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-		}
-		table[i][63] = mx;
-	}
+
+	if(!create_alias_tables())
+		return DAWG_ERROR("unable to create alias tables");
 	
 	uni_scale *= 3; // adjust for codon mutations
 	name = mod_name;
-	do_op_f = &subst_model::do_codgtr_f;
-	do_op_s = &subst_model::do_codgtr_s;
 	
 	return true;
 }

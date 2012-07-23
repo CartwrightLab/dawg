@@ -2,7 +2,7 @@
 #ifndef DAWG_SUBST_H
 #define DAWG_SUBST_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #include <vector>
@@ -21,11 +21,17 @@ public:
 		
 	// return random base from stat. dist.
 	inline base_type operator()(mutt &m) const {
-		return (this->*do_op_f)(m);
+		boost::uint64_t u = m.rand_uint64();
+		boost::uint32_t x = u&63;
+		boost::uint32_t y = u >> 32;
+		return (y < stat_dist[0][x]) ? x : stat_dist[1][x];
 	}
 	// return random mutant base
 	inline base_type operator()(mutt &m, base_type n) const {
-		return (this->*do_op_s)(m,n);
+		boost::uint64_t u = m.rand_uint64();
+		boost::uint32_t x = u&63;
+		boost::uint32_t y = u >> 32;
+		return (y < mutation[0][n][x]) ? x : mutation[1][n][x];		
 	}
 
 	inline const std::string& label() const { return name; }
@@ -37,42 +43,25 @@ public:
 	
 private:
 	// must hold at least 64 different characters
-	mutt::uint_t freqs[64];
-	mutt::uint_t table[64][64];
+	double freqs[64];
+	double table[64][64];
+	
+	boost::uint32_t stat_dist[2][64];
+	boost::uint32_t mutation[2][64][64];
+
+	bool create_alias_tables();
+	
 	double uni_scale;
 	std::string name;
 	unsigned int _model;
 
 	inline static void remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]);
 	inline static const char* get_codon_diff_upper();
-
-	// pointer that will hold our method
-	base_type (subst_model::*do_op_f)(mutt &m) const;
-	base_type (subst_model::*do_op_s)(mutt &m, base_type n) const;
- 
-	inline base_type do_gtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[4], m.rand_uint());
-	}
-	inline base_type do_gtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][4], m.rand_uint());
-	}
-	inline base_type do_aagtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[32], m.rand_uint());
-	}
-	inline base_type do_aagtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][32], m.rand_uint());
-	}	
-	inline base_type do_codgtr_f(mutt &m) const {
-		return (base_type)search_binary_cont(&freqs[0], &freqs[64], m.rand_uint());
-	}
-	inline base_type do_codgtr_s(mutt &m, base_type n) const {
-		return (base_type)search_binary_cont(&table[n][0], &table[n][64], m.rand_uint());
-	}	
-
-	// DNA Models
+	
 	template<typename It1, typename It2>
 	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2, unsigned int ncol=0) const;
-	
+
+	// DNA Models
 	template<typename It1, typename It2>
 	bool create_gtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
 	

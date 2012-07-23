@@ -4,6 +4,8 @@ SET(DAWG_LIB_SOURCES
 	output.cpp
 	mutt.cpp
 	parse.cpp
+	models.cpp
+	${RANDOM_GEN_FILES_X}
 	"${CMAKE_CURRENT_BINARY_DIR}/../include/dawg/details/config.h"
 )
 

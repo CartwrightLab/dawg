@@ -160,7 +160,7 @@ public:
 				
 		cs_decode = &mods[a*64];
 
-		_gap = strchr(cs_decode, '-')-cs_decode;
+		_gap = static_cast<unsigned int>(strchr(cs_decode, '-')-cs_decode);
 
 		if(a < AA)
 			cs_encode = &rmods[0*80];

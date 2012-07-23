@@ -15,9 +15,10 @@ bool subst_model::create_gtr(const char *mod_name, unsigned int code, It1 first1
 	_model = residue_exchange::DNA + code%4;
 	
 	// do freqs first
-	double ff[4];
-	if(!create_freqs(mod_name, first2, last2, &ff[0], &ff[4]))
+	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[4]))
 		return false;
+	for(int i=4;i<64;++i)
+		freqs[i] = 0.0;
 	
 	// fill params array
 	double params[6];
@@ -32,66 +33,49 @@ bool subst_model::create_gtr(const char *mod_name, unsigned int code, It1 first1
 		return DAWG_ERROR("Invalid subst model; gtr requires six parameters.");
 	
 	// construct substitution matrix
-	// do this locally to enable possible optimizations?
-	double s[4][4];
 	double rs[4];
-	s[0][0] = s[1][1] = s[2][2] = s[3][3] = 0.0;
-	s[0][1] = s[1][0] = params[0]; // A-C
-	s[0][2] = s[2][0] = params[1]; // A-G
-	s[0][3] = s[3][0] = params[2]; // A-T
-	s[1][2] = s[2][1] = params[3]; // C-G
-	s[1][3] = s[3][1] = params[4]; // C-T
-	s[2][3] = s[3][2] = params[5]; // G-T
+	table[0][0] = table[1][1] = table[2][2] = table[3][3] = 0.0;
+	table[0][1] = table[1][0] = params[0]; // A-C
+	table[0][2] = table[2][0] = params[1]; // A-G
+	table[0][3] = table[3][0] = params[2]; // A-T
+	table[1][2] = table[2][1] = params[3]; // C-G
+	table[1][3] = table[3][1] = params[4]; // C-T
+	table[2][3] = table[3][2] = params[5]; // G-T
 	// scale the matrix to substitution time and uniformize
 	d = 0.0;
 	uni_scale = 0.0;
 	for(int i=0;i<4;++i) {
 		for(int j=0;j<4;++j) {
-			s[i][j] *= ff[j];
-			d += s[i][j]*ff[i];
+			table[i][j] *= freqs[j];
+			d += table[i][j]*freqs[i];
 		}
 	}
 	for(int i=0;i<4;++i) {
 		rs[i] = 0.0;
 		for(int j=0;j<4;++j) {
-			s[i][j] /= d;
-			rs[i] += s[i][j];
+			table[i][j] /= d;
+			rs[i] += table[i][j];
 		}
 		uni_scale = std::max(uni_scale, rs[i]);
 	}
 	// create pseudosubstitutions and transition frequencies
 	for(int i=0;i<4;++i)
-		s[i][i] = uni_scale - rs[i];
+		table[i][i] = uni_scale - rs[i];
 	for(int i=0;i<4;++i) {
 		for(int j=0;j<4;++j)
-			s[i][j] /= uni_scale;
+			table[i][j] /= uni_scale;
 	}
+	// fill in the rest of the table matrix
+	for(int i=0;i<4;++i)
+		for(int j=4;j<64;++j)
+			table[i][j] = 0.0;
+	for(int i=4;i<64;++i)
+		for(int j=0;j<64;++j)
+			table[i][j] = 1.0/64.0;
 	
-	// create cumulative frequencies
-	d = 0.0;
-	mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
-	double dmx = static_cast<double>(mx);
-	// TODO: Kahan Sum
-	// TODO: chose dmx as the highest double that when converted is below mx
-	// TODO:  for 64-bit this is 18446744073709549568.0
-	// TODO: then adjust the comparison
-	for(int i=0;i<3;++i) {
-		d += ff[i];
-		freqs[i] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-	}
-	freqs[3] = mx;
-	for(int i=0;i<4;++i) {
-		d = 0.0;
-		for(int j=0;j<3;++j) {
-			d += s[i][j];
-			table[i][j] = ((d*mx) < dmx) ?  static_cast<mutt::uint_t>(d*mx) : mx;
-		}
-		table[i][3] = mx;
-	}
+	if(!create_alias_tables())
+		return DAWG_ERROR("unable to create alias tables");
 	name = mod_name;
-	do_op_f = &subst_model::do_gtr_f;
-	do_op_s = &subst_model::do_gtr_s;
-	
 	return true;
 }
 	
