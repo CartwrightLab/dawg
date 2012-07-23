@@ -23,15 +23,13 @@ public:
 	inline base_type operator()(mutt &m) const {
 		boost::uint64_t u = m.rand_uint64();
 		boost::uint32_t x = u&63;
-		boost::uint32_t y = u >> 32;
-		return (y < stat_dist[0][x]) ? x : stat_dist[1][x];
+		return (u < stat_dist_p[x]) ? x : stat_dist_a[x];
 	}
 	// return random mutant base
 	inline base_type operator()(mutt &m, base_type n) const {
 		boost::uint64_t u = m.rand_uint64();
 		boost::uint32_t x = u&63;
-		boost::uint32_t y = u >> 32;
-		return (y < mutation[0][n][x]) ? x : mutation[1][n][x];		
+		return (u < mutation_p[n][x]) ? x : mutation_a[n][x];
 	}
 
 	inline const std::string& label() const { return name; }
@@ -46,9 +44,11 @@ private:
 	double freqs[64];
 	double table[64][64];
 	
-	boost::uint32_t stat_dist[2][64];
-	boost::uint32_t mutation[2][64][64];
-
+	boost::uint32_t stat_dist_a[64];
+	boost::uint64_t stat_dist_p[64];
+	boost::uint32_t mutation_a[64][64];
+	boost::uint64_t mutation_p[64][64];
+	
 	bool create_alias_tables();
 	
 	double uni_scale;
