@@ -22,7 +22,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	// do freqs first
 	if(!create_freqs("codgtr", first2, last2, &freqs[0], &freqs[64]))
 		return false;
-	
+		
 	// fill params array
 	double params[2016];
 	u = 0;
@@ -176,8 +176,8 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 		// ACGT -> TCAG
 		std::swap(df[0], df[2]); std::swap(df[0], df[3]);
 		// fill in the rest
-		memcpy(&df[4], &df[0], 4*sizeof(double));
-		memcpy(&df[8], &df[0], 4*sizeof(double));
+		std::copy(&df[0], &df[4], &df[4]);
+		std::copy(&df[0], &df[4], &df[8]);
 	} else {
 		mod_namex += "+f12";
 		if(!create_freqs(mod_namex.c_str(), first2, last2, &df[0], &df[12], 4))
@@ -208,11 +208,11 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 		dp[u++] = *first1;
 	if(u != 64)
 		return DAWG_ERROR("Invalid subst model; codmg-cp requires 71 parameters.");
-	
+		
 	// Stationary frequencies
 	for(int i=0;i<64;++i)
 		p[i] = dp[i]*df[(i/16)%4]*df[(i/4)%4+4]*df[(i)%4+8];
-	
+		
 	const char *cs_code = residue_exchange::get_protein_code(code);
 	const char *cs_diff = get_codon_diff_upper();
 
@@ -225,21 +225,25 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 				s[u] = 0.0;
 				continue;
 			}
-			s[u] = ds[(d%8)]/sqrt(dp[i]*dp[j]);
 			// correct for constant positions
+			double f = sqrt(dp[i]*dp[j]);
 			switch(d/8) {
 			case 0: // First position (high bits) differs
-				s[u] /= df[(j/4)%4+4]*df[(j)%4+8];
+				f *= df[(j/4)%4+4]*df[(j)%4+8];
 				break;
 			case 1: // Second position (mid bits) differs
-				s[u] /= df[(j/16)%4]*df[(j)%4+8];
+				f *= df[(j/16)%4]*df[(j)%4+8];
 				break;
 			case 2: // Third position (low bits) differs
-				s[u] /= df[(j/16)%4]*df[(j/4)%4+4];
+				f *= df[(j/16)%4]*df[(j/4)%4+4];
 				break;
 			default:
 				return DAWG_ERROR("Unexpected error.");
 			}
+			if(f > 0.0)
+				s[u] = ds[(d%8)]/f;
+			else
+				s[u] = 1.0;
 			if(cs_code[i] != cs_code[j])
 				s[u] *= omega;
 		}
