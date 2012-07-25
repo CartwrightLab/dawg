@@ -5,13 +5,10 @@
 #include <dawg/subst.h>
 #include <cassert>
 #include <cstdio>
-
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/sum_kahan.hpp>
  
 inline boost::uint64_t uint64_bound(double bound) {
 	assert((0.0 <= bound && bound < 1.0));
-	return static_cast<boost::uint64_t>(ceil(bound*9007199254740991.0)) << 11;
+	return static_cast<boost::uint64_t>(ceil(bound*9007199254740992.0)) << 11;
 }
 
 // vose method for creating alias tables
