@@ -36,9 +36,8 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 			for(m=mm;m<64 && p[m] >= 1.0; ++m)
 				/*noop*/;
 			mm = m+1;
-		} else {
+		} else
 			m = g;
-		}
 		for(; g<64 && p[g] <  1.0; ++g)
 			/*noop*/;
 	}
@@ -62,8 +61,6 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 
 bool dawg::subst_model::create_alias_tables() {
 	alias_table_64(&freqs[0], &stat_dist_p[0], &stat_dist_a[0]);
-	for(int i=0;i<64;++i)
-		printf("%d\t%llu\t%d\n", i, stat_dist_p[i], stat_dist_a[i]);
 	for(int i=0;i<64;++i)
 		alias_table_64(&table[i][0], &mutation_p[i][0], &mutation_a[i][0]);
 	return true;
