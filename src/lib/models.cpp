@@ -27,15 +27,15 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 		/*noop*/;
 	for(m=0; m<64 && p[m] >= 1.0; ++m)
 		/*noop*/;
-	mm = m;
+	mm = m+1;
 	while(g < 64 && m < 64) {
 		q[m] = uint64_bound(p[m]);
 		a[m] = g;
 		p[g] = (p[g]+p[m])-1.0;
 		if(p[g] >= 1.0 || mm < g) {
-			for(++mm;mm<64 && p[mm] >= 1.0; ++mm)
+			for(m=mm;m<64 && p[m] >= 1.0; ++m)
 				/*noop*/;
-			m = mm;
+			mm = m+1;
 		} else {
 			m = g;
 		}
@@ -51,17 +51,19 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 	if(m < 64) {
 		q[m] = std::numeric_limits<boost::uint64_t>::max();
 		a[m] = m;
-		for(++mm; mm<64; ++mm) {
-			if(p[mm] > 1.0)
+		for(m=mm; m<64; ++m) {
+			if(p[m] > 1.0)
 				continue;
-			q[mm] = std::numeric_limits<boost::uint64_t>::max();
-			a[mm] = mm;			
+			q[m] = std::numeric_limits<boost::uint64_t>::max();
+			a[m] = m;
 		}
 	}
 }
 
 bool dawg::subst_model::create_alias_tables() {
 	alias_table_64(&freqs[0], &stat_dist_p[0], &stat_dist_a[0]);
+	for(int i=0;i<64;++i)
+		printf("%d\t%llu\t%d\n", i, stat_dist_p[i], stat_dist_a[i]);
 	for(int i=0;i<64;++i)
 		alias_table_64(&table[i][0], &mutation_p[i][0], &mutation_a[i][0]);
 	return true;
