@@ -45,7 +45,7 @@ public:
 	struct args
 	{			
 	// use X-Macros to specify argument variables
-#	define XM(lname, sname, desc, type, def) type _V(lname) ;
+#	define XM(lname, sname, desc, type, def) type _XV(lname) ;
 #	include "dawgarg.xmh"
 #	undef XM
 		std::vector< std::string > input;

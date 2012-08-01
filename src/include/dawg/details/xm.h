@@ -53,9 +53,9 @@
 
 #define _IFD(seq,res) BOOST_PP_EXPR_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE((_)seq),1), res)
 
-#define _V(lname) _JS(_, lname)
-#define _S(lname) _SS("-", lname)
-#define _P(lname) _SS(".", lname)
+#define _XV(lname) _JS(_, lname)
+#define _XS(lname) _SS("-", lname)
+#define _XP(lname) _SS(".", lname)
 #define _DL(a,b) a,b
 
 #else
@@ -69,10 +69,10 @@
 #undef _JS
 #undef _SS
 #undef _IFD
-#undef _V
-#undef _S
-#undef _P
-#undef _DL
+#undef _XV
+#undef _XS
+#undef _XP
+#undef _XL
 
 #endif
 

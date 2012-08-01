@@ -13,19 +13,19 @@
 namespace dawg {
 
 struct global_options {
-#	define XM(name, type, def, desc) type _V(name) ;
+#	define XM(name, type, def, desc) type _XV(name) ;
 #	include <dawg/details/global.xmh>
 #	undef XM
 
 	global_options() :
-#	define XM(name, type, def, desc) _V(name) (def),
+#	define XM(name, type, def, desc) _XV(name) (def),
 #	include <dawg/details/global.xmh>
 #	undef XM
 	_unused()
 	{ }
 	
 	void read_section(const trick::data_type::value_type &sec) {
-#	define XM(name, type, def, desc) sec.get(_P(name), _V(name));
+#	define XM(name, type, def, desc) sec.get(_XP(name), _XV(name));
 #	include <dawg/details/global.xmh>
 #	undef XM
 	}
