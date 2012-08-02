@@ -66,9 +66,9 @@ struct xorshift_64_mutt_gen {
 		for(int i=0;i<128;++i)
 			rand_native();
 	}
-	template<int _N>
-	inline void seed(boost::uint32_t (&xx)[_N]) {
-		seed(&xx[0],&xx[_N]);
+	template<int N>
+	inline void seed(boost::uint32_t (&xx)[N]) {
+		seed(&xx[0],&xx[N]);
 	}
 	template<typename _It>
 	inline void seed(_It first, _It last) {

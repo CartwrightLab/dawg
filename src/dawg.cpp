@@ -59,8 +59,8 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 	try {
 		desc.add_options()
 			#define XM(lname, sname, desc, type, def) ( \
-				_XS(lname) _IFD(sname, "," BOOST_PP_STRINGIZE sname), \
-				po::value< type >(&arg._XV(lname))->default_value(def), \
+				XS(lname) IFD(sname, "," BOOST_PP_STRINGIZE sname), \
+				po::value< type >(&arg.XV(lname))->default_value(def), \
 				desc )				
 			#include "dawgarg.xmh"
 			#undef XM

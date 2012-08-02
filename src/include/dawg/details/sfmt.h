@@ -31,9 +31,9 @@ struct sfmt_mutt_gen {
 	double rand_real()   { return to_double52(rand_uint64()); }
 	
 	void seed(uint32_t x) { sfmt_init_gen_rand(&state, x); }
-	template<int _N>
-	void seed(uint32_t (&x)[_N]) {
-		sfmt_init_by_array(&state, &x[0], _N);
+	template<int N>
+	void seed(uint32_t (&x)[N]) {
+		sfmt_init_by_array(&state, &x[0], N);
 	}
 	template<typename _It>
 	void seed(_It first, _It last) {

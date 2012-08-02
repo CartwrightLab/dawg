@@ -27,18 +27,18 @@ XM((subst)(rate)(model),  std::string, "const",
 XM((subst)(rate)(params), std::vector<double>, ,
 	"The parameters of the rate model.  Model Dependant.")
 
-XM((indel)(model)(ins),  std::vector<std::string>, _DL(1, "user"),
+XM((indel)(model)(ins),  std::vector<std::string>, DL(1, "user"),
 	"The identifiers of the insertion models, e.g. USER, GEO,\n"
 	"  POWER-LAW.")
-XM((indel)(params)(ins), std::vector<double>, _DL(1, 1.0),
+XM((indel)(params)(ins), std::vector<double>, DL(1, 1.0),
 	"The parameters of the insertion models.  Model Dependant.")
 XM((indel)(rate)(ins),   std::vector<double>,  ,
 	"The per-substitution rates of the mixture of insertion models.")
 
-XM((indel)(model)(del),  std::vector<std::string>, _DL(1, "user"),
+XM((indel)(model)(del),  std::vector<std::string>, DL(1, "user"),
 	"The identifiers of the deletion models, e.g. USER, GEO,\n"
 	"  POWER-LAW.")
-XM((indel)(params)(del), std::vector<double>, _DL(1, 1.0),
+XM((indel)(params)(del), std::vector<double>, DL(1, 1.0),
 	"The parameters of the deletion models.  Model Dependant.")
 XM((indel)(rate)(del),   std::vector<double>, ,
 	"The per-substitution rates of the mixture of deletion models.")

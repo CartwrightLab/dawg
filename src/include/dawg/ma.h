@@ -18,13 +18,13 @@ namespace dawg {
 
 // dawg::ma is a "model argument" structure
 struct ma {
-#	define XM(name, type, def, desc) type _XV(name) ;
+#	define XM(name, type, def, desc) type XV(name) ;
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 	std::string name;
 
 	ma(const std::string &_n = std::string() ) :
-#	define XM(name, type, def, desc) _XV(name) (def),
+#	define XM(name, type, def, desc) XV(name) (def),
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 	name(_n)
@@ -48,7 +48,7 @@ operator<<(std::basic_ostream<CharType, CharTrait>& o, const ma &a) {
 	o << set_open('\x7f') << set_close('\x7f') << set_delimiter(',');
 
 	o << "[[ " << a.name << " ]]" << std::endl;
-#	define XM(name, type, def, desc) o << _XP(name) " = " << a._XV(name) << std::endl;
+#	define XM(name, type, def, desc) o << XP(name) " = " << a.XV(name) << std::endl;
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 
@@ -73,12 +73,12 @@ inline std::string ma_help_name(const char *cs) {
 template<class CharType, class CharTrait>
 void ma::help(std::basic_ostream<CharType, CharTrait>& o) {
 	o << "[REGULAR PARAMETERS]" << std::endl;
-#	define XM(name, type, def, desc) o << details::ma_help_name(_XP(name)) \
+#	define XM(name, type, def, desc) o << details::ma_help_name(XP(name)) \
 	<< " - " << (desc) << std::endl;
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 	o << "\n[GLOBAL PARAMETERS]" << std::endl;
-#	define XM(name, type, def, desc) o << details::ma_help_name(_XP(name)) \
+#	define XM(name, type, def, desc) o << details::ma_help_name(XP(name)) \
 	<< " - " << (desc) << std::endl;
 #	include <dawg/details/global.xmh>
 #	undef XM

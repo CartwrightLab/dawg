@@ -56,9 +56,9 @@ public:
 	template<typename Iterator>
 	bool parse(Iterator first, Iterator last);
 	
-	template<std::size_t _N>
-	bool parse(const char (&str)[_N]) {
-		return parse(&str[0], &str[_N]);
+	template<std::size_t N>
+	bool parse(const char (&str)[N]) {
+		return parse(&str[0], &str[N]);
 	}
 	bool parse(const std::string &str) {
 		return parse(str.begin(), str.end());

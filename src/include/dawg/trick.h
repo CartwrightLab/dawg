@@ -107,7 +107,7 @@ inline void trick::section::read_alias(const std::string& a, const std::string& 
 }
 
 inline void trick::section::read_aliases() {
-	#define XM(aname, bname) read_alias(_XP(aname), _XP(bname));
+	#define XM(aname, bname) read_alias(XP(aname), XP(bname));
 	#include <dawg/details/aliases.xmh>
 	#undef XM
 }

@@ -14,7 +14,7 @@ using namespace std;
 // Read a section, setting and values that correspond to 
 void dawg::ma::read_section(const trick::data_type::value_type &sec) {
 	name = sec.name;
-#	define XM(aname, type, def, desc) sec.get(_XP(aname), _XV(aname));
+#	define XM(aname, type, def, desc) sec.get(XP(aname), XV(aname));
 #	include <dawg/details/dawgma.xmh>
 #	undef XM
 }
