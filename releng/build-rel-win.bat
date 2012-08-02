@@ -27,12 +27,16 @@ set BUILD_DIR="%RELENG_DIR%\build"
 mkdir %BUILD_DIR% || exit /B 1
 cd %BUILD_DIR% || exit /B 1
 
-call "C:\Program Files\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" x86
+call "%ProgramFiles%\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
 
-%CMAKE% -G "NMake Makefiles" %SOURCE_DIR% -DCMAKE_BUILD_TYPE=Release
+%CMAKE% -G "NMake Makefiles" %SOURCE_DIR% -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=yes -DLIBDAWG_USE_STATIC_LIBS=yes
+if %ERRORLEVEL% NEQ 0 goto end
 %MAKE%
+if %ERRORLEVEL% NEQ 0 goto end
 %MAKE% package
+if %ERRORLEVEL% NEQ 0 goto end
 %MAKE% package_source
+if %ERRORLEVEL% NEQ 0 goto end
 
 echo.
 echo Copying distribution packages ...
@@ -44,3 +48,6 @@ echo Cleaning up ...
 
 cd %DEST_DIR%
 rd /S /Q %RELENG_DIR%
+
+:end
+cd %DEST_DIR%
