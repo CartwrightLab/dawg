@@ -22,21 +22,19 @@ set DEST_DIR="%CD%"
 set SOURCE_DIR="%RELENG_DIR%\source"
 set BUILD_DIR="%RELENG_DIR%\build"
 
-%SVN% co -q %REPOS% %SOURCE_DIR% || exit /B 1
+%SVN% co -q %REPOS% %SOURCE_DIR% || goto :end
 
-mkdir %BUILD_DIR% || exit /B 1
-cd %BUILD_DIR% || exit /B 1
+mkdir %BUILD_DIR% || goto :end
+cd %BUILD_DIR% || goto :end
 
 call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
 
-%CMAKE% -G "NMake Makefiles" %SOURCE_DIR% -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=yes -DLIBDAWG_USE_STATIC_LIBS=yes
-if %ERRORLEVEL% NEQ 0 goto :end
-%MAKE%
-if %ERRORLEVEL% NEQ 0 goto :end
-%MAKE% package
-if %ERRORLEVEL% NEQ 0 goto :end
-%MAKE% package_source
-if %ERRORLEVEL% NEQ 0 goto :end
+%CMAKE% -G "NMake Makefiles" %SOURCE_DIR% ^
+  -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=yes ^
+  -DLIBDAWG_USE_STATIC_LIBS=yes
+%MAKE% || goto :end
+%MAKE% package || goto :end
+%MAKE% package_source || goto :end
 
 echo.
 echo Copying distribution packages ...
@@ -48,6 +46,8 @@ echo Cleaning up ...
 
 cd %DEST_DIR%
 rd /S /Q %RELENG_DIR%
+exit
 
 :end
 cd %DEST_DIR%
+exit /B 1
