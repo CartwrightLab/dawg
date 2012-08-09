@@ -22,8 +22,8 @@ public:
 	// return random base from stat. dist.
 	inline base_type operator()(mutt &m) const {
 		boost::uint64_t u = m.rand_uint64();
-		boost::uint32_t x = u&63;
-		return (u < stat_dist_p[x]) ? x : stat_dist_a[x];
+		boost::uint32_t x = (u >> 58);
+		return ((u << 6) < stat_dist_p[x]) ? x : stat_dist_a[x];
 	}
 	// return random mutant base
 	inline base_type operator()(mutt &m, base_type n) const {
