@@ -1,8 +1,9 @@
 INSTALL(FILES
-  example0.dawg
-  example1.dawg
-  example2.dawg
-  example3.dawg
-  example4.dawg
+  segments.dawg
+  basic-dna.dawg
+  basic-dna-2.dawg
+  multiple-models.dawg
+  pseudogene.dawg
+  recombination.dawg
   DESTINATION "${CMAKE_DATA_DIR}/examples")
   
