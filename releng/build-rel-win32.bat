@@ -13,7 +13,7 @@ echo.
 echo Building distributions for %REPOS% ...
 
 set RELENG_DIR="%TEMP%\%PROJ%-releng.%RANDOM%"
-mkdir %RELENG_DIR% || exit /B 1
+mkdir %RELENG_DIR% || goto :end
 
 echo Using temp directory %RELENG_DIR% ...
 echo.
@@ -30,8 +30,7 @@ cd %BUILD_DIR% || goto :end
 call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" x86
 
 %CMAKE% -G "NMake Makefiles" %SOURCE_DIR% ^
-  -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=yes ^
-  -DLIBDAWG_USE_STATIC_LIBS=yes
+  -DCMAKE_BUILD_TYPE=Release -DUSE_STATIC_LIBS=yes
 %MAKE% || goto :end
 %MAKE% package || goto :end
 %MAKE% package_source || goto :end
@@ -46,7 +45,7 @@ echo Cleaning up ...
 
 cd %DEST_DIR%
 rd /S /Q %RELENG_DIR%
-exit
+exit /B
 
 :end
 cd %DEST_DIR%

@@ -103,14 +103,12 @@ SET(CMAKE_MAN_DIR "man" CACHE STRING
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 
 SET(CPACK_SOURCE_IGNORE_FILES
-  "/CVS/" "/\\\\.svn/"  "\\\\.swp$"  "\\\\.#"  "/#"  ".*~$"
+  "/CVS/" "/\\\\.svn/"  "\\\\.swp$"  "\\\\.#"  "/#"  ".*~$" "/\\\\.git/"
   "/CMakeFiles/"  "CMakeCache\\\\.txt"
   "CPack.*Config\\\\.cmake"  "cmake_install\\\\.cmake"
   "install_manifest\\\\.txt$"
-  "_CPACK_PACKAGES"  "_CPack_Packages"
-  "\\\\.vcproj"  "\\\\.dir"  "\\\\.ncb$"  "\\\\.sln$"  "\\\\.suo$"
-  "Makefile$" "\\\\.ilk"  "\\\\.pdb"
-  "/releng/" "/build/" "\\\\.a$"
+  "_CPACK_PACKAGES"  "_CPack_Packages" "\\\\.dir"
+  "Makefile$" "/releng/" "\\\\.a$"
   "${PROJ_NAME}[-]${PROJ_VERSION_MAJOR}" "${PROJ_NAME}$" "${PROJ_NAME}\\\\.exe"
 )
 
@@ -142,9 +140,9 @@ IF(NOT DEFINED CPACK_SYSTEM_NAME)
 ENDIF(NOT DEFINED CPACK_SYSTEM_NAME)
 IF(${CPACK_SYSTEM_NAME} MATCHES Windows)
   IF(CMAKE_CL_64)
-    SET(CPACK_SYSTEM_NAME win64-${CMAKE_SYSTEM_PROCESSOR})
+#    SET(CPACK_SYSTEM_NAME Windows-amd64)
   ELSE(CMAKE_CL_64)
-    SET(CPACK_SYSTEM_NAME win32-${CMAKE_SYSTEM_PROCESSOR})
+#    SET(CPACK_SYSTEM_NAME Windows-x86)
   ENDIF(CMAKE_CL_64)
 ENDIF(${CPACK_SYSTEM_NAME} MATCHES Windows)
 
