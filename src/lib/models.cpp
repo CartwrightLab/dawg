@@ -30,7 +30,7 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 	mm = m+1;
 	while(g < 64 && m < 64) {
 		q[m] = uint64_bound(p[m]);
-		a[m] = g;
+		a[m] = static_cast<boost::uint32_t>(g);
 		p[g] = (p[g]+p[m])-1.0;
 		if(p[g] >= 1.0 || mm < g) {
 			for(m=mm;m<64 && p[m] >= 1.0; ++m)
@@ -41,20 +41,24 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 		for(; g<64 && p[g] <  1.0; ++g)
 			/*noop*/;
 	}
-	for(; g<64; ++g) {
-		if(p[g] < 1.0)
-			continue;
+	if(g < 64) {
 		q[g] = std::numeric_limits<boost::uint64_t>::max();
-		a[g] = g;
+		a[g] = static_cast<boost::uint32_t>(g);
+		for(g=g+1; g<64; ++g) {
+			if(p[g] < 1.0)
+				continue;
+			q[g] = std::numeric_limits<boost::uint64_t>::max();
+			a[g] = static_cast<boost::uint32_t>(g);
+		}
 	}
 	if(m < 64) {
 		q[m] = std::numeric_limits<boost::uint64_t>::max();
-		a[m] = m;
+		a[m] = static_cast<boost::uint32_t>(m);
 		for(m=mm; m<64; ++m) {
 			if(p[m] > 1.0)
 				continue;
 			q[m] = std::numeric_limits<boost::uint64_t>::max();
-			a[m] = m;
+			a[m] = static_cast<boost::uint32_t>(m);
 		}
 	}
 }
