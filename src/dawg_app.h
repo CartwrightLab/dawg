@@ -26,6 +26,45 @@
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
+namespace boost {
+void validate(boost::any& v, const std::vector<std::string>& xs, boost::tribool*, int) {
+    using namespace boost::program_options;
+    validators::check_first_occurrence(v);
+	std::string s(validators::get_single_string(xs, true));
+
+    for (size_t i = 0; i < s.size(); ++i)
+        s[i] = char(tolower(s[i]));
+
+    if (s.empty() || s == "on" || s == "yes" || s == "1" || s == "true")
+		v = boost::any(boost::tribool(true));
+    else if (s == "off" || s == "no" || s == "0" || s == "false")
+		v = boost::any(boost::tribool(false));
+    else if (s == "null" || s == "maybe" || s == "2" || s == "indeterminate")
+		v = boost::any(boost::tribool(boost::indeterminate));
+    else
+        boost::throw_exception(validation_error(validation_error::invalid_option_value, s));
+}
+#if !defined(BOOST_NO_STD_WSTRING)
+void validate(boost::any& v, const std::vector<std::wstring>& xs, boost::tribool*, int) {
+    using namespace boost::program_options;
+    validators::check_first_occurrence(v);
+	std::wstring s(validators::get_single_string(xs, true));
+
+    for (size_t i = 0; i < s.size(); ++i)
+        s[i] = char(tolower(s[i]));
+
+    if (s.empty() || s == L"on" || s == L"yes" || s == L"1" || s == L"true")
+		v = boost::any(boost::tribool(true));
+    else if (s == L"off" || s == L"no" || s == L"0" || s == L"false")
+		v = boost::any(boost::tribool(false));
+    else if (s == L"null" || s == L"maybe" || s == L"2" || s == L"indeterminate")
+		v = boost::any(boost::tribool(boost::indeterminate));
+    else
+        boost::throw_exception(validation_error(validation_error::invalid_option_value));
+}
+#endif
+}
+
 namespace boost { namespace program_options {
 template<>
 typed_value<bool>* value(bool* v) {
@@ -43,50 +82,6 @@ typed_value<boost::tribool>* value(boost::tribool* v) {
 	return r;
 }
 }}
-
-// modified from boost/libs/program_options/src/value_semantic.cpp
-void validate(boost::any& v, const std::vector<std::string>& xs, boost::tribool*, int) {
-    using namespace boost::program_options;
-    validators::check_first_occurrence(v);
-	std::string s(validators::get_single_string(xs, true));
-
-	printf("validating\n");
-
-    for (size_t i = 0; i < s.size(); ++i)
-        s[i] = char(tolower(s[i]));
-
-    if (s.empty() || s == "on" || s == "yes" || s == "1" || s == "true")
-		v = boost::any(boost::tribool(true));
-    else if (s == "off" || s == "no" || s == "0" || s == "false")
-		v = boost::any(boost::tribool(false));
-    else if (s == "null" || s == "maybe" || s == "2" || s == "indeterminate")
-		v = boost::any(boost::tribool(boost::indeterminate));
-    else
-        boost::throw_exception(validation_error(validation_error::invalid_option_value, s));
-}
-#if !defined(BOOST_NO_STD_WSTRING)
-void validate(boost::any& v, const std::vector<std::wstring>& xs, boost::tribool*, int)
-{
-    using namespace boost::program_options;
-    validators::check_first_occurrence(v);
-	std::wstring s(validators::get_single_string(xs, true));
-
-	printf("wvalidating\n");
-
-    for (size_t i = 0; i < s.size(); ++i)
-        s[i] = wchar_t(tolower(s[i]));
-
-    if (s.empty() || s == L"on" || s == L"yes" || s == L"1" || s == L"true")
-        v = boost::any(boost::tribool(true));
-    else if (s == L"off" || s == L"no" || s == L"0" || s == L"false")
-        v = boost::any(boost::tribool(false));
-    else if (s == L"null" || s == L"maybe" || s == L"2" || s == L"indeterminate")
-		v = boost::any(boost::tribool(boost::indeterminate));
-    else
-        boost::throw_exception(validation_error(validation_error::invalid_option_value));
-}
-#endif
-
 
 /****************************************************************************
  *    class dawg_app                                                        *

@@ -24,15 +24,13 @@
 
 #include <exception>
 
-#include "dawg_app.h"
-
 #include <dawg/ma.h>
 #include <dawg/trick.h>
 #include <dawg/utils/foreach.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
 
-#include <boost/algorithm/string/regex.hpp>
+#include "dawg_app.h"
 
 using namespace std;
 using namespace boost;

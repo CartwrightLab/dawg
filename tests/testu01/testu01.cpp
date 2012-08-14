@@ -24,12 +24,26 @@ extern "C" {
 using namespace dawg;
 using namespace dawg::details;
 
+uint64_t revbits(uint64_t x) {
+	uint64_t y = 0;
+	for(int i=0;i<8;++i) {
+		unsigned char b = (unsigned char)x;
+		b = ((b * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;
+		y = (y << 8) + b;
+		x =  x >> 8;
+	}
+	return y;
+}
+
 uint32_t to_32(uint32_t x) {
 	return x;
 }
 uint32_t to_32(uint64_t x) {
+#ifdef TEST_REV
+	x = revbits(x) << 4;
+#endif
 #ifdef TEST_LOWER
-	return (x & 0xFFFFFFFFUL);
+	return (x & 0xFFFFFFFFUL);	
 #else
 	return ((x >> 32) & 0xFFFFFFFFUL);
 #endif
@@ -56,6 +70,9 @@ unif01_Gen *create_gen(unsigned int u) {
 #endif
 #ifdef TEST_LOWER
 		"-low"
+#endif
+#ifdef TEST_REV
+		"-rev"
 #endif
 	;
 	unif01_Gen *gen = new unif01_Gen;
