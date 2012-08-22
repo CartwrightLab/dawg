@@ -275,6 +275,7 @@ void dawg::details::matic_section::evolve_upstream(
 		}
 	}
 	// Process any Imortal Link Insertions
+	sequence temp;
 	while(!indels.ins.empty()) {
 		// Fetch most recent immortal link insertion
 		indel_data::element &n = indels.ins.top();
@@ -284,7 +285,7 @@ void dawg::details::matic_section::evolve_upstream(
 			del_up.pop();
 		}
 		evolve_indels(child, indels, T, branch_color,
-			sequence::const_iterator(), sequence::const_iterator(), m);
+			temp.begin(), temp.end(), m);
 	}
 	// Add any outstanding upstream deletions
 	while(!del_up.empty()) {
