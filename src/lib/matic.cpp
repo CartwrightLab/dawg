@@ -196,9 +196,13 @@ void dawg::matic::walk(alignment& aln) {
 		foreach(const section &sec, configs[0]) {
 			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
 				const wood::node &n = sec.usertree.data()[u];
+				const sequence &ranc = seqs[sec.metatree[u-n.anc]].seq;
 				details::sequence_data &sd = seqs[sec.metatree[u]];
 				sec.evolve_upstream(sd.seq, sd.indels, n.length,
 					branch_color, maxx);
+				sec.evolve(sd.seq, sd.indels, n.length,
+					branch_color, ranc.begin(), ranc.end(), maxx);
+				branch_color += dawg::residue::branch_inc;
 			}
 		}
 		align(aln, seqs, configs[0].rex);
