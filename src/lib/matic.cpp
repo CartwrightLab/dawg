@@ -254,43 +254,73 @@ void dawg::details::matic_section::evolve_upstream(
 	
 	indels.clear();
 	
-	indel_data::stack del_up;
+	indel_data::stack del_up, ins_up;
 
 	// Calculate Upstream Deletions
+	// TODO: fix-this for zeta models and mixtures
+	//    p(size) = (1-sum(f(x), 1, size))/(mean(x)-1)
 	dM = del_rate*(del_mod.meansize()-1.0);
 	if(dM > DBL_EPSILON) {
 		d = m.rand_exp(dM);
 		while(d < T) {
-			boost::uint32_t u;
-			do {
-				u = del_mod(m);
-			} while(u == 1);
-			del_up.push(indel_data::element(d/T,  1+m.rand_uint32(u-1)));
-			d +=m.rand_exp(dM);
-		}
-	}
-	// Calculate Immortal Link Insertions
-	if(ins_rate > DBL_EPSILON) {
-		dM = ins_rate;
-		d = m.rand_exp(dM);
-		while(d < T) {
-			indels.ins.push(indel_data::element(d/T, ins_mod(m)));
+			del_up.push(indel_data::element(d/T,  del_mod(m)));
 			d += m.rand_exp(dM);
 		}
 	}
-	// Process any Imortal Link Insertions
+	// Calculate Immortal Link Insertion
+	if(ins_rate > DBL_EPSILON) {
+		dM = ins_rate;
+		d = m.rand_exp(dM);
+		if(d < T) {
+			ins_up.push(indel_data::element(d/T, ins_mod(m)));
+			d += m.rand_exp(dM);
+		}
+	}
+	// Process Immortal Link Insertions, have to do this manually because
+	// we have already searched the whole insertion space.  No double counting.
 	sequence temp;
-	while(!indels.ins.empty()) {
-		// Fetch most recent immortal link insertion
+	while(!ins_up.empty()) {
+		indels.ins.push(ins_up.top());
+		ins_up.pop();
 		indel_data::element &n = indels.ins.top();
-		// Did any upstream deletions occur before this?
+		// Add any upstream indels that happen after
 		while(!del_up.empty() && del_up.top().first >= n.first) {
 			indels.del.push(del_up.top());
 			del_up.pop();
 		}
-		evolve_indels(child, indels, T, branch_color,
-			temp.begin(), temp.end(), m);
+		double t;
+		if(!indels.del.empty()) {
+			indel_data::element &r = indels.del.top();
+			assert(r.first >= n.first && n.first >= 0.0);
+			t = r.first - n.first;
+		} else {
+			assert(1.0 >= n.first && n.first >= 0.0);
+			t = 1.0-n.first;
+		}
+		// Does a deletion occur at the first site?
+		d = m.rand_exp(del_rate);
+		if(d < t)
+			indels.del.push(indel_data::element(n.first+d, del_mod(m)));
+		// Do we need to delete an indel
+		if(!indels.del.empty()) {
+			indel_data::element &r = indels.del.top();
+			assert(r.first >= n.first && n.first >= 0.0);
+			child.push_back(residue(gap_base, residue::rate_type(0.0), branch_color));
+			r.second -= 1;
+			if(r.second == 0)
+				indels.del.pop();
+		} else {
+			child.push_back(residue(sub_mod(m),
+				static_cast<residue::rate_type>(rat_mod(m)), branch_color));
+		}
+		n.second -= 1;
+		if(n.second == 0)
+			indels.ins.pop();
+		else
+			evolve_indels(child, indels, T, branch_color,
+				temp.begin(),temp.end(),m);
 	}
+
 	// Add any outstanding upstream deletions
 	while(!del_up.empty()) {
 		indels.del.push(del_up.top());
@@ -388,17 +418,19 @@ dawg::details::matic_section::evolve_indels(
 			if(x <= 2*u) {
 				// next event overlaps this one
 				u = x/2;
+				// remove u sites from the location and pop if empty
+				n.second -= u;
+				if(n.second == 0)
+					indels.ins.pop();
 				// push the new event on the proper stack
 				if((x&1) == 0) {
 					indels.ins.push(indel_data::element(n.first+t*f/ins_rate, ins_mod(m)));
 				} else {
 					indels.del.push(indel_data::element(n.first+t*f/del_rate, del_mod(m)));
 				}
-			}
-			// remove u sites from the location and pop if empty
-			n.second -= u;
-			if(n.second == 0)
+			} else {
 				indels.ins.pop();
+			}
 			// Insert u random nucleotides into buffer
 			while(u--)
 				child.push_back(residue(sub_mod(m),
