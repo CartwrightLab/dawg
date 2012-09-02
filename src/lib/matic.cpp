@@ -420,13 +420,14 @@ dawg::details::matic_section::evolve_indels(
 				u = x/2;
 				// remove u sites from the location and pop if empty
 				n.second -= u;
+				double tt = n.first;
 				if(n.second == 0)
 					indels.ins.pop();
 				// push the new event on the proper stack
 				if((x&1) == 0) {
-					indels.ins.push(indel_data::element(n.first+t*f/ins_rate, ins_mod(m)));
+					indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
 				} else {
-					indels.del.push(indel_data::element(n.first+t*f/del_rate, del_mod(m)));
+					indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
 				}
 			} else {
 				indels.ins.pop();

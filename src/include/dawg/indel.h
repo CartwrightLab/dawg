@@ -51,7 +51,8 @@ public:
 	}
 		
 	boost::uint32_t operator()(mutt &m) const {
-		return (this->*do_op)(m);
+		uint32_t u = (this->*do_op)(m);
+		return u;
 	}
 	
 	inline const std::string& label() const {
