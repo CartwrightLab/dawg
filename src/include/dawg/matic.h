@@ -70,21 +70,24 @@ struct matic_section {
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const;
 		
-	inline boost::uint32_t next_indel(double d, double &f) const {
+	inline boost::uint32_t next_indel(double d, double &f, bool bDel) const {
 		double ins_rate = ins_mod.rate();
 		double del_rate = del_mod.rate();
 		double indel_rate = ins_rate+del_rate;
-		if(d < ins_rate) {
-			f = d;
-			return 1;
+		if(bDel) {
+			if(d < ins_rate) {
+				f = d; return 1;
+			}
+			d -= ins_rate;
 		}
-		f = modf((d-ins_rate)/(indel_rate), &d);
+		f = modf(d/indel_rate, &d);
 		f *= (indel_rate);
 		boost::uint32_t x = 2*static_cast<boost::uint32_t>(d);
+		x += (bDel) ? 2 : 0;
 		if(f < del_rate)
-			return 2+x;
+			return x;
 		f -= del_rate;
-		return 3+x;
+		return 1+x;
 	}
 };
 

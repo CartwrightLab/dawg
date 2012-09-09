@@ -350,7 +350,7 @@ dawg::details::matic_section::evolve_indels(
 				t = r.first-n.first;
 				boost::uint32_t u = min(r.second, n.second);
 				// Determine where the next event occurs
-				boost::uint32_t x = next_indel(m.rand_exp(t*T), f);
+				boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
 				if(x < 2*u) {
 					// the next event occured between these two
 					// how may sites are deleted
@@ -378,7 +378,7 @@ dawg::details::matic_section::evolve_indels(
 				t = r.first;
 				boost::uint32_t u = r.second;
 				// Determine where the next event occurs
-				boost::uint32_t x = next_indel(m.rand_exp(t*T), f);
+				boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
 				if(x < 2*u) {
 					// the next event occured between these two
 					// how may sites are deleted
@@ -413,21 +413,24 @@ dawg::details::matic_section::evolve_indels(
 			assert(n.first < 1.0);
 			t = 1.0-n.first;
 			// Find location of next event
-			boost::uint32_t x = next_indel(m.rand_exp(t*T), f)-1;
+			boost::uint32_t x = next_indel(m.rand_exp(t*T), f, false);
 			boost::uint32_t u = n.second;
-			if(x <= 2*u) {
+			if(x < 2*u) {
 				// next event overlaps this one
-				u = x/2;
 				// remove u sites from the location and pop if empty
+				u = (x+1)/2;
 				n.second -= u;
 				double tt = n.first;
 				if(n.second == 0)
 					indels.ins.pop();
-				// push the new event on the proper stack
+				// push the new event(s) on the proper stack
 				if((x&1) == 0) {
-					indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
-				} else {
 					indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
+				} else {
+					do {
+						indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
+						f += m.rand_exp(t*T);
+					} while( f < ins_rate );
 				}
 			} else {
 				indels.ins.pop();
@@ -485,18 +488,18 @@ void dawg::details::matic_section::evolve(
 		++first;
 		while(d < w) {
 			rez.base(sub_mod(m,rez.base()));
-			// how much space is left in the substitution section
-			w = w - d;
-			d = m.rand_exp(T);		
+			d += m.rand_exp(T);
 		}
 		d -= w;
 		child.push_back(rez);
 		if(d < ins_rate) {
-			indels.ins.push(indel_data::element(d/ins_rate, ins_mod(m)));
+			do {
+				indels.ins.push(indel_data::element(d/ins_rate, ins_mod(m)));
+				d += m.rand_exp(T);
+			} while(d < ins_rate);
 			first = evolve_indels(child, indels, T, branch_color, first, last, m);
-			d = m.rand_exp(T);
-		} else
-			d -= ins_rate;
+		}
+		d -= ins_rate;
 	}
 }
 
