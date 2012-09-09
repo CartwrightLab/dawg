@@ -276,8 +276,7 @@ void dawg::details::matic_section::evolve_upstream(
 			d += m.rand_exp(dM);
 		}
 	}
-	// Process Immortal Link Insertions, have to do this manually because
-	// we have already searched the whole insertion space.  No double counting.
+	// Process Immortal Link Insertions
 	sequence temp;
 	while(!ins_up.empty()) {
 		indels.ins.push(ins_up.top());
@@ -288,37 +287,7 @@ void dawg::details::matic_section::evolve_upstream(
 			indels.del.push(del_up.top());
 			del_up.pop();
 		}
-		double t;
-		if(!indels.del.empty()) {
-			indel_data::element &r = indels.del.top();
-			assert(r.first >= n.first && n.first >= 0.0);
-			t = r.first - n.first;
-		} else {
-			assert(1.0 >= n.first && n.first >= 0.0);
-			t = 1.0-n.first;
-		}
-		// Does a deletion occur at the first site?
-		d = m.rand_exp(del_rate);
-		if(d < t)
-			indels.del.push(indel_data::element(n.first+d, del_mod(m)));
-		// Do we need to delete an indel
-		if(!indels.del.empty()) {
-			indel_data::element &r = indels.del.top();
-			assert(r.first >= n.first && n.first >= 0.0);
-			child.push_back(residue(gap_base, residue::rate_type(0.0), branch_color));
-			r.second -= 1;
-			if(r.second == 0)
-				indels.del.pop();
-		} else {
-			child.push_back(residue(sub_mod(m),
-				static_cast<residue::rate_type>(rat_mod(m)), branch_color));
-		}
-		n.second -= 1;
-		if(n.second == 0)
-			indels.ins.pop();
-		else
-			evolve_indels(child, indels, T, branch_color,
-				temp.begin(),temp.end(),m);
+		evolve_indels(child, indels, T, branch_color, temp.begin(),temp.end(),m);
 	}
 
 	// Add any outstanding upstream deletions
