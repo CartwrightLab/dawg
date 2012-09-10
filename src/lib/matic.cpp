@@ -317,62 +317,73 @@ dawg::details::matic_section::evolve_indels(
 				// Did anything happen between the deletion and this insertion
 				assert(r.first >= n.first && 1.0 > r.first-n.first );
 				t = r.first-n.first;
-				boost::uint32_t u = min(r.second, n.second);
+				double tt = n.first;
+				boost::uint32_t u = std::min(r.second, n.second);
 				// Determine where the next event occurs
 				boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
-				if(x < 2*u) {
+				if(x <= 2*u) {
 					// the next event occured between these two
 					// how may sites are deleted
-					u = (x+1)/2;
+					u = x/2;
+					// adjust stacks
+					r.second -= u;
+					n.second -= u;
+					if(r.second == 0)
+						indels.del.pop();
+					if(n.second == 0)
+						indels.ins.pop();					
 					// push the new event on the proper stack
 					if((x&1) == 1) {
-						indels.ins.push(indel_data::element(n.first+t*f/ins_rate, ins_mod(m)));
+						indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
 					} else {
-						indels.del.push(indel_data::element(n.first+t*f/del_rate, del_mod(m)));
-					}
+						do {
+							indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
+							f += m.rand_exp(t*T);
+						} while( f < ins_rate );
+					}					
+				} else {
+					r.second -= u;
+					n.second -= u;
+					if(r.second == 0)
+						indels.del.pop();
+					if(n.second == 0)
+						indels.ins.pop();					
 				}
+				
 				// insert u "deleted insertions" into buffer
 				child.insert(child.end(), u, residue(gap_base,
 					residue::rate_type(0.0), branch_color));
 				// remove u sites from both stacks, pop if empty
-				r.second -= u;
-				n.second -= u;
-				if(r.second == 0)
-					indels.del.pop();
-				if(n.second == 0)
-					indels.ins.pop();
 			} else if(first != last) {
 				// Deleted Original
 				assert(r.first < 1.0);
 				t = r.first;
-				boost::uint32_t u = r.second;
 				// Determine where the next event occurs
 				boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
-				if(x < 2*u) {
-					// the next event occured between these two
-					// how may sites are deleted
-					u = (x+1)/2;
-					// push the new event on the proper stack
+				if(x <= 2*r.second) {
+					// copy and mark at most x/2 nucleotides as deleted
+					boost::uint32_t u = mark_del(x/2, child, first, last);
+					if(u == r.second)
+						indels.del.pop();
+					else
+						r.second -= u;
 					if((x&1) == 1) {
-						indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
-					} else {
 						indels.del.push(indel_data::element(t*f/del_rate, del_mod(m)));
-					}
+					} else {
+						do {
+							indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
+							f += m.rand_exp(t*T);
+						} while( f < ins_rate );
+					}										
+				} else {
+					// copy and mark at most r.second nucleotides as deleted
+					boost::uint32_t u = mark_del(r.second, child, first, last);
+					// remove sites from stack, pop if empty
+					if(u == r.second)
+						indels.del.pop();
+					else
+						r.second -= u;
 				}
-				// copy and mark at most u nucleotides as deleted
-				boost::uint32_t uu;
-				for(uu=0;uu != u && first != last;++first) {
-					child.push_back(*first);
-					if(first->base() == gap_base)
-						continue;
-					child.back().base(gap_base);
-					child.back().rate_scalar(0.0);
-					++uu;
-				}
-				// remove sites from stack, pop if empty
-				r.second -= uu;
-				if(r.second == 0)
-					indels.del.pop();
 			} else {
 				// everything possible has been deleted
 				break;
@@ -384,16 +395,16 @@ dawg::details::matic_section::evolve_indels(
 			// Find location of next event
 			boost::uint32_t x = next_indel(m.rand_exp(t*T), f, false);
 			boost::uint32_t u = n.second;
-			if(x < 2*u) {
+			if(x <= 2*u) {
 				// next event overlaps this one
 				// remove u sites from the location and pop if empty
-				u = (x+1)/2;
+				u = x/2;
 				n.second -= u;
 				double tt = n.first;
 				if(n.second == 0)
 					indels.ins.pop();
 				// push the new event(s) on the proper stack
-				if((x&1) == 0) {
+				if((x&1) == 1) {
 					indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
 				} else {
 					do {
@@ -409,8 +420,7 @@ dawg::details::matic_section::evolve_indels(
 				child.push_back(residue(sub_mod(m),
 					static_cast<residue::rate_type>(rat_mod(m)), branch_color));
 		} else {
-			// nothing to do
-			break;
+			break; // nothing to do
 		}
 	}
 	return first;

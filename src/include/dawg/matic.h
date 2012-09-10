@@ -76,19 +76,35 @@ struct matic_section {
 		double indel_rate = ins_rate+del_rate;
 		if(bDel) {
 			if(d < ins_rate) {
-				f = d; return 1;
+				f = d;
+				return 2;
 			}
 			d -= ins_rate;
 		}
 		f = modf(d/indel_rate, &d);
 		f *= (indel_rate);
 		boost::uint32_t x = 2*static_cast<boost::uint32_t>(d);
-		x += (bDel) ? 2 : 0;
 		if(f < del_rate)
-			return x;
+			return x + ((bDel) ? 3 : 1);
 		f -= del_rate;
-		return 1+x;
+		return x + ((bDel) ? 4 : 2);
 	}
+	
+	inline boost::uint32_t mark_del(boost::uint32_t u, sequence &child,
+			sequence::const_iterator &first, sequence::const_iterator last) const {
+		boost::uint32_t uu;
+		for(uu=0;uu != u && first != last;++first) {
+			child.push_back(*first);
+			if(first->base() == gap_base)
+				continue;
+			child.back().base(gap_base);
+			child.back().rate_scalar(0.0);
+			++uu;
+		}
+		return uu;
+	}
+	
+	
 };
 
 struct sequence_data {
