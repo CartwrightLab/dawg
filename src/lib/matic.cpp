@@ -268,10 +268,10 @@ void dawg::details::matic_section::evolve_upstream(
 		}
 	}
 	// Calculate Immortal Link Insertion
-	if(ins_rate > DBL_EPSILON) {
-		dM = ins_rate;
+	dM = ins_rate;
+	if(dM > DBL_EPSILON) {
 		d = m.rand_exp(dM);
-		if(d < T) {
+		while(d < T) {
 			ins_up.push(indel_data::element(d/T, ins_mod(m)));
 			d += m.rand_exp(dM);
 		}
