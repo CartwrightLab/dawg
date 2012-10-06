@@ -28,8 +28,8 @@ public:
 	// return random mutant base
 	inline base_type operator()(mutt &m, base_type n) const {
 		boost::uint64_t u = m.rand_uint64();
-		boost::uint32_t x = u&63;
-		return (u < mutation_p[n][x]) ? x : mutation_a[n][x];
+		boost::uint32_t x = (u >> 58);
+		return ((u << 6) < mutation_p[n][x]) ? x : mutation_a[n][x];
 	}
 
 	inline const std::string& label() const { return name; }
