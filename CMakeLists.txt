@@ -21,6 +21,10 @@ ENDIF(USE_STATIC_LIBS)
 
 PROJECT(Dawg)
 
+set(NEW_PACKAGE_NAME "dawg")
+set(NEW_PACKAGE_VERSION "2-CURRENT")
+set(NEW_PACKAGE_INSTALL_DIR_VERSION "2")
+
 SET(PROJ_NAME "dawg")
 SET(PROJ_NAME_PRO "Dawg")
 SET(PROJ_EMAIL "reed@scit.us")
@@ -85,22 +89,6 @@ IF(APPLE_BUNDLE)
     SET(CMAKE_INSTALL_PREFIX "/Applications")
   ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 ENDIF(APPLE_BUNDLE)
-
-IF(WIN32 AND NOT UNIX)
-  SET(PROJ_DIR)
-ELSEIF(APPLE_BUNDLE)
-  SET(PROJ_DIR)
-ELSE(WIN32 AND NOT UNIX)
-  SET(PROJ_DIR "/${PROJ_NAME}-${PROJ_VERSION}")
-ENDIF(WIN32 AND NOT UNIX)
-
-SET(CMAKE_DATA_DIR "share${PROJ_DIR}" CACHE STRING
-  "Install location for data (relative to prefix).")
-SET(CMAKE_DOC_DIR "doc${PROJ_DIR}" CACHE STRING
-  "Install location for documentation (relative to prefix).")
-SET(CMAKE_MAN_DIR "man" CACHE STRING
-  "Install location for man pages (relative to prefix).")
-MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 
 SET(CPACK_SOURCE_IGNORE_FILES
   "/CVS/" "/\\\\.svn/"  "\\\\.swp$"  "\\\\.#"  "/#"  ".*~$" "/\\\\.git/"
@@ -199,6 +187,16 @@ ELSE(WIN32 AND NOT UNIX)
   SET(CPACK_SOURCE_GENERATOR "TGZ") 
   SET(CPACK_STRIP_FILES "bin/dawg")
 ENDIF(WIN32 AND NOT UNIX)
+
+INCLUDE(NewPackage)
+
+SET(CMAKE_DATA_DIR "share${NEW_PACKAGE_DIR}" CACHE STRING
+  "Install location for data (relative to prefix).")
+SET(CMAKE_DOC_DIR "doc${NEW_PACKAGE_DIR}" CACHE STRING
+  "Install location for documentation (relative to prefix).")
+SET(CMAKE_MAN_DIR "man" CACHE STRING
+  "Install location for man pages (relative to prefix).")
+MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 
 INCLUDE(CPack)
 
