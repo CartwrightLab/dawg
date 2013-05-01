@@ -22,7 +22,7 @@ ENDIF(USE_STATIC_LIBS)
 PROJECT(Dawg)
 
 set(NEW_PACKAGE_NAME "dawg")
-set(NEW_PACKAGE_VERSION "2-CURRENT")
+set(NEW_PACKAGE_VERSION "2-current-rUnknown")
 set(NEW_PACKAGE_INSTALL_DIR_VERSION "2")
 
 SET(PROJ_NAME "dawg")
@@ -91,13 +91,15 @@ IF(APPLE_BUNDLE)
 ENDIF(APPLE_BUNDLE)
 
 SET(CPACK_SOURCE_IGNORE_FILES
-  "/CVS/" "/\\\\.svn/"  "\\\\.swp$"  "\\\\.#"  "/#"  ".*~$" "/\\\\.git/"
+  "/CVS/" "/\\\\.svn/" "/\\\\.bzr/" "/\\\\.hg/" "/\\\\.git/"  "\\\\.swp$"
+  "\\\\.#"  "/#"  ".*~$"
+  "/releng/" "/build/"
   "/CMakeFiles/"  "CMakeCache\\\\.txt"
   "CPack.*Config\\\\.cmake"  "cmake_install\\\\.cmake"
   "install_manifest\\\\.txt$"
-  "_CPACK_PACKAGES"  "_CPack_Packages" "\\\\.dir"
-  "Makefile$" "/releng/" "\\\\.a$"
-  "${PROJ_NAME}[-]${PROJ_VERSION_MAJOR}" "${PROJ_NAME}$" "${PROJ_NAME}\\\\.exe"
+  "_CPACK_PACKAGES"  "_CPack_Packages"
+  "\\\\.dir" "Makefile$" "\\\\.a$"
+  "dawg\\\\.exe"  "dawg$"
 )
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Sequence Evolution Simulator")
