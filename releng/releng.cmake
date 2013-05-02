@@ -5,7 +5,14 @@ set(PROJECT_NAME "dawg")
 set(PROJECT_TITLE "Dawg")
 set(PROJECT_DISTS "dawg-2*")
 set(SVN_URL "svn://scit.us/${PROJECT_NAME}/")
-set(SVN_BIN "svn")
+
+find_program(SVN_BIN svn)
+
+if(NOT SVN_BIN)
+	message(FATAL_ERROR "Could not find Subversion binary.")
+endif()
+
+set(ENV{LC_ALL} C)
 
 # Script Options
 # RELENG_TAG
@@ -17,35 +24,42 @@ if(NOT RELENG_TAG)
 	set(RELENG_TAG "current")
 endif()
 
+# Identify Temporary Directory
+if(WIN32 AND NOT UNIX)
+	set(TMPDIR $ENV{TEMP})
+	if(NOT TMPDIR)
+		set(TMPDIR "c:/Temp")
+	endif()
+else()
+	set(TMPDIR $ENV{TMPDIR})
+	if(NOT TMPDIR)
+		set(TMPDIR "/tmp")
+	endif()
+endif()
+
 string(RANDOM TMP)
-set(RELENG_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-temp/${TMP}/")
+set(RELENG_DIR "${TMPDIR}/${PROJECT_NAME}-releng-${TMP}/")
+set(ARCHIVE_DIR "${RELENG_DIR}/dawg")
 
 message(STATUS "Using ${RELENG_DIR} to build packages ...")
 file(MAKE_DIRECTORY "${RELENG_DIR}")
 
-set(ARCHIVE "${PROJECT_NAME}.tar.gz")
 message(STATUS "Exporting ${PROJECT_TITLE} '${RELENG_TAG}' from SVN...")
-execute_process(COMMAND ${SVN_BIN} 
+execute_process(COMMAND ${SVN_BIN} export "${SVN_URL}/${RELENG_TAG}" "${ARCHIVE_DIR}"
+	OUTPUT_VARIABLE SVN_OUTPUT
+)
 
-# Extract version tag from the download log
-if(GIT_LOG MATCHES "Content-Disposition: attachment; filename=${GITHUB_USER}-${GITHUB_PROJECT}-(.*).tar.gz")
-	set(PROJECT_VERSION "${CMAKE_MATCH_1}")
-	# trim comment id if version matches a tag
-	if(PROJECT_VERSION MATCHES "^(.*)-0-.*$")
-		set(PROJECT_VERSION "${CMAKE_MATCH_1}")
-	endif()
+if(SVN_OUTPUT MATCHES "\nExported revision (.*)\\.\n")
+	set(PROJECT_SVNREV ${CMAKE_MATCH_1})
+else()
+	message(FATAL_ERROR "Unable to identify revision")
 endif()
 
-message(STATUS "Extracting archive ...")
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${ARCHIVE}"
-	WORKING_DIRECTORY "${RELENG_DIR}")
-file(GLOB ARCHIVE_DIR "${RELENG_DIR}${GITHUB_USER}-${GITHUB_PROJECT}*")
-
-message(STATUS "Configuring SPAGeDi version ${PROJECT_VERSION} ...")
+message(STATUS "Configuring ${PROJECT_TITLE} '${RELENG_TAG}' ...")
 set(CMAKE_DEFS
 	-DCMAKE_BUILD_TYPE=Release
-	-DUSE_STATIC_LIBS=on
-	-DSPAGEDI_VERSION_GIT=${PROJECT_VERSION}
+#	-DUSE_STATIC_LIBS=on
+	-DNEW_PACKAGE_VERSION_REV=${PROJECT_SVNREV}
 )
 set(CMAKE_ARGS "")
 if(WIN32 AND NOT UNIX)
@@ -61,8 +75,6 @@ elseif(APPLE)
 else()
 	set(MAKE_BIN make)	
 endif()
-
-message(status "${CMAKE_DEFS}")
 
 if(RELENG_M32)
 	set(CMAKE_DEFS ${CMAKE_DEFS} -DCMAKE_C_FLAGS=-m32)

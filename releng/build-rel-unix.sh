@@ -2,6 +2,7 @@
 # Download and build a package from GitHub
 
 CMAKE=cmake
+umask 077
 
 # Process command line arguments
 build_toolchain=
@@ -15,7 +16,7 @@ done
 shift `expr $OPTIND - 1`
 
 # Determine the archive tag
-build_archive=${1-HEAD}
+build_archive=${1-current}
 build_args="-DRELENG_TAG=${build_archive}"
 
 # if toolchain is m32 or m64 use the flags and not a toolchain
