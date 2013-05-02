@@ -15,6 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include "../version.h"
 #include "dawg.h"
 
 #include <dawg/matic.h>
@@ -36,9 +37,8 @@ using namespace std;
 using namespace boost;
 using namespace dawg;
 
-#define VERSION_MSG PACKAGE_STRING "\n" \
-	"    Copyright (C) 2004-2012  Reed A. Cartwright, PhD <reed@scit.us>\n" \
-	"    Report bugs to " PACKAGE_BUGREPORT
+#define VERSION_MSG NEW_PACKAGE_STRING "\n" \
+	"    Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>\n"
 
 int main(int argc, char *argv[])
 {

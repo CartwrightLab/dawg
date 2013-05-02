@@ -9,6 +9,10 @@ SET(DAWG_LIB_SOURCES
 	"${CMAKE_CURRENT_BINARY_DIR}/../include/dawg/details/config.h"
 )
 
+SET(PACKAGE_STRING "${NEW_PACKAGE_NAME} ${NEW_PACKAGE_VERSION}")
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/dawg/details/config.h.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/../include/dawg/details/config.h)
+
 ADD_LIBRARY(libdawg2 SHARED ${DAWG_LIB_SOURCES})
 SET_TARGET_PROPERTIES(libdawg2 PROPERTIES
 	OUTPUT_NAME "dawg2"

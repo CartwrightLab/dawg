@@ -1,0 +1,107 @@
+################################################################################
+## Wrapper script for setting up CPack
+##
+
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${NEW_PACKAGE_NAME}-${NEW_PACKAGE_VERSION}")
+SET(CPACK_PACKAGE_VERSION ${NEW_PACKAGE_VERSION})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${NEW_PACKAGE_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${NEW_PACKAGE_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${NEW_PACKAGE_VERSION_PATCH})
+
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
+
+list(APPEND CPACK_SOURCE_IGNORE_FILES
+  "/CVS/" "/\\\\.svn/" "/\\\\.bzr/" "/\\\\.hg/" "/\\\\.git/"  "\\\\.swp$"
+  "\\\\.#"  "/#"  ".*~$"
+  "/releng/" "/build/"
+  "/CMakeFiles/"  "CMakeCache\\\\.txt"
+  "CPack.*Config\\\\.cmake"  "cmake_install\\\\.cmake"
+  "install_manifest\\\\.txt$"
+  "_CPACK_PACKAGES"  "_CPack_Packages"
+  "\\\\.dir" "Makefile$" "\\\\.a$"
+)
+
+IF(NOT DEFINED CPACK_SYSTEM_NAME)
+	if(APPLE) # work around a bug in CMakeDetermineSystem.cmake
+		exec_program(uname ARGS -m OUTPUT_VARIABLE CPACK_SYSTEM_PROCESSOR RETURN_VAL val)
+		IF("${CMAKE_C_FLAGS}" MATCHES "[-]m32")
+			SET(CPACK_SYSTEM_PROCESSOR i386)
+		ELSEIF("${CMAKE_C_FLAGS}" MATCHES "[-]m64")
+			SET(CPACK_SYSTEM_PROCESSOR x86_64)
+		ENDIF()
+		if(CPACK_SYSTEM_PROCESSOR STREQUAL "x86_64")
+			set(CPACK_SYSTEM_NAME Darwin64)
+		else()
+			set(CPACK_SYSTEM_NAME Darwin)
+		endif()
+		SET(CPACK_SYSTEM_NAME ${CPACK_SYSTEM_NAME}-${CPACK_SYSTEM_PROCESSOR})
+	elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+		SET(CPACK_SYSTEM_NAME Cygwin-x86)
+	elseif(UNIX)
+		set(CPACK_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
+		# Check for building 32-bit binaries on 64-bit machines
+		# Adjust names as appropriate
+		IF("${CMAKE_C_FLAGS}" MATCHES "[-]m32")
+			IF(CPACK_SYSTEM_PROCESSOR MATCHES "x86")
+				SET(CPACK_SYSTEM_PROCESSOR x86_32)
+			ELSE()
+				SET(CPACK_SYSTEM_PROCESSOR i386)
+			ENDIF()
+		# Check for building 64-bit binaries on 32-bit machines
+		# Adjust names as appropriate
+		ELSEIF("${CMAKE_C_FLAGS}" MATCHES "[-]m64")
+			IF(CPACK_SYSTEM_PROCESSOR MATCHES "x86")
+				SET(CPACK_SYSTEM_PROCESSOR x86_64)
+			ELSE()
+				SET(CPACK_SYSTEM_PROCESSOR amd64)
+			ENDIF()
+		ENDIF()
+		SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CPACK_SYSTEM_PROCESSOR})
+	ELSE()
+		SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
+	ENDIF()
+ENDIF()
+
+IF(${CPACK_SYSTEM_NAME} MATCHES Windows)
+  IF(CMAKE_CL_64)
+    SET(CPACK_SYSTEM_NAME Win64-amd64)
+	SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+  ELSE()
+    SET(CPACK_SYSTEM_NAME Win32-x86)
+  ENDIF()
+ENDIF()
+
+IF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
+    SET(CPACK_PACKAGE_FILE_NAME 
+      "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
+ENDIF()
+
+if(WIN32 AND NOT UNIX)
+  SET(CPACK_NSIS_MODIFY_PATH ON)
+  set(CPACK_NSIS_DEFINES "
+		VIProductVersion ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.0
+		VIAddVersionKey ProductName \\\"${CPACK_PACKAGE_NAME}\\\"
+		VIAddVersionKey FileDescription \\\"${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\\\"
+		VIAddVersionKey Comments \\\"A binary installer for ${CPACK_PACKAGE_NAME}\\\"
+		VIAddVersionKey CompanyName \\\"${CPACK_PACKAGE_VENDOR}\\\"
+		VIAddVersionKey LegalCopyright \\\"${CPACK_PACKAGE_VENDOR}\\\"
+		VIAddVersionKey InternalName \\\"${CPACK_PACKAGE_NAME} Installer\\\"
+		VIAddVersionKey LegalTrademarks \\\"\\\"
+		VIAddVersionKey OriginalFilename \\\"${CPACK_PACKAGE_FILE_NAME}.exe\\\"
+		VIAddVersionKey FileVersion ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.0
+		VIAddVersionKey ProductVersion ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}.0
+	")
+endif()
+
+if(WIN32 AND NOT UNIX)
+  set(CPACK_SOURCE_GENERATOR "ZIP")
+  set(CPACK_GENERATOR "ZIP;NSIS")  
+elseif(APPLE)
+  set(CPACK_SOURCE_GENERATOR "TBZ2") 
+  set(CPACK_GENERATOR "PackageMaker" "TBZ2")
+else()
+  set(CPACK_SOURCE_GENERATOR "TBZ2") 
+  set(CPACK_GENERATOR "TBZ2")
+endif()
+
