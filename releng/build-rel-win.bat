@@ -2,7 +2,7 @@
 set ProductDir=
 set toolchain=
 set arch=
-set archivetag=HEAD
+set archivetag=current
 
 if "%~1"=="-t" goto TOOLCHAIN
 goto BEGINVCVAR
