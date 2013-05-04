@@ -23,6 +23,16 @@ IF(USE_STATIC_LIBS)
   SET(LIBDAWG_USE_STATIC_LIBS ON FORCE)
 ENDIF(USE_STATIC_LIBS)
 
+#### RPATH Support #####
+
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif()
+
 PROJECT(Dawg)
 
 INCLUDE(NewPackage)
@@ -75,6 +85,15 @@ ADD_SUBDIRECTORY(tests)
 
 ADD_DEPENDENCIES(new_package dawg)
 ADD_DEPENDENCIES(dawg version)
+
+########### Add uninstall target ###############
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/Modules/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+  IMMEDIATE @ONLY)
+
+ADD_CUSTOM_TARGET(uninstall
+  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake") 
 
 #INCLUDE(InstallRequiredSystemLibraries)
 
