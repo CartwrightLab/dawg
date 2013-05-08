@@ -55,8 +55,8 @@ struct matic_section {
 	subst_model     sub_mod;
 	rate_model      rat_mod;
 	root_model      rut_mod;
-	indel_mix_model ins_mod;
-	indel_mix_model del_mod;
+	indel_model ins_mod;
+	indel_model del_mod;
 
 	residue::data_type gap_base;
 	

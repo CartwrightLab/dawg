@@ -14,6 +14,8 @@ XM((indel)(params), (indel)(params)(ins))
 XM((indel)(params), (indel)(params)(del))
 XM((indel)(rate),   (indel)(rate)(ins))
 XM((indel)(rate),   (indel)(rate)(del))
+XM((indel)(max),    (indel)(max)(ins))
+XM((indel)(max),    (indel)(max)(del))
 
 /***************************************************************************
  *    cleanup                                                              *
