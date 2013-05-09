@@ -127,34 +127,22 @@ private:
 	}
 	
 	template<typename It>
-	inline bool create_user(It &first, It last) {
-		udata.assign(1,0);
-		double m = 0.0, d=0.0, n=1.0;
-		mutt::uint_t mx = std::numeric_limits<mutt::uint_t>::max();
-		It it=first;
-		// find sum and mean
-		for(;it != last && *it >= 0.0;++it) {
-			m += *it*n;
-			d += *it;
-			n += 1.0;
-		}
-		mean = m/d;
-		m = 0.0;
-		for(It jt=first;jt != it;++jt) {
-			m += *jt;
-			udata.push_back(static_cast<mutt::uint_t>(mx*(m/d)));
-		}
-		if(udata.size() == 1)
+	inline bool create_user(double f, It &first, It last, unsigned int max_size,
+	                       std::vector<double> &mix_dist) {
+		double d = 0.0;
+		It it = first;
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; no parameters for user model.");
-		
-		udata.back() = mx;
-		udata.resize(upper_binary(udata.size()), mx);
+		// sum up parameters
+		for(;it != last && *it >= 0.0;++it)
+			d += *it;
+		for(unsigned int n=1; first != it && n <= max_size; ++first,++n)
+			mix_dist[n] += f*(*first)/d;
 
 		// skip the '-1' terminator if it exists
 		if(it != last)
 			++it;
-		name = "user";
-		do_op = &dawg::indel_model::do_user;
+		first = it;
 		return true;
 	}
 	
