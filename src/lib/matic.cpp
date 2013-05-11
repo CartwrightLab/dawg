@@ -257,7 +257,6 @@ void dawg::details::matic_section::evolve_upstream(
 	indel_data::stack del_up, ins_up;
 
 	// Calculate Upstream Deletions
-	// TODO: fix-this for zeta models and mixtures
 	//    p(size) = (1-sum(f(x), 1, size))/(mean(x)-1)
 	dM = del_rate*(del_mod.meansize()-1.0);
 	if(dM > DBL_EPSILON) {
