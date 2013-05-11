@@ -57,11 +57,11 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("heterogenous rate model could not be created.");
 	if(!info->ins_mod.create(ma.indel_model_ins.begin(), ma.indel_model_ins.end(),
 		ma.indel_rate_ins.begin(), ma.indel_rate_ins.end(),
-		ma.indel_params_ins.begin(), ma.indel_params_ins.end()))
+		ma.indel_params_ins.begin(), ma.indel_params_ins.end(), ma.indel_max_ins))
 		return DAWG_ERROR("insertion model could not be created.");
 	if(!info->del_mod.create(ma.indel_model_del.begin(), ma.indel_model_del.end(),
 		ma.indel_rate_del.begin(), ma.indel_rate_del.end(),
-		ma.indel_params_del.begin(), ma.indel_params_del.end()))
+		ma.indel_params_del.begin(), ma.indel_params_del.end(), ma.indel_max_del))
 		return DAWG_ERROR("deletion model could not be created.");
 	if(!info->rut_mod.create(ma.root_length, ma.root_seq, ma.root_rates))
 		return DAWG_ERROR("root model could not be created.");

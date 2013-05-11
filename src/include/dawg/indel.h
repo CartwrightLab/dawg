@@ -25,11 +25,15 @@ public:
 	typedef std::vector<double> params_type;
 	
 	indel_model() {
-		sample.create(params_type(1,1.0));
+		std::vector<double> a;
+		a.push_back(0.0);
+		a.push_back(1.0);
+		sample.create(a);
 	}
 	
-	inline double meansize() const { return mean;}
-
+	inline double meansize() const { return mean_size;}
+	inline double rate() const { return total_rate;}
+	
 	// std::numeric_limits<uint32>::max()
 	template<typename It1, typename It2, typename It3>
 	bool create(It1 first_n, It1 last_n, It2 first_r, It2 last_r,
@@ -39,19 +43,18 @@ public:
 			std::string("zeta"), std::string("zipf"), std::string("power-law")
 		};
 
-		if(max_size > std::numeric_limits<uint32>::max())
+		if(max_size > std::numeric_limits<boost::uint32_t>::max())
 			return DAWG_ERROR("maximum indel size is out of range");
 	    if(first_n == last_n)
 	    	return DAWG_ERROR("invalid indel model; no model type specified");
 
-		therate = 0.0;
+		total_rate = 0.0;
 
-		for(It2 it=first_r;it!=last_r;++it,++sz) {
+		for(It2 it=first_r;it!=last_r;++it) {
 			if(*it < 0.0)
 				return DAWG_ERROR("invalid indel model; rate '" << *it << "' must be positive");
-			therate += *it;
+			total_rate += *it;
 		}
-		models.resize(sz);
 		
 		// enumerate over all models and build table in place
 		std::vector<double> mix_dist(max_size, 0);
@@ -59,27 +62,35 @@ public:
 		for(It2 it=first_r;it!=last_r;++it) {
 			// we have to try to create a model to consume parameters
 			bool okay = true;
-			double fraction = *it/therate;
+			double fraction = *it/total_rate;
 			switch(key_switch(*itn, name_keys)) {
 			case 0: // user model
-				okay = create_user(fraction, first, last, max_size, mix_dist);
+				okay = create_user(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			case 1: // geometric model
-				okay = create_geo(fraction, first, last, max_size, mix_dist);
+				okay = create_geo(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			case 2: // zeta power-law model
 			case 3:
 			case 4: 
-				okay = create_zeta(fraction, first, last, max_size, mix_dist);
+				okay = create_zeta(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			default:
-				return DAWG_ERROR("Invalid indel model; no model named '" << name << "'");
+				return DAWG_ERROR("Invalid indel model; no model named '" << *itn << "'");
 			};
 			if(!okay)
 				return DAWG_ERROR("indel model creation failed");
 			if(++itn == last_n)
 				itn = first_n;		
-		};
+		}
+		double m = 0.0, n = 0.0, w = 0.0;
+		for(std::vector<double>::const_iterator it = mix_dist.begin();
+			it != mix_dist.end(); ++it) {
+			w += *it;
+			m += *it*n;
+			n += 1.0;
+		}
+		mean_size = m/w;
 		sample.create_inplace(mix_dist);
 		return true;
 	}
@@ -115,7 +126,7 @@ private:
 			return DAWG_ERROR("Invalid indel model; zeta requires 1 parameter");
 		double z = *first++;
 		if(z <= 1.0) 
-			return DAWG_ERROR("Invalid indel model; zeta parameter '" << qorz
+			return DAWG_ERROR("Invalid indel model; zeta parameter '" << z
 				<< "' must be > 1");
 		double d = 1.0;
 		double zz = zeta(z);
@@ -147,6 +158,8 @@ private:
 	}
 	
 	alias_table sample;
+	double total_rate;
+	double mean_size;
 };
 
 } /* namespace dawg */
