@@ -28,11 +28,12 @@ public:
 		std::vector<double> a;
 		a.push_back(0.0);
 		a.push_back(1.0);
-		sample.create(a);
+		sample.create_inplace(a);
 	}
 	
-	inline double meansize() const { return mean_size;}
-	inline double rate() const { return total_rate;}
+	inline double meansize() const { return mean_size; }
+	inline double rate() const { return total_rate; }
+	inline double upstream_rate() const { return total_upstream_rate; }
 	
 	// std::numeric_limits<uint32>::max()
 	template<typename It1, typename It2, typename It3>
@@ -57,7 +58,7 @@ public:
 		}
 		
 		// enumerate over all models and build table in place
-		std::vector<double> mix_dist(max_size, 0);
+		std::vector<double> mix_dist(max_size+1, 0.0);
 		It1 itn = first_n;
 		for(It2 it=first_r;it!=last_r;++it) {
 			// we have to try to create a model to consume parameters
@@ -80,25 +81,37 @@ public:
 			};
 			if(!okay)
 				return DAWG_ERROR("indel model creation failed");
+			// cycle "name" as needed
 			if(++itn == last_n)
 				itn = first_n;		
 		}
-		double m = 0.0, n = 0.0, w = 0.0;
-		for(std::vector<double>::const_iterator it = mix_dist.begin();
-			it != mix_dist.end(); ++it) {
-			w += *it;
-			m += *it*n;
-			n += 1.0;
+		// Calculate mean
+		double m = 0.0, w = 0.0;
+		std::vector<double> upstream_dist(mix_dist.size(),0.0);
+		for(std::size_t x = mix_dist.size()-1; x != 0; --x) {
+			m += mix_dist[x]*x;
+			w += mix_dist[x];
+			upstream_dist[x-1] = upstream_dist[x] + mix_dist[x];
 		}
+		upstream_dist[0] = 0.0;
+		// upstream deletions
+		// p(size) = (sum(f(x), size+1, MAX))/(mean(x)-1)
+		// p(size) = (w-sum(wf(x), 1, size))/w(mean(x)-1)
 		mean_size = m/w;
+		total_upstream_rate = total_rate*(mean_size-1.0);
 		sample.create_inplace(mix_dist);
+		sample_upstream.create_inplace(upstream_dist);
+		
 		return true;
 	}
 		
 	boost::uint32_t operator()(mutt &m) const {
 		return sample(m.rand_uint64());
 	}
-		
+	
+	boost::uint32_t sample_upstream_overlap(mutt &m) const {
+		return sample_upstream(m.rand_uint64());
+	}	
 private:
 	template<typename It>
 	inline bool create_geo(double f, It &first, It last, unsigned int max_size,
@@ -157,8 +170,8 @@ private:
 		return true;
 	}
 	
-	alias_table sample;
-	double total_rate;
+	alias_table sample, sample_upstream;
+	double total_rate, total_upstream_rate;
 	double mean_size;
 };
 

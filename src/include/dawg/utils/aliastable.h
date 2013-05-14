@@ -6,6 +6,7 @@
 #include <vector>
 #include <numeric>
 #include <cassert>
+#include <ostream>
 #include <boost/range.hpp>
 #include <boost/cstdint.hpp>
 
@@ -108,6 +109,13 @@ public:
 			}
 		}
 	}
+
+	template<class CharType, class CharTrait>
+	void print_table(std::basic_ostream<CharType, CharTrait>& o) {
+		for(std::size_t n = 0; n < a.size(); ++n) {
+			o << n << "\t" << a[n] << "\t" << p[n] << std::endl;
+		}
+	}
 	
 private:
 	template<typename T>
@@ -122,5 +130,12 @@ private:
 	std::vector<uint32> a,p;
 	int shr;
 };
+
+template<class CharType, class CharTrait, class T, class A>
+inline std::basic_ostream<CharType, CharTrait>&
+operator<<(std::basic_ostream<CharType, CharTrait>& o, const alias_table &a) {
+	
+}
+
 
 #endif //ALIASTABLE_H

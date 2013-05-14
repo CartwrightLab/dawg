@@ -257,12 +257,12 @@ void dawg::details::matic_section::evolve_upstream(
 	indel_data::stack del_up, ins_up;
 
 	// Calculate Upstream Deletions
-	//    p(size) = (1-sum(f(x), 1, size))/(mean(x)-1)
-	dM = del_rate*(del_mod.meansize()-1.0);
+	dM = del_mod.upstream_rate();
 	if(dM > DBL_EPSILON) {
 		d = m.rand_exp(dM);
 		while(d < T) {
-			del_up.push(indel_data::element(d/T,  del_mod(m)));
+			del_up.push(indel_data::element(d/T,
+				del_mod.sample_upstream_overlap(m)));
 			d += m.rand_exp(dM);
 		}
 	}
