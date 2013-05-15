@@ -12,7 +12,7 @@
 #include <boost/cstdint.hpp>
 
 #include <dawg/utils/foreach.h>
-#include <dawg/utils/zeta.h>
+#include <dawg/utils/specfunc.h>
 #include <dawg/utils.h>
 #include <dawg/log.h>
 #include <dawg/mutt.h>
@@ -41,7 +41,8 @@ public:
 	            It3 first_p, It3 last_p, unsigned int max_size) {
 		static std::string name_keys[] = {
 			std::string("user"), std::string("geom"),
-			std::string("zeta"), std::string("zipf"), std::string("power-law")
+			std::string("zeta"), std::string("zipf"), std::string("power-law"),
+			std::string("yule-simon"), std::string("lavalette")
 		};
 
 		if(max_size > std::numeric_limits<boost::uint32_t>::max())
@@ -75,6 +76,12 @@ public:
 			case 3:
 			case 4: 
 				okay = create_zeta(fraction, first_p, last_p, max_size, mix_dist);
+				break;
+			case 5: // yule-simon model
+				okay = create_yule(fraction, first_p, last_p, max_size, mix_dist);
+				break;
+			case 6: // lavalette model
+				okay = create_lavalette(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			default:
 				return DAWG_ERROR("Invalid indel model; no model named '" << *itn << "'");
@@ -125,7 +132,7 @@ private:
 			return DAWG_ERROR("Invalid indel model; geo parameter '" << p
 				<< "' must be positive.");
 		double d = p;
-		for(unsigned int n=1;n<=max_size;++n) {
+		for(boost::uint32_t n=1; n <= max_size; ++n) {
 			mix_dist[n] += f*d;
 			d *= (1.0-p);
 		}
@@ -141,14 +148,56 @@ private:
 		if(z <= 1.0) 
 			return DAWG_ERROR("Invalid indel model; zeta parameter '" << z
 				<< "' must be > 1");
-		double d = 1.0;
 		double zz = zeta(z);
-		for(unsigned int n=1;n<=max_size;++n) {
-			mix_dist[n] += f*pow(d,-z)/zz;
-			d += 1.0;
+		for(boost::uint32_t n=1; n <= max_size; ++n) {
+			mix_dist[n] += f*pow(1.0*n,-z)/zz;
 		}
 		return true;
 	}
+	
+	template<typename It>
+	inline bool create_yule(double f, It &first, It last, unsigned int max_size,
+	                       std::vector<double> &mix_dist) {
+		if(first == last) 
+			return DAWG_ERROR("Invalid indel model; yule requires 1 parameter");
+		double z = *first++;
+		if(z <= 1.0) 
+			return DAWG_ERROR("Invalid indel model; yule parameter '" << z
+				<< "' must be > 1");
+		for(boost::uint32_t n=1; n <= max_size; ++n) {
+			mix_dist[n] += f*(z-1.0)*beta(n,z);
+		}
+		return true;
+	}
+
+	template<typename It>
+	inline bool create_lavalette(double f, It &first, It last, unsigned int max_size,
+	                       std::vector<double> &mix_dist) {
+		if(first == last) 
+			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
+		double z = *first++;
+		if(first == last) 
+			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
+ 		double dm = *first++; 
+		if(z <= 1.0) 
+			return DAWG_ERROR("Invalid indel model; lavalette slope '" << z
+				<< "' must be > 1");
+		if(dm <= 1.0)
+			return DAWG_ERROR("Invalid indel model; lavalette max '" << dm
+				<< "' must be > 1");
+		boost::uint32_t m = static_cast<boost::uint32_t>(dm);
+		// find normalization curve
+		double d=0.0;
+		for(boost::uint32_t n=m; n != 0; --n) {
+			d += pow(1.0*m*n/(m-n+1.0),-z);
+		}
+
+		for(boost::uint32_t n=1; n <= m && n <= max_size; ++n) {
+			mix_dist[n] += f*pow(1.0*m*n/(m-n+1.0),-z)/d;
+		}
+		return true;
+	}
+
 	
 	template<typename It>
 	inline bool create_user(double f, It &first, It last, unsigned int max_size,
@@ -160,7 +209,7 @@ private:
 		// sum up parameters
 		for(;it != last && *it >= 0.0;++it)
 			d += *it;
-		for(unsigned int n=1; first != it && n <= max_size; ++first,++n)
+		for(boost::uint32_t n=1; first != it && n <= max_size; ++first,++n)
 			mix_dist[n] += f*(*first)/d;
 
 		// skip the '-1' terminator if it exists
