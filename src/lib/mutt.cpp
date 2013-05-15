@@ -54,9 +54,9 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
  *
  * Imported from GSL's gamma.c.
  */
-double dawg::mutt::rand_gamma_high(double a, double b) {
-	//if(a < 1)
-	//	return rand_gamma(1.0+a,b)*pow(rand_real_b(), 1.0/a);
+double dawg::mutt::rand_gamma(double a, double b) {
+	if(a < 1.0)
+		return rand_gamma(1.0+a,b)*pow(rand_real(), 1.0/a);
 
 	double x, v, u;
 	double d = a - 1.0/3.0;

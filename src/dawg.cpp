@@ -160,15 +160,15 @@ int dawg_app::run() {
 	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
 	dawg::matic kimura;
-	if(!kimura.configure(configs.begin(), configs.end())) {
-		DAWG_ERROR("bad configuration");
-		return EXIT_FAILURE;
-	}
 	// if a seed was specified, use it
 	if(arg.seed != 0) {
 		kimura.seed(arg.seed);
 	} else if(!glopts.sim_seed.empty()) {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
+	}
+	if(!kimura.configure(configs.begin(), configs.end())) {
+		DAWG_ERROR("bad configuration");
+		return EXIT_FAILURE;
 	}
 	// create sets of aligned sequences;
 	dawg::alignment aln;

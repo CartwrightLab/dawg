@@ -2,70 +2,79 @@
 #ifndef DAWG_RATE_H
 #define DAWG_RATE_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009,2013 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
- #include <string>
+// We will approximate the gamma distribution by taking a large sample.
+#define DAWG_GAMMA_SAMPLE_SIZE 4095
  
+#include <string>
+#include <dawg/utils/aliastable.h>
+
 namespace dawg {
 
 class rate_model {
 public:
-
+	typedef float rate_type;
+	
 	template<typename It>
-	bool create(const std::string &rname, It first, It last) {
+	bool create(const std::string &rname, It first, It last, mutt &m) {
 		static std::string name_keys[] = {
 			std::string("const"),
-			std::string("gamma")
+			std::string("gamma-invariant")
 		};
 		switch(key_switch(rname, name_keys)) {
 			case 0:
-				return create_const(first, last);
+				return create_const(first, last, m);
 			case 1:
-				return create_gamma(first, last);
+				return create_gamma(first, last, m);
 		};
 		return DAWG_ERROR("Invalid rate model; no model named '" << rname << "'");		
 		
 	}
+	
 	template<typename It>
-	inline bool create_const(It first, It last) {
+	inline bool create_const(It first, It last, mutt &) {
 		name = "const";
-		do_op = &rate_model::do_const;
+		std::vector<double> weights(1, 1.0);
+		sample.create_inplace(weights);
+		values.assign(1, 1.0f);
 		return true;
 	}
 
 	template<typename It>
-	bool create_gamma(It first, It last) {
+	bool create_gamma(It first, It last, mutt &m) {
 		if(first == last)
-			return DAWG_ERROR("Invalid rate model; gamma requires at least 1 parameter");
-		gamma = *first++;
-		alpha = 1.0/gamma;
-		if(gamma < 0.0) 
-			return DAWG_ERROR("Invalid rate model; first gamma parameter '" << gamma << "' is not >= 0.");
-		iota = 0.0;
+			return DAWG_ERROR("Invalid rate model; gamma-invariant requires at least 1 parameter");
+		double alpha = *first++;
+		if(alpha < 0.0) 
+			return DAWG_ERROR("Invalid rate model; first gamma-invariant parameter '" << alpha << "' is not >= 0.");
+		double iota = 0.0;
 		if(first != last) {
 			iota = *first++;
-			if(iota < 0.0 || iota > 1.0) 
-				return DAWG_ERROR("Invalid rate model; second gamma parameter '" << iota << "' is not [0,1].");
+			if(iota < 0.0 || iota >= 1.0) 
+				return DAWG_ERROR("Invalid rate model; second gamma-invariant parameter '" << iota << "' is not [0,1).");
 		}
-		if(iota == 0.0) {
-			if(gamma == 0.0) {
-				name = "const";
-				do_op = &rate_model::do_const;
-				return true;
-			} else if(gamma > 1.0) {
-				do_op = &rate_model::do_gamma_low;
-			} else {
-				do_op = &rate_model::do_gamma_high;
-			}
-		} else if(gamma == 0.0) {
-			do_op = &rate_model::do_iota;
-		} else if(gamma > 1.0) {
-			do_op = &rate_model::do_iota_gamma_low;
-		} else {
-			do_op = &rate_model::do_iota_gamma_high;
+		// construct weights
+		std::vector<double> weights(1+DAWG_GAMMA_SAMPLE_SIZE,
+			(1.0-iota)/DAWG_GAMMA_SAMPLE_SIZE);
+		weights[0] = iota;
+		sample.create_inplace(weights);
+		
+		// construct values
+		values.assign(1+DAWG_GAMMA_SAMPLE_SIZE,0.0f);
+		double d = 0.0;
+		for(std::size_t u = 1; u < values.size(); ++u) {
+			values[u] = static_cast<rate_type>(m.rand_gamma(alpha, 1.0/alpha));
+			d += values[u];
 		}
-		name = "gamma";
+		// rescale values so that the expected value is exactly 1.0
+		d *= (1.0-iota)/DAWG_GAMMA_SAMPLE_SIZE;
+		for(std::size_t u = 1; u < values.size(); ++u) {
+			values[u] = static_cast<rate_type>(values[u]/d);
+		}
+		
+		name = "gamma-invariant";
 		return true;
 	}
 	
@@ -74,43 +83,14 @@ public:
 	}
 
 	double operator()(mutt &m) const {
-		return (this->*do_op)(m);
-	}	
+		return values[sample(m.rand_uint64())];
+	}
 	
 private:
-	// pointer that will hold our method
-	double (rate_model::*do_op)(mutt &m) const;
-
-	double do_const(mutt &m) const {
-		return 1.0;
-	}
-	
-	double do_iota(mutt &m) const {
-		return m.rand_bool(iota) ? 0.0 : 1.0;
-	}
-	
-	double do_gamma_low(mutt &m) const {
-		//gamma > 1.0
-		return m.rand_gamma_low(alpha, gamma);
-	}
-	
-	double do_gamma_high(mutt &m) const {
-		// gamma <= 1.0
-		return m.rand_gamma_high(alpha, gamma);
-	}
-	
-	double do_iota_gamma_low(mutt &m) const {
-		//gamma > 1.0
-		return m.rand_bool(iota) ? 0.0 : m.rand_gamma_low(alpha, gamma);
-	}
-	
-	double do_iota_gamma_high(mutt &m) const {
-		// gamma <= 1.0
-		return m.rand_bool(iota) ? 0.0 : m.rand_gamma_high(alpha, gamma);
-	}	
-	
+		
+	alias_table sample;
+	std::vector<rate_type> values;
 	std::string name;
-	double alpha,gamma,iota;
 };
  
 } /* namespace dawg */

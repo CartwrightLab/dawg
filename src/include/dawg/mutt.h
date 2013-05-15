@@ -75,19 +75,7 @@ public:
 	boost::uint32_t rand_zeta(double z);
 	
 	// random gamma with mean ab and var abb
-	inline double rand_gamma(double a, double b) {
-		if(a < 1)
-			return rand_gamma_low(a,b);
-		else
-			return rand_gamma_high(a,b);
-	}
-	// assumes a >= 1
-	double rand_gamma_high(double a, double b);
-	// assumes a < 1
-	inline double rand_gamma_low(double a, double b) {
-		// TODO: check to see if this can be _oc
-		return rand_gamma_high(1.0+a,b)*pow(rand_real(), 1.0/a);
-	}
+	double rand_gamma(double a, double b);
 	
 	// random normal with mean and sigma
 	inline double rand_normal(double m, double s) {
