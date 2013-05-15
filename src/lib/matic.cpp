@@ -249,7 +249,7 @@ void dawg::details::matic_section::evolve_upstream(
 		mutt &m) const {
 	double dM, d;
 	//insertion and deletion rates
-	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
+	double ins_rate = ins_mod.rate();
 	//double indel_rate = ins_rate+del_rate;
 	
 	indels.clear();

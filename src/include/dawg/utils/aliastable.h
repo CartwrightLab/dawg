@@ -2,7 +2,6 @@
 #ifndef ALIASTABLE_H
 #define ALIASTABLE_H
 
-#include <cstdint>
 #include <vector>
 #include <numeric>
 #include <cassert>
