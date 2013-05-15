@@ -88,7 +88,8 @@ public:
 		// Calculate mean
 		double m = 0.0, w = 0.0;
 		std::vector<double> upstream_dist(mix_dist.size(),0.0);
-		for(std::size_t x = mix_dist.size()-1; x != 0; --x) {
+		for(boost::uint32_t x = static_cast<boost::uint32_t>(mix_dist.size()-1);
+				x != 0; --x) {
 			m += mix_dist[x]*x;
 			w += mix_dist[x];
 			upstream_dist[x-1] = upstream_dist[x] + mix_dist[x];
@@ -96,7 +97,6 @@ public:
 		upstream_dist[0] = 0.0;
 		// upstream deletions
 		// p(size) = (sum(f(x), size+1, MAX))/(mean(x)-1)
-		// p(size) = (w-sum(wf(x), 1, size))/w(mean(x)-1)
 		mean_size = m/w;
 		total_upstream_rate = total_rate*(mean_size-1.0);
 		sample.create_inplace(mix_dist);
