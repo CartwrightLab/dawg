@@ -37,6 +37,7 @@ struct trick {
 		static inline void conv(const std::string& ss, double& r);
 		static inline void conv(const std::string& ss, bool& r);
 		static inline void conv(const std::string& ss, unsigned int& r);
+		static inline void conv(const std::string& ss, int& r);
 		
 		inline void read_alias(const std::string& a, const std::string& b);
 	};
@@ -89,6 +90,10 @@ inline void trick::section::conv(const std::string& ss, double& r) {
 
 inline void trick::section::conv(const std::string& ss, unsigned int& r) {
 	r = strtoul(ss.c_str(), NULL, 0);
+}
+
+inline void trick::section::conv(const std::string& ss, int& r) {
+	r = strtol(ss.c_str(), NULL, 0);
 }
 
 // A value is false if it is equal to 0, f, false, off, no, or blank

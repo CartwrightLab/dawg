@@ -139,8 +139,9 @@ int dawg_app::run() {
 
 	bool split  = arg.split || (indeterminate(arg.split) && glopts.output_split);
 	bool append = arg.append || (indeterminate(arg.append) && glopts.output_append);
+	bool label  = arg.label || (indeterminate(arg.label) && glopts.output_label);
 
-	if(!write_aln.open(file_name, num_reps-1, split, append)) {
+	if(!write_aln.open(file_name, num_reps-1, split, append, label)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
@@ -149,14 +150,14 @@ int dawg_app::run() {
 		glopts.output_block_tail.c_str(),
 		glopts.output_block_before.c_str(),
 		glopts.output_block_after.c_str()
-	);		
+	);
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_trick(input, configs)) {
 		DAWG_ERROR("bad configuration");
 		return EXIT_FAILURE;
 	}
-		
+
 	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
 	dawg::matic kimura;

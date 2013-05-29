@@ -19,7 +19,7 @@ struct aligned_sequence {
 typedef std::vector<residue> sequence;
 
 struct alignment : public std::vector<details::aligned_sequence> {
-	std::string::size_type max_label_width, max_label_width_14;
+	std::string::size_type max_label_width;
 	int seq_type;
 };
 

@@ -162,12 +162,10 @@ void dawg::matic::pre_walk(alignment& aln) {
 	aln.resize(aln_size);
 	seqs.resize(label_union.size());
 	aln.max_label_width = 0;
-	aln.max_label_width_14 = 14;
 	label_to_index_type::const_iterator it = label_union.begin();
 	for(alignment::size_type uu = 0; uu < aln_size;++uu) {
 		const string &lab = it->first;
 		aln.max_label_width = std::max(aln.max_label_width, lab.length());
-		aln.max_label_width_14 = std::max(aln.max_label_width_14, lab.length());
 		aln[uu].label = lab;
 		++it;
 	}

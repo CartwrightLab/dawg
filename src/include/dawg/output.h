@@ -19,21 +19,24 @@ namespace dawg {
 class output {
 public:
 	output() : do_op(&output::print_aln), p_out(NULL), format_id(0),
-		rep(0), split_width(0), app(false), split_id_offset(0) { }
+		rep(0), label_width(0),
+		do_append(false), do_split(false), do_label(false),
+		split_id_offset(0) { }
 
-	bool open(const char *file_name, unsigned int max_rep=0, bool split = false, bool append=false);
+	bool open(const char *file_name, unsigned int max_rep=0,
+		bool split = false, bool append=false, bool label=false);
 
 	inline bool operator()(const alignment& aln) {
 		open_next();
 		if(p_out == NULL)
 			return false;
 		std::ostream &out = *p_out;
-		if(split_width == 0)
+		if(!do_split)
 			out << ((rep == 0) ? block_head : block_between);
 		out << block_before;
 		(this->*do_op)(aln);
 		out << block_after;
-		if(split_width == 0 && rep == last_rep)
+		if(!do_split == 0 && rep == last_rep)
 			out << block_tail;
 		++rep;
 		out.flush();
@@ -75,9 +78,9 @@ protected:
 	std::ostream *p_out;
 	std::ofstream fout;
 	std::size_t format_id;
-	unsigned int rep, split_width, last_rep;
-	bool app;
-	std::string split_file_name;
+	unsigned int rep, label_width, last_rep;
+	bool do_append, do_split, do_label;
+	std::string current_label, split_file_name;
 	std::string::size_type split_id_offset;
 	
 	std::string block_head;

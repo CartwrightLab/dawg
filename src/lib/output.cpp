@@ -20,7 +20,8 @@
 using namespace dawg;
 using namespace std;
 
-bool dawg::output::open(const char *file_name, unsigned int max_rep, bool split, bool append) {
+bool dawg::output::open(const char *file_name, unsigned int max_rep,
+	bool split, bool append, bool label) {
 	typedef boost::iterator_range<const char*> cs_range;
 	set_format("aln");
 	last_rep = max_rep;
@@ -48,38 +49,37 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep, bool split,
 						<< std::string(format.begin(), format.end()) << "\'.");
 		}
 	}
+	label_width = 1+static_cast<unsigned int>(log10(1.0*max_rep));
+	current_label.assign(label_width, '0');
+	do_label = label;
+	
 	if(file_name != NULL && file_name[0] != '\0' && strcmp(file_name, "-") != 0) {
-		// set append option before we open the file
-		app = append;
-		// find how wide the id number must be
-		unsigned int m = split ? max_rep : 0;
-		split_width = (m == 0) ? 0 : (m < 10) ? 1 : (m < 100) ? 2 : (m < 1000) ? 3 :
-			(m < 10000) ? 4 : (m < 100000) ? 5 : (m < 1000000) ? 6 :
-			(m < 10000000) ? 7 : (m < 100000000) ? 8 :
-			(m < 1000000000) ? 9 : 10;
+		// set append and split options before we open the file
+		do_append = append;
+		do_split  = split;
 		// open our omnibus output if desired
-		if(split_width == 0) {
+		if(!do_split) {
 			if(!open_file(file_name))
-				return DAWG_ERROR("unable to open output file \'" << file_name<< "\'.");
+				return DAWG_ERROR("unable to open output file \'" << file_name << "\'.");
 		} else {
 			// setup output_filename
 			if(mid == NULL) {
 				split_file_name.assign(file_name);
 				split_file_name.append(1, '-');
-				split_file_name.append(split_width, '0');
-				split_id_offset = split_file_name.size()-split_width;
+				split_file_name.append(current_label);
+				split_id_offset = split_file_name.size()-label_width;
 			} else {
 				split_file_name.assign(file_name, mid);
 				split_file_name.append(1, '-');
-				split_file_name.append(split_width, '0');
+				split_file_name.append(current_label);
 				split_file_name.append(mid);
 				split_id_offset = (mid-file_name)+1;
 			}
 		}
 	} else {
 		// turn off appending and spliting
-		app = false;
-		split_width = 0;
+		do_append = false;
+		do_split = false;
 		set_ostream(cout);
 	}
 	return true;
@@ -88,7 +88,8 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep, bool split,
 bool dawg::output::open_file(const char* file_name) {
 	if(fout.is_open())
 		fout.close();
-	ios_base::openmode om = ios_base::out | (app ? ios_base::app : ios_base::trunc);
+	ios_base::openmode om = ios_base::out |
+		(do_append ? ios_base::app : ios_base::trunc);
 	fout.open(file_name, om);
 	if(!fout.is_open()) {
 		set_ostream(NULL);
@@ -99,27 +100,45 @@ bool dawg::output::open_file(const char* file_name) {
 }
 
 bool dawg::output::open_next() {
-	// no need to open next file
-	if(split_width == 0)
-		return true;
+	// Generate next id number
 	using boost::spirit::karma::generate;
 	using boost::spirit::karma::uint_;
 	using boost::spirit::karma::lit;
 	using boost::spirit::karma::right_align;
+	generate(current_label.begin(), right_align(label_width, lit('0'))[uint_], rep);
 
-	string::iterator it = split_file_name.begin()+split_id_offset;
-	generate(it, right_align(split_width, lit('0'))[uint_], rep);
+	// no need to open next file
+	if(!do_split)
+		return true;
+
+	// replace 
+	split_file_name.replace(split_id_offset, label_width, current_label);
 	
 	if(!open_file(split_file_name.c_str()))
 		return DAWG_ERROR("unable to open output file \'" << split_file_name << "\'.");
 	return true;
 }
 
+void dawg::output::print_poo(const alignment& aln) {
+	ostream &out = *p_out;
+
+	foreach(const alignment::value_type& v, aln) {
+		out << setw(aln.max_label_width) << v.label
+			<< '-' << current_label
+			<< ' ' << v.seq
+			<< endl;
+	}
+	out << endl;
+}
+
 void dawg::output::print_fasta(const alignment& aln) {
 	ostream &out = *p_out;
 
 	foreach(const alignment::value_type& v, aln) {
-		out << ">" << v.label << endl;
+		out << ">" << v.label;
+		if(do_label)
+			out << "-" << current_label;
+		out << endl;
 
 		const char *it = v.seq.c_str();
 		const char *last = it+v.seq.size();
@@ -139,9 +158,18 @@ void dawg::output::print_aln(const alignment& aln) {
 
 	// find alignment length
 	string::size_type u=0, len = aln[0].seq.length();
+	string::size_type aln_label_width = do_label ?
+		std::max(aln.max_label_width+label_width+1,string::size_type(14)) :
+		std::max(aln.max_label_width,string::size_type(14)) ;
 	for(;u+60 < len;u += 60) {
 		foreach(const alignment::value_type& v, aln) {
-			out << setw(aln.max_label_width_14) << left << v.label << ' ';
+			out << v.label;
+			if(do_label) {
+				out << '-' << current_label;
+				out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
+			} else {
+				out << setw(aln_label_width-v.label.length()+1) << ' ';
+			}
 			out.write(&v.seq[u], 60);
 			out << endl;
 		}
@@ -149,20 +177,15 @@ void dawg::output::print_aln(const alignment& aln) {
 	}
 	len = len-u;
 	foreach(const alignment::value_type& v, aln) {
-		out << setw(aln.max_label_width_14) << left << v.label << ' ';
+		out << v.label;
+		if(do_label) {
+			out << '-' << current_label;
+			out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
+		} else {
+			out << setw(aln_label_width-v.label.length()+1) << ' ';
+		}
 		out.write(&v.seq[u], len);
 		out << endl;
-	}
-	out << endl;
-}
-
-void dawg::output::print_poo(const alignment& aln) {
-	ostream &out = *p_out;
-
-	foreach(const alignment::value_type& v, aln) {
-		out << setw(aln.max_label_width) << v.label
-			<< ' ' << v.seq
-			<< endl;
 	}
 	out << endl;
 }
@@ -170,9 +193,20 @@ void dawg::output::print_poo(const alignment& aln) {
 void dawg::output::print_phylip(const alignment& aln) {
 	ostream &out = *p_out;
 
+	string::size_type aln_label_width = do_label ?
+		std::max(aln.max_label_width+label_width+1,string::size_type(9)) :
+		std::max(aln.max_label_width,string::size_type(9)) ;
+
 	out << "  " << aln.size() << "    " << aln[0].seq.size() << endl;
 	foreach(const alignment::value_type& v, aln) {
-		out << setw(10) << left << v.label.substr(0,10) << v.seq << endl;
+		out << v.label;
+		if(do_label) {
+			out << '-' << current_label;
+			out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
+		} else {
+			out << setw(aln_label_width-v.label.length()+1) << ' ';
+		}
+		out << v.seq << endl;
 	}
 	out << endl;
 }
@@ -198,8 +232,16 @@ void dawg::output::print_nexus(const alignment& aln) {
 	       "\tMATRIX" << endl;
 	
 	// Write sequences in non-interleaved format
+	string::size_type aln_label_width = do_label ?
+		aln.max_label_width+label_width+1 :
+		aln.max_label_width;
+	
 	foreach(const alignment::value_type& v, aln) {
-		out << setw(aln.max_label_width_14) << left << v.label << ' ' << v.seq << endl;
+		out << v.label;
+		if(do_label)
+			out << '-' << current_label;
+		out << setw(aln.max_label_width-v.label.length()+1) << ' ';
+		out << v.seq << endl;
 	}
 	// Close data block
 	out << ";\nEND;\n" << endl;

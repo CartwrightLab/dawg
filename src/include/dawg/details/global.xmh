@@ -30,6 +30,8 @@ XM( (output)(split),  bool, false,
 	"Ouput each replicate to its own file.")
 XM( (output)(append), bool, false,
 	"Append results to existing file.")
+XM(  (output)(label), bool, false,
+	"label each simulation with a unique id.")  
 
 XM( (sim)(reps),  unsigned int, 1,
 	"Number of simulation replicates.")
