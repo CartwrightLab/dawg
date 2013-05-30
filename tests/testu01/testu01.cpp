@@ -40,7 +40,7 @@ uint32_t to_32(uint32_t x) {
 }
 uint32_t to_32(uint64_t x) {
 #ifdef TEST_REV
-	x = revbits(x) << 4;
+	x = revbits(x) ;//<< 4;
 #endif
 #ifdef TEST_LOWER
 	return (x & 0xFFFFFFFFUL);	
@@ -51,7 +51,14 @@ uint32_t to_32(uint64_t x) {
 
 unsigned long get_bits(void *params, void *state) {
 	mutt_gen_default *g = static_cast<mutt_gen_default*>(state);
+#ifndef TEST_MIX
 	return to_32(g->rand_native());
+#else
+	unsigned long u=0;
+	for(int i=0;i<8;++i)
+		u = u << 8 | (g->rand_native() & 255);
+	return u;
+#endif
 }
 
 double get_u01(void *params, void *state) {
@@ -73,6 +80,9 @@ unif01_Gen *create_gen(unsigned int u) {
 #endif
 #ifdef TEST_REV
 		"-rev"
+#endif
+#ifdef TEST_MIX
+		"-mix"
 #endif
 	;
 	unif01_Gen *gen = new unif01_Gen;
