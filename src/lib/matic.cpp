@@ -53,7 +53,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	info->gap_base = seg.rex.gap_base();
 	
 	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
-		ma.subst_rate_params.end(), maxx))
+		ma.subst_rate_params.end()))
 		return DAWG_ERROR("heterogenous rate model could not be created.");
 	if(!info->ins_mod.create(ma.indel_model_ins.begin(), ma.indel_model_ins.end(),
 		ma.indel_rate_ins.begin(), ma.indel_rate_ins.end(),
