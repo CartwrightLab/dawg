@@ -41,6 +41,7 @@ public:
 			case details::vecio_info::open :  c = i.widen('('); break;
 			case details::vecio_info::close : c = i.widen(')'); break;
 			case details::vecio_info::delimiter : c = i.widen(' '); break;
+			default: break;
 			}
 		}
 		return c;

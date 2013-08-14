@@ -14,6 +14,7 @@
 #include <dawg/utils/foreach.h>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/erase.hpp>
 
 namespace dawg {
 
@@ -29,6 +30,8 @@ struct trick {
 		inline void get(const std::string& k, T& r) const;
 		template<typename T, typename A>
 		inline void get(const std::string& k, std::vector<T,A>& r) const;
+		
+		//inline void get(const std::string& k, trick::section& r) const;
 		
 		inline void read_aliases();
 		
@@ -79,6 +82,23 @@ inline void trick::section::get(const std::string& k, std::vector<T,A>& r) const
 		}
 	}
 }
+
+template<>
+inline void trick::section::get(const std::string& k, trick::section& r) const {
+	using boost::algorithm::starts_with;
+	using boost::algorithm::erase_head_copy;
+	r.name = k;
+	r.inherits = "_nothing_";
+	r.db.clear();
+	db_type::const_iterator first = db.lower_bound(k);
+	db_type::const_iterator last;
+	for(last = first; last != db.end()
+		&& starts_with(last->first, k); ++last) {
+		r.db.insert(r.db.end(),
+			make_pair(erase_head_copy(last->first, k.length()), last->second));
+	}
+}
+
 
 inline void trick::section::conv(const std::string& ss, std::string& r) {
 	r = ss;
