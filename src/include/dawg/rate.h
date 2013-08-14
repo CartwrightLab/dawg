@@ -101,9 +101,9 @@ public:
 		
 		// rescale values so that the expected value is exactly 1.0
 		double d = 0.0;
-		for(int k=1;k<values.size();++k)
+		for(size_t k=1;k<values.size();++k)
 			d += values[k]*gw;
-		for(int k=1;k<values.size();++k)
+		for(size_t k=1;k<values.size();++k)
 			values[k] /= d;
 		
 		name = "gamma-invariant";
