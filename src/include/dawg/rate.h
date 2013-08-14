@@ -5,8 +5,8 @@
  *  Copyright (C) 2009,2013 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-// We will approximate the gamma distribution by taking a large sample.
-#define DAWG_GAMMA_SAMPLE_SIZE 4095
+// We will approximate the cont. gamma by a large disc. gamma.
+#define DAWG_GAMMA_CONT_SIZE 4095
  
 #include <string>
 #include <dawg/utils/aliastable.h>
@@ -59,7 +59,7 @@ public:
 				return DAWG_ERROR("Invalid rate model; second gamma-invariant parameter '"
 					<< iota << "' is not [0,1).");
 		}
-		int sz = DAWG_GAMMA_SAMPLE_SIZE;
+		int sz = DAWG_GAMMA_CONT_SIZE;
 		if(first != last) {
 			sz = static_cast<int>(*first++);
 			// use an upper limit to catch user mistakes.
