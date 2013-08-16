@@ -121,13 +121,6 @@ int dawg_app::run() {
 	foreach(string &ss, arg.input) {
 		ret &= trick::parse_file(input, ss.c_str());
 	}
-	trick::section sectemp;
-	input.data[0].get("subst.rate.params.", sectemp);
-	for(trick::section::db_type::const_iterator it = sectemp.db.begin();
-		it != sectemp.db.end(); ++it) {
-		cout << it->first << " = " << it->second << endl;
-	}
-	return 0;
 	
 	if(!ret)
 		return EXIT_FAILURE;	
