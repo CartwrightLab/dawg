@@ -32,7 +32,7 @@ void alias_table_64(const double *pp, boost::uint64_t *q, boost::uint32_t *a) {
 		q[m] = uint64_bound(p[m]);
 		a[m] = static_cast<boost::uint32_t>(g);
 		p[g] = (p[g]+p[m])-1.0;
-		if(p[g] >= 1.0 || mm < g) {
+		if(p[g] >= 1.0 || mm <= g) {
 			for(m=mm;m<64 && p[m] >= 1.0; ++m)
 				/*noop*/;
 			mm = m+1;
