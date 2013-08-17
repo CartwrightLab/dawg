@@ -503,8 +503,8 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	unsigned int uStateQuit = rex.is_keep_empty() ? (residue::base_mask+1)*2
-		                                          : (residue::base_mask+1)*2-1 ;
+	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3; 
+		                                          
 	unsigned int uBranch = 0;
 	unsigned int uBranchN = 0;
 	// Go through each column, adding gaps where neccessary
@@ -517,13 +517,14 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 				continue; // Sequence is done
 			uBranchN = v.it->branch();
 			if(uBranchN == uBranch) {
-				uState &= v.it->base();
+				uState &= ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
 			} else if(uBranchN > uBranch) {
 				uBranch = uBranchN;
-				uState = v.it->base() & uStateQuit;
+				uState = uStateQuit & ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
 			}
 		}
-		switch(((uState+1) >> residue::base_bit_width)&3) {
+		switch(uState&3) {
+			case 3:
 			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
 			case 1: // Empty column that we want to ignore
 				foreach(aligner_data &v, aln_table) {
