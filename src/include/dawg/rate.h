@@ -10,6 +10,7 @@
  
 #include <string>
 #include <dawg/utils/aliastable.h>
+#include <dawg/mutt.h>
 
 #include <boost/math/distributions/gamma.hpp>
 
