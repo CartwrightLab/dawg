@@ -13,6 +13,7 @@ class alias_table {
 public:
 	typedef boost::uint64_t uint64;
 	typedef boost::uint32_t uint32;
+	typedef uint32 category_type;
 	
 	alias_table() { }
 	
@@ -21,13 +22,16 @@ public:
 		create(v);
 	}
 	
-	uint32 get(uint64 u) const {
-		uint32 x = static_cast<uint32>(u >> shr);
+	category_type get(uint64 u) const {
+		uint32 x = static_cast<uint32>(u >> shr_);
 		uint32 y = static_cast<uint32>(u);
-		return ( y < p[x]) ? x : a[x];
+		return ( y < p_[x]) ? x : a_[x];
 	}
 	
-	uint32 operator()(uint64 u) const {
+	const std::vector<uint32>& a() const { return a_;}
+	const std::vector<uint32>& p() const { return p_;}
+
+	category_type operator()(uint64 u) const {
 		return get(u);
 	}
 	
@@ -51,10 +55,10 @@ public:
 		std::pair<std::vector<double>::size_type,int> ru = round_up(v.size());
 		const std::vector<double>::size_type sz = ru.first;
 		v.resize(sz,0.0);
-		a.resize(sz,0);
-		p.resize(sz,0);
+		a_.resize(sz,0);
+		p_.resize(sz,0);
 		// use the number of bits to calculate the right shift operand
-		shr = 64 - ru.second;
+		shr_ = 64 - ru.second;
 		
 		// find scale for input vector
 		double d = std::accumulate(v.begin(),v.end(),0.0)/sz;
@@ -73,8 +77,8 @@ public:
 		// contruct table
 		while(g < sz && m < sz) {
 			assert(v[m] < d);
-			p[m] = static_cast<uint32>(4294967296.0/d*v[m]);
-			a[m] = static_cast<uint32>(g);
+			p_[m] = static_cast<uint32>(4294967296.0/d*v[m]);
+			a_[m] = static_cast<uint32>(g);
 			v[g] = (v[g]+v[m])-d;
 			if(v[g] >= d || mm <= g) {
 				for(m=mm; m<sz && v[m] >= d; ++m)
@@ -87,32 +91,32 @@ public:
 		}
 		// if we stopped early fill in the rest
 		if(g < sz) {
-			p[g] = std::numeric_limits<uint32>::max();
-			a[g] = static_cast<uint32>(g);
+			p_[g] = std::numeric_limits<uint32>::max();
+			a_[g] = static_cast<uint32>(g);
 			for(g=g+1; g<sz; ++g) {
 				if(v[g] < d)
 					continue;
-				p[g] = std::numeric_limits<uint32>::max();
-				a[g] = static_cast<uint32>(g);
+				p_[g] = std::numeric_limits<uint32>::max();
+				a_[g] = static_cast<uint32>(g);
 			}
 		}
 		// if we stopped early fill in the rest
 		if(m < sz) {
-			p[m] = std::numeric_limits<uint32>::max();
-			a[m] = static_cast<uint32>(m);
+			p_[m] = std::numeric_limits<uint32>::max();
+			a_[m] = static_cast<uint32>(m);
 			for(m=mm; m<sz; ++m) {
 				if(v[m] > d)
 					continue;
-				p[m] = std::numeric_limits<uint32>::max();
-				a[m] = static_cast<uint32>(m);
+				p_[m] = std::numeric_limits<uint32>::max();
+				a_[m] = static_cast<uint32>(m);
 			}
 		}
 	}
 
 	template<class CharType, class CharTrait>
 	void print_table(std::basic_ostream<CharType, CharTrait>& o) {
-		for(std::size_t n = 0; n < a.size(); ++n) {
-			o << n << "\t" << a[n] << "\t" << p[n] << std::endl;
+		for(std::size_t n = 0; n < a_.size(); ++n) {
+			o << n << "\t" << a_[n] << "\t" << p_[n] << "\n";
 		}
 	}
 	
@@ -126,8 +130,8 @@ private:
 		return std::make_pair(y,k);
 	}
 
-	std::vector<uint32> a,p;
-	int shr;
+	std::vector<uint32> a_,p_;
+	int shr_;
 };
 
 template<class CharType, class CharTrait, class T, class A>
