@@ -20,13 +20,20 @@
 
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable: 4127 )
+#endif
+
 #include <boost/spirit/include/qi.hpp>
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
+
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
-
-
-// #include <boost/spirit/include/phoenix.hpp>
-
 
 namespace dawg {
 
@@ -176,6 +183,6 @@ inline bool trick::parse_stream(std::basic_istream<Char, Traits>& is) {
 	return parse(first, last);	
 }
 
-}
+} // namespace dawg
  
 #endif // DAWG_TRICK_PARSE_H

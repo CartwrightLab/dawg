@@ -18,13 +18,23 @@
 #	error Spirit version 2.2 or greater required.
 #endif
 
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable: 4127 )
+#endif
+
 #include <boost/spirit/include/qi.hpp>
+
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 #include<iterator>
 
 #include<dawg/wood.h>
 
 namespace dawg {
+
 
 namespace qi = boost::spirit::qi;
 namespace standard = boost::spirit::standard;
