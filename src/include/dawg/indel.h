@@ -57,7 +57,13 @@ public:
 				return DAWG_ERROR("invalid indel model; rate '" << *it << "' must be positive");
 			total_rate += *it;
 		}
-		
+		if(total_rate == 0.0) {
+			std::vector<double> mix_dist(1, 1.0);
+			sample.create(mix_dist);
+			sample_upstream.create(mix_dist);
+			return true;
+		}
+
 		// enumerate over all models and build table in place
 		std::vector<double> mix_dist(max_size+1, 0.0);
 		It1 itn = first_n;
