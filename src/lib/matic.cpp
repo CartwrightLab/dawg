@@ -39,22 +39,26 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	std::auto_ptr<section> info(new section);
 	
 	// construct models
+	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
+		ma.subst_rate_params.end()))
+		return DAWG_ERROR("heterogenous rate model could not be created.");
+
 	if(!info->sub_mod.create(ma.subst_model.c_str(), ma.root_code,
 		ma.subst_params.begin(), ma.subst_params.end(),
 		ma.subst_freqs.begin(), ma.subst_freqs.end()))
 		return DAWG_ERROR("substitution model could not be created.");
-	
+
+	// TODO: do we really want to allow only one residue exchange per segment?
 	if(seg.empty()) { // new segment
-		if(!seg.rex.model(info->sub_mod.seq_type(), ma.output_markins, ma.output_keepempty))
+		if(!seg.rex.model(info->sub_mod.seq_type(), info->sub_mod.seq_code(),
+			ma.output_rna, ma.output_lowercase, ma.output_markins, ma.output_keepempty))
 			return DAWG_ERROR("failed to create sequence type or format object.");
-	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), ma.output_markins, ma.output_keepempty)) {
+	} else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), info->sub_mod.seq_code(), ma.output_rna,
+			ma.output_lowercase, ma.output_markins, ma.output_keepempty)) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}
 	info->gap_base = seg.rex.gap_base();
 	
-	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
-		ma.subst_rate_params.end()))
-		return DAWG_ERROR("heterogenous rate model could not be created.");
 	if(!info->ins_mod.create(ma.indel_model_ins.begin(), ma.indel_model_ins.end(),
 		ma.indel_rate_ins.begin(), ma.indel_rate_ins.end(),
 		ma.indel_params_ins.begin(), ma.indel_params_ins.end(), ma.indel_max_ins))
@@ -348,8 +352,7 @@ dawg::details::matic_section::evolve_indels(
 				}
 				
 				// insert u "deleted insertions" into buffer
-				child.insert(child.end(), u, residue(gap_base,
-					residue::rate_type(0.0), branch_color));
+				child.insert(child.end(), u, residue(gap_base, 0, branch_color));
 				// remove u sites from both stacks, pop if empty
 			} else if(first != last) {
 				// Deleted Original
@@ -414,8 +417,7 @@ dawg::details::matic_section::evolve_indels(
 			}
 			// Insert u random nucleotides into buffer
 			while(u--)
-				child.push_back(residue(sub_mod(m),
-					static_cast<residue::rate_type>(rat_mod(m)), branch_color));
+				child.push_back(residue(sub_mod(m), rat_mod(m), branch_color));
 		} else {
 			break; // nothing to do
 		}
@@ -427,7 +429,11 @@ void dawg::details::matic_section::evolve(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const {
-		
+	
+	if(T <= 0.0) {
+		child.insert(child.end(), first, last);
+		return;
+	}
 	//process any existing indels.
 	first = evolve_indels(child, indels, T, branch_color, first, last, m);
 	
@@ -437,21 +443,26 @@ void dawg::details::matic_section::evolve(
 	double d = m.rand_exp(T);
 	for(;;) {
 		sequence::const_iterator start = first;
-		// TODO: Optimize out this if?
-		// TODO: Variant for constant rate_scale
-		// TODO: Optimzie out uni_scale multiplication by changing T and indel_rate
-		// TODO: Move to residue_model class
 		for(;first != last; ++first) {
-			if(first->base() == gap_base)
-				continue;
-			if(d < indel_rate+first->rate_scalar()*uni_scale)
+			if(d < indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale)
 				break;
-			d -= indel_rate+first->rate_scalar()*uni_scale;
+			d -= indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale;
+		}
+		
+		// check to see if offset is beyond end of sequence
+		if(first == last) {
+			child.insert(child.end(), start, first);
+			break;
+		}
+		// check to see if we landed on a gap
+		if(first->base() == gap_base) {
+			++first;
+			child.insert(child.end(), start, first);
+			d = m.rand_exp(T);
+			continue;
 		}
 		// copy unmodified sites into buffer.
 		child.insert(child.end(), start, first);
-		if(first == last)
-			break;
 		if(d < del_rate) {
 			indels.del.push(indel_data::element(d/del_rate, del_mod(m)));
 			first = evolve_indels(child, indels, T, branch_color, first, last, m);
@@ -459,7 +470,8 @@ void dawg::details::matic_section::evolve(
 			continue;
 		} else
 			d -= del_rate;
-		double w = first->rate_scalar()*uni_scale;
+		double w = rat_mod.values()[first->rate_cat()]*uni_scale;
+		//double w = uni_scale;
 		residue rez = *first;
 		++first;
 		while(d < w) {
@@ -489,7 +501,7 @@ struct aligner_data {
 
 void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const residue_exchange &rex) {
 	assert(aln.size() <= seqs.size());
-	
+
 	//unsigned uFlags = 0; //temporary
 	
 	// construct a table to hold alignment information
@@ -505,8 +517,8 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 
 	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3; 
 		                                          
-	unsigned int uBranch = 0;
-	unsigned int uBranchN = 0;
+	residue::data_type uBranch = 0, uBranchN = 0;
+
 	// Go through each column, adding gaps where neccessary
 	for(;;) {
 		unsigned int uState =  uStateQuit; // Set to quit

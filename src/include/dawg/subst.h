@@ -12,52 +12,72 @@
 #include <dawg/utils.h>
 #include <dawg/log.h>
 #include <dawg/residue.h>
- 
+#include <dawg/utils/aliastable.h>
+
 namespace dawg {
  
 class subst_model {
 public:
-	typedef boost::uint32_t base_type;
-		
+	typedef dawg::residue::data_type base_type;
+	typedef dawg::residue::data_type rate_cat_type;
+
 	// return random base from stat. dist.
 	inline base_type operator()(mutt &m) const {
+		// since we know what shr is, roll our own get function
 		boost::uint64_t u = m.rand_uint64();
-		boost::uint32_t x = (u >> 58);
-		return ((u << 6) < stat_dist_p[x]) ? x : stat_dist_a[x];
+		base_type x = static_cast<base_type>(u >> 58);
+		boost::uint32_t y = static_cast<boost::uint32_t>(u);
+		return ( y < stat_dist_table_.p()[x]) ? x : stat_dist_table_.a()[x];
 	}
 	// return random mutant base
 	inline base_type operator()(mutt &m, base_type n) const {
 		boost::uint64_t u = m.rand_uint64();
-		boost::uint32_t x = (u >> 58);
-		return ((u << 6) < mutation_p[n][x]) ? x : mutation_a[n][x];
+		base_type x = static_cast<base_type>(u >> 58);
+		boost::uint32_t y = static_cast<boost::uint32_t>(u);
+		return ( y < mutation_table_[n].p()[x]) ? x : mutation_table_[n].a()[x];
 	}
 
 	inline const std::string& label() const { return name; }
 	inline double uniform_scale() const { return uni_scale; }
-	inline int seq_type() const { return _model; }
+	inline double uniform_rate_scale() const { return uni_rate_scale_; }
+	inline unsigned int seq_type() const { return type_; }
+	inline unsigned int seq_code() const { return code_; }
 	
 	template<typename It1, typename It2>
 	bool create(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2);
-	
+
 private:
 	// must hold at least 64 different characters
 	double freqs[64];
 	double table[64][64];
 	
-	boost::uint32_t stat_dist_a[64];
-	boost::uint64_t stat_dist_p[64];
-	boost::uint32_t mutation_a[64][64];
-	boost::uint64_t mutation_p[64][64];
+	alias_table stat_dist_table_;
+	alias_table mutation_table_[64];
 	
 	bool create_alias_tables();
 	
 	double uni_scale;
+	double uni_rate_scale_;
 	std::string name;
-	unsigned int _model;
+	unsigned int code_;
+	unsigned int type_;
 
 	inline static void remove_stops(unsigned int code, double (&s)[64][64], double (&f)[64]);
 	inline static const char* get_codon_diff_upper();
 	
+	inline std::size_t model_size() const {
+		switch(seq_type()) {
+		case dawg::residue_exchange::DNA:
+			return 4;
+		case dawg::residue_exchange::AA:
+			return 20;
+		case dawg::residue_exchange::CODON:
+		default: 
+			break;
+		}
+		return 64;
+	}
+
 	template<typename It1, typename It2>
 	bool create_freqs(const char *mod_name, It1 first1, It1 last1, It2 first2, It2 last2, unsigned int ncol=0) const;
 
