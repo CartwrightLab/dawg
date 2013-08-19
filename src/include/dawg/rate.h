@@ -17,7 +17,7 @@ namespace dawg {
 
 class rate_model {
 public:
-	typedef float rate_type;
+	typedef alias_table::category_type category_type;
 	
 	template<typename It>
 	bool create(const std::string &rname, It first, It last) {
@@ -37,10 +37,10 @@ public:
 	
 	template<typename It>
 	inline bool create_const(It first, It last) {
-		name = "const";
-		std::vector<double> weights(1, 1.0);
-		sample.create_inplace(weights);
-		values.assign(1, 1.0f);
+		name_ = "const";
+		weights_.assign(1, 1.0);
+		sample_.create(weights_);
+		values_.assign(1, 1.0f);
 		return true;
 	}
 
@@ -73,17 +73,17 @@ public:
 		
 		// construct weights
 		double gw = (1.0-iota)/sz;
-		std::vector<double> weights(1+sz, gw);
-		weights[0] = iota;
-		sample.create_inplace(weights);
+		weights_.assign(1+sz, gw);
+		weights_[0] = iota;
+		sample_.create(weights_);
 		
 		// construct values
-		values.assign(1+sz,0.0f);
+		values_.assign(1+sz,0.0f);
 		
 		if(do_median) {
 			boost::math::gamma_distribution<> gamma_dist(alpha,1.0/alpha);
 			for(int k=0; k < sz; ++k)
-				values[k+1] = boost::math::quantile(gamma_dist, (2*k+1)/(2.0*sz));
+				values_[k+1] = boost::math::quantile(gamma_dist, (2*k+1)/(2.0*sz));
 		} else {
 			std::vector<double> g(sz);
 			boost::math::gamma_distribution<> gamma_dist(alpha,1.0/alpha);
@@ -93,36 +93,41 @@ public:
 				g[k] = boost::math::quantile(gamma_dist, (k+1.0)/sz);
 			for(int k = 0; k < sz-1; ++k)
 				g[k] = boost::math::cdf(gamma_dist2,g[k]);
-			values[1] = g[0]*sz;
+			values_[1] = g[0]*sz;
 			for(int k = 1; k < sz-1; ++k)
-				values[k+1] = (g[k]-g[k-1])*sz;
-			values[sz] = (1.0-g[sz-2])*sz;
+				values_[k+1] = (g[k]-g[k-1])*sz;
+			values_[sz] = (1.0-g[sz-2])*sz;
 		}
 		
 		// rescale values so that the expected value is exactly 1.0
 		double d = 0.0;
-		for(size_t k=1;k<values.size();++k)
-			d += values[k]*gw;
-		for(size_t k=1;k<values.size();++k)
-			values[k] /= d;
+		for(size_t k=1;k<values_.size();++k)
+			d += values_[k]*gw;
+		for(size_t k=1;k<values_.size();++k)
+			values_[k] /= d;
 		
-		name = "gamma-invariant";
+		name_ = "gamma-invariant";
 		return true;
 	}
 	
 	inline const std::string& label() const {
-		return name;
+		return name_;
 	}
 
-	double operator()(mutt &m) const {
-		return values[sample(m.rand_uint64())];
+	category_type operator()(mutt &m) const {
+		return sample_(m.rand_uint64());
+	}
+	
+	const std::vector<double>& values() const {
+		return values_;
 	}
 	
 private:
 		
-	alias_table sample;
-	std::vector<rate_type> values;
-	std::string name;
+	alias_table sample_;
+	std::vector<double> weights_;
+	std::vector<double> values_;
+	std::string name_;
 };
  
 } /* namespace dawg */
