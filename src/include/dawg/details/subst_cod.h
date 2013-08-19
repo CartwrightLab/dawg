@@ -15,7 +15,9 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	double d = 0.0;
 	int u = 0;
 	
-	_model = residue_exchange::CODON + code;
+	type_ = residue_exchange::CODON;
+	code_ = code;
+
 	unsigned int gcode = code%100;
 	if(gcode >= 24)
 		return DAWG_ERROR("Invalid genetic code.");

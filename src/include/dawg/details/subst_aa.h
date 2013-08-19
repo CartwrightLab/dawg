@@ -12,7 +12,10 @@ template<typename It1, typename It2>
 bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double d = 0.0;
 	int u = 0;
-	_model = residue_exchange::AA + code%2;
+
+	type_ = residue_exchange::AA;
+	code_ = code;
+
 	// do freqs first
 	if(!create_freqs(mod_name, first2, last2, &freqs[0], &freqs[20]))
 		return false;

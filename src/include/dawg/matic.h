@@ -43,7 +43,8 @@ struct indel_data {
 	}
 };
 
-struct matic_section {
+class matic_section {
+public:
 	typedef std::vector<wood::data_type::size_type> wood_meta_type;
 
 	wood usertree;
@@ -98,13 +99,11 @@ struct matic_section {
 			if(first->base() == gap_base)
 				continue;
 			child.back().base(gap_base);
-			child.back().rate_scalar(0.0);
+			child.back().rate_cat(0);
 			++uu;
 		}
 		return uu;
 	}
-	
-	
 };
 
 struct sequence_data {

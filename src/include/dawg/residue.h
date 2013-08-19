@@ -5,6 +5,13 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+#ifndef __STDC_CONSTANT_MACROS
+#	define __STDC_CONSTANT_MACROS 1
+#endif
+#ifndef __STDC_LIMIT_MACROS
+#	define __STDC_LIMIT_MACROS 1
+#endif
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -19,63 +26,44 @@ namespace dawg {
 
 class residue {
 public:
-	typedef float rate_type;
-	typedef boost::uint32_t data_type;
+	typedef boost::uint64_t data_type;
 
-	enum {
-		base_mask      =  0x3F, // 00111111
-		base_bit_width =  6,
-		branch_mask    = ~0x3F,
-		branch_inc     =  0x40
-	};
+	
+	static const data_type base_mask      =  UINT64_C(0x00000000000000FF);
+	static const data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
+	static const data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
+	static const data_type rate_shift     =  48;
+	static const data_type base_bit_width =  8;
+	static const data_type branch_inc     =  0x100;
 
-	inline data_type base() const { return _data & base_mask; }
-	inline void base(data_type b) { _data = (b & base_mask) | (_data & ~base_mask); }
+	inline data_type base() const { return data_ & base_mask; }
+	inline void base(data_type b) { data_ = (b & base_mask) | (data_ & ~base_mask); }
 
-	inline data_type branch() const { return _data & branch_mask; }
-	inline void branch(data_type u) { _data = (u & branch_mask) | (_data & ~branch_mask); }
+	inline data_type branch() const { return data_ & branch_mask; }
+	inline void branch(data_type u) { data_ = (u & branch_mask) | (data_ & ~branch_mask); }
 
-	inline data_type data()  const { return _data; }
-	inline void data(data_type d) { _data = d; }
-	inline void data(data_type a, data_type d) {
-		_data = (a & base_mask) | (d & branch_mask);
+	inline data_type rate_cat() const { return data_ >> rate_shift; }
+	inline void rate_cat(data_type k) { data_ = (k << rate_shift) | (data_ & ~rate_mask); }
+
+	inline data_type data()  const { return data_; }
+	inline void data(data_type d) { data_ = d; }
+	inline void data(data_type n, data_type r, data_type b) {
+		data_ = (n & base_mask) | (b & branch_mask) | (r << rate_shift);
 	}
 
 	inline bool is_base(data_type u) const { return (base() == (u & base_mask)); }
 	inline bool is_branch(data_type u) const { return (branch() == (u & branch_mask)); }
 
-	inline rate_type rate_scalar() const {return _rate_scalar;}
-	inline void rate_scalar(rate_type s) {
-		_rate_scalar = s;
-	}
-
-	inline data_type rate_cat() const {return _rate_cat;}
-	inline void rate_cat(data_type s) {
-		_rate_cat = s;
-	}
-
-	residue() : _data(0), _rate_scalar(1.0) { }
-	residue(data_type xbase, rate_type xscale, data_type xbranch) :
-		_data((xbase & base_mask) | (xbranch & branch_mask)),
-		_rate_scalar(xscale)
-	{
-
-	}
-
-	residue(data_type xbase, data_type xscale, data_type xbranch) :
-		_data((xbase & base_mask) | (xbranch & branch_mask)),
-		_rate_cat(xscale)
+	residue() : data_(0)  { }
+	residue(data_type n, data_type r, data_type b) :
+		data_((n & base_mask) | (b & branch_mask) | (r << rate_shift))
 	{
 
 	}
 
 
 protected:
-	data_type  _data;
-	union {
-	rate_type  _rate_scalar;
-	data_type  _rate_cat;
-	};
+	data_type data_;
 };
 
 template<class CharType, class CharTrait>
@@ -88,17 +76,17 @@ operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
 
 class residue_exchange {
 public:
-	enum { DNA = 0, RNA=2, AA=4, CODON=6, MODEND=30};
-
+	enum { MODDNA = 0, MODRNA=2, MODAA=4, MODCOD=6, MODEND=30};
+	enum { DNA = 0, AA = 1, CODON = 2};
+	
 	typedef residue_exchange self_type;
 	
 	typedef boost::sub_range< const char [64] > str_type;
 
-	inline bool model(unsigned int code, bool markins=false, bool keepempty=true) {
+	inline bool model(unsigned int type, unsigned int code, bool rna,
+			bool lowercase, bool markins, bool keepempty) {
 		static const char sIns[] = "-+";
 		// table for going from base->char
-		// TODO: standardize Root.Code = xyz so that xy picks the type/translation
-		// table and z picks upper or lowercase
 		// TODO: Allow codons to be translated into aa
 		static const char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
@@ -148,52 +136,66 @@ public:
 			25,26,27,-1,-1,-1,-1,-1,-1,28,29,30,31,32,33,34,35,36,37,38,
 			39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
 		};
-		
-		unsigned int a = code%100;
-		unsigned int b = code/100;
-		
-		if(a >= MODEND || mods[a*64] == '!')
+
+		markins_ = markins;
+		keepempty_ = keepempty;
+		lowercase_ = lowercase;
+		rna_ = rna;
+
+		type_ = type; // set sequence type NA, AA, or CODON
+		nuc_ = ((rna) ? MODRNA : MODDNA) | ((lowercase) ? 1 : 0);
+		code_ = code;
+		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
-		_model = code;
-		_markins = markins;
-		_keepempty = keepempty;
-				
-		cs_decode = &mods[a*64];
-
-		_gap = static_cast<unsigned int>(strchr(cs_decode, '-')-cs_decode);
-
-		if(a < AA)
-			cs_encode = &rmods[0*80];
-		else if(a < CODON)
-			cs_encode = &rmods[1*80];
-		else
-			cs_encode = &rmods[2*80];
-
-		cs_ins = &sIns[(_markins ? 1 : 0)];
 		
-		do_op_append =  (a >= CODON && b < AA) ?
+		switch(type_) {
+			case DNA:
+				cs_decode_ = &mods[nuc_*64];
+				break;
+			case AA:
+				cs_decode_ = &mods[(MODAA + (lowercase ? 1 : 0))*64];
+				break;
+			case CODON:
+				cs_decode_ = &mods[(MODCOD+code_)*64];
+				break;
+			default:
+				return DAWG_ERROR("invalid sequence type");
+		}
+		cs_encode_ = &rmods[type_*80];
+		cs_ins_ = &sIns[(markins_ ? 1 : 0)];
+		
+		gap_ = static_cast<unsigned int>(strchr(cs_decode_, '-')-cs_decode_);
+		
+		do_op_append =  (type_ == CODON) ?
 			&residue_exchange::do_op_append_cod :
 			&residue_exchange::do_op_append_res ;
-		do_op_appendi = (a >= CODON && b < AA) ? 
+		do_op_appendi = (type_ == CODON) ? 
 			&residue_exchange::do_op_appendi_cod :
 			&residue_exchange::do_op_appendi_res ;
 		
 		return true;
 	};
-	inline bool is_same_model(unsigned int a, bool markins, bool keepempty) const {
-		return (a == _model && markins == _markins && keepempty == _keepempty);
+	inline bool is_same_type(unsigned int type, bool markins, bool keepempty) const {
+		return (type == type_ && markins == markins_ && keepempty == keepempty_);
 	}
-	inline bool is_keep_empty() const { return _keepempty; }
+	inline bool is_same_model(unsigned int type, unsigned int code, bool rna,
+			bool lowercase, bool markins, bool keepempty) const {
+		return ( type == type_       && code == code_
+			  && rna  == rna_        && lowercase == lowercase_
+			  && markins == markins_ && keepempty == keepempty_
+			  );
+	}
+	inline bool is_keep_empty() const { return keepempty_; }
 
-	inline residue::data_type gap_base() const { return _gap; }
+	inline residue::data_type gap_base() const { return gap_; }
 
 	inline residue::data_type encode(char ch) const {
-		char ret = (ch >= '0') ? (cs_encode[ch - '0']) : -1;	
+		char ret = (ch >= '0') ? (cs_encode_[ch - '0']) : -1;	
 		return static_cast<residue::data_type>(ret);
 	}
 	
 	inline char decode(residue::data_type r) const {
-		return cs_decode[r & 63];
+		return cs_decode_[r & 63];
 	}
 	
 	inline char decode(const residue &r) const {
@@ -201,7 +203,7 @@ public:
 	}
 	
 	inline char decode_ins() const {
-		return cs_ins[0];
+		return cs_ins_[0];
 	}
 	
 	// codon number -> cod64
@@ -255,7 +257,7 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
-	explicit residue_exchange(int m=DNA) { model(m); }
+	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
 	
 	inline static const char* get_protein_code(unsigned int code) {
 		static const char s[] = 
@@ -296,12 +298,12 @@ protected:
 	}
 	void do_op_append_cod(std::string &ss, const residue &r) const {
 		unsigned int b = r.base()&63;
-		if(b == _gap)
+		if(b == gap_)
 			ss.append(3, '-');
-		else if(cs_decode[b] == '!')
+		else if(cs_decode_[b] == '!')
 			ss.append(3, '*');
 		else {
-			unsigned int u = codon_to_triplet(b, _model/100);
+			unsigned int u = codon_to_triplet(b, nuc_);
 			ss.append(1, (char)(u));
 			ss.append(1, (char)(u>>8));
 			ss.append(1, (char)(u>>16));
@@ -314,9 +316,9 @@ protected:
 		ss.append(3, decode_ins());
 	}
 
-	unsigned int _model, _gap;
-	bool _markins, _keepempty, _translate;
-	const char *cs_decode, *cs_ins, *cs_encode;
+	unsigned int type_, code_, nuc_, gap_;
+	bool rna_, markins_, keepempty_, lowercase_;
+	const char *cs_decode_, *cs_ins_, *cs_encode_;
 };
 
 }

@@ -63,7 +63,7 @@ XM((root)(seq),     std::string, ,
 XM((root)(rates),   std::vector<double>, ,
 	"The heterogeneous rates of the root sequence.")
 XM((root)(code),    unsigned int, 0,
-	"The root's type of sequence and genetic code (for codon data).")
+	"The genetic code used when simulating codon evolution.")
 XM((root)(segment), unsigned int, 0,
 	"The segment number that the root belongs too.")
 XM((root)(gapoverlap), bool, true,
@@ -73,7 +73,10 @@ XM((output)(markins), bool, false,
 	"Distinguish insertions from deletions.")
 XM((output)(keepempty), bool, true,
 	"Keep empty columns instead of deleting them in the alignment.")
-//XM((output)(lowercase), bool, false)
+XM((output)(lowercase), bool, false,
+	"Use lowercase for sequence output.")
+XM((output)(rna), bool, false,
+	"Output an RNA sequence instead of a DNA sequence")
 //XM((output)(translate), bool, false)
 //XM((output)(gapsinglechar), bool, false)
 
