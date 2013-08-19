@@ -95,7 +95,7 @@ inline void trick::section::get(const std::string& k, trick::section& r) const {
 	for(last = first; last != db.end()
 		&& starts_with(last->first, k); ++last) {
 		r.db.insert(r.db.end(),
-			make_pair(erase_head_copy(last->first, k.length()), last->second));
+			make_pair(erase_head_copy(last->first, static_cast<int>(k.length())), last->second));
 	}
 }
 
