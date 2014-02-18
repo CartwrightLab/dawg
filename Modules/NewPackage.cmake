@@ -172,7 +172,7 @@ if(NOT CPACK_INSTALL_CMAKE_PROJECTS)
 			@ONLY)
 	endif()
 	file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/build\")
-	file(WRITE \"\${CMAKE_INSTALL_PREFIX}/build/.empty\" "")
+	file(WRITE \"\${CMAKE_INSTALL_PREFIX}/build/.empty\" \"\")
 endif()
 ")
 ####
