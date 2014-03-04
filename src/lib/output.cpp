@@ -124,7 +124,7 @@ void dawg::output::print_poo(const alignment& aln) {
 
 	foreach(const alignment::value_type& v, aln) {
 		out << setw(aln.max_label_width) << v.label
-			<< '-' << current_label
+			<< '_' << current_label
 			<< ' ' << v.seq
 			<< endl;
 	}
@@ -137,7 +137,7 @@ void dawg::output::print_fasta(const alignment& aln) {
 	foreach(const alignment::value_type& v, aln) {
 		out << ">" << v.label;
 		if(do_label)
-			out << "-" << current_label;
+			out << "_" << current_label;
 		out << endl;
 
 		const char *it = v.seq.c_str();
@@ -165,7 +165,7 @@ void dawg::output::print_aln(const alignment& aln) {
 		foreach(const alignment::value_type& v, aln) {
 			out << v.label;
 			if(do_label) {
-				out << '-' << current_label;
+				out << '_' << current_label;
 				out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
 			} else {
 				out << setw(aln_label_width-v.label.length()+1) << ' ';
@@ -179,7 +179,7 @@ void dawg::output::print_aln(const alignment& aln) {
 	foreach(const alignment::value_type& v, aln) {
 		out << v.label;
 		if(do_label) {
-			out << '-' << current_label;
+			out << '_' << current_label;
 			out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
 		} else {
 			out << setw(aln_label_width-v.label.length()+1) << ' ';
@@ -201,7 +201,7 @@ void dawg::output::print_phylip(const alignment& aln) {
 	foreach(const alignment::value_type& v, aln) {
 		out << v.label;
 		if(do_label) {
-			out << '-' << current_label;
+			out << '_' << current_label;
 			out << setw(aln_label_width-(v.label.length()+label_width+1)+1) << ' ';
 		} else {
 			out << setw(aln_label_width-v.label.length()+1) << ' ';
@@ -239,7 +239,7 @@ void dawg::output::print_nexus(const alignment& aln) {
 	foreach(const alignment::value_type& v, aln) {
 		out << v.label;
 		if(do_label)
-			out << '-' << current_label;
+			out << '_' << current_label;
 		out << setw(aln.max_label_width-v.label.length()+1) << ' ';
 		out << v.seq << endl;
 	}
