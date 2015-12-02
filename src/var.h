@@ -108,7 +108,7 @@ public:
 		return ( pVar != NULL && pVar->Get(r) );
 	}
 
-	// Get as array filling in values as neccessary.
+	// Get as array filling in values as necessary.
 	// An array has a set length.
 	template<class T>
 	Vec::size_type GetArray(T ar[], Vec::size_type uSize, bool bExpand=true)
@@ -148,7 +148,7 @@ public:
 		return true;
 	}
 
-	// Get as matrix, filling in rows as neccessary
+	// Get as matrix, filling in rows as necessary
 	// A matrix is an array of vectors.
 	template< class T >
 	Vec::size_type GetMatrix(std::vector<T> ar[], Vec::size_type uSize, bool bExpand=true)
@@ -176,7 +176,7 @@ public:
 				return 0;
 			u = 1;
 		}
-		// fill-in rows as neccessary
+		// fill-in rows as necessary
 		for(; bExpand && u<uSize; u++)
 			ar[u] = ar[0];
 		return u;

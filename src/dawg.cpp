@@ -408,7 +408,7 @@ bool Execute()
 	if(!myTree.SetupRoot(vssSeqs, vuSeqLen, vvdRates))
 		return DawgError("Bad root parameters");
 
-	// Read Out.Block.* from file if neccessary
+	// Read Out.Block.* from file if necessary
    	if(!ssOutBlockHead.empty())
 	{
 		ifstream iFile(ssOutBlockHead.c_str());
