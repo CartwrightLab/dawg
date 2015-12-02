@@ -9,7 +9,7 @@
 "  -v: display version information\n" \
 "  -h: display help information\n" \
 "  -?: same as -h\n" \
-"  -o outputfile: override ouput filename in the configuration file\n" \
+"  -o outputfile: override output filename in the configuration file\n" \
 "\n" \
 "  Dawg will read stdin if filename is \"-\".\n" \
 "\n" \

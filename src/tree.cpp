@@ -690,7 +690,7 @@ void Tree::Align(Alignment &aln, unsigned int uFlags) const
 	unsigned int uState = 1;
 	unsigned int uColor = 0;
 	unsigned int uColorN = 0;
-	// Go through each column, adding gaps where neccessary
+	// Go through each column, adding gaps where necessary
 	while(uState != 0) {
 		uState = 0; // Set to quit
 		uColor = 0; // Set to lowest color

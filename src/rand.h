@@ -168,7 +168,7 @@ inline uint32_t rand_poisson(double lambda)
 {
 	uint32_t u = 0;
 	double d, e = exp(-lambda);
-	// effecient for lambda < 12
+	// efficient for lambda < 12
 	d = rand_real();
 	while(d > e) {++u; d*=rand_real();}
 	return u;
