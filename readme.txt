@@ -170,7 +170,7 @@ section:
   [[SectionC = SectionA]]
 
 Here SectionC will inherit the values from SectionA, not SectionB.  If you use a
-black header, [[]], the name of the section will be generated automatically.
+blank header, [[]], the name of the section will be generated automatically.
 
 Another shortcut is to use parameter headers:
 
@@ -274,7 +274,7 @@ distribution of gap sizes.  NB: The number of failures (r), the probability of
 success (q).  PL: The rate parameter (a), the maximum gap size.
 
 To create a recombinant tree, you may need to specifically describe and label
-the inner nodes at which the recombination events occur.  See example4.dawg.
+the inner nodes at which the recombination events occur.
 
 Gamma takes precedence over Alpha.
 
