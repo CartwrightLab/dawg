@@ -24,18 +24,21 @@ public:
 	bool create(const std::string &rname, It first, It last) {
 		static std::string name_keys[] = {
 			std::string("const"),
-			std::string("gamma-invariant")
+			std::string("gamma-invariant"),
+            std::string("zero")
 		};
 		switch(key_switch(rname, name_keys)) {
 			case 0:
 				return create_const(first, last);
 			case 1:
 				return create_gamma(first, last);
+            case 2:
+                return create_zero(first, last);
 		};
 		return DAWG_ERROR("Invalid rate model; no model named '" << rname << "'");		
 		
 	}
-	
+
 	template<typename It>
 	inline bool create_const(It first, It last) {
 		name_ = "const";
@@ -110,7 +113,16 @@ public:
 		name_ = "gamma-invariant";
 		return true;
 	}
-	
+
+    template<typename It>
+    inline bool create_zero(It first, It last) {
+        name_ = "zero";
+        weights_.assign(1, 1.0f);
+        sample_.create(weights_);
+        values_.assign(1, 0.0f);
+        return true;
+    }
+
 	inline const std::string& label() const {
 		return name_;
 	}

@@ -3,7 +3,7 @@
 # Simulation results are sent to stdout.
 
 ## Tree Section ################################################################
-# 
+#
 # Use a constant tree.
 
 [Tree]
@@ -16,8 +16,9 @@ Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
 
 [Subst]
 Model = "HKY"
-Params = 2.0, 1.0 
+Params = 2.0, 1.0
 Freqs = 0.3, 0.2, 0.2, 0.3
+Rate.Model = "ZERO"
 
 ## Root Section ################################################################
 #
@@ -32,4 +33,3 @@ Length = 1000
 
 [Sim]
 Reps = 10
-

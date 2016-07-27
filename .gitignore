@@ -1,0 +1,45 @@
+# intelliJ stuff
+.idea/
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Data files
+*.glf
+*.sam
+*.fa
+*.fai
+
+# misc
+dawg
+*~
+*temp*
+.DS_*
+*.chain
+
+bk
+.gitignore
+.Rhistory
+
+# cmake stuff
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+src/version.h
+src/config.h
+
+# Ignore the build directory
+build/*
+!build/.gitkeep
