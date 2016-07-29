@@ -20,7 +20,7 @@ Root.Length = 10
 Subst.Model = codmg
 Subst.Params = 0.1, 1, 1, 1, 1, 1, 1
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
-Root.Code = 100
+# Root.Code = 100
 
 # Another section to control segment 3.  Clone parameters from "Noncoding"
 # section.
