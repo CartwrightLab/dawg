@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <vector>
 #include <limits>
+
 #include <boost/cstdint.hpp>
 
-#include <dawg/utils/foreach.h>
 #include <dawg/utils/specfunc.h>
 #include <dawg/utils.h>
 #include <dawg/log.h>

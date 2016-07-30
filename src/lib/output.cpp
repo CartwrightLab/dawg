@@ -15,7 +15,6 @@
 #include <dawg/log.h>
 
 #include <dawg/output.h>
-#include <dawg/utils/foreach.h>
 
 using namespace dawg;
 using namespace std;
@@ -122,7 +121,7 @@ bool dawg::output::open_next() {
 void dawg::output::print_poo(const alignment& aln) {
 	ostream &out = *p_out;
 
-	foreach(const alignment::value_type& v, aln) {
+	for(const alignment::value_type& v : aln) {
 		out << setw(aln.max_label_width) << v.label
 			<< '_' << current_label
 			<< ' ' << v.seq
@@ -134,7 +133,7 @@ void dawg::output::print_poo(const alignment& aln) {
 void dawg::output::print_fasta(const alignment& aln) {
 	ostream &out = *p_out;
 
-	foreach(const alignment::value_type& v, aln) {
+	for(const alignment::value_type& v : aln) {
 		out << ">" << v.label;
 		if(do_label)
 			out << "_" << current_label;
@@ -162,7 +161,7 @@ void dawg::output::print_aln(const alignment& aln) {
 		std::max(aln.max_label_width+label_width+1,string::size_type(14)) :
 		std::max(aln.max_label_width,string::size_type(14)) ;
 	for(;u+60 < len;u += 60) {
-		foreach(const alignment::value_type& v, aln) {
+		for(const alignment::value_type& v : aln) {
 			out << v.label;
 			if(do_label) {
 				out << '_' << current_label;
@@ -176,7 +175,7 @@ void dawg::output::print_aln(const alignment& aln) {
 		out << endl;
 	}
 	len = len-u;
-	foreach(const alignment::value_type& v, aln) {
+	for(const alignment::value_type& v : aln) {
 		out << v.label;
 		if(do_label) {
 			out << '_' << current_label;
@@ -198,7 +197,7 @@ void dawg::output::print_phylip(const alignment& aln) {
 		std::max(aln.max_label_width,string::size_type(9)) ;
 
 	out << "  " << aln.size() << "    " << aln[0].seq.size() << endl;
-	foreach(const alignment::value_type& v, aln) {
+	for(const alignment::value_type& v : aln) {
 		out << v.label;
 		if(do_label) {
 			out << '_' << current_label;
@@ -236,7 +235,7 @@ void dawg::output::print_nexus(const alignment& aln) {
 		aln.max_label_width+label_width+1 :
 		aln.max_label_width;
 	
-	foreach(const alignment::value_type& v, aln) {
+	for(const alignment::value_type& v : aln) {
 		out << v.label;
 		if(do_label)
 			out << '_' << current_label;
