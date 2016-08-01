@@ -1,3 +1,8 @@
+#define BOOST_TEST_MODULE Dawg::testu01
+#define BOOST_TEST_DYN_LINK
+
+#include "../boost_test_helper.h"
+
 // Test for uniformity
 #define DAWG_NO_CONFIG_H
 #ifndef TEST_GEN
@@ -8,7 +13,7 @@
 
 #define XSTR(s) XSTR_(s)
 #define XSTR_(s) #s
-#define GEN_NAME XSTR(RANDOM_GEN_HEADER) 
+#define GEN_NAME XSTR(RANDOM_GEN_HEADER)
 
 #include <iostream>
 #include <stdint.h>
@@ -43,7 +48,7 @@ uint32_t to_32(uint64_t x) {
 	x = revbits(x) ;//<< 4;
 #endif
 #ifdef TEST_LOWER
-	return (x & 0xFFFFFFFFUL);	
+	return (x & 0xFFFFFFFFUL);
 #else
 	return ((x >> 32) & 0xFFFFFFFFUL);
 #endif
@@ -104,21 +109,27 @@ void delete_gen(unif01_Gen *gen) {
 	delete gen;
 }
 
-int main(int argc, const char *argv[]) {
-	unsigned int u = 1276590013;
-	unif01_Gen *g = create_gen(u);
-	if(argc < 1 || argv[1][0] == 's')
-		bbattery_SmallCrush(g);
-	else if(argv[1][0] == 'm')
-		bbattery_Crush(g);
-	else if(argv[1][0] == 'b')
-		bbattery_BigCrush(g);
-	else {
-		std::cerr << "Unknown Test" << std::endl;
-		delete_gen(g);
-		return 1;
-	}
-	delete_gen(g);
-	return 0;
+BOOST_AUTO_TEST_CASE(test_small_crush)
+{
+    unsigned int u = 1276590013;
+    unif01_Gen *g = create_gen(u);
+    bbattery_SmallCrush(g);
+    delete_gen(g);
 }
+
+//BOOST_AUTO_TEST_CASE(test_crush)
+//{
+//    unsigned int u = 1276590013;
+//    unif01_Gen *g = create_gen(u);
+//    bbattery_Crush(g);
+//    delete_gen(g);
+//}
+
+//BOOST_AUTO_TEST_CASE(test_big_crush)
+//{
+//    unsigned int u = 1276590013;
+//    unif01_Gen *g = create_gen(u);
+//    bbattery_BigCrush(g);
+//    delete_gen(g);
+//}
 
