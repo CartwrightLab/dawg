@@ -23,7 +23,7 @@ XM((subst)(freqs),        std::vector<double>, ,
 	"  amino acids, or codons. Model Dependant.")
 XM((subst)(rate)(model),  std::string, "const",
 	"The identifier of the heterogeneous rate model, e.g.\n"
-	"  CONST, GAMMA." )
+	"  CONST, GAMMA, or ZERO." )
 XM((subst)(rate)(params), std::vector<double>, ,
 	"The parameters of the rate model.  Model Dependant.")
 
