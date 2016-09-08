@@ -545,13 +545,21 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 				}
 				break;
 			case 0: // Unempty column
+				bool alignOnce = (configs[0][0].rat_mod.label() == "zero") ? true : false;
+				int i = 0;
 				foreach(aligner_data &v, aln_table) {
+					if (alignOnce && i++ != 0) {
+						*v.str = *aln_table.at(0).str;
+						*(v.it++);
+						continue;
+					}
 					if(v.it == v.last || v.it->branch() != uBranch) {
 						rex.append_ins(*v.str);
 					} else {
 						rex.append_residue(*v.str, *(v.it++));
 					}
 				}
+				break;
 		};
 	}
 ENDFOR:
