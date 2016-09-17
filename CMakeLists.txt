@@ -55,6 +55,7 @@ if("${isSystemDir}" STREQUAL "-1")
    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
+INCLUDE(DawgDevel)
 INCLUDE(NewPackage)
 
 if(WIN32 AND NOT UNIX)
