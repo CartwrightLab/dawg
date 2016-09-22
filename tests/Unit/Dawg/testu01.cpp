@@ -20,14 +20,8 @@
 #include <cstdio>
 
 extern "C" {
-#if defined(__FreeBSD__)
-#include <TestU01/unif01.h>
-#include <TestU01/bbattery.h>
-#include <TestU01/gdefconf.h>
-#else
 #include <unif01.h>
 #include <bbattery.h>
-#endif // defined
 }
 
 #include <dawg/details/mutt.h>
