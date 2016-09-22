@@ -1,7 +1,6 @@
 /****************************************************************************
  *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
-#include <dawg/utils/foreach.h>
 #include <dawg/ma.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
@@ -39,7 +38,7 @@ bool dawg::ma::from_trick(const trick &trk, vector<ma> &v) {
 			return DAWG_ERROR("section '" << secit->inherits <<
 				"' not found (inherited by '" << secit->name << "')");
 		// lookup section
-		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->name, (dawg::ma*)NULL));
+		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->name, (dawg::ma*)nullptr));
 		if(!me.second)
 			return DAWG_ERROR("section '" << secit->name << "' specified more than once.");
 

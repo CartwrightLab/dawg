@@ -6,24 +6,19 @@
  ****************************************************************************/
 
 #include <dawg/mutt.h>
-
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include <dawg/indel.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
 #include <dawg/wood.h>
 #include <dawg/root.h>
 #include <dawg/sequence.h>
-
 #include <dawg/ma.h>
-
-#include <dawg/utils/foreach.h>
 
 #include <vector>
 #include <set>
 #include <stack>
 #include <map>
+#include <memory>
 
 namespace dawg {
 namespace details {
@@ -118,7 +113,7 @@ typedef std::map<std::string,sequence_data> seq_map;
 template<class CharType, class CharTrait>
 inline std::basic_ostream<CharType, CharTrait>&
 operator<<(std::basic_ostream<CharType, CharTrait>& o, const alignment &aln) {
-	foreach(const alignment::value_type &v, aln) {
+	for(const alignment::value_type &v : aln) {
 		o << v.label << "\t" << v.seq << std::endl;
 	}
 	return o;
@@ -168,7 +163,7 @@ public:
 	
 protected:
 	typedef dawg::details::matic_section section;
-	struct segment : public boost::ptr_vector<section> {
+	struct segment : public std::vector<std::unique_ptr<section>> {
 		residue_exchange rex;
 	};
 	typedef std::vector<segment> segment_vector;

@@ -11,7 +11,6 @@
 #include <map>
 
 #include <dawg/log.h>
-#include <dawg/utils/foreach.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -76,7 +75,7 @@ inline void trick::section::get(const std::string& k, std::vector<T,A>& r) const
 	if((it = db.find(k)) != db.end()) {
 		T x;
 		r.clear();
-		foreach(const std::string &ss, it->second) {
+		for(const std::string &ss : it->second) {
 			section::conv(ss, x);
 			r.push_back(x);
 		}
@@ -138,7 +137,7 @@ inline void trick::section::read_aliases() {
 }
 
 inline void trick::read_aliases() {
-	foreach(section &sec, data) {
+	for(section &sec : data) {
 		sec.read_aliases();
 	}
 }

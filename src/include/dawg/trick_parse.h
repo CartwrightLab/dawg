@@ -42,7 +42,7 @@ namespace standard = boost::spirit::standard;
 namespace phoenix = boost::phoenix;
 
 namespace details {
-	typedef std::pair<std::string, std::vector<std::string> > line_type;
+	using line_type = std::pair<std::string, std::vector<std::string> >;
 	typedef std::vector<line_type> subsection_body_type;
 	typedef std::pair<std::string, subsection_body_type> subsection_type;
 	typedef std::vector<subsection_type> section_body_type;

@@ -27,7 +27,6 @@
 
 #include <dawg/ma.h>
 #include <dawg/trick.h>
-#include <dawg/utils/foreach.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
 
@@ -118,7 +117,7 @@ int dawg_app::run() {
 	trick input;
 		
 	bool ret = true;
-	foreach(string &ss, arg.input) {
+	for(string &ss : arg.input) {
 		ret &= trick::parse_file(input, ss.c_str());
 	}
 	

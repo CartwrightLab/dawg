@@ -7,11 +7,6 @@
 #include <dawg/residue.h>
 #include <dawg/log.h>
 
-#include <dawg/utils/foreach.h>
-#include <dawg/utils/vecio.h>
-
-#include <boost/phoenix/stl/container.hpp>
-
 using namespace dawg;
 using namespace std;
 
@@ -36,8 +31,8 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	segment &seg = configs[ma.root_segment];
 		
 	// construction section_info
-	std::auto_ptr<section> info(new section);
-	
+    std::unique_ptr<section> info(new section);
+
 	// construct models
 	if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
 		ma.subst_rate_params.end()))
@@ -58,7 +53,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("the sequence type or format options of a section is different than its segment.");
 	}
 	info->gap_base = seg.rex.gap_base();
-	
+
 	if(!info->ins_mod.create(ma.indel_model_ins.begin(), ma.indel_model_ins.end(),
 		ma.indel_rate_ins.begin(), ma.indel_rate_ins.end(),
 		ma.indel_params_ins.begin(), ma.indel_params_ins.end(), ma.indel_max_ins))
@@ -69,36 +64,36 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		return DAWG_ERROR("deletion model could not be created.");
 	if(!info->rut_mod.create(ma.root_length, ma.root_seq, ma.root_rates))
 		return DAWG_ERROR("root model could not be created.");
-	
+
 	// parse tree and find all named descendant nodes
 	if(!info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end()))
 		return DAWG_ERROR("invalid tree; it failed to parse");
-		
+
 	// test whether descendents already exist in this segment
-	foreach(section &r, seg) {
-		std::set<std::string>::const_iterator it = has_intersection(
-			r.usertree.desc_labels().begin(), r.usertree.desc_labels().end(),
-			info->usertree.desc_labels().begin(), info->usertree.desc_labels().end());
+	for(auto& sec : seg) {
+        std::set<std::string>::const_iterator it = has_intersection(
+            sec->usertree.desc_labels().begin(), sec->usertree.desc_labels().end(),
+            info->usertree.desc_labels().begin(), info->usertree.desc_labels().end());
 		if(it != info->usertree.desc_labels().end())
 			return DAWG_ERROR("invalid tree; descendent '" <<  *it
 			               << "' already exists in segment #"
 			               << ma.root_segment);
 	}
-	
+
 	// Allow gap overlap ?
 	info->gap_overlap = ma.root_gapoverlap;
-	
+
 	// Tree Scale
 	info->tree_scale = ma.tree_scale;
 	info->usertree.scale(info->tree_scale);
-	
+
 	// find location to insert
 	segment::iterator it;
 	for(it = seg.begin(); it != seg.end()
-	    && !info->usertree.has_desc(it->usertree.root_label()); ++it)
+	    && !info->usertree.has_desc(it->get()->usertree.root_label()); ++it)
 		/*noop*/;
-	seg.insert(it, info);
-	
+	seg.insert(it, std::move(info));
+
 	return true;
 }
 
@@ -113,24 +108,24 @@ bool dawg::matic::finalize_configuration() {
 		configs.end());
 	
 	// find the union of all labels in the configuration
-	foreach(segment &seg, configs) {
-		bool has_root = false;
-		foreach(section &sec, seg) {
-			label_to_index_type::iterator it;
+    for(auto &seg : configs) {
+        bool has_root = false;
+		for(auto &sec : seg) {
+            label_to_index_type::iterator it;
 			// try to insert the root label
-			it = label_union.insert(label_to_index_type::value_type(sec.usertree.root_label(),0)).first;
+			it = label_union.insert(label_to_index_type::value_type(sec->usertree.root_label(),0)).first;
 			// if this root hasn't been seen before in this segment, mark it
 			if(it->second < u) {
 				if(has_root)
 					return DAWG_ERROR("segment " << u-1 << " has an extra root ( "
-						<< sec.usertree.root_label() << " )");
+						<< sec->usertree.root_label() << " )");
 				has_root = true;
 			}
 			it->second = u;
 			// insert and mark all descendant labels
 			it = label_union.begin();
-			foreach(const string &lab, sec.usertree.desc_labels()) {
-				it = label_union.insert(it, label_to_index_type::value_type(lab,0));
+			for(const auto& lab : sec->usertree.desc_labels()) {
+                it = label_union.insert(it, label_to_index_type::value_type(lab,0));
 				it->second = u;
 			}
 		}
@@ -139,8 +134,8 @@ bool dawg::matic::finalize_configuration() {
 	// set id's for each label
 	u = 0;
 	aln_size = 0;
-	foreach(label_to_index_type::value_type &lab, label_union) {
-		lab.second = u++;
+    for(auto& lab : label_union) {
+        lab.second = u++;
 		if(lab.first[0] != '{' && lab.first[0] != '~')
 			aln_size = u;
 	}
@@ -148,11 +143,11 @@ bool dawg::matic::finalize_configuration() {
 		return DAWG_ERROR("no sequences to align");
 	}
 	// copy the id's to the meta information for a tree
-	foreach(segment &seg, configs) {
-		foreach(section &sec, seg) {
-			sec.metatree.resize(sec.usertree.data().size());
-			for(u=0;u<sec.usertree.data().size();++u) {
-				sec.metatree[u] = label_union[sec.usertree.data()[u].label];
+	for(auto &seg : configs) {
+	    for(auto &sec : seg) {
+            sec->metatree.resize(sec->usertree.data().size());
+			for(u=0;u<sec->usertree.data().size();++u) {
+				sec->metatree[u] = label_union[sec->usertree.data()[u].label];
 			}
 		}
 	}
@@ -175,34 +170,34 @@ void dawg::matic::pre_walk(alignment& aln) {
 	}
 	// TODO: We need to either initialize "empty" segments or skip over them
 	// Or prune them
-	aln.seq_type = configs[0][0].sub_mod.seq_type();
+	aln.seq_type = configs[0][0]->sub_mod.seq_type();
 }
 
 void dawg::matic::walk(alignment& aln) {
 	if(configs.empty())
 		return;
 	// clear alignment
-	foreach(alignment::value_type &a, aln) {
+	for(alignment::value_type &a : aln) {
 		a.seq.clear();
 	}
 
-	if(configs[0][0].gap_overlap) {
+	if(configs[0][0]->gap_overlap) {
 		// take first seg and do upstream indels
 		// root.gapoverlap = false prevents upstream indel creation		
 		branch_color = 0;
 		// clear sequence buffer
-		foreach(details::sequence_data &v, seqs) {
+		for(details::sequence_data &v : seqs) {
 			v.seq.clear();
 			v.indels.clear();
 		}
-		foreach(const section &sec, configs[0]) {
-			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
-				const wood::node &n = sec.usertree.data()[u];
-				const sequence &ranc = seqs[sec.metatree[u-n.anc]].seq;
-				details::sequence_data &sd = seqs[sec.metatree[u]];
-				sec.evolve_upstream(sd.seq, sd.indels, n.length,
+	    for(const auto &sec : configs[0]) {
+            for(wood::data_type::size_type u=1;u<sec->usertree.data().size();++u) {
+				const wood::node &n = sec->usertree.data()[u];
+				const sequence &ranc = seqs[sec->metatree[u-n.anc]].seq;
+				details::sequence_data &sd = seqs[sec->metatree[u]];
+				sec->evolve_upstream(sd.seq, sd.indels, n.length,
 					branch_color, maxx);
-				sec.evolve(sd.seq, sd.indels, n.length,
+				sec->evolve(sd.seq, sd.indels, n.length,
 					branch_color, ranc.begin(), ranc.end(), maxx);
 				branch_color += dawg::residue::branch_inc;
 			}
@@ -210,32 +205,32 @@ void dawg::matic::walk(alignment& aln) {
 		align(aln, seqs, configs[0].rex);
 	}
 
-	foreach(const segment &seg, configs) {
+	for(const segment &seg : configs) {
 		if(seg.empty())
 			continue;
 		branch_color = 0;
 		// clear the sequence buffers
-		foreach(details::sequence_data &v, seqs) {
+		for(details::sequence_data &v : seqs) {
 			v.seq.clear();
 		}
 		{ // create root sequence of this 
-			const section &sec = seg[0];
-			seqs[sec.metatree[0]].indels.clear();	
-			sec.rut_mod(seqs[sec.metatree[0]].seq, maxx, sec.sub_mod, sec.rat_mod, branch_color);
+			const auto &sec = std::move(seg.at(0));
+			seqs[sec->metatree[0]].indels.clear();
+			sec->rut_mod(seqs[sec->metatree[0]].seq, maxx, sec->sub_mod, sec->rat_mod, branch_color);
 			branch_color += dawg::residue::branch_inc;
 			// if gap_overlap is false, clear the upstream buffer of all sequences
-			if(!sec.gap_overlap) {
-				foreach(details::sequence_data &v, seqs) {
+			if(!sec->gap_overlap) {
+				for(details::sequence_data &v : seqs) {
 					v.indels.clear();
 				}
 			}
 		}
-		foreach(const section &sec, seg) {
-			for(wood::data_type::size_type u=1;u<sec.usertree.data().size();++u) {
-				const wood::node &n = sec.usertree.data()[u];
-				const sequence &ranc = seqs[sec.metatree[u-n.anc]].seq;
-				sequence &seq = seqs[sec.metatree[u]].seq;
-				sec.evolve(seq, seqs[sec.metatree[u]].indels, n.length,
+	    for(const auto& sec : seg) {
+            for(wood::data_type::size_type u=1;u<sec->usertree.data().size();++u) {
+				const wood::node &n = sec->usertree.data()[u];
+				const sequence &ranc = seqs[sec->metatree[u-n.anc]].seq;
+				sequence &seq = seqs[sec->metatree[u]].seq;
+				sec->evolve(seq, seqs[sec->metatree[u]].indels, n.length,
 					branch_color, ranc.begin(), ranc.end(), maxx);
 				branch_color += dawg::residue::branch_inc;
 			}
@@ -524,7 +519,7 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 		unsigned int uState =  uStateQuit; // Set to quit
 		uBranch = 0; // Set to lowest branch
 		// Find column state(s)
-		foreach(aligner_data &v, aln_table) {
+		for(aligner_data &v : aln_table) {
 			if(v.it == v.last)
 				continue; // Sequence is done
 			uBranchN = v.it->branch();
@@ -539,13 +534,13 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 			case 3:
 			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
 			case 1: // Empty column that we want to ignore
-				foreach(aligner_data &v, aln_table) {
+				for(aligner_data &v : aln_table) {
 					if(v.it != v.last && v.it->branch() == uBranch)
 						++v.it;
 				}
 				break;
 			case 0: // Unempty column
-				foreach(aligner_data &v, aln_table) {
+				for(aligner_data &v : aln_table) {
 					if(v.it == v.last || v.it->branch() != uBranch) {
 						rex.append_ins(*v.str);
 					} else {
