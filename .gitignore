@@ -5,6 +5,9 @@
 # intelliJ stuff
 .idea/
 
+# KDE stuff
+*kde*
+
 # Compiled Object files
 *.slo
 *.lo
