@@ -7,7 +7,7 @@
 # TESTU01_FOUND        true if both the TESTU01_LIBRARY and TESTU01_INCLUDE_DIR have been found.
 #
 # To help locate the library and include file, you can define a
-# variable called TESTU01_ROOT which points to the root of the glfw library
+# variable called TESTU01_ROOT which points to the root of the TESTU01 library
 # installation.
 #
 
@@ -35,7 +35,8 @@ endif()
 
 # Search for the header
 FIND_PATH(TESTU01_INCLUDE_DIR "TestU01.h"
-        PATHS ${_testu01_HEADER_SEARCH_DIRS} )
+        PATHS ${_testu01_HEADER_SEARCH_DIRS}
+        PATH_SUFFIXES TestU01)
 
 # Search for the library
 FIND_LIBRARY(TESTU01_LIBRARY NAMES testu01

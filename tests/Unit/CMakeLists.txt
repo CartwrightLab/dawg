@@ -1,7 +1,6 @@
 set(DAWG_DIR "Dawg")
 
-find_package(TestU01 REQUIRED)
-set(TESTU01_LIBS ${TESTU01_LIBRARY})
+find_package(TestU01)
 
 ###############################################################################
 # AddUnitTest
@@ -24,13 +23,18 @@ macro(AddUnitTest NAME)
 
     target_include_directories("${target}" BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
-    target_link_libraries("${target}"
-            libdawg2
-            ${Boost_FILESYSTEM_LIBRARY}
-            ${Boost_SYSTEM_LIBRARY}
-            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-            ${TESTU01_LIBS}
-            )
+    if(TESTU01_FOUND)
+        target_link_libraries("${target}"
+                libdawg2
+                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                ${TESTU01_LIBRARY}
+                )
+    else()
+        target_link_libraries("${target}"
+                libdawg2
+                ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                )
+    endif(TESTU01_FOUND)
 
     add_test("Unit.${NAME}" ${CMAKE_CTEST_COMMAND}
             --build-and-test "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}"
@@ -54,5 +58,7 @@ file(COPY "${CMAKE_SOURCE_DIR}/examples/segments.dawg" DESTINATION "${CMAKE_CURR
 ###############################################################################
 # Add Unit tests based on CXX namespaces
 
-AddUnitTest(${DAWG_DIR}::testu01)
+if(TESTU01_FOUND)
+    AddUnitTest(${DAWG_DIR}::testu01)
+endif(TESTU01_FOUND)
 AddUnitTest(${DAWG_DIR}::parse_test)
