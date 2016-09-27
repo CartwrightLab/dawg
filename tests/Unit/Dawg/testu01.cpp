@@ -95,7 +95,7 @@ unif01_Gen *create_gen(unsigned int u) {
 	g->seed(u);
 	gen->state = g;
 	gen->name = &name[0];
-	gen->param = NULL;
+	gen->param = nullptr;
 	gen->GetU01 =  &get_u01;
 	gen->GetBits = &get_bits;
 	gen->Write = &write_gen;
@@ -103,7 +103,7 @@ unif01_Gen *create_gen(unsigned int u) {
 }
 
 void delete_gen(unif01_Gen *gen) {
-	if(NULL == gen)
+	if(nullptr == gen)
 		return;
 	delete static_cast<mutt_gen_default*>(gen->state);
 	delete gen;

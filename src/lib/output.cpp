@@ -26,20 +26,20 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 	last_rep = max_rep;
 	rep = 0;
 	cs_range format(file_name, file_name);
-	const char *mid = NULL;
-	if(file_name != NULL && file_name[0] != '\0') {
+	const char *mid = nullptr;
+	if(file_name != nullptr && file_name[0] != '\0') {
 		mid = strchr(file_name, ':');
 #ifdef BOOST_WINDOWS
-		if(mid != NULL && mid != file_name+1) {
+		if(mid != nullptr && mid != file_name+1) {
 #else
-		if(mid != NULL) {
+		if(mid != nullptr) {
 #endif		
 			// format:file
 			format = boost::make_iterator_range(file_name, mid);
 			file_name = mid+1;
 			// find extension point for later
 			mid = strrchr(file_name, '.');
-		} else if((mid = strrchr(file_name, '.')) != NULL) {
+		} else if((mid = strrchr(file_name, '.')) != nullptr) {
 			// file.format
 			format = boost::make_iterator_range(mid+1, (const char*)strchr(mid+1, '\0'));
 		}
@@ -52,7 +52,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 	current_label.assign(label_width, '0');
 	do_label = label;
 	
-	if(file_name != NULL && file_name[0] != '\0' && strcmp(file_name, "-") != 0) {
+	if(file_name != nullptr && file_name[0] != '\0' && strcmp(file_name, "-") != 0) {
 		// set append and split options before we open the file
 		do_append = append;
 		do_split  = split;
@@ -62,7 +62,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 				return DAWG_ERROR("unable to open output file \'" << file_name << "\'.");
 		} else {
 			// setup output_filename
-			if(mid == NULL) {
+			if(mid == nullptr) {
 				split_file_name.assign(file_name);
 				split_file_name.append(1, '-');
 				split_file_name.append(current_label);
@@ -91,7 +91,7 @@ bool dawg::output::open_file(const char* file_name) {
 		(do_append ? ios_base::app : ios_base::trunc);
 	fout.open(file_name, om);
 	if(!fout.is_open()) {
-		set_ostream(NULL);
+		set_ostream(nullptr);
 		return false;
 	}
 	set_ostream(fout);
@@ -214,7 +214,7 @@ void dawg::output::print_phylip(const alignment& aln) {
 void dawg::output::print_nexus(const alignment& aln) {
 	ostream &out = *p_out;
 	
-	static char datatypes[][10] = {
+	static constexpr char datatypes[][10] = {
 		"DNA", "RNA", "PROTEIN", "DNA",
 		"DNA", "RNA", "PROTEIN", "DNA"
 	};

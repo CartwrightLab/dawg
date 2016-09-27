@@ -18,7 +18,7 @@ namespace dawg {
 
 class output {
 public:
-	output() : do_op(&output::print_aln), p_out(NULL), format_id(0),
+	output() : do_op(&output::print_aln), p_out(nullptr), format_id(0),
 		rep(0), label_width(0),
 		do_append(false), do_split(false), do_label(false),
 		split_id_offset(0) { }
@@ -28,7 +28,7 @@ public:
 
 	inline bool operator()(const alignment& aln) {
 		open_next();
-		if(p_out == NULL)
+		if(p_out == nullptr)
 			return false;
 		std::ostream &out = *p_out;
 		if(!do_split)
@@ -92,7 +92,7 @@ protected:
 
 template<class T>
 bool output::set_format(T format) {
-	static const char format_keys[][10] = {
+	static constexpr char format_keys[][10] = {
 		"aln", "poo", "fasta", "fsa",
 		"nexus", "phylip"
 	};

@@ -104,15 +104,15 @@ inline void trick::section::conv(const std::string& ss, std::string& r) {
 }
 
 inline void trick::section::conv(const std::string& ss, double& r) {
-	r = strtod(ss.c_str(), NULL);
+	r = strtod(ss.c_str(), nullptr);
 }
 
 inline void trick::section::conv(const std::string& ss, unsigned int& r) {
-	r = strtoul(ss.c_str(), NULL, 0);
+	r = strtoul(ss.c_str(), nullptr, 0);
 }
 
 inline void trick::section::conv(const std::string& ss, int& r) {
-	r = strtol(ss.c_str(), NULL, 0);
+	r = strtol(ss.c_str(), nullptr, 0);
 }
 
 // A value is false if it is equal to 0, f, false, off, no, or blank
