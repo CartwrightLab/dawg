@@ -2,7 +2,9 @@
 include(ExternalProject)
 
 # Prelim settings
-SET(EXT_PREFIX ext_deps)
+SET(EXT_DEPS_PREFIX ext_deps)
+
+ADD_CUSTOM_TARGET(ext_projects)
 
 IF(NOT "${CMAKE_VERSION}" VERSION_LESS 3.2)
   SET(use_byproducts true)
@@ -43,7 +45,98 @@ IF(USE_STATIC_LIBS)
   SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 ENDIF(USE_STATIC_LIBS)
 
-ADD_CUSTOM_TARGET(ext_projects)
+################################################################################
+# YAML-CPP
+#
+# See if YAML doesn't already exist on the system
+find_package(YamlCpp)
+IF(YAMLCPP_FOUND)
+    message(STATUS "Yaml-CPP library found and support for parsing .yaml files included.")
+
+    if(NOT TARGET YAML::YAML)
+        add_library(YAML::YAML STATIC IMPORTED GLOBAL)
+        set_target_properties(YAML::YAML PROPERTIES
+                IMPORTED_LOCATION "${YAMLCPP_LIBRARY}"
+                INTERFACE_INCLUDE_DIRECTORIES "${YAMLCPP_INCLUDE_DIR}")
+    endif(NOT TARGET YAML::YAML)
+
+    # Finally, add the YAML definition for the pre-processor
+    ADD_DEFINITIONS(-DENABLE_YAML)
+elseif(NOT YAMLCPP_FOUND AND BUILD_EXTERNAL_PROJECTS)
+    set(EXT_YAML_PREFIX "ext_yaml")
+
+    set(YAML_COMMIT         86c69bb73c497bd127afd9802d0aef8ba160f9c6)
+    set(YAML_URL            https://github.com/jbeder/yaml-cpp/commit/${YAML_COMMIT})
+    set(YAML_SHA256         f69244b5027646aa87171780fced6095b396e79df07475fb1d20cfc64122445e)
+    set(YAML_REPO           "https://github.com/jbeder/yaml-cpp.git")
+    set(YAML_TAG            ${YAML_COMMIT})
+    set(YAML_PREFIX         "${CMAKE_CURRENT_BINARY_DIR}/${EXT_DEPS_PREFIX}/${EXT_YAML_PREFIX}")
+    set(YAML_BUILD_PATH     "${YAML_PREFIX}-build")
+    set(YAML_INSTALL_PATH   "${YAML_PREFIX}-install")
+    set(YAML_CMAKE_ARGS     -DCMAKE_BUILD_TYPE:STRING=Release -DCMAKE_INSTALL_PREFIX:PATH=${YAML_INSTALL_PATH})
+
+    message(STATUS "Downloading and building YAML-CPP from: [tag: ${YAML_TAG}] ${YAML_REPO}")
+    message(STATUS "Path to YAML-CPP: ${YAML_PREFIX}")
+    message(STATUS "YAML-CPP CMake args: ${YAML_CMAKE_ARGS}")
+
+    # Build Yaml-CPP
+    ExternalProject_Add(${EXT_YAML_PREFIX}
+            GIT_REPOSITORY    ${YAML_REPO}
+            GIT_TAG           ${YAML_TAG}
+            URL               ${YAML_URL}
+            URL_HASH          256=${YAML_SHA256}
+            PREFIX            ${YAML_PREFIX}
+            CMAKE_ARGS        ${YAML_CMAKE_ARGS}
+            TMP_DIR           "${YAML_PREFIX}-tmp"
+            STAMP_DIR         "${YAML_PREFIX}-stamp"
+            INSTALL_DIR       ${YAML_INSTALL_PATH}
+            #PATCH_COMMAND      ""
+            #UPDATE_COMMAND     ""
+            #CONFIGURE_COMMAND  ""
+            SOURCE_DIR        ${YAML_PREFIX}
+            BINARY_DIR        ${YAML_BUILD_PATH}
+            #BUILD_IN_SOURCE  true
+            #BUILD_ALWAYS     true
+            #BUILD_COMMAND    ${CMAKE_COMMAND} --build ${CMAKE_EXECUTABLE} ${GMAKE_EXECUTABLE}
+            #INSTALL_COMMAND  ${GMAKE_EXECUTABLE} install
+            TEST_COMMAND      "")
+
+    set(YAML_FOUND TRUE)
+    set(YAMLCPP_INCLUDE_DIR "${YAML_INSTALL_PATH}/include/yaml-cpp/")
+
+    # May want to add a check to see if we're linking statically or not
+    if(WIN32 AND NOT UNIX)
+      set(YAMLCPP_LIBRARY "${YAML_INSTALL_PATH}/lib/libyaml-cpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    else()
+      set(YAMLCPP_LIBRARY "${YAML_INSTALL_PATH}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}yaml-cpp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    endif(WIN32 AND NOT UNIX)
+
+    message(STATUS
+            "Including path to YAML headers: ${YAMLCPP_INCLUDE_DIR}")
+    message(STATUS
+            "Linking to built YAML library: ${YAMLCPP_LIBRARY}")
+
+    file(MAKE_DIRECTORY "${YAMLCPP_INCLUDE_DIR}")
+
+    if(NOT TARGET YAML::YAML)
+    add_library(YAML::YAML STATIC IMPORTED GLOBAL)
+    set_target_properties(YAML::YAML PROPERTIES
+            IMPORTED_LOCATION "${YAMLCPP_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${YAMLCPP_INCLUDE_DIR}")
+    endif(NOT TARGET YAML::YAML)
+
+    add_dependencies(YAML::YAML ${EXT_YAML_PREFIX})
+    add_dependencies(ext_projects YAML::YAML)
+    # Finally, add the YAML definition for the pre-processor
+    ADD_DEFINITIONS(-DENABLE_YAML)
+elseif(NOT YAMLCPP_FOUND AND BUILD_EXTERNAL_PROJECTS)
+else()
+  message(WARN
+          "Yaml-CPP is required to parse files in YAML format,
+          enable -DBUILD_EXTERNAL_PROJECTS:BOOL=ON to build YAML-CPP with DAWG")
+endif(YAMLCPP_FOUND)
+################################################################################
+
 
 ################################################################################
 # THREADS
@@ -75,10 +168,10 @@ IF(NOT BUILD_EXTERNAL_PROJECTS_FORCED)
 ENDIF()
 
 IF(BUILD_EXTERNAL_PROJECTS AND NOT Boost_FOUND)
-  SET(boost_ext_libdir "${CMAKE_BINARY_DIR}/${EXT_PREFIX}/boost/lib")
+  SET(boost_ext_libdir "${CMAKE_BINARY_DIR}/${EXT_DEPS_PREFIX}/boost/lib")
   SET(Boost_FOUND TRUE)
   SET(Boost_VERSION 1.60.0)
-  SET(Boost_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/${EXT_PREFIX}/boost/include/")
+  SET(Boost_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/${EXT_DEPS_PREFIX}/boost/include/")
   FILE(MAKE_DIRECTORY "${Boost_INCLUDE_DIRS}")
   SET(Boost_LIBRARY_DIRS "")
   SET(BOOST_EXT_TARGET ext_boost)
@@ -118,12 +211,12 @@ IF(BUILD_EXTERNAL_PROJECTS AND NOT Boost_FOUND)
 
   CONFIGURE_FILE(
     "${CMAKE_SOURCE_DIR}/Modules/cmake_ext_boost_bootstrap.cmake.in"
-    "${CMAKE_BINARY_DIR}/${EXT_PREFIX}/cmake_ext_boost_bootstrap.cmake"
+    "${CMAKE_BINARY_DIR}/${EXT_DEPS_PREFIX}/cmake_ext_boost_bootstrap.cmake"
     IMMEDIATE @ONLY
   )
 
   SET(boost_bootstrap
-    "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/${EXT_PREFIX}/cmake_ext_boost_bootstrap.cmake"
+    "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/${EXT_DEPS_PREFIX}/cmake_ext_boost_bootstrap.cmake"
   )
 
   MARK_AS_ADVANCED(EXT_BOOST_TOOLSET EXT_BOOST_BOOTSTRAP_TOOLSET)
@@ -153,7 +246,7 @@ IF(BUILD_EXTERNAL_PROJECTS AND NOT Boost_FOUND)
   ExternalProject_add(ext_boost
     URL http://downloads.sourceforge.net/project/boost/boost/${Boost_VERSION}/boost_${boost_file_version}.tar.bz2
     URL_MD5 65a840e1a0b13a558ff19eeb2c4f0cbe
-    PREFIX "${EXT_PREFIX}/boost"
+    PREFIX "${EXT_DEPS_PREFIX}/boost"
     BUILD_IN_SOURCE TRUE
     CONFIGURE_COMMAND ${boost_bootstrap}
     BUILD_COMMAND ${boost_build}

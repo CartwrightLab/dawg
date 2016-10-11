@@ -28,6 +28,15 @@ boolean: true|false
 tree:    Newick Format
 vector:  { value, value, ...}
 
+UPDATED FOR YAML:
+    The layout for specifying DAWG tricks in YAML format (spec. 1.2) looks something like:
+
+    [] denotes sequence
+    {} denotes map
+
+    SectionName:
+        Section: string|number|boolean|[]|{}
+
 OPTIONS
 
   Name            Type            Description

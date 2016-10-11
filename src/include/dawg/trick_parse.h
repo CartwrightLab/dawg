@@ -10,9 +10,15 @@
 #include <boost/phoenix/core.hpp>
 
 #include <iterator>
+#include <algorithm>
 
 #include <dawg/trick.h>
- 
+
+#if defined(ENABLE_YAML)
+#include <yaml-cpp/yaml.h>
+#include <functional>
+#endif // ENABLE_YAML
+
 #include <boost/spirit/include/version.hpp>
 #if SPIRIT_VERSION < 0x2020
 #	error Spirit version 2.2 or greater required.
@@ -20,6 +26,8 @@
 
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/any.hpp>
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -68,7 +76,7 @@ struct trick_grammar : qi::grammar<Iterator, details::trick_raw_type(), skip_typ
 		using standard::graph; using standard::print;
 		using standard::char_;
 		using qi::raw; using qi::lexeme; using qi::eol;
-		
+
 		start = *section;
 		section = section_header || section_body;
 		section_header = "[[" >> id >> -('=' >> id) >> "]]";
@@ -82,9 +90,9 @@ struct trick_grammar : qi::grammar<Iterator, details::trick_raw_type(), skip_typ
 		bare_string     = lexeme[+(graph - char_(",#\"[]=()"))];
 		tree_string     = lexeme[char_("(") >> +(char_ - ';') >> char_(";")];
 		quoted_string   = lexeme['"' >> *(print - '"') >> '"'];
-		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];		
+		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];
 	}
-	
+
 	qi::rule<Iterator, details::trick_raw_type(), skip_type> start;
 	qi::rule<Iterator, details::section_type(), skip_type> section;
 	qi::rule<Iterator, details::section_header_type(), skip_type> section_header;
@@ -152,7 +160,7 @@ bool trick::parse(Iterator first, Iterator last) {
 				} while(starts_with(hh, ".."));
 				if(!subheader.empty() && !hh.empty())
 					subheader.append(1, '.');
-				subheader.append(hh);			
+				subheader.append(hh);
 			} else if(starts_with(h, ".")) { // if h begins with a single period, append it to existing subheader
 				if(!subheader.empty() && h.size() > 1)
 					subheader.append(1, '.').append(h.begin()+1, h.end());
@@ -180,9 +188,75 @@ template<typename Char, typename Traits>
 inline bool trick::parse_stream(std::basic_istream<Char, Traits>& is) {
 	is.unsetf(std::ios::skipws);
 	boost::spirit::basic_istream_iterator<Char, Traits> first(is), last;
-	return parse(first, last);	
+	return parse(first, last);
 }
 
+#if defined(ENABLE_YAML)
+bool trick::parse_yaml(const char* filepath)
+{
+    using boost::algorithm::to_lower;
+    using boost::algorithm::contains;
+	using boost::algorithm::split;
+
+    static constexpr auto auto_header_label = "auto";
+
+    std::string pSec("_initial_");
+    int autonum = 1; //TODO: What happens with multiple trick files?
+
+    // Load the YAML doc
+    YAML::Node yamlDoc;
+    try {
+        yamlDoc = YAML::LoadFile(filepath);
+    } catch (std::exception& ex) {
+        return DAWG_ERROR("YAML Parsing failed");
+    }
+
+    for (YAML::const_iterator section = yamlDoc.begin(); section != yamlDoc.end(); ++section) {
+        std::string key = section->first.as<std::string>();
+        to_lower(key);
+
+        if (boost::iequals(key, auto_header_label)) {
+            // auto-generate this sections' name
+            auto tempStr = "Unnamed Section " + toString(autonum++);
+        } else if (contains(key, "=")) {
+            // Header is "SecA=SecB" and thus splits as ["SecA", "SecB"]
+            std::vector<std::string> strs;
+            split(strs, key, [](const char c) -> bool { return (c == '=') ? true : false; });
+            assert(strs.size() == 2);
+        } else {
+            // inherit from the section in the document above this one
+
+        }
+
+        data.emplace_back(key, pSec);
+        pSec = key; // update the previous section
+
+        // Gather up the values for this new section
+        for (YAML::const_iterator params = section->second.begin(); params != section->second.end(); ++params) {
+            std::vector<std::string> values;
+
+            if (params->second.IsScalar()) {
+                values.emplace_back(params->second.as<std::string>());
+            }
+            else if (params->second.IsSequence()) {
+                for(YAML::const_iterator itt = params->second.begin(); itt != params->second.end(); ++itt)
+                    values.emplace_back(itt->as<std::string>());
+            }
+            else if (params->second.IsMap()) {
+                values.emplace_back(params->second.as<std::string>());
+            }
+            else {
+            }
+
+            std::string formattedLabel = key + "." + params->first.as<std::string>();
+            to_lower(formattedLabel);
+//            data.emplace_back().db[key] = values;
+        }
+    }
+    return true;
+}
+#endif // ENABLE_YAML
+
 } // namespace dawg
- 
+
 #endif // DAWG_TRICK_PARSE_H
