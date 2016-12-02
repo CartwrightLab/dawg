@@ -34,7 +34,7 @@ XM((indel)(params)(ins), std::vector<double>, DL(1, 1.0),
 	"The parameters of the insertion models.  Model Dependant.")
 XM((indel)(rate)(ins),   std::vector<double>,  ,
 	"The per-substitution rates of the mixture of insertion models.")
-XM((indel)(max)(ins),    unsigned int, 16000,
+XM((indel)(max)(ins),    unsigned int, 100,
 	"The maximum size of an insertion")
 
 XM((indel)(model)(del),  std::vector<std::string>, DL(1, "user"),
@@ -44,7 +44,7 @@ XM((indel)(params)(del), std::vector<double>, DL(1, 1.0),
 	"The parameters of the deletion models.  Model Dependant.")
 XM((indel)(rate)(del),   std::vector<double>, ,
 	"The per-substitution rates of the mixture of deletion models.")
-XM((indel)(max)(del),    unsigned int, 16000,
+XM((indel)(max)(del),    unsigned int, 100,
 	"The maximum size of a deletion.")
 
 XM((tree)(model),  std::string, "user",
