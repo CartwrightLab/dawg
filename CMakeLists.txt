@@ -13,17 +13,12 @@ SET(CMAKE_BUILD_TYPE_INIT "RelWithDebInfo")
 SET(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "Turn on Verbose Makefiles" FORCE)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
+SET(BUILD_EXTERNAL_PROJECTS OFF CACHE BOOL "Build external dependencies if they are not found.")
 
 SET(USE_STATIC_LIBS OFF CACHE BOOL "Link against static libraries.")
 SET(LIBDAWG_USE_STATIC_LIBS OFF CACHE BOOL "Link against a static version of libdawg2.")
 SET(RANDOM_GEN "xorshift_64" CACHE STRING "Pseudo-random number generator to use.")
 MARK_AS_ADVANCED(RANDOM_GEN)
-
-IF(USE_STATIC_LIBS)
-  SET(Boost_USE_STATIC_LIBS ON)
-  SET(Boost_USE_STATIC_RUNTIME ON)
-  SET(LIBDAWG_USE_STATIC_LIBS ON FORCE)
-ENDIF(USE_STATIC_LIBS)
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -127,23 +122,6 @@ ENDIF()
 MESSAGE(STATUS "${DAWG_NAME} version: ${DAWG_VERSION}.")
 
 ################################################################################
-# Find Boost dependency
-SET(Boost_ADDITIONAL_VERSIONS 1.53 1.53.0 1.52 1.52.0 1.51 1.51.0
-        1.50 1.50.0 1.49 1.49.0 1.48 1.48.0 1.47 1.47.0)
-FIND_PACKAGE(Boost 1.47.0 REQUIRED COMPONENTS program_options unit_test_framework)
-IF(Boost_FOUND)
-    ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB -DBOOST_PROGRAM_OPTIONS_NO_LIB)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-    LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-    IF(NOT Boost_USE_STATIC_LIBS)
-        ADD_DEFINITIONS(-DBOOST_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_TEST_DYN_LINK)
-    ENDIF(NOT Boost_USE_STATIC_LIBS)
-    #  IF(Boost_VERSION LESS 104700)
-    #    MESSAGE(STATUS "WARNING: Headers from Boost 1.47+ are needed for successful compiling.")
-    #  ENDIF(Boost_VERSION LESS 104700)
-ENDIF(Boost_FOUND)
-
-################################################################################
 # Packaging Information
 
 SET(CPACK_SOURCE_IGNORE_FILES
@@ -168,12 +146,9 @@ ELSE()
   SET(CPACK_STRIP_FILES "bin/dawg")
 ENDIF()
 
-IF(UNIX)
-  FIND_PACKAGE(Threads REQUIRED)
-ENDIF(UNIX)
-
 INCLUDE(CPackBefore)
 INCLUDE(CPack)
+INCLUDE(ExternalDep)
 
 INSTALL(FILES copying.txt readme.txt changelog.txt DESTINATION ${CMAKE_DOC_DIR})
 INSTALL(FILES lambda.pl outsplit.pl nexus2fasta.pl varrep.pl DESTINATION ${CMAKE_DATA_DIR})
