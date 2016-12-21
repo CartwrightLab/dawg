@@ -1,17 +1,17 @@
 # This CMake File defines several useful developer options
 
-#SET(DAWG_DEVEL_ENABLE_GPERFTOOLS OFF CACHE BOOL "Enable profiling with gperftools.")
+SET(DAWG_DEVEL_ENABLE_GPERFTOOLS OFF CACHE BOOL "Enable profiling with gperftools.")
 
-#SET(dawg_devel_LIBRARIES)
-#if(DAWG_DEVEL_ENABLE_GPERFTOOLS)
-#  find_package(Gperftools COMPONENTS profiler)
-#  if(GPERFTOOLS_FOUND)
-#    message(S -DTATUS "DAWG_DEVEL: Profiling with gperftools enabled. Use CPUPROFILE environmental variable to turn on profiling and specify output file.")
-#    set(dawg_devel_LIBRARIES ${dawg_devel_LIBRARIES} GPERFTOOLS::GPERFTOOLS)
-#  else()
-#    message(FATAL_ERROR "Gperftools was not found. Please disable the flag DAWG_DEVEL_ENABLE_GPERFTOOLS and try again.")
-#  endif()
-#endif()
+SET(dawg_devel_LIBRARIES)
+if(DAWG_DEVEL_ENABLE_GPERFTOOLS)
+  find_package(Gperftools COMPONENTS profiler)
+  if(GPERFTOOLS_FOUND)
+    message(S -DTATUS "DAWG_DEVEL: Profiling with gperftools enabled. Use CPUPROFILE environmental variable to turn on profiling and specify output file.")
+    set(dawg_devel_LIBRARIES ${dawg_devel_LIBRARIES} GPERFTOOLS::GPERFTOOLS)
+  else()
+    message(FATAL_ERROR "Gperftools was not found. Please disable the flag DAWG_DEVEL_ENABLE_GPERFTOOLS and try again.")
+  endif()
+endif()
 
 SET(DAWG_DEVEL_ENABLE_COVERAGE_REPORT OFF CACHE BOOL "Enable code coverage reporting.")
 
