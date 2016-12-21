@@ -61,6 +61,8 @@ public:
 			std::vector<double> mix_dist(1, 1.0);
 			sample.create(mix_dist);
 			sample_upstream.create(mix_dist);
+			mean_size = 1.0;
+			total_upstream_rate = 0.0;
 			return true;
 		}
 
