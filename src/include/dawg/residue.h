@@ -29,12 +29,12 @@ public:
 	typedef boost::uint64_t data_type;
 
 	
-	static const data_type base_mask      =  UINT64_C(0x00000000000000FF);
-	static const data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
-	static const data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
-	static const data_type rate_shift     =  48;
-	static const data_type base_bit_width =  8;
-	static const data_type branch_inc     =  0x100;
+	static constexpr data_type base_mask      =  UINT64_C(0x00000000000000FF);
+	static constexpr data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
+	static constexpr data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
+	static constexpr data_type rate_shift     =  48;
+	static constexpr data_type base_bit_width =  8;
+	static constexpr data_type branch_inc     =  0x100;
 
 	inline data_type base() const { return data_ & base_mask; }
 	inline void base(data_type b) { data_ = (b & base_mask) | (data_ & ~base_mask); }
@@ -85,10 +85,10 @@ public:
 
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
-		static const char sIns[] = "-+";
+		static constexpr char sIns[] = "-+";
 		// table for going from base->char
 		// TODO: Allow codons to be translated into aa
-		static const char mods[] =
+		static constexpr char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
 			"acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // dna
 			"ACGU!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // RNA
@@ -122,7 +122,7 @@ public:
 		;
 		// tables for going from char->base
 		// 1 genetic code is 80 elements long
-		static const char rmods[] = {
+		static constexpr char rmods[] = {
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 0,-1, 1, // DNA & RNA
 			-1,-1,-1, 2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 3, 3,-1,-1,
 			-1,-1,-1,-1,-1,-1,-1,-1,-1, 0,-1, 1,-1,-1,-1, 2,-1,-1,-1,-1,
@@ -214,7 +214,7 @@ public:
 
 	// cod64 -> codon number
 	static inline unsigned int cod64_to_codon(char c) {
-		static const char a[] = {
+		static constexpr char a[] = {
 			// cod64 -> codon number
 			54,55,56,57,58,59,60,61,62,63,-1,-1,-1,11,-1,-1,10, 0, 1, 2,
 			 3, 4, 5, 6, 7, 8, 9,12,13,15,16,14,17,18,19,20,21,22,23,24,
@@ -260,7 +260,7 @@ public:
 	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
 	
 	inline static const char* get_protein_code(unsigned int code) {
-		static const char s[] = 
+		static constexpr char s[] =
 			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
 			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
 			"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSS**VVVVAAAADDEEGGGG"

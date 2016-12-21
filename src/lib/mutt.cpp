@@ -83,7 +83,7 @@ double dawg::mutt::rand_gamma(double a, double b) {
  ************************************************************/
 
 /* tabulated values for the height of the Ziggurat levels */
-static const double ytab[128] = {
+static constexpr double ytab[128] = {
   1, 0.963598623011, 0.936280813353, 0.913041104253,
   0.892278506696, 0.873239356919, 0.855496407634, 0.838778928349,
   0.822902083699, 0.807732738234, 0.793171045519, 0.779139726505,
@@ -120,7 +120,7 @@ static const double ytab[128] = {
 
 /* tabulated values for 2^24 times x[i]/x[i+1],
  * used to accept for U*x[i+1]<=x[i] without any floating point operations */
-static const boost::uint32_t ktab[128] = {
+static constexpr boost::uint32_t ktab[128] = {
   0, 12590644, 14272653, 14988939,
   15384584, 15635009, 15807561, 15933577,
   16029594, 16105155, 16166147, 16216399,
@@ -156,7 +156,7 @@ static const boost::uint32_t ktab[128] = {
 };
 
 /* tabulated values of 2^{-24}*x[i] */
-static const double wtab[128] = {
+static constexpr double wtab[128] = {
   1.62318314817e-08, 2.16291505214e-08, 2.54246305087e-08, 2.84579525938e-08,
   3.10340022482e-08, 3.33011726243e-08, 3.53439060345e-08, 3.72152672658e-08,
   3.8950989572e-08, 4.05763964764e-08, 4.21101548915e-08, 4.35664624904e-08,

@@ -22,7 +22,7 @@ public:
 	
 	template<typename It>
 	bool create(const std::string &rname, It first, It last) {
-		static std::string name_keys[] = {
+		static const std::string name_keys[] = {
 			std::string("const"),
 			std::string("gamma-invariant"),
             std::string("zero")

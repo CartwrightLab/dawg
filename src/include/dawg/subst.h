@@ -157,7 +157,7 @@ private:
 
 template<typename It1, typename It2>
 bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
-	static const char name_keys[][16] = {
+	static constexpr char name_keys[][16] = {
 		"jc",  "gtr", "k2p", "hky", "f84", "f81", "tn", "tn-f04",
 		"equ", "aagtr", "lg", "wag", "wagstar", "jtt-dcmut", "dayhoff-dcmut", "molphy",
 		"codgtr", "codmg", "codmg-equ", "codmg-aap", "codmg-cp",

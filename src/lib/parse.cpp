@@ -16,7 +16,7 @@ using namespace dawg;
 
 bool trick::parse_file(trick& p, const char *cs) {
 	bool ret;
-	if(cs == NULL || strcmp(cs, "")==0 || strcmp(cs, "-")==0) {
+	if(cs == nullptr || strcmp(cs, "")==0 || strcmp(cs, "-")==0) {
 		ret = p.parse_stream(std::cin);
 	} else {
 		std::ifstream is(cs);

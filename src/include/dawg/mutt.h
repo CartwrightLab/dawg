@@ -105,7 +105,7 @@ inline boost::uint32_t create_random_seed() {
 	boost::uint32_t v = static_cast<boost::uint32_t>(getpid());
 	v += ((v << 15) + (v >> 3)) + 0x6ba658b3; // Spread 5-decimal PID over 32-bit number
 	v^=(v<<17); v^=(v>>13); v^=(v<<5);
-	v += static_cast<boost::uint32_t>(time(NULL));
+	v += static_cast<boost::uint32_t>(time(nullptr));
 	v^=(v<<17); v^=(v>>13); v^=(v<<5);
 	return (v == 0) ? 0x6a27d958 : (v & 0x7FFFFFFF); // return at most a 31-bit seed
 }

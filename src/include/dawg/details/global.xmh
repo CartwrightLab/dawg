@@ -21,13 +21,13 @@ XM( (output)(block)(before),  std::string, ,
 XM( (output)(block)(after),   std::string, ,
 	"Text that will be written after every replicate.")
 XM( (output)(block)(between), std::string, ,
-	"Text that will be written betwee replicates.")
+	"Text that will be written between replicates.")
 
 //XM( (output)(vars),   bool, true)
 XM( (output)(file),   std::string, ,
 	"Path to the output file.")
 XM( (output)(split),  bool, false,
-	"Ouput each replicate to its own file.")
+	"Output each replicate to its own file.")
 XM( (output)(append), bool, false,
 	"Append results to existing file.")
 XM(  (output)(label), bool, false,
