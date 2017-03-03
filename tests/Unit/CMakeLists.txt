@@ -46,14 +46,18 @@ file(COPY "${CMAKE_SOURCE_DIR}/examples/multiple-models.dawg" DESTINATION "${CMA
 file(COPY "${CMAKE_SOURCE_DIR}/examples/pseudogene.dawg" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${DAWG_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/examples/recombination.dawg" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${DAWG_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/examples/segments.dawg" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${DAWG_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/examples/basic-dna.yaml" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${DAWG_DIR}")
 
 ###############################################################################
 # Add Unit tests based on CXX namespaces
-
-AddUnitTest(${DAWG_DIR}::parse_test)
 
 if(TESTU01_FOUND)
     AddUnitTest(${DAWG_DIR}::testu01)
     target_link_libraries(unittest_${DAWG_DIR}_testu01 ${TESTU01_LIBRARY})
     target_include_directories(unittest_${DAWG_DIR}_testu01 BEFORE PRIVATE ${TESTU01_INCLUDE_DIR})
 endif(TESTU01_FOUND)
+
+AddUnitTest(${DAWG_DIR}::parse_test)
+if(YAMLCPP_FOUND)
+  target_link_libraries(unittest_${DAWG_DIR}_parse_test YAML::YAML)
+endif(YAMLCPP_FOUND)

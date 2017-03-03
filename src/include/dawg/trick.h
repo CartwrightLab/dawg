@@ -24,7 +24,10 @@ struct trick {
 		std::string name;
 		std::string inherits;
 		db_type db;
-		
+
+        section() : name("_initial_"), inherits("_default_") { }
+        section(const std::string& nn, const std::string& ii) : name(nn), inherits(ii) { }
+
 		template<typename T>
 		inline void get(const std::string& k, T& r) const;
 		template<typename T, typename A>
@@ -51,14 +54,15 @@ struct trick {
 	bool parse(Iterator first, Iterator last);
 	template<typename Char, typename Traits>
 	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
-	
+#if defined(ENABLE_YAML)
+	bool parse_yaml(const char* filepath);
+#endif // ENABLE_YAML
+
 	trick() {
-		data.push_back(section());
-		data.back().name = "_initial_";
-		data.back().inherits = "_default_";
+		data.emplace_back("_initial_", "_default_");
 	}
 	
-	inline void read_aliases();	
+	inline void read_aliases();
 };
 
 template<typename T>

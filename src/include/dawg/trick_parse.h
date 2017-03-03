@@ -5,14 +5,16 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+#include <dawg/trick.h>
+
+#include <iterator>
+#include <algorithm>
+#include <array>
+
 #define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/phoenix/core.hpp>
 
-#include <iterator>
-
-#include <dawg/trick.h>
- 
 #include <boost/spirit/include/version.hpp>
 #if SPIRIT_VERSION < 0x2020
 #	error Spirit version 2.2 or greater required.
@@ -20,6 +22,8 @@
 
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -34,6 +38,10 @@
 
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
+
+#if defined(ENABLE_YAML)
+#include <yaml-cpp/yaml.h>
+#endif // ENABLE_YAML
 
 namespace dawg {
 
@@ -68,7 +76,7 @@ struct trick_grammar : qi::grammar<Iterator, details::trick_raw_type(), skip_typ
 		using standard::graph; using standard::print;
 		using standard::char_;
 		using qi::raw; using qi::lexeme; using qi::eol;
-		
+
 		start = *section;
 		section = section_header || section_body;
 		section_header = "[[" >> id >> -('=' >> id) >> "]]";
@@ -82,9 +90,9 @@ struct trick_grammar : qi::grammar<Iterator, details::trick_raw_type(), skip_typ
 		bare_string     = lexeme[+(graph - char_(",#\"[]=()"))];
 		tree_string     = lexeme[char_("(") >> +(char_ - ';') >> char_(";")];
 		quoted_string   = lexeme['"' >> *(print - '"') >> '"'];
-		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];		
+		qqquoted_string = lexeme["\"\"\"" >> *(char_ - "\"\"\"") >> "\"\"\""];
 	}
-	
+
 	qi::rule<Iterator, details::trick_raw_type(), skip_type> start;
 	qi::rule<Iterator, details::section_type(), skip_type> section;
 	qi::rule<Iterator, details::section_header_type(), skip_type> section_header;
@@ -152,7 +160,7 @@ bool trick::parse(Iterator first, Iterator last) {
 				} while(starts_with(hh, ".."));
 				if(!subheader.empty() && !hh.empty())
 					subheader.append(1, '.');
-				subheader.append(hh);			
+				subheader.append(hh);
 			} else if(starts_with(h, ".")) { // if h begins with a single period, append it to existing subheader
 				if(!subheader.empty() && h.size() > 1)
 					subheader.append(1, '.').append(h.begin()+1, h.end());
@@ -180,9 +188,140 @@ template<typename Char, typename Traits>
 inline bool trick::parse_stream(std::basic_istream<Char, Traits>& is) {
 	is.unsetf(std::ios::skipws);
 	boost::spirit::basic_istream_iterator<Char, Traits> first(is), last;
-	return parse(first, last);	
+	return parse(first, last);
 }
 
+#if defined(ENABLE_YAML)
+bool trick::parse_yaml(const char* filepath)
+{
+	using std::cout; using std::endl; using std::find_if;
+    using boost::algorithm::to_lower; using boost::algorithm::contains; using boost::algorithm::split;
+    using boost::algorithm::iequals;
+
+	static std::array<std::string, static_cast<std::size_t>(44)> DawgParams = {
+	    // Regular Params
+	    "Subst.Model",
+	    "Subst.Params",
+	    "Subst.Freqs",
+	    "Subst.Rate.Model",
+	    "Subst.Rate.Params",
+	    "Indel.Model.Ins",
+	    "Indel.Params.Ins",
+	    "Indel.Rate.Ins",
+	    "Indel.Max.Ins",
+	    "Indel.Model.Del",
+	    "Indel.Params.Del",
+	    "Indel.Rate.Del",
+	    "Indel.Max.Del",
+	    "Tree.Model",
+	    "Tree.Params",
+	    "Tree.Tree",
+	    "Tree.Scale",
+	    "Root.Length",
+	    "Root.Seq",
+	    "Root.Rates",
+	    "Root.Code",
+	    "Root.Segment",
+	    "Root.Gapoverlap",
+	    "Output.Markins",
+	    "Output.Keepempty",
+	    "Output.Lowercase",
+	    "Output.Rna"
+	    // Global Params
+	    "Output.Block.Head",
+	    "Output.Block.Tail",
+	    "Output.Block.Before",
+	    "Output.Block.After",
+	    "Output.Block.Between",
+	    "Output.File",
+	    "Output.Split",
+	    "Output.Append",
+	    "Output.Label",
+	    "Sim.Reps",
+	    "Sim.Seed",
+	    // Short-named versions
+	    "Sim",
+	    "Output",
+	    "Root",
+	    "Tree",
+	    "Indel",
+	    "Subst"
+	};
+
+    std::string pSec("_initial_");
+    int autonum = 1; //TODO: What happens with multiple trick files?
+    std::string sectionName = "", paramName = "";
+    std::vector<std::string> values;
+    bool newSection = false;
+
+    static constexpr auto auto_header_flag = "auto";
+
+    YAML::Node yamlDoc = YAML::LoadFile(filepath);
+    for (YAML::const_iterator section = yamlDoc.begin(); section != yamlDoc.end(); ++section)
+    {
+        sectionName = section->first.as<std::string>();
+        to_lower(sectionName);
+
+        auto&& itr = find_if(DawgParams.begin(), DawgParams.end(), [&sectionName] (const std::string& s)->bool {
+            return (iequals(sectionName, s)) ? true : false;
+        });
+
+        if (itr == DawgParams.end()) {
+            newSection = true;
+     
+            if (iequals(sectionName, auto_header_flag)) {
+                // Case 1: Auto-generate the name of the new section
+                sectionName = "Unnamed Section " + boost::lexical_cast<std::string>(autonum++);
+            }
+            else if (contains(sectionName, "=")) {
+                // Case 2: Inherit from a user-defined section
+                // Header is in the form of "SecA=SecB" and we split it as ["SecA", "SecB"]
+                std::vector<std::string> strs;
+                split(strs, sectionName, [](const char c) -> bool { return (c == '=') ? true : false; });
+                assert(strs.size() == 2);
+                pSec = strs.at(1);
+                sectionName = strs.at(0);
+            }
+
+            data.emplace_back(sectionName, pSec);
+            pSec = sectionName;
+        } else {
+            newSection = false;
+            // @TODO handle the case where the user might specify a section using, "tree.tree" (with a dot), without any nesting
+            // if (contains(sectionName, "."))
+        }
+
+        // Parse the values for this sectionName
+        for (YAML::const_iterator params = section->second.begin(); params != section->second.end(); ++params) 
+        {
+            paramName = params->first.as<std::string>();
+            to_lower(paramName);
+
+            if (params->second.IsScalar()) {
+                values.emplace_back(params->second.as<std::string>());
+            }
+            else if (params->second.IsSequence()) {
+                for(YAML::const_iterator itt = params->second.begin(); itt != params->second.end(); ++itt)
+                    values.emplace_back(itt->as<std::string>());
+            }
+            else if (params->second.IsMap()) {
+                values.emplace_back(params->second.as<std::string>());
+            }
+            else { /*  \__o_v_O__/ */ }
+
+            // the db expects parameter names in the form of "param.member = value"
+            if (newSection)
+                data.back().db[paramName] = values;
+            else
+                data.back().db[{sectionName + "." + paramName}] = values;
+
+            values.clear();
+        }
+    } // end outter for loop
+	return true;
+}
+#endif // enable_yaml
+
 } // namespace dawg
- 
+
 #endif // DAWG_TRICK_PARSE_H

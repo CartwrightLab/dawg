@@ -28,6 +28,33 @@ boolean: true|false
 tree:    Newick Format
 vector:  { value, value, ...}
 
+UPDATED FOR YAML:
+    DAWG uses [YAML-CPP](https://github.com/jbeder/yaml-cpp) for parsing YAML format.
+
+ - The current parser only supports 1-level of nesting, for instance:
+    SecA:
+        Tree.Tree: "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+
+ - This is not valid:
+    SecA:
+        Tree:
+            Tree: "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+
+ - Auto-naming sections is done using the "AUTO" header (case-insenstive):
+    AUTO:
+        Tree.Tree: "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+
+ - Inheritance is done using an "=", but no spaces are allowed:
+    SecB:
+        Tree.Tree: "((Llama:0.8,Squirrel:0.1):0.2,Kat:0.45);"
+    SecA=SecB:
+        Tree.Tree: "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+
+    [] denotes sequence
+    {} denotes map
+    1  denotes a scalar value (where 1 can be any numeric value)
+    "" denotes a string
+
 OPTIONS
 
   Name            Type            Description

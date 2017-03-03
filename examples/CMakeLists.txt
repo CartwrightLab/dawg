@@ -5,5 +5,6 @@ INSTALL(FILES
   multiple-models.dawg
   pseudogene.dawg
   recombination.dawg
+  basic-dna.yaml
   DESTINATION "${CMAKE_DATA_DIR}/examples")
   
