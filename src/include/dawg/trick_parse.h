@@ -5,19 +5,15 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
-#include <boost/phoenix/core.hpp>
+#include <dawg/trick.h>
 
 #include <iterator>
 #include <algorithm>
+#include <array>
 
-#include <dawg/trick.h>
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
-#if defined(ENABLE_YAML)
-#include <yaml-cpp/yaml.h>
-#include <functional>
-#endif // ENABLE_YAML
+#include <boost/phoenix/core.hpp>
 
 #include <boost/spirit/include/version.hpp>
 #if SPIRIT_VERSION < 0x2020
@@ -27,7 +23,7 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/any.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning( push )
@@ -42,6 +38,10 @@
 
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
+
+#if defined(ENABLE_YAML)
+#include <yaml-cpp/yaml.h>
+#endif // ENABLE_YAML
 
 namespace dawg {
 
@@ -194,46 +194,108 @@ inline bool trick::parse_stream(std::basic_istream<Char, Traits>& is) {
 #if defined(ENABLE_YAML)
 bool trick::parse_yaml(const char* filepath)
 {
-    using boost::algorithm::to_lower;
-    using boost::algorithm::contains;
-	using boost::algorithm::split;
+	using std::cout; using std::endl; using std::find_if;
+    using boost::algorithm::to_lower; using boost::algorithm::contains; using boost::algorithm::split;
+    using boost::algorithm::iequals;
 
-    static constexpr auto auto_header_label = "auto";
+	static std::array<std::string, static_cast<std::size_t>(44)> DawgParams = {
+	    // Regular Params
+	    "Subst.Model",
+	    "Subst.Params",
+	    "Subst.Freqs",
+	    "Subst.Rate.Model",
+	    "Subst.Rate.Params",
+	    "Indel.Model.Ins",
+	    "Indel.Params.Ins",
+	    "Indel.Rate.Ins",
+	    "Indel.Max.Ins",
+	    "Indel.Model.Del",
+	    "Indel.Params.Del",
+	    "Indel.Rate.Del",
+	    "Indel.Max.Del",
+	    "Tree.Model",
+	    "Tree.Params",
+	    "Tree.Tree",
+	    "Tree.Scale",
+	    "Root.Length",
+	    "Root.Seq",
+	    "Root.Rates",
+	    "Root.Code",
+	    "Root.Segment",
+	    "Root.Gapoverlap",
+	    "Output.Markins",
+	    "Output.Keepempty",
+	    "Output.Lowercase",
+	    "Output.Rna"
+	    // Global Params
+	    "Output.Block.Head",
+	    "Output.Block.Tail",
+	    "Output.Block.Before",
+	    "Output.Block.After",
+	    "Output.Block.Between",
+	    "Output.File",
+	    "Output.Split",
+	    "Output.Append",
+	    "Output.Label",
+	    "Sim.Reps",
+	    "Sim.Seed",
+	    // Short-named versions
+	    "Sim",
+	    "Output",
+	    "Root",
+	    "Tree",
+	    "Indel",
+	    "Subst"
+	};
 
     std::string pSec("_initial_");
     int autonum = 1; //TODO: What happens with multiple trick files?
+    std::string sectionName = "", paramName = "";
+    std::vector<std::string> values;
+    bool newSection = false;
 
-    // Load the YAML doc
-    YAML::Node yamlDoc;
-    try {
-        yamlDoc = YAML::LoadFile(filepath);
-    } catch (std::exception& ex) {
-        return DAWG_ERROR("YAML Parsing failed");
-    }
+    static constexpr auto auto_header_flag = "auto";
 
-    for (YAML::const_iterator section = yamlDoc.begin(); section != yamlDoc.end(); ++section) {
-        std::string key = section->first.as<std::string>();
-        to_lower(key);
+    YAML::Node yamlDoc = YAML::LoadFile(filepath);
+    for (YAML::const_iterator section = yamlDoc.begin(); section != yamlDoc.end(); ++section)
+    {
+        sectionName = section->first.as<std::string>();
+        to_lower(sectionName);
 
-        if (boost::iequals(key, auto_header_label)) {
-            // auto-generate this sections' name
-            auto tempStr = "Unnamed Section " + toString(autonum++);
-        } else if (contains(key, "=")) {
-            // Header is "SecA=SecB" and thus splits as ["SecA", "SecB"]
-            std::vector<std::string> strs;
-            split(strs, key, [](const char c) -> bool { return (c == '=') ? true : false; });
-            assert(strs.size() == 2);
+        auto&& itr = find_if(DawgParams.begin(), DawgParams.end(), [&sectionName] (const std::string& s)->bool {
+            return (iequals(sectionName, s)) ? true : false;
+        });
+
+        if (itr == DawgParams.end()) {
+            newSection = true;
+     
+            if (iequals(sectionName, auto_header_flag)) {
+                // Case 1: Auto-generate the name of the new section
+                sectionName = "Unnamed Section " + boost::lexical_cast<std::string>(autonum++);
+            }
+            else if (contains(sectionName, "=")) {
+                // Case 2: Inherit from a user-defined section
+                // Header is in the form of "SecA=SecB" and we split it as ["SecA", "SecB"]
+                std::vector<std::string> strs;
+                split(strs, sectionName, [](const char c) -> bool { return (c == '=') ? true : false; });
+                assert(strs.size() == 2);
+                pSec = strs.at(1);
+                sectionName = strs.at(0);
+            }
+
+            data.emplace_back(sectionName, pSec);
+            pSec = sectionName;
         } else {
-            // inherit from the section in the document above this one
-
+            newSection = false;
+            // @TODO handle the case where the user might specify a section using, "tree.tree" (with a dot), without any nesting
+            // if (contains(sectionName, "."))
         }
 
-        data.emplace_back(key, pSec);
-        pSec = key; // update the previous section
-
-        // Gather up the values for this new section
-        for (YAML::const_iterator params = section->second.begin(); params != section->second.end(); ++params) {
-            std::vector<std::string> values;
+        // Parse the values for this sectionName
+        for (YAML::const_iterator params = section->second.begin(); params != section->second.end(); ++params) 
+        {
+            paramName = params->first.as<std::string>();
+            to_lower(paramName);
 
             if (params->second.IsScalar()) {
                 values.emplace_back(params->second.as<std::string>());
@@ -245,17 +307,20 @@ bool trick::parse_yaml(const char* filepath)
             else if (params->second.IsMap()) {
                 values.emplace_back(params->second.as<std::string>());
             }
-            else {
-            }
+            else { /*  \__o_v_O__/ */ }
 
-            std::string formattedLabel = key + "." + params->first.as<std::string>();
-            to_lower(formattedLabel);
-//            data.emplace_back().db[key] = values;
+            // the db expects parameter names in the form of "param.member = value"
+            if (newSection)
+                data.back().db[paramName] = values;
+            else
+                data.back().db[{sectionName + "." + paramName}] = values;
+
+            values.clear();
         }
-    }
-    return true;
+    } // end outter for loop
+	return true;
 }
-#endif // ENABLE_YAML
+#endif // enable_yaml
 
 } // namespace dawg
 

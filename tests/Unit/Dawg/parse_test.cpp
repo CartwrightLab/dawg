@@ -4,6 +4,7 @@
 #endif // BOOST_TEST_DYN_LINK
 
 #include <string>
+#include <array>
 
 #include "../boost_test_helper.h"
 
@@ -17,7 +18,7 @@ static std::string dir_prefix = "tests/Unit/Dawg/";
 BOOST_AUTO_TEST_CASE(test_basic_dna)
 {
     dawg::trick input;
-    std::string exampleFile(dir_prefix + "basic-dna.dawg");
+    std::string exampleFile (dir_prefix + "basic-dna.dawg");
     BOOST_CHECK_EQUAL(dawg::trick::parse_file(input, exampleFile.c_str()), true);
 }
 
@@ -63,10 +64,20 @@ BOOST_AUTO_TEST_CASE(test_basic_dna_YAML)
     std::string dawgExample (dir_prefix + "basic-dna.dawg");
     std::string yamlExample (dir_prefix + "basic-dna.yaml");
 
-    BOOST_CHECK_EQUAL(dawg::trick::parse_file(inputDawg, dawgExample.c_str()), true);
-    BOOST_CHECK_EQUAL(dawg::trick::parse_file(inputYaml, yamlExample.c_str()), true);
-    BOOST_CHECK_EQUAL(inputDawg.data.size(), inputYaml.data.size());
-    // @TODO: add more robust checking
+    std::array<dawg::trick, 2> inputs;
+    inputs.at(0) = inputDawg;
+    inputs.at(1) = inputYaml;
+
+    BOOST_CHECK_EQUAL(dawg::trick::parse_file(inputs.at(0), dawgExample.c_str()), true);
+    BOOST_CHECK_EQUAL(dawg::trick::parse_file(inputs.at(1), yamlExample.c_str()), true);
+    BOOST_CHECK_EQUAL(inputs.at(0).data.size(), inputs.at(1).data.size());
+
+    /* This loop relies on the size assertion above */
+    for(unsigned int i = 0; i != inputDawg.data.size(); ++i) {
+        BOOST_CHECK_EQUAL(inputDawg.data.at(0).name, inputYaml.data.at(0).name);
+        BOOST_CHECK_EQUAL(inputDawg.data.at(0).inherits, inputYaml.data.at(0).inherits);
+        /* @TODO : add more robust checks */
+    }
 }
 #endif // defined
 

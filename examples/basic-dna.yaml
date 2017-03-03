@@ -1,3 +1,5 @@
+# Shows the basic-dna.dawg example using YAML format
+# @TODO "tree.tree" without any nesting is not valid unless it is already a child in a nest
 
 Tree:
   Tree: "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"

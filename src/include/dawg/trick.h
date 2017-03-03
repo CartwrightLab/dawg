@@ -9,28 +9,15 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <sstream>
-#include <array>
 
 #include <dawg/log.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/erase.hpp>
 
-namespace details {
-    typedef std::pair<std::string, std::vector<std::string> > line_type;
-    typedef std::vector<line_type> subsection_body_type;
-    typedef std::pair<std::string, subsection_body_type> subsection_type;
-    typedef std::vector<subsection_type> section_body_type;
-    typedef std::pair<std::string, std::string> section_header_type;
-    typedef std::pair<section_header_type, section_body_type> section_type;
-    typedef std::vector<section_type> trick_raw_type;
-}
-
 namespace dawg {
 
 struct trick {
-
 	struct section {
 		typedef std::vector<std::string> value_type;
 		typedef std::map<std::string, value_type> db_type;
@@ -39,7 +26,6 @@ struct trick {
 		db_type db;
 
         section() : name("_initial_"), inherits("_default_") { }
-
         section(const std::string& nn, const std::string& ii) : name(nn), inherits(ii) { }
 
 		template<typename T>
@@ -64,9 +50,7 @@ struct trick {
 	data_type data;
 
 	static bool parse_file(trick &p, const char *cs);
-	void genHeader(const std::string& sec, std::string& header, int* autonum);
-    void genSubHeader(std::string& subheader, const std::string& h);
-    template<typename Iterator>
+	template<typename Iterator>
 	bool parse(Iterator first, Iterator last);
 	template<typename Char, typename Traits>
 	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
@@ -75,7 +59,6 @@ struct trick {
 #endif // ENABLE_YAML
 
 	trick() {
-        // Ensure there is something to inherit from in the future
 		data.emplace_back("_initial_", "_default_");
 	}
 	
@@ -161,14 +144,6 @@ inline void trick::read_aliases() {
 	for(section &sec : data) {
 		sec.read_aliases();
 	}
-}
-
-template <typename T>
-inline std::string toString(const T& t) {
-    using std::stringstream;
-    stringstream ss;
-    ss << t;
-    return ss.str();
 }
 
 } // namespace dawg
