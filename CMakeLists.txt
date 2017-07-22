@@ -20,6 +20,8 @@ SET(LIBDAWG_USE_STATIC_LIBS OFF CACHE BOOL "Link against a static version of lib
 SET(RANDOM_GEN "xorshift_64" CACHE STRING "Pseudo-random number generator to use.")
 MARK_AS_ADVANCED(RANDOM_GEN)
 
+SET(DAWG_BUILD_DOC OFF CACHE BOOL "TRUE to generate Doxygen API docs, FALSE to ignore it")
+
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -155,7 +157,9 @@ INSTALL(FILES lambda.pl outsplit.pl nexus2fasta.pl varrep.pl DESTINATION ${CMAKE
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
-ADD_SUBDIRECTORY(doc)
+IF(DAWG_BUILD_DOC) 
+    ADD_SUBDIRECTORY(doc)
+ENDIF(DAWG_BUILD_DOC)
 ADD_SUBDIRECTORY(tests)
 
 ADD_DEPENDENCIES(new_package dawg)
