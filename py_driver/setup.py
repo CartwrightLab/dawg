@@ -1,9 +1,9 @@
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 
-ext = Extension("RNG",
-                sources=["RNG.pyx", "mt19937.cpp"],
+ext = Extension("DAWG",
+                sources=["DAWG.pyx", "../src/dawg.cpp"],
                 language="c++")
 
-setup(name="RNG",
+setup(name="DAWG",
       ext_modules=cythonize(ext))
