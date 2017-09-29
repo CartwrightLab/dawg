@@ -1,28 +1,28 @@
-#include "mt19937.h"
+#include "dawg.hpp"
 
 #define M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-mtrandom::MT_RNG::MT_RNG() :
+dawg::Dawg::Dawg() :
   mti(N+1)
 {
   init_genrand(199119491UL);
 }
 
-mtrandom::MT_RNG::MT_RNG(unsigned long s) :
+dawg::Dawg::Dawg(unsigned long s) :
   mti(N+1)
 {
   init_genrand(s);
 }
 
-void mtrandom::MT_RNG::init_genrand(unsigned long s)
+void dawg::Dawg::init_genrand(unsigned long s)
 {
   mt[0] = s & 0xffffffffUL;
   for (mti=1; mti<N; mti++) {
-    mt[mti] = 
-      (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
+    mt[mti] =
+      (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti);
     /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
     /* In the previous versions, MSBs of the seed affect   */
     /* only MSBs of the array mt[].                        */
@@ -32,7 +32,7 @@ void mtrandom::MT_RNG::init_genrand(unsigned long s)
   }
 }
 
-mtrandom::MT_RNG::MT_RNG(unsigned long init_key[], int key_length)
+dawg::Dawg::Dawg(unsigned long init_key[], int key_length)
 {
   int i, j, k;
   init_genrand(19650218UL);
@@ -54,10 +54,10 @@ mtrandom::MT_RNG::MT_RNG(unsigned long init_key[], int key_length)
     if (i>=N) { mt[0] = mt[N-1]; i=1; }
   }
 
-  mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
+  mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */
 }
 
-unsigned long mtrandom::MT_RNG::genrand_int32()
+unsigned long dawg::Dawg::genrand_int32()
 {
     unsigned long y;
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -82,7 +82,7 @@ unsigned long mtrandom::MT_RNG::genrand_int32()
 
         mti = 0;
     }
-  
+
     y = mt[mti++];
 
     /* Tempering */
@@ -95,35 +95,35 @@ unsigned long mtrandom::MT_RNG::genrand_int32()
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-long mtrandom::MT_RNG::genrand_int31()
+long dawg::Dawg::genrand_int31()
 {
     return (long)(genrand_int32()>>1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-double mtrandom::MT_RNG::genrand_real1()
+double dawg::Dawg::genrand_real1()
 {
-    return genrand_int32()*(1.0/4294967295.0); 
-    /* divided by 2^32-1 */ 
+    return genrand_int32()*(1.0/4294967295.0);
+    /* divided by 2^32-1 */
 }
 
 /* generates a random number on [0,1)-real-interval */
-double mtrandom::MT_RNG::genrand_real2()
+double dawg::Dawg::genrand_real2()
 {
-    return genrand_int32()*(1.0/4294967296.0); 
+    return genrand_int32()*(1.0/4294967296.0);
     /* divided by 2^32 */
 }
 
 /* generates a random number on (0,1)-real-interval */
-double mtrandom::MT_RNG::genrand_real3()
+double dawg::Dawg::genrand_real3()
 {
-    return (((double)genrand_int32()) + 0.5)*(1.0/4294967296.0); 
+    return (((double)genrand_int32()) + 0.5)*(1.0/4294967296.0);
     /* divided by 2^32 */
 }
 
 /* generates a random number on [0,1) with 53-bit resolution*/
-double mtrandom::MT_RNG::genrand_res53() 
-{ 
-    unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6; 
-    return(a*67108864.0+b)*(1.0/9007199254740992.0); 
-} 
+double dawg::Dawg::genrand_res53()
+{
+    unsigned long a=genrand_int32()>>5, b=genrand_int32()>>6;
+    return(a*67108864.0+b)*(1.0/9007199254740992.0);
+}

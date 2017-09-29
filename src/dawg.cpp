@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "../version.h"
-#include "dawg.h"
+//#include "dawg.h"
 
 #include <dawg/matic.h>
 
@@ -58,7 +58,7 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 			#define XM(lname, sname, desc, type, def) ( \
 				XS(lname) IFD(sname, "," BOOST_PP_STRINGIZE sname), \
 				po::value< type >(&arg.XV(lname))->default_value(def), \
-				desc )				
+				desc )
 			#include "dawgarg.xmh"
 			#undef XM
 			;
@@ -69,7 +69,7 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 		po::notify(vm);
 		if(!arg.arg_file.empty()) {
 			if(arg.arg_file == "-") {
-				po::store(po::parse_config_file(cin, desc), vm);	
+				po::store(po::parse_config_file(cin, desc), vm);
 			} else {
 				std::ifstream ifs(arg.arg_file.c_str());
 				if(!ifs.is_open()) {
@@ -92,7 +92,7 @@ int dawg_app::run() {
 	//_out = boost::algorithm::replace_all_regex_copy(_temp, boost::regex("%(r)|%(R)|%(%)"),
 	//	std::string("?1x:?2y:z"), match_default | format_all);
 	//cout << _out << endl << endl;
-	
+
 
 	if(arg.version)	{
 		cerr << endl << VERSION_MSG << endl << endl;
@@ -111,18 +111,18 @@ int dawg_app::run() {
 		cerr << desc << endl;
 		return EXIT_SUCCESS;
 	}
-	
+
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
 	trick input;
-		
+
 	bool ret = true;
 	for(string &ss : arg.input) {
 		ret &= trick::parse_file(input, ss.c_str());
 	}
-	
+
 	if(!ret)
-		return EXIT_FAILURE;	
+		return EXIT_FAILURE;
 	// process aliases
 	input.read_aliases();
 
@@ -177,6 +177,6 @@ int dawg_app::run() {
 	for(unsigned int i=0;i<num_reps;++i) {
 		kimura.walk(aln);
 		write_aln(aln);
-	}	
+	}
 	return EXIT_SUCCESS;
 }

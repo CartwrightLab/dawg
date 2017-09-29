@@ -1,16 +1,16 @@
-#ifndef MT_19937AR_H
-#define MT_19937AR_H
+#ifndef DAWG_HPP
+#define DAWG_HPP
 
-namespace mtrandom {
+namespace dawg {
 
 const static unsigned int N = 624;
 
-class MT_RNG
+class Dawg
 {
   public:
-    MT_RNG();
-    MT_RNG(unsigned long s);
-    MT_RNG(unsigned long init_key[], int key_length);
+    Dawg();
+    Dawg(unsigned long s);
+    Dawg(unsigned long init_key[], int key_length);
 
     // initializes RNG state, called by constructors.
     void init_genrand(unsigned long s);
@@ -37,12 +37,11 @@ class MT_RNG
       return genrand_real1();
     }
 
-  private:
-
+private:
     unsigned long mt[N];
     int mti;
-}; // class MT_RNG
+}; // class Dawg
 
-} // namespace mtrandom
+} // namespace dawg
 
 #endif
