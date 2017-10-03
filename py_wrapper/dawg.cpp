@@ -6,6 +6,13 @@
 #include <dawg/global.h>
 #include <dawg/output.h>
 
+#include <iostream>
+
+dawg::Dawg::Dawg()
+{
+
+}
+
 dawg::Dawg::Dawg(int argc, char* argv)
 {
 
@@ -13,6 +20,7 @@ dawg::Dawg::Dawg(int argc, char* argv)
 
 void dawg::Dawg::run()
 {
-
+    using namespace std;
+    cout << "Hello PyDawg" << endl;
 
 }

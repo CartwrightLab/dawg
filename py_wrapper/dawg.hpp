@@ -6,7 +6,8 @@ namespace dawg {
 class Dawg
 {
 public:
-    Dawg(int argc, char *argv);
+    explicit Dawg();
+    explicit Dawg(int argc, char *argv);
     void run();
 private:
 

@@ -1,7 +1,6 @@
 from os import sys
-import PyDawg
+import PyDawg as pd
 
-
-
-if '__name__' == '__main__':
-    pd = (len(sys.args), sys.args)
+if __name__ == '__main__':
+    dd = pd.PyDawg(sys.argv)
+    dd.run()

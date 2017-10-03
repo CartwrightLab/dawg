@@ -10,6 +10,9 @@
             "../src/include"
         ],
         "language": "c++",
+        "libraries": [
+            "boost_program_options"
+        ],
         "sources": [
             "dawg.cpp"
         ]
@@ -671,7 +674,7 @@ typedef struct arrayobject arrayobject;
 #endif
 struct __pyx_obj_6PyDawg_PyDawg;
 
-/* "PyDawg.pyx":12
+/* "PyDawg.pyx":13
  *         void run()
  * 
  * cdef class PyDawg:             # <<<<<<<<<<<<<<
@@ -1062,12 +1065,12 @@ static int __pyx_pf_7cpython_5array_5array___getbuffer__(arrayobject *__pyx_v_se
 static void __pyx_pf_7cpython_5array_5array_2__releasebuffer__(CYTHON_UNUSED arrayobject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static PyObject *__pyx_tp_new_6PyDawg_PyDawg(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 
-/* "PyDawg.pyx":16
+/* "PyDawg.pyx":17
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self, *args):             # <<<<<<<<<<<<<<
- * 
  *         self._thisptr = new Dawg(len(args), array("B", args).data.as_chars)
+ *         if self._thisptr == NULL:
  */
 
 /* Python wrapper */
@@ -1098,8 +1101,8 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
   /* "PyDawg.pyx":18
- *     def __cinit__(self, *args):
  * 
+ *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(len(args), array("B", args).data.as_chars)             # <<<<<<<<<<<<<<
  *         if self._thisptr == NULL:
  *             raise MemoryError()
@@ -1120,7 +1123,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "PyDawg.pyx":19
- * 
+ *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(len(args), array("B", args).data.as_chars)
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
@@ -1139,7 +1142,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
     PyErr_NoMemory(); __PYX_ERR(0, 20, __pyx_L1_error)
 
     /* "PyDawg.pyx":19
- * 
+ *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(len(args), array("B", args).data.as_chars)
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
@@ -1147,12 +1150,12 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
  */
   }
 
-  /* "PyDawg.pyx":16
+  /* "PyDawg.pyx":17
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self, *args):             # <<<<<<<<<<<<<<
- * 
  *         self._thisptr = new Dawg(len(args), array("B", args).data.as_chars)
+ *         if self._thisptr == NULL:
  */
 
   /* function exit code */
@@ -2213,10 +2216,10 @@ PyMODINIT_FUNC PyInit_PyDawg(void)
   /*--- Type init code ---*/
   __pyx_vtabptr_6PyDawg_PyDawg = &__pyx_vtable_6PyDawg_PyDawg;
   __pyx_vtable_6PyDawg_PyDawg.run = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_run;
-  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
   __pyx_type_6PyDawg_PyDawg.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
   __pyx_ptype_6PyDawg_PyDawg = &__pyx_type_6PyDawg_PyDawg;
   /*--- Type import code ---*/
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType(__Pyx_BUILTIN_MODULE_NAME, "type", 
