@@ -10,17 +10,19 @@
 
 dawg::Dawg::Dawg()
 {
-
+    using namespace std;
+    cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
 }
 
-dawg::Dawg::Dawg(int argc, char* argv)
+dawg::Dawg::Dawg(const std::list<std::string>& s)
 {
-
+    using namespace std;
+    cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
 }
 
 void dawg::Dawg::run()
 {
     using namespace std;
-    cout << "Hello PyDawg" << endl;
+    cout << "Hello PyDawg" << __FILE__ << ", " << __LINE__ << endl;
 
 }
