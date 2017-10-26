@@ -5,9 +5,6 @@
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <functional>
-#include <algorithm>
-
 #include <dawg/mutt.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
@@ -18,6 +15,11 @@ namespace dawg {
 class root_model {
 public:
 	bool create(unsigned int len, const std::string &seq,  const std::vector<double> &rates) {
+		if (len > seq.size())
+			return DAWG_ERROR("Size of root seq does not match root len");
+		if (len == 0)
+			return DAWG_ERROR("Root length is null");
+
 		root_len = len;
 		name = "stationary";
 		root_seq = seq;
@@ -45,23 +47,6 @@ public:
 	}
 
 private:
-	void calcBaseFromRootSeq(sequence &seq, const subst_model &s) const {
-		if (seq.empty())
-			return;
-		auto triplet = 0;
-		std::for_each(root_seq.begin(), root_seq.end(), [&triplet] (const char c)->void {
-			triplet |= c;
-			triplet <<= 8;
-		});
-
-		// DNA
-		if (s.seq_type() == 4) {
-			seq.at(0).base(residue_exchange::codon_to_triplet(triplet));
-		} else {
-			seq.at(0).base(residue_exchange::triplet_to_codon(triplet));
-		}
-	}
-
 	// pointer that will hold our method
 	void (root_model::*do_op)(sequence &seq, mutt &m,
 		const subst_model &s, const rate_model &r, residue::data_type b) const;
@@ -76,12 +61,16 @@ private:
 	}
 
 	void do_user_seq(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
+		using namespace dawg;
 		seq.resize(root_len);
-		calcBaseFromRootSeq(seq, s);
+		for(auto i = 0; i != root_len; ++i) {
+			seq.at(i).rate_cat(r(m));
+			seq.at(i).branch(b);
+			if (s.seq_type() == residue_exchange::DNA) {
+				seq.at(i).base(root_seq.at(i));
+			} else {
 
-		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
-			it->rate_cat(r(m));
-			it->branch(b);
+			}
 		}
 	}
 
@@ -96,8 +85,7 @@ private:
 
 	void do_user_seq_rates(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
 		seq.resize(root_len);
-		calcBaseFromRootSeq(seq, s);
-
+// TODO add seq calculations
 		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
 			it->rate_cat(r(m));
 			it->branch(b);
