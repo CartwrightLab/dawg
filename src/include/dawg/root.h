@@ -15,12 +15,7 @@ namespace dawg {
 class root_model {
 public:
 	bool create(unsigned int len, const std::string &seq,  const std::vector<double> &rates) {
-		if (len > seq.size())
-			return DAWG_ERROR("Size of root seq does not match root len");
-		if (len == 0)
-			return DAWG_ERROR("Root length is null");
-
-		root_len = len;
+		root_len = (len == 0) ? seq.size() : len;
 		name = "stationary";
 		root_seq = seq;
 		this->rates = rates;
@@ -67,7 +62,8 @@ private:
 			seq.at(i).rate_cat(r(m));
 			seq.at(i).branch(b);
 			if (s.seq_type() == residue_exchange::DNA) {
-				seq.at(i).base(root_seq.at(i));
+				residue_exchange rex;
+				seq.at(i).base(rex.encode(root_seq.at(i)));
 			} else {
 
 			}
