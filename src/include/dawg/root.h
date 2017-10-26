@@ -55,7 +55,7 @@ private:
 		});
 
 		// DNA
-		if (s.seq_type() == 4) {
+		if (s.seq_type() == dawg::residue_exchange::DNA) {
 			seq.at(0).base(residue_exchange::codon_to_triplet(triplet));
 		} else {
 			seq.at(0).base(residue_exchange::triplet_to_codon(triplet));
