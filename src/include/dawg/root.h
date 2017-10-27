@@ -5,6 +5,8 @@
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
+#include <algorithm>
+
 #include <dawg/mutt.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
@@ -14,20 +16,18 @@ namespace dawg {
 
 class root_model {
 public:
-	bool create(unsigned int len, const std::string &seq,  const std::vector<double> &rates) {
-		root_len = (len == 0) ? seq.size() : len;
-		name = "stationary";
-		root_seq = seq;
-		this->rates = rates;
+	bool create(unsigned int len, sequence& root_seq) {
+		this->root_seq = root_seq;
+		root_len = len;
 
-		if (seq.empty() && rates.empty())
+		if (root_seq.empty()) {
 			do_op = &root_model::do_stat;
-		else if (seq.empty() && !rates.empty())
-			do_op = &root_model::do_user_rates;
-		else if (!seq.empty() && rates.empty())
+			name = "stationary";
+		}
+		else if (!root_seq.empty()) {
 			do_op = &root_model::do_user_seq;
-		else
-			do_op = &root_model::do_user_seq_rates;
+			name = "user_seq";
+		}
 
 		return true;
 	}
@@ -56,41 +56,14 @@ private:
 	}
 
 	void do_user_seq(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
-		using namespace dawg;
-		seq.resize(root_len);
-		for(auto i = 0; i != root_len; ++i) {
-			seq.at(i).rate_cat(r(m));
-			seq.at(i).branch(b);
-			if (s.seq_type() == residue_exchange::DNA) {
-				residue_exchange rex;
-				seq.at(i).base(rex.encode(root_seq.at(i)));
-			} else {
-
-			}
-		}
-	}
-
-	void do_user_rates(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
-		seq.resize(root_len);
-		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
-			it->base(s(m));
-			it->rate_cat(r(m));
-			it->branch(b);
-		}
-	}
-
-	void do_user_seq_rates(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
-		seq.resize(root_len);
-// TODO add seq calculations
-		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
-			it->rate_cat(r(m));
-			it->branch(b);
-		}
+		std::copy(root_seq.begin(), root_seq.end(), std::back_inserter(seq));
+		// seq.at(i).rate_cat(r(m));
+		// seq.at(i).branch(b);
 	}
 
 	unsigned int root_len;
 	std::string name;
-	std::string root_seq;
+	sequence root_seq;
 	std::vector<double> rates;
 };
 

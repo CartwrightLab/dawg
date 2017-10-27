@@ -29,7 +29,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 	if(ma.root_segment >= configs.size())
 		configs.resize(ma.root_segment+1);
 	segment &seg = configs[ma.root_segment];
-		
+
 	// construction section_info
     std::unique_ptr<section> info(new section);
 
@@ -62,7 +62,8 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		ma.indel_rate_del.begin(), ma.indel_rate_del.end(),
 		ma.indel_params_del.begin(), ma.indel_params_del.end(), ma.indel_max_del))
 		return DAWG_ERROR("deletion model could not be created.");
-	if(!info->rut_mod.create(ma.root_length, ma.root_seq, ma.root_rates))
+	auto &&residues = seg.rex.encode(ma.root_seq);
+	if(!info->rut_mod.create(ma.root_length, residues))
 		return DAWG_ERROR("root model could not be created.");
 
 	// parse tree and find all named descendant nodes
@@ -100,13 +101,13 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 bool dawg::matic::finalize_configuration() {
 	label_union.clear();
 	label_to_index_type::value_type::second_type u = 1;
-	
+
 	// remove segments that lack sections and resize vector
 	configs.erase(
 		remove_if(configs.begin(), configs.end(),
 		phoenix::empty(phoenix::arg_names::arg1)),
 		configs.end());
-	
+
 	// find the union of all labels in the configuration
     for(auto &seg : configs) {
         bool has_root = false;
@@ -151,7 +152,7 @@ bool dawg::matic::finalize_configuration() {
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -183,7 +184,7 @@ void dawg::matic::walk(alignment& aln) {
 
 	if(configs[0][0]->gap_overlap) {
 		// take first seg and do upstream indels
-		// root.gapoverlap = false prevents upstream indel creation		
+		// root.gapoverlap = false prevents upstream indel creation
 		branch_color = 0;
 		// clear sequence buffer
 		for(details::sequence_data &v : seqs) {
@@ -213,7 +214,7 @@ void dawg::matic::walk(alignment& aln) {
 		for(details::sequence_data &v : seqs) {
 			v.seq.clear();
 		}
-		{ // create root sequence of this 
+		{ // create root sequence of this
 			const auto &sec = std::move(seg.at(0));
 			seqs[sec->metatree[0]].indels.clear();
 			sec->rut_mod(seqs[sec->metatree[0]].seq, maxx, sec->sub_mod, sec->rat_mod, branch_color);
@@ -234,7 +235,7 @@ void dawg::matic::walk(alignment& aln) {
 					branch_color, ranc.begin(), ranc.end(), maxx);
 				branch_color += dawg::residue::branch_inc;
 			}
-			
+
 		}
 		// Align segment
 		align(aln, seqs, seg.rex);
@@ -248,9 +249,9 @@ void dawg::details::matic_section::evolve_upstream(
 	//insertion and deletion rates
 	double ins_rate = ins_mod.rate();
 	//double indel_rate = ins_rate+del_rate;
-	
+
 	indels.clear();
-	
+
 	indel_data::stack del_up, ins_up;
 
 	// Calculate Upstream Deletions
@@ -327,7 +328,7 @@ dawg::details::matic_section::evolve_indels(
 					if(r.second == 0)
 						indels.del.pop();
 					if(n.second == 0)
-						indels.ins.pop();					
+						indels.ins.pop();
 					// push the new event on the proper stack
 					if((x&1) == 1) {
 						indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
@@ -336,16 +337,16 @@ dawg::details::matic_section::evolve_indels(
 							indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
 							f += m.rand_exp(t*T);
 						} while( f < ins_rate );
-					}					
+					}
 				} else {
 					r.second -= u;
 					n.second -= u;
 					if(r.second == 0)
 						indels.del.pop();
 					if(n.second == 0)
-						indels.ins.pop();					
+						indels.ins.pop();
 				}
-				
+
 				// insert u "deleted insertions" into buffer
 				child.insert(child.end(), u, residue(gap_base, 0, branch_color));
 				// remove u sites from both stacks, pop if empty
@@ -369,7 +370,7 @@ dawg::details::matic_section::evolve_indels(
 							indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
 							f += m.rand_exp(t*T);
 						} while( f < ins_rate );
-					}										
+					}
 				} else {
 					// copy and mark at most r.second nucleotides as deleted
 					boost::uint32_t u = mark_del(r.second, child, first, last);
@@ -424,14 +425,14 @@ void dawg::details::matic_section::evolve(
 		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const {
-	
+
 	if(T <= 0.0) {
 		child.insert(child.end(), first, last);
 		return;
 	}
 	//process any existing indels.
 	first = evolve_indels(child, indels, T, branch_color, first, last, m);
-	
+
 	const double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
 	const double indel_rate = ins_rate+del_rate;
 	const double uni_scale = sub_mod.uniform_scale();
@@ -443,7 +444,7 @@ void dawg::details::matic_section::evolve(
 				break;
 			d -= indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale;
 		}
-		
+
 		// check to see if offset is beyond end of sequence
 		if(first == last) {
 			child.insert(child.end(), start, first);
@@ -498,20 +499,20 @@ void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const resi
 	assert(aln.size() <= seqs.size());
 
 	//unsigned uFlags = 0; //temporary
-	
+
 	// construct a table to hold alignment information
 	// TODO: Cache this?
 	std::vector<aligner_data> aln_table;
 	for(alignment::size_type u=0;u<aln.size();++u) {
 		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
 	}
-	
+
 	// Alignment rules:
 	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
 	// Deletion & Original Nucleotide : w/ del, original nucl
 
-	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3; 
-		                                          
+	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3;
+
 	residue::data_type uBranch = 0, uBranchN = 0;
 
 	// Go through each column, adding gaps where neccessary
