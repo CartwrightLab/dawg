@@ -10,7 +10,7 @@
 #include <dawg/mutt.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
-#include <dawg/sequence.h>
+#include <dawg/residue.h>
 
 namespace dawg {
 

@@ -24,10 +24,25 @@
 
 namespace dawg {
 
+namespace details {
+struct aligned_sequence {
+	std::string label;
+	std::string seq;
+};
+
+} // details
+
+class residue;
+typedef std::vector<residue> sequence;
+
+struct alignment : public std::vector<details::aligned_sequence> {
+	std::string::size_type max_label_width;
+	int seq_type;
+};
+
 class residue {
 public:
 	typedef boost::uint64_t data_type;
-
 
 	static constexpr data_type base_mask      =  UINT64_C(0x00000000000000FF);
 	static constexpr data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
@@ -194,9 +209,9 @@ public:
 		return static_cast<residue::data_type>(ret);
 	}
 
-	inline std::vector<residue> encode(const std::string &root_seq) const {
-		std::vector<residue> residues;
-		if (root_seq.size() % 2 == 0) {
+	inline sequence encode(const std::string &root_seq) const {
+		sequence residues;
+		if (type_ == DNA) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
 				residues.emplace_back();
 				residues.back().base(encode(root_seq.at(i)));
