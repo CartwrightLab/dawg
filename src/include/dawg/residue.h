@@ -213,8 +213,9 @@ public:
 		sequence residues;
 		if (type_ == DNA) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
-				residues.emplace_back();
-				residues.back().base(encode(root_seq.at(i)));
+				auto base = encode(root_seq.at(i));
+				// check for errors
+				residues.emplace_back(base, 0, 0);
 			}
 		} else {
 
