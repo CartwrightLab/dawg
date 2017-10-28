@@ -214,7 +214,7 @@ public:
 		if (type_ != CODON) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
 				auto base = encode(root_seq.at(i));
-				if (base == '!') DAWG_ERROR("Invalid user sequence");
+				if (base == -1) DAWG_ERROR("Invalid user sequence");
 				residues.emplace_back(base, 0, 0);
 			}
 		} else {
