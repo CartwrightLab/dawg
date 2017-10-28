@@ -62,8 +62,7 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
 		ma.indel_rate_del.begin(), ma.indel_rate_del.end(),
 		ma.indel_params_del.begin(), ma.indel_params_del.end(), ma.indel_max_del))
 		return DAWG_ERROR("deletion model could not be created.");
-	auto &&residues = seg.rex.encode(ma.root_seq);
-	if(!info->rut_mod.create(ma.root_length, residues))
+	if(!info->rut_mod.create(ma.root_length, seg.rex.encode(ma.root_seq)))
 		return DAWG_ERROR("root model could not be created.");
 
 	// parse tree and find all named descendant nodes

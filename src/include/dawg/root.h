@@ -16,7 +16,7 @@ namespace dawg {
 
 class root_model {
 public:
-	bool create(unsigned int len, sequence& root_seq) {
+	bool create(unsigned int len, sequence &&root_seq) {
 		this->root_seq = root_seq;
 		root_len = len;
 
@@ -24,7 +24,7 @@ public:
 			do_op = &root_model::do_stat;
 			name = "stationary";
 		}
-		else if (!root_seq.empty()) {
+		else {
 			do_op = &root_model::do_user_seq;
 			name = "user_seq";
 		}
