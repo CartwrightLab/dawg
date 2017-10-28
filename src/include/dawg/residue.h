@@ -211,10 +211,10 @@ public:
 
 	inline sequence encode(const std::string &root_seq) const {
 		sequence residues;
-		if (type_ == DNA) {
+		if (type_ != CODON) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
 				auto base = encode(root_seq.at(i));
-				// check for errors
+				if (base == '!') DAWG_ERROR("Invalid user sequence");
 				residues.emplace_back(base, 0, 0);
 			}
 		} else {

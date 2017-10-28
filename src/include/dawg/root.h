@@ -57,9 +57,9 @@ private:
 
 	void do_user_seq(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
 		seq = root_seq;
-		for (auto 묒 = 0; 묒 != seq.size(); ++묒) {
-			seq.at(묒).rate_cat(r(m));
-			seq.at(묒).branch(b);
+		for (auto i = 0; i != seq.size(); ++i) {
+			seq.at(i).rate_cat(r(m));
+			seq.at(i).branch(b);
 		}
 	}
 
