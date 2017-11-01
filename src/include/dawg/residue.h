@@ -214,11 +214,21 @@ public:
 		if (type_ != CODON) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
 				auto base = encode(root_seq.at(i));
-				if (base == -1) DAWG_ERROR("Invalid user sequence");
+				if (base == -1)
+					DAWG_ERROR("Invalid user sequence");
 				residues.emplace_back(base, 0, 0);
 			}
 		} else {
-
+			if (root_seq.size() % 3 != 0)
+				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
+			for (auto i = 0; i + 2 < root_seq.size(); i += 2) {
+				unsigned int triplet = root_seq.at(i);
+				triplet <<= 8;
+				triplet |= root_seq.at(i + 1);
+				triplet <<= 8;
+				triplet |= root_seq.at(i + 2);
+				residues.emplace_back(triplet_to_codon(triplet), 0, 0);
+			}
 		}
 		return residues;
 	}
