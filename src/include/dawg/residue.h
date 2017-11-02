@@ -227,6 +227,8 @@ public:
 				triplet |= root_seq.at(i + 1);
 				triplet <<= 8;
 				triplet |= root_seq.at(i + 2);
+				if (triplet == -1)
+					DAWG_ERROR("Invalid user sequence");
 				residues.emplace_back(triplet_to_codon(triplet), 0, 0);
 			}
 		}
