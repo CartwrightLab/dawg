@@ -210,6 +210,11 @@ public:
 	}
 
 	inline sequence encode(const std::string &root_seq) const {
+		std::function<unsigned int(unsigned int, unsigned int, unsigned int)> createTriplet = []
+			(const unsigned int r, const unsigned int g, const unsigned int b)->unsigned int {
+				return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF));
+			};
+
 		sequence residues;
 		if (type_ != CODON) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
@@ -222,14 +227,11 @@ public:
 			if (root_seq.size() % 3 != 0)
 				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
 			for (auto i = 0; i + 2 < root_seq.size(); i += 2) {
-				unsigned int triplet = root_seq.at(i);
-				triplet <<= 8;
-				triplet |= root_seq.at(i + 1);
-				triplet <<= 8;
-				triplet |= root_seq.at(i + 2);
-				if (triplet == -1)
+				residues.emplace_back(
+					triplet_to_codon(createTriplet(
+						root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
+				if (residues.back().data() == -1)
 					DAWG_ERROR("Invalid user sequence");
-				residues.emplace_back(triplet_to_codon(triplet), 0, 0);
 			}
 		}
 		return residues;
