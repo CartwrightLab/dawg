@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <unordered_map>
 
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
@@ -210,11 +211,10 @@ public:
 	}
 
 	inline sequence encode(const std::string &root_seq) const {
-		std::function<unsigned int(unsigned int, unsigned int, unsigned int)> createTriplet = []
-			(const unsigned int r, const unsigned int g, const unsigned int b)->unsigned int {
-				return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF));
+		static const std::function<unsigned int(const char, const char, const char)> getCodonNumber = []
+			(const char a, const char b, const char c)->unsigned int {
+				return ((a & 0xFF) | ((b & 0xFF) << 8) | ((c & 0xFF) << 16));
 			};
-
 		sequence residues;
 		if (type_ != CODON) {
 			for (auto i = 0; i != root_seq.size(); ++i) {
@@ -228,8 +228,7 @@ public:
 				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
 			for (auto i = 0; i + 2 < root_seq.size(); i += 2) {
 				residues.emplace_back(
-					triplet_to_codon(createTriplet(
-						root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
+					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2)), 0, 0);
 				if (residues.back().data() == -1)
 					DAWG_ERROR("Invalid user sequence");
 			}
