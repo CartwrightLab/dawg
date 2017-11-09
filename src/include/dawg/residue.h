@@ -211,9 +211,9 @@ public:
 	}
 
 	inline sequence encode(const std::string &root_seq) const {
-		static const std::function<unsigned int(const char, const char, const char)> getCodonNumber = []
+		static const auto getCodonNumber = []
 			(const char a, const char b, const char c)->unsigned int {
-				return ((a & 0xFF) | ((b & 0xFF) << 8) | ((c & 0xFF) << 16));
+				return a | (b << 8) | (c << 16);
 			};
 		sequence residues;
 		if (type_ != CODON) {
@@ -226,9 +226,9 @@ public:
 		} else {
 			if (root_seq.size() % 3 != 0)
 				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
-			for (auto i = 0; i + 2 < root_seq.size(); i += 2) {
-				residues.emplace_back(
-					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2)), 0, 0);
+			for (auto i = 0; i + 2 < root_seq.size(); i += 3) {
+				residues.emplace_back(triplet_to_codon(
+					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
 				if (residues.back().data() == -1)
 					DAWG_ERROR("Invalid user sequence");
 			}
