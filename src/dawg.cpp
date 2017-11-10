@@ -31,6 +31,7 @@
 #include <dawg/output.h>
 
 #include "dawg_app.h"
+#include "dawg.h"
 
 using namespace std;
 using namespace boost;
