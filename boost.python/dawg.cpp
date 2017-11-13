@@ -12,15 +12,13 @@
 class DawgWalker {
 public:
     void parse() {
+        std::vector<unsigned char> modifiedInstructionChars;
     	// input.parse(modifiedInstructionChars.begin(), modifiedInstructionChars.end());
-        //
+
     	// // process aliases
     	// input.read_aliases();
         //
-    	// dawg::global_options glopts;
     	// glopts.read_section(input.data.front());
-        //
-    	// dawg::output write_aln;
         //
     	// // Since no output file has been specified,
     	// // the output will go to std::cout
@@ -48,19 +46,15 @@ public:
     	// 	return;
     	// }
         //
-        // // Create the object that will do all the simulation
-        // // work for us.  Configure its sections.
-        // dawg::matic kimura;
-        //
         // if (!kimura.configure(configs.begin(), configs.end())) {
-        //     // DAWG_ERROR("bad configuration");
+        //     DAWG_ERROR("bad configuration");
         //     return;
         // }
     }
 
     void align() {
-    	// // create sets of aligned sequences;
-    	// dawg::alignment aln;
+    	// create sets of aligned sequences;
+    	dawg::alignment aln;
     	// kimura.pre_walk(aln);
     	// for (unsigned int i = 0; i<glopts.sim_reps; ++i) {
     	// 	kimura.walk(aln);
@@ -74,8 +68,11 @@ public:
     }
 
 private:
-    // dawg::trick input;
-    // std::vector<dawg::alignment> alignments;
+    dawg::trick input;
+    dawg::matic kimura;
+    dawg::global_options glopts;
+    dawg::output write_aln;
+    std::vector<dawg::alignment> alignments;
 };
 
 #include <boost/python.hpp>
