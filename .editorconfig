@@ -1,1 +1,22 @@
-# blah
+# EditorConfig is awesome: http://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+# Remove whitespace characters at the end of line
+trim_trailing_whitespace = true
+
+# Matches multiple files with brace expansion notation
+# Set default charset
+[*.{cpp, h}]
+charset = utf-8
+indent_style = tab
+indent_size = 4
+
+# Tab indentation (no size specified)
+[CMakeLists.txt]
+indent_style = tab
