@@ -12,7 +12,7 @@
 class DawgWalker {
 public:
     void parse() {
-        std::vector<unsigned char> modifiedInstructionChars;
+        // std::vector<unsigned char> modifiedInstructionChars;
     	// input.parse(modifiedInstructionChars.begin(), modifiedInstructionChars.end());
 
     	// // process aliases
@@ -54,7 +54,7 @@ public:
 
     void align() {
     	// create sets of aligned sequences;
-    	dawg::alignment aln;
+    	// dawg::alignment aln;
     	// kimura.pre_walk(aln);
     	// for (unsigned int i = 0; i<glopts.sim_reps; ++i) {
     	// 	kimura.walk(aln);
@@ -68,11 +68,11 @@ public:
     }
 
 private:
-    dawg::trick input;
-    dawg::matic kimura;
-    dawg::global_options glopts;
-    dawg::output write_aln;
-    std::vector<dawg::alignment> alignments;
+    // dawg::trick input;
+    // dawg::matic kimura;
+    // dawg::global_options glopts;
+    // dawg::output write_aln;
+    // std::vector<dawg::alignment> alignments;
 };
 
 #include <boost/python.hpp>

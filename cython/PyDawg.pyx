@@ -18,7 +18,8 @@ cdef class PyDawg:
     cdef Dawg *_thisptr
 
     def __cinit__(self, args):
-        cdef list[string] = args
+        print("hello __ciinit__")
+        # cdef list[string] = args
         # for arg in args:
         #     print("{}".format(arg))
         # print("type of args:{}".format(args))

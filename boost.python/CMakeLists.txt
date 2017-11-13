@@ -1,15 +1,3 @@
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
-if (${PYTHON_VERSION_MAJOR} EQUAL 3)
-    FIND_PACKAGE(Boost COMPONENTS python3)
-else()
-    FIND_PACKAGE(Boost COMPONENTS python)
-endif()
-
-ENABLE_TESTING()
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
-LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${libdawg2-static}) # Deprecated but so convenient!
-
 PYTHON_ADD_MODULE(dawg_python dawg.cpp)
 FILE(COPY dawg.py DESTINATION .)
 ADD_TEST(NAME boost.python COMMAND ${PYTHON_EXECUTABLE} dawg.py)

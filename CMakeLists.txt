@@ -162,7 +162,22 @@ IF(DAWG_BUILD_DOC)
     ADD_SUBDIRECTORY(doc)
 ENDIF(DAWG_BUILD_DOC)
 IF(DAWG_BOOST_PYTHON)
+    # Look for Python packages first
+    FIND_PACKAGE(PythonInterp)
+    FIND_PACKAGE(PythonLibs)
+    if (${PYTHON_VERSION_MAJOR} EQUAL 3)
+        FIND_PACKAGE(Boost COMPONENTS python3)
+    else()
+        FIND_PACKAGE(Boost COMPONENTS python)
+    endif()
+
+    ENABLE_TESTING()
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+    # Deprecated but so convenient, might need add_custom_target?
+    LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${libdawg2-static})
+
     ADD_SUBDIRECTORY(boost.python)
+    ADD_SUBDIRECTORY(cython)
 ENDIF(DAWG_BOOST_PYTHON)
 ADD_SUBDIRECTORY(tests)
 
