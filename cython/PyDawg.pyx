@@ -1,8 +1,9 @@
+# cython: language_level = 3
 # distutils: language = c++
 # distutils: sources = dawg.cpp
 
-from cpython.array cimport array
-from libcpp.list cimport list
+#from cpython.array cimport array
+#from libcpp.list cimport list
 #from libcpp.array cimport array
 from libcpp.string cimport string
 
@@ -10,7 +11,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
     unsigned int N
     cdef cppclass Dawg:
         Dawg()
-        Dawg(list[string] args)
+        Dawg(string args)
         void run()
 
 cdef class PyDawg:
@@ -24,7 +25,7 @@ cdef class PyDawg:
         #     print("{}".format(arg))
         # print("type of args:{}".format(args))
         # print("type of arr:{}".format(arr))
-        #self._thisptr = new Dawg(array("B", args).data.as_chars)
+        self._thisptr = new Dawg(args)
         if self._thisptr == NULL:
             raise MemoryError()
 

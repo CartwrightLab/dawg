@@ -14,10 +14,11 @@ dawg::Dawg::Dawg()
     cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
 }
 
-dawg::Dawg::Dawg(const std::list<std::string>& s)
+dawg::Dawg::Dawg(const std::string& s)
 {
     using namespace std;
     cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
+    cout << "s: " << s << "\n";
 }
 
 void dawg::Dawg::run()
