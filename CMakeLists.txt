@@ -172,7 +172,9 @@ IF(DAWG_BUILD_PYTHON)
     endif()
 
     ENABLE_TESTING()
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
     # Deprecated but so convenient, might need add_custom_target?
     LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${libdawg2-static})
 
