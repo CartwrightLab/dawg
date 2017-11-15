@@ -8,24 +8,17 @@
 from libcpp.string cimport string
 
 cdef extern from "dawg.hpp" namespace "dawg":
-    unsigned int N
     cdef cppclass Dawg:
         Dawg()
-        Dawg(string args)
+        Dawg(string, string, unsigned int, unsigned int)
         void run()
 
 cdef class PyDawg:
 
     cdef Dawg *_thisptr
 
-    def __cinit__(self, args):
-        print("hello __ciinit__")
-        # cdef list[string] = args
-        # for arg in args:
-        #     print("{}".format(arg))
-        # print("type of args:{}".format(args))
-        # print("type of arr:{}".format(arr))
-        self._thisptr = new Dawg(args)
+    def __cinit__(self, *args):
+        self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
         if self._thisptr == NULL:
             raise MemoryError()
 

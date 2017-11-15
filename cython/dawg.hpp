@@ -9,10 +9,16 @@ class Dawg
 {
 public:
     explicit Dawg();
-    explicit Dawg(const std::string& args);
+    explicit Dawg(const std::string& in,
+        const std::string& o,
+        const unsigned int r,
+        const unsigned int s);
     void run();
 private:
-
+    std::string inFile;
+    std::string outFile;
+    unsigned int reps;
+    unsigned int seed;
 }; // class Dawg
 
 } // namespace dawg
