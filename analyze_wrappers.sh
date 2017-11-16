@@ -12,15 +12,17 @@ DEV_FASTA_FILE="dev.fasta"
 # diff $DEV_FASTA_FILE boost.python/$BOOST_FASTA_FILE
 # diff $DEV_FASTA_FILE cython/$CYTHON_FASTA_FILE
 
-# Time Cython
-cd cython
-for (( i = 0; i < 10000; i++ ))
-do
-	python dawg_cython.py > /dev/null
-done
-cd ../
+# # Time Cython (approx 3m51.320s)
+# # size of PyDawg.so file is about 2gb
+# cd cython
+# for (( i = 0; i < 10000; i++ ))
+# do
+# 	python dawg_cython.py > /dev/null
+# done
+# cd ../
 
-# # Time BoostPython
+# # Time BoostPython (approx 6m45.847s)
+# # size of dawg.so file is about 702mb
 # cd boost.python
 # for (( i = 0; i < 10000; i++ ))
 # do
