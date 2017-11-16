@@ -1,5 +1,6 @@
-import dawg_python
+import dawg
 
-akita = dawg_python.DawgWalker(b"../examples/basic-dna.dawg", b"fasta:-", 10, 121)
-akita.bark(b"bark bark bark")
-akita.run()
+# akita = dawg.DawgWalker(b"../examples/basic-dna.dawg", b"fasta:-", 10, 121212)
+akita = dawg.DawgWalker()
+# akita.bark(b"bark bark bark")
+akita.run(b"../examples/basic-dna.dawg", b"fasta:-", 10, 212121)

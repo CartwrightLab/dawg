@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <cstring>
+#include <string>
+#include <vector>
 
 #include <dawg/ma.h>
 #include <dawg/matic.h>
@@ -9,8 +11,6 @@
 #include <dawg/trick_parse.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
-
-// #clib
 
 dawg::Dawg::Dawg()
 {

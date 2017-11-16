@@ -171,12 +171,11 @@ IF(DAWG_BUILD_PYTHON)
         FIND_PACKAGE(Boost COMPONENTS python)
     endif()
 
-    ENABLE_TESTING()
     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
-    # Deprecated but so convenient, might need add_custom_target?
-    LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${libdawg2-static})
+    # Deprecated but so convenient, might need to set it to a target?
+    LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_MODULE} ${libdawg2})
 
     ADD_SUBDIRECTORY(boost.python)
     ADD_SUBDIRECTORY(cython)
