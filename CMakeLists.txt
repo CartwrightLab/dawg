@@ -21,7 +21,7 @@ SET(RANDOM_GEN "xorshift_64" CACHE STRING "Pseudo-random number generator to use
 MARK_AS_ADVANCED(RANDOM_GEN)
 
 SET(DAWG_BUILD_DOC OFF CACHE BOOL "TRUE to generate Doxygen API docs, FALSE to ignore it")
-SET(DAWG_BOOST_PYTHON OFF CACHE BOOL "TRUE to generate a Python module using Boost Python")
+SET(DAWG_BUILD_PYTHON OFF CACHE BOOL "TRUE to generate a Python module using Boost Python / Cython / Swig")
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
