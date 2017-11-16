@@ -6,17 +6,21 @@
         "depends": [
             "dawg.hpp"
         ],
+        "extra_link_args": [
+            "-static"
+        ],
         "include_dirs": [
             "../src/include"
         ],
         "language": "c++",
         "libraries": [
-            "boost_program_options"
+            "dawg2"
         ],
         "name": "PyDawg",
         "sources": [
             "PyDawg.pyx",
-            "dawg.cpp"
+            "dawg.cpp",
+            "../src/lib/ma.cpp"
         ]
     },
     "module_name": "PyDawg"
@@ -720,8 +724,8 @@ static const char *__pyx_f[] = {
 /*--- Type declarations ---*/
 struct __pyx_obj_6PyDawg_PyDawg;
 
-/* "PyDawg.pyx":16
- *         void run()
+/* "PyDawg.pyx":17
+ *         void bark()
  * 
  * cdef class PyDawg:             # <<<<<<<<<<<<<<
  * 
@@ -737,6 +741,7 @@ struct __pyx_obj_6PyDawg_PyDawg {
 
 struct __pyx_vtabstruct_6PyDawg_PyDawg {
   void (*run)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch);
+  void (*bark)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6PyDawg_PyDawg *__pyx_vtabptr_6PyDawg_PyDawg;
 
@@ -967,6 +972,7 @@ static int __Pyx_check_binary_version(void);
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
+static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 
 /* Module declarations from 'libc.string' */
 
@@ -982,6 +988,7 @@ int __pyx_module_is_main_PyDawg = 0;
 static PyObject *__pyx_builtin_MemoryError;
 static PyObject *__pyx_builtin_TypeError;
 static const char __pyx_k_run[] = "run";
+static const char __pyx_k_bark[] = "bark";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_TypeError[] = "TypeError";
@@ -993,6 +1000,7 @@ static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static PyObject *__pyx_n_s_MemoryError;
 static PyObject *__pyx_n_s_TypeError;
+static PyObject *__pyx_n_s_bark;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_kp_s_no_default___reduce___due_to_non;
@@ -1004,13 +1012,14 @@ static PyObject *__pyx_n_s_test;
 static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_args); /* proto */
 static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_6__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_8__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_tp_new_6PyDawg_PyDawg(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 
-/* "PyDawg.pyx":20
+/* "PyDawg.pyx":21
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self, *args):             # <<<<<<<<<<<<<<
@@ -1047,32 +1056,32 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   int __pyx_t_6;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "PyDawg.pyx":21
+  /* "PyDawg.pyx":22
  * 
  *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(args[0], args[1], args[2], args[3])             # <<<<<<<<<<<<<<
  *         if self._thisptr == NULL:
  *             raise MemoryError()
  */
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyInt_As_unsigned_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_unsigned_int(__pyx_t_1); if (unlikely((__pyx_t_4 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v_args, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyInt_As_unsigned_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_unsigned_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_self->_thisptr = new dawg::Dawg(__pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5);
 
-  /* "PyDawg.pyx":22
+  /* "PyDawg.pyx":23
  *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
@@ -1082,16 +1091,16 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   __pyx_t_6 = ((__pyx_v_self->_thisptr == NULL) != 0);
   if (__pyx_t_6) {
 
-    /* "PyDawg.pyx":23
+    /* "PyDawg.pyx":24
  *         self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
  *         if self._thisptr == NULL:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
  */
-    PyErr_NoMemory(); __PYX_ERR(0, 23, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(0, 24, __pyx_L1_error)
 
-    /* "PyDawg.pyx":22
+    /* "PyDawg.pyx":23
  *     def __cinit__(self, *args):
  *         self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
@@ -1100,7 +1109,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
  */
   }
 
-  /* "PyDawg.pyx":20
+  /* "PyDawg.pyx":21
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self, *args):             # <<<<<<<<<<<<<<
@@ -1120,7 +1129,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":25
+/* "PyDawg.pyx":26
  *             raise MemoryError()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1144,7 +1153,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "PyDawg.pyx":26
+  /* "PyDawg.pyx":27
  * 
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -1154,7 +1163,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   __pyx_t_1 = ((__pyx_v_self->_thisptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "PyDawg.pyx":27
+    /* "PyDawg.pyx":28
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:
  *             del self._thisptr             # <<<<<<<<<<<<<<
@@ -1163,7 +1172,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
  */
     delete __pyx_v_self->_thisptr;
 
-    /* "PyDawg.pyx":26
+    /* "PyDawg.pyx":27
  * 
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -1172,7 +1181,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
  */
   }
 
-  /* "PyDawg.pyx":25
+  /* "PyDawg.pyx":26
  *             raise MemoryError()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1184,11 +1193,12 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   __Pyx_RefNannyFinishContext();
 }
 
-/* "PyDawg.pyx":29
+/* "PyDawg.pyx":30
  *             del self._thisptr
  * 
  *     cpdef void run(self):             # <<<<<<<<<<<<<<
  *         self._thisptr.run()
+ * 
  */
 
 static PyObject *__pyx_pw_6PyDawg_6PyDawg_5run(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
@@ -1203,7 +1213,7 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_run); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_run); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_5run)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1218,10 +1228,10 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
         }
       }
       if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 29, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 29, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1232,18 +1242,21 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":30
+  /* "PyDawg.pyx":31
  * 
  *     cpdef void run(self):
  *         self._thisptr.run()             # <<<<<<<<<<<<<<
+ * 
+ *     cpdef void bark(self):
  */
   __pyx_v_self->_thisptr->run();
 
-  /* "PyDawg.pyx":29
+  /* "PyDawg.pyx":30
  *             del self._thisptr
  * 
  *     cpdef void run(self):             # <<<<<<<<<<<<<<
  *         self._thisptr.run()
+ * 
  */
 
   /* function exit code */
@@ -1277,7 +1290,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("run", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_run(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_run(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1294,6 +1307,116 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
   return __pyx_r;
 }
 
+/* "PyDawg.pyx":33
+ *         self._thisptr.run()
+ * 
+ *     cpdef void bark(self):             # <<<<<<<<<<<<<<
+ *         self._thisptr.bark()
+ */
+
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_7bark(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch) {
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_RefNannySetupContext("bark", 0);
+  /* Check if called by wrapper */
+  if (unlikely(__pyx_skip_dispatch)) ;
+  /* Check if overridden in Python */
+  else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_bark); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7bark)) {
+      __Pyx_INCREF(__pyx_t_1);
+      __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+        __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
+        if (likely(__pyx_t_4)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+          __Pyx_INCREF(__pyx_t_4);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_3, function);
+        }
+      }
+      if (__pyx_t_4) {
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 33, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      } else {
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 33, __pyx_L1_error)
+      }
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      goto __pyx_L0;
+    }
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  }
+
+  /* "PyDawg.pyx":34
+ * 
+ *     cpdef void bark(self):
+ *         self._thisptr.bark()             # <<<<<<<<<<<<<<
+ */
+  __pyx_v_self->_thisptr->bark();
+
+  /* "PyDawg.pyx":33
+ *         self._thisptr.run()
+ * 
+ *     cpdef void bark(self):             # <<<<<<<<<<<<<<
+ *         self._thisptr.bark()
+ */
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_WriteUnraisable("PyDawg.PyDawg.bark", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_7bark(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_7bark(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("bark (wrapper)", 0);
+  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_6bark(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("bark", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_bark(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("PyDawg.PyDawg.bark", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
 /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
@@ -1301,19 +1424,19 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_7__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_7__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_9__reduce_cython__(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__reduce_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_6__reduce_cython__(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_8__reduce_cython__(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_6__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_8__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1355,19 +1478,19 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_6__reduce_cython__(CYTHON_UNUSED struc
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_9__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_9__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state); /*proto*/
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_11__setstate_cython__(PyObject *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__setstate_cython__ (wrapper)", 0);
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_8__setstate_cython__(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
+  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_10__setstate_cython__(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self), ((PyObject *)__pyx_v___pyx_state));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_8__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_10__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1492,8 +1615,9 @@ static void __pyx_tp_dealloc_6PyDawg_PyDawg(PyObject *o) {
 
 static PyMethodDef __pyx_methods_6PyDawg_PyDawg[] = {
   {"run", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_5run, METH_NOARGS, 0},
-  {"__reduce_cython__", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7__reduce_cython__, METH_NOARGS, 0},
-  {"__setstate_cython__", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_9__setstate_cython__, METH_O, 0},
+  {"bark", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7bark, METH_NOARGS, 0},
+  {"__reduce_cython__", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_9__reduce_cython__, METH_NOARGS, 0},
+  {"__setstate_cython__", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_11__setstate_cython__, METH_O, 0},
   {0, 0, 0, 0}
 };
 
@@ -1580,6 +1704,7 @@ static struct PyModuleDef __pyx_moduledef = {
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
+  {&__pyx_n_s_bark, __pyx_k_bark, sizeof(__pyx_k_bark), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_kp_s_no_default___reduce___due_to_non, __pyx_k_no_default___reduce___due_to_non, sizeof(__pyx_k_no_default___reduce___due_to_non), 0, 0, 1, 0},
@@ -1591,7 +1716,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 24, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -1721,11 +1846,12 @@ PyMODINIT_FUNC PyInit_PyDawg(void)
   /*--- Type init code ---*/
   __pyx_vtabptr_6PyDawg_PyDawg = &__pyx_vtable_6PyDawg_PyDawg;
   __pyx_vtable_6PyDawg_PyDawg.run = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_run;
-  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_vtable_6PyDawg_PyDawg.bark = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_bark;
+  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __pyx_type_6PyDawg_PyDawg.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __pyx_ptype_6PyDawg_PyDawg = &__pyx_type_6PyDawg_PyDawg;
   /*--- Type import code ---*/
   /*--- Variable import code ---*/

@@ -14,6 +14,7 @@ public:
         const unsigned int r,
         const unsigned int s);
     void run();
+    void bark() const;
 private:
     std::string inFile;
     std::string outFile;

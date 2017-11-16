@@ -1,13 +1,16 @@
 #include "dawg.hpp"
 
-#include "../src/dawg_app.h"
+#include <iostream>
+#include <cstring>
+
 #include <dawg/ma.h>
 #include <dawg/matic.h>
 #include <dawg/trick.h>
+#include <dawg/trick_parse.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
 
-#include <iostream>
+// #clib
 
 dawg::Dawg::Dawg()
 {
@@ -44,7 +47,7 @@ void dawg::Dawg::run()
 
     bool ret = true;
 	// for(string &ss : inFile) {
-		ret &= trick::parse_file(input, inFile.c_str());
+		ret &= dawg::trick::parse_file(input, inFile.c_str());
 	// }
 
 	if(!ret)
@@ -58,8 +61,6 @@ void dawg::Dawg::run()
 
 	dawg::output write_aln;
 
-	// Since no output file has been specified,
-	// the output will go to std::cout
 	if (!write_aln.open(/*glopts.output_file.c_str()*/ outFile.c_str(),
 		reps - 1,
 		false, // false
@@ -77,7 +78,7 @@ void dawg::Dawg::run()
 	);
 
 	std::vector<dawg::ma> configs;
-	if (!dawg::ma::from_trick(input, configs)) {
+	if (!dawg::ma::from_trick(input, configs)) { // throwing error
 		DAWG_ERROR("bad configuration");
 		return;
 	}
@@ -102,7 +103,15 @@ void dawg::Dawg::run()
 	for (unsigned int i = 0; i< reps; ++i) {
 		kimura.walk(aln);
 		alignments.insert(alignments.end(), aln);
-		//write_aln(aln); // this would print the aln data out to std::cout or a file
+		write_aln(aln); // this would print the aln data out to std::cout or a file
     }
 
 } // run
+
+void dawg::Dawg::bark() const {
+    using namespace std;
+    cout << "inFile: " << inFile << ", " <<
+        "outFile: " << outFile << ", " <<
+        "reps: " << reps << ", " <<
+        "seed: " << seed << "\n";
+}

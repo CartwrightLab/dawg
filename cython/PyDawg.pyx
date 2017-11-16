@@ -12,6 +12,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
         Dawg()
         Dawg(string, string, unsigned int, unsigned int)
         void run()
+        void bark()
 
 cdef class PyDawg:
 
@@ -28,3 +29,6 @@ cdef class PyDawg:
 
     cpdef void run(self):
         self._thisptr.run()
+
+    cpdef void bark(self):
+        self._thisptr.bark()
