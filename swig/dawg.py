@@ -9,12 +9,12 @@ if _swig_python_version_info >= (2, 7, 0):
     def swig_import_helper():
         import importlib
         pkg = __name__.rpartition('.')[0]
-        mname = '.'.join((pkg, '_example')).lstrip('.')
+        mname = '.'.join((pkg, '_dawg')).lstrip('.')
         try:
             return importlib.import_module(mname)
         except ImportError:
-            return importlib.import_module('_example')
-    _example = swig_import_helper()
+            return importlib.import_module('_dawg')
+    _dawg = swig_import_helper()
     del swig_import_helper
 elif _swig_python_version_info >= (2, 6, 0):
     def swig_import_helper():
@@ -22,20 +22,20 @@ elif _swig_python_version_info >= (2, 6, 0):
         import imp
         fp = None
         try:
-            fp, pathname, description = imp.find_module('_example', [dirname(__file__)])
+            fp, pathname, description = imp.find_module('_dawg', [dirname(__file__)])
         except ImportError:
-            import _example
-            return _example
+            import _dawg
+            return _dawg
         try:
-            _mod = imp.load_module('_example', fp, pathname, description)
+            _mod = imp.load_module('_dawg', fp, pathname, description)
         finally:
             if fp is not None:
                 fp.close()
         return _mod
-    _example = swig_import_helper()
+    _dawg = swig_import_helper()
     del swig_import_helper
 else:
-    import _example
+    import _dawg
 del _swig_python_version_info
 
 try:
@@ -95,19 +95,6 @@ except __builtin__.Exception:
         pass
     _newclass = 0
 
-
-def fact(n):
-    return _example.fact(n)
-fact = _example.fact
-
-def my_mod(x, y):
-    return _example.my_mod(x, y)
-my_mod = _example.my_mod
-
-def get_time():
-    return _example.get_time()
-get_time = _example.get_time
 # This file is compatible with both classic and new-style classes.
 
-cvar = _example.cvar
 
