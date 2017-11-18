@@ -52,4 +52,4 @@ build/*
 !build/.gitkeep
 
 # Python
-__pycache__/*
+swig/__pycache__/*
