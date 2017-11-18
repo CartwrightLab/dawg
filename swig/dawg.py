@@ -95,6 +95,10 @@ except __builtin__.Exception:
         pass
     _newclass = 0
 
+
+def run(inFile, outFile, reps, seed):
+    return _dawg.run(inFile, outFile, reps, seed)
+run = _dawg.run
 # This file is compatible with both classic and new-style classes.
 
 

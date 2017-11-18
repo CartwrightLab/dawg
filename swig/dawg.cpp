@@ -3,10 +3,8 @@
 ///
 ///////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <cstring>
-#include <string>
 #include <vector>
+#include <string>
 
 #include <dawg/ma.h>
 #include <dawg/matic.h>
@@ -15,12 +13,15 @@
 #include <dawg/global.h>
 #include <dawg/output.h>
 
-void run(const std::string &inFile,
-    const std::string &outFile,
+void run(const std::string inFile,
+    const std::string outFile,
     const unsigned int reps,
     const unsigned int seed)
 {
-    using std::string;
+    using namespace std;
+    // cout << "inFile: " << inFile << ", " <<
+    //     "outFile: " << outFile << ", " <<
+    //     "reps: " << reps << ", seed: " << seed << endl;
 
 	dawg::trick input;
 
