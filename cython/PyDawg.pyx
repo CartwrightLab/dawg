@@ -6,20 +6,29 @@
 #from libcpp.list cimport list
 #from libcpp.array cimport array
 from libcpp.string cimport string
+#from libcpp.map cimport map
 
 cdef extern from "dawg.hpp" namespace "dawg":
     cdef cppclass Dawg:
         Dawg()
+        Dawg(unsigned int)
         Dawg(string, string, unsigned int, unsigned int)
         void run()
         void bark()
+        unsigned int rand(unsigned int, unsigned int)
 
 cdef class PyDawg:
 
     cdef Dawg *_thisptr
 
     def __cinit__(self, *args):
-        self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
+        if len(args) == 4:
+            self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
+        elif len(args) == 1:
+            self._thisptr = new Dawg(args[0])
+        else:
+            self._thisptr = new Dawg()
+
         if self._thisptr == NULL:
             raise MemoryError()
 
@@ -32,3 +41,6 @@ cdef class PyDawg:
 
     cpdef void bark(self):
         self._thisptr.bark()
+
+    cpdef unsigned int rand(self, a, b):
+        return self._thisptr.rand(a, b)

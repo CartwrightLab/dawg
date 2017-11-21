@@ -7,7 +7,6 @@
 
 #include <dawg/ma.h>
 #include <dawg/matic.h>
-#include <dawg/trick.h>
 #include <dawg/trick_parse.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
@@ -16,6 +15,14 @@ dawg::Dawg::Dawg()
 {
     using namespace std;
     cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
+}
+
+dawg::Dawg::Dawg(const unsigned int s)
+: seed(s)
+, rng()
+{
+    using namespace std;
+    rng.seed(s);
 }
 
 ///////////////////////////////////////////////////////////
@@ -114,4 +121,13 @@ void dawg::Dawg::bark() const {
         "outFile: " << outFile << ", " <<
         "reps: " << reps << ", " <<
         "seed: " << seed << "\n";
+}
+
+unsigned int
+dawg::Dawg::rand(unsigned int a, unsigned int b) {
+    using namespace std;
+    // cout << "Hello rand(" << a << ", " << b << ")\n";
+    auto n = rng.rand_uint();
+    // cout << "n: " << n << "\n";
+    return n % b + a;
 }
