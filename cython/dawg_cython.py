@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from os import sys
 import PyDawg
-# import pandas as pd
+import pandas as pd
 
 # def createGraph():
 #     filename = sys.argv[1]
@@ -66,4 +66,12 @@ if __name__ == '__main__':
     dog1.run()
     print("Stats for basic-dna.dawg trick file")
     dog1.trickStats()
-    # dog1.rand(0, 100)
+
+    numbers = []
+    for i in range(1000):
+        numbers.append(dog1.rand(0, 100))
+    # s = pd.Series(numbers)
+    # s.value_counts()
+    # df = pd.DataFrame(data=numbers)
+    # print(df)
+    # pd.DataFrame.hist(data=numbers)
