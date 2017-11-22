@@ -50,21 +50,19 @@ void dawg::Dawg::run()
 {
     using std::string;
 
-	dawg::trick input;
-
     bool ret = true;
 	// for(string &ss : inFile) {
-		ret &= dawg::trick::parse_file(input, inFile.c_str());
+		ret &= dawg::trick::parse_file(mInput, inFile.c_str());
 	// }
 
 	if(!ret)
 		std::cerr << "Failure to parse DAWG file\n";
 
 	// process aliases
-	input.read_aliases();
+	mInput.read_aliases();
 
 	dawg::global_options glopts;
-	glopts.read_section(input.data.front());
+	glopts.read_section(mInput.data.front());
 
 	dawg::output write_aln;
 
@@ -85,7 +83,7 @@ void dawg::Dawg::run()
 	);
 
 	std::vector<dawg::ma> configs;
-	if (!dawg::ma::from_trick(input, configs)) { // throwing error
+	if (!dawg::ma::from_trick(mInput, configs)) { // throwing error
 		DAWG_ERROR("bad configuration");
 		return;
 	}
@@ -132,26 +130,20 @@ dawg::Dawg::rand(unsigned int a, unsigned int b) {
     return n % b + a;
 }
 
-void dawg::Dawg::printSections() const
-{
+void dawg::Dawg::trickStats() const {
+    using namespace dawg;
+    using namespace std;
 
-}
-
-void dawg::Dawg::printSection(const std::string &s)
-{
-
-}
-
-void dawg::Dawg::addSection(const std::string &s)
-{
-
-}
-
-///////////////////////////////////////////////////////////
-/// \param header = std::string("__initial__")
-///////////////////////////////////////////////////////////
-void dawg::Dawg::setSection(const std::string &key, const std::string &val,
-    const std::string &header)
-{
-
+    auto sections = mInput.data;
+    for (auto sec : sections) {
+        cout << "section: " << sec.name << "\n" <<
+        "inherits: " << sec.inherits << "\n";
+        for (auto node : sec.db) {
+            cout << "node: " << node.first << ", values: ";
+            for (auto value : node.second) {
+                cout << value << ", ";
+            }
+            cout << "\n";
+        }
+    }
 }

@@ -33,13 +33,37 @@ import PyDawg
 #     with pd.option_context('display.max_rows', 60000, 'display.max_columns', 1000, 'display.width', 1000):
 #         print(y)
 
+recombinationStr = """
+[[-]]
+Subst.Model = jc
+Root.Segment = 1
+Root.Length = 60
+Tree.Tree = ((A:0.02,B:0.02):0.2,(C:0.02):0.2);
+[[-]]
+Root.Code = 1
+Root.Segment = 0
+Root.Length = 60
+Tree.Tree = ((A:0.02):0.2,(B:0.02,C:0.02):0.2);
+[[-]]
+Root.Segment = 2
+"""
+
+basicDnaStr = """
+[Tree]
+Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+[Subst]
+Model = "HKY"
+Params = 2.0, 1.0
+Freqs = 0.3, 0.2, 0.2, 0.3
+[Root]
+Length = 1000
+[Sim]
+Reps = 10
+"""
+
 if __name__ == '__main__':
-    dog1 = PyDawg.PyDawg(b"../examples/basic-dna.dawg", b"fasta:-", 10, 212121)
-    dog2 = PyDawg.PyDawg(212121)
-    dog2.rand(0, 100)
-    # dog2.printSections()
-    # dog2.addSection("SectionA")
-    # dog2.printSection("SectionA")
-    # section name (the key), inheritance, and a list of values
-    # dog2.setSection(b"SectionA", b"LUCA", "Root.Code = 2121")
-    alignmentBuffer = PyDawg.trick("").walk("").fetch("") # can pass a treat in fetch to make it go faster
+    dog1 = PyDawg.PyDawg(b"../examples/basic-dna.dawg", b"fasta:/dev/null", 10, 212121)
+    dog1.run()
+    print("Stats for basic-dna.dawg trick file")
+    dog1.trickStats()
+    # dog1.rand(0, 100)

@@ -16,6 +16,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
         void run()
         void bark()
         unsigned int rand(unsigned int, unsigned int)
+        void trickStats()
 
 cdef class PyDawg:
 
@@ -44,3 +45,6 @@ cdef class PyDawg:
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)
+
+    cpdef void trickStats(self):
+        self._thisptr.trickStats()

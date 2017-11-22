@@ -20,18 +20,14 @@ public:
     void run();
     void bark() const;
     unsigned int rand(unsigned int a, unsigned int b);
-    void printSections() const;
-    void printSection(const std::string &s);
-    void addSection(const std::string &s);
-    void setSection(const std::string &key, const std::string &val,
-        const std::string &header = std::string("__initial__"));
+    void trickStats() const;
 private:
     std::string inFile;
     std::string outFile;
     unsigned int reps;
     unsigned int seed;
     mutt rng;
-    trick input;
+    trick mInput;
 }; // class Dawg
 
 } // namespace dawg
