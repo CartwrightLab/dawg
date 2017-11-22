@@ -131,3 +131,27 @@ dawg::Dawg::rand(unsigned int a, unsigned int b) {
     // cout << "n: " << n << "\n";
     return n % b + a;
 }
+
+void dawg::Dawg::printSections() const
+{
+
+}
+
+void dawg::Dawg::printSection(const std::string &s)
+{
+
+}
+
+void dawg::Dawg::addSection(const std::string &s)
+{
+
+}
+
+///////////////////////////////////////////////////////////
+/// \param header = std::string("__initial__")
+///////////////////////////////////////////////////////////
+void dawg::Dawg::setSection(const std::string &key, const std::string &val,
+    const std::string &header)
+{
+
+}

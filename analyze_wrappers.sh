@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# I used the basic-dna.dawg for all these (10 reps, seed=212121)
+# The **basic-dna.dawg** trick file with 10 reps, seed=212121 is used
 BOOST_FASTA_FILE="boostPython.fasta"
 CYTHON_FASTA_FILE="cython.fasta"
 SWIG_FASTA_FILE="swig.fasta"

@@ -20,6 +20,11 @@ public:
     void run();
     void bark() const;
     unsigned int rand(unsigned int a, unsigned int b);
+    void printSections() const;
+    void printSection(const std::string &s);
+    void addSection(const std::string &s);
+    void setSection(const std::string &key, const std::string &val,
+        const std::string &header = std::string("__initial__"));
 private:
     std::string inFile;
     std::string outFile;

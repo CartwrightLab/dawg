@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from os import sys
 import PyDawg
-import pandas as pd
+# import pandas as pd
 
 # def createGraph():
 #     filename = sys.argv[1]
@@ -41,4 +41,5 @@ if __name__ == '__main__':
     # dog2.addSection("SectionA")
     # dog2.printSection("SectionA")
     # section name (the key), inheritance, and a list of values
-    dog2.setSection(b"SectionA", b"LUCA", "Root.Code = 2121")
+    # dog2.setSection(b"SectionA", b"LUCA", "Root.Code = 2121")
+    alignmentBuffer = PyDawg.trick("").walk("").fetch("") # can pass a treat in fetch to make it go faster
