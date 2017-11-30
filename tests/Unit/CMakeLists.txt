@@ -24,7 +24,7 @@ macro(AddUnitTest NAME)
     target_include_directories("${target}" BEFORE PRIVATE "${CMAKE_SOURCE_DIR}/src/include")
 
     target_link_libraries("${target}"
-        libdawg2
+        libdawg2-static
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     )
 
