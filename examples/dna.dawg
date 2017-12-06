@@ -1,0 +1,67 @@
+# Test dna evaluationary models
+
+Tree.Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+Tree.Scale = 0.99999
+Root.Length = 100
+Sim.Reps = 10
+Sim.Seed = 42
+
+[[gtr]]
+Subst.Model = "gtr"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[jc]]
+Subst.Model = "jc"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[f81]]
+Subst.Model = "f81"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[k2p]]
+Subst.Model = "k2p"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[tn]]
+Subst.Model = "tn"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[tn_f04]]
+Subst.Model = "tn_f04"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[f84]]
+Subst.Model = "f84"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[hky]]
+Subst.Model = "hky"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[jtt]]
+Subst.Model = "jtt"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[dayhoff]]
+Subst.Model = "dayhoff"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"

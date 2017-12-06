@@ -1,0 +1,49 @@
+# Test codon evaluationary models
+
+Tree.Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+Tree.Scale = 0.99999
+Root.Length = 100
+Sim.Reps = 10
+Sim.Seed = 42
+
+[[codgtr]]
+Subst.Model = "codgtr"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codgy_equ]]
+Subst.Model = "codgy_equ"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codgy]]
+Subst.Model = "codgy"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codmg_cp]]
+Subst.Model = "codmg_cp"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codmg_equ]]
+Subst.Model = "codmg_equ"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codmg]]
+Subst.Model = "codmg"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
+
+[[codmg_aap]]
+Subst.Model = "codmg_aap"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+Subst.Rate.Model = "ZERO"
