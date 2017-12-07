@@ -1,68 +1,61 @@
 # Test rna evaluationary models
 
-Output.Rna = truth
-Tree.Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+Output.Rna = 1
+Tree.Tree = "(A:0.3, B:0.2)C;"
 Tree.Scale = 0.99999
 Root.Length = 100
-Sim.Reps = 10
+Root.Code = TCAAAAGGGGTTTTCCCCAAATTAAGGCCCC
+Root.Seq = "AATGCTTTTTTTTTTGGCCAA"
+Sim.Reps = 4
 Sim.Seed = 42
+Root.Seg = 0
 
-[[gtr]]
 Subst.Model = "gtr"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[jc]]
 Subst.Model = "jc"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[f81]]
 Subst.Model = "f81"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[k2p]]
 Subst.Model = "k2p"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[tn]]
 Subst.Model = "tn"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[tn_f04]]
 Subst.Model = "tn_f04"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[f84]]
 Subst.Model = "f84"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[hky]]
 Subst.Model = "hky"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[jtt]]
 Subst.Model = "jtt"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
 
-[[dayhoff]]
 Subst.Model = "dayhoff"
-Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.22, 0.2222, 0.3112, 0.3333, 0.223, 0.2061, 0.3007, 0.3998, 0.2112, 0.244, 0.3726, 0.30871, 0.29191, 0.2232, 0.322, 0.32, 0.12
 Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
 Subst.Rate.Model = "ZERO"
