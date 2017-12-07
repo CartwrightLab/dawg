@@ -3,7 +3,7 @@
 Tree.Tree = "(A:0.3, B:0.2)C;"
 Tree.Scale = 0.99999
 Root.Length = 100
-Root.Code = TCAAAAGGGGTTTTCCCCAAATTAAGGCCCC
+Root.Code = 2
 Root.Seq = "AATGCTTTTTTTTTTGGCCAA"
 Sim.Reps = 10
 Sim.Seed = 42
