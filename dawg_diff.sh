@@ -1,38 +1,45 @@
-#!/bin/bash
+#!/usr/bin/bash
 
-# Utility script to compare current dawg branch with
-# develop outputs
-cd ~/repo/dawg/build/debug && git checkout $1 &> /dev/null
-cmake -G"Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug ../..
-ninja -j4
+# cd ~/code/dawg
 
-~/repo/dawg/build/debug/src/dawg --seed=1111111 \
-    ~/repo/dawg/examples/basic-dna.dawg -o \
-    ~/Dropbox/dawg-house/outs/basic-dna_D2.fasta
+# Simple script that runs dawg examples and validates them
+#cmake -G"Ninja" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug ../..
+#ninja -j4
 
-~/repo/dawg/build/debug/src/dawg --seed=1111111 \
-    ~/repo/dawg/examples/basic-dna-2.dawg -o \
-    ~/Dropbox/dawg-house/outs/basic-dna-2_D2.fasta
+SEED=1111111
 
-~/repo/dawg/build/debug/src/dawg --seed=1111111 \
-    ~/repo/dawg/examples/multiple-models.dawg -o \
-    ~/Dropbox/dawg-house/outs/multiple-models_D2.fasta
+build/debug/src/dawg --seed=1111111 \
+    examples/basic-dna.dawg -o \
+    test_dist/basic-dna_patch.fasta
 
-~/repo/dawg/build/debug/src/dawg --seed=1111111 \
-    ~/repo/dawg/examples/recombination.dawg -o \
-    ~/Dropbox/dawg-house/outs/recombination_D2.fasta
+# ~/code/dawg/build/debug/src/dawg --seed=1111111 \
+    # ~/code/dawg/examples/basic-dna-2.dawg -o \
+    # ~/Dropbox/dawg-house/outs/basic-dna-2_D2.fasta
 
-~/repo/dawg/build/debug/src/dawg --seed=1111111 \
-    ~/repo/dawg/examples/segments.dawg -o \
-    ~/Dropbox/dawg-house/outs/segments_D2.fasta
+build/debug/src/dawg --seed=1111111 \
+    examples/multiple-models.dawg -o \
+    test_dist/multiple-models_patch.fasta
 
-#~/repo/dawg/build/debug/src/dawg --seed=1111111 \
+build/debug/src/dawg --seed=1111111 \
+    examples/recombination.dawg -o \
+    test_dist/recombination_patch.fasta
+
+build/debug/src/dawg --seed=1111111 \
+    examples/segments.dawg -o \
+    test_dist/segments_patch.fasta
+
+#~/code/dawg/build/debug/src/dawg --seed=1111111 \
 #    ~/Dropbox/dawg-house/indels.dawg -o \
 #    ~/Dropbox/dawg-house/outs/indels_D2.fasta
 
 
-diff ~/Dropbox/dawg-house/outs/basicdna_DAWG.fasta ~/Dropbox/dawg-house/outs/basic-dna_D2.fasta
-diff ~/Dropbox/dawg-house/outs/segments_DAWG.fasta ~/Dropbox/dawg-house/outs/segments_D2.fasta
-diff ~/Dropbox/dawg-house/outs/recomb_DAWG.fasta ~/Dropbox/dawg-house/outs/recombination_D2.fasta
-diff ~/Dropbox/dawg-house/outs/multiple-models_DAWG.fasta ~/Dropbox/dawg-house/outs/multiple-models_D2.fasta
+diff ~/code/dawg/test_dist/basicdna.fasta          ~/code/dawg/test_dist/basic-dna_patch.fasta
+diff ~/code/dawg/test_dist/segments.fasta          ~/code/dawg/test_dist/segments_patch.fasta
+diff ~/code/dawg/test_dist/recomb.fasta            ~/code/dawg/test_dist/recombination_patch.fasta
+diff ~/code/dawg/test_dist/multiple-models.fasta   ~/code/dawg/test_dist/multiple-models_patch.fasta
 #diff ~/Dropbox/dawg-house/outs/indels_DAWG.fasta ~/Dropbox/dawg-house/outs/indels_D2.fasta
+
+rm ~/code/dawg/test_dist/basic-dna_patch.fasta
+rm ~/code/dawg/test_dist/segments_patch.fasta
+rm ~/code/dawg/test_dist/recombination_patch.fasta
+rm ~/code/dawg/test_dist/multiple-models_patch.fasta
