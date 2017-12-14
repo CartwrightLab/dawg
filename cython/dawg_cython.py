@@ -16,6 +16,9 @@ class TrickSection:
         self.inheritsFrom = inheritsFrom
         self.db = db
 
+    compileNewickTree():
+        pass
+
 # The list of sections to breed
 # There is a priority queue that sorts the sections by
 # how easy they will be to evolve?
@@ -35,6 +38,8 @@ def basicdna():
         "Root.Length"="1000",
         "Sim.Reps"="10"
     ])
+
+    ts1.compileNewickTree()
 
 def help():
     print("""
