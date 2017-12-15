@@ -104,6 +104,7 @@ public:
 		static constexpr char sIns[] = "-+";
 		// table for going from base->char
 		// TODO: Allow codons to be translated into aa
+		// table is 63 wide and 30 down
 		static constexpr char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
 			"acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // dna
@@ -159,7 +160,7 @@ public:
 		rna_ = rna;
 
 		type_ = type; // set sequence type NA, AA, or CODON
-		nuc_ = ((rna) ? MODRNA : MODDNA) | ((lowercase) ? 1 : 0);
+		nuc_ = ((rna) ? MODRNA : MODDNA) | static_cast<unsigned int>((lowercase) ? 1 : 0);
 		code_ = code;
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
@@ -169,7 +170,9 @@ public:
 				cs_decode_ = &mods[nuc_*64];
 				break;
 			case AA:
-				cs_decode_ = &mods[(MODAA + (lowercase ? 1 : 0))*64];
+				// if (rna_) cs_decode_ = &mods[nuc_*64];
+				// else
+					cs_decode_ = &mods[(MODAA + (lowercase ? 1 : 0))*64];
 				break;
 			case CODON:
 				cs_decode_ = &mods[(MODCOD+code_)*64];
