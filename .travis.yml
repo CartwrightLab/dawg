@@ -19,9 +19,10 @@ before_script:
     - mkdir release
     - cd release
     - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ../
+    - make
+    - cd ../
 
 script:
-    - make
     - test_dist/diff.sh
 
 notifications:
