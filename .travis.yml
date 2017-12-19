@@ -13,8 +13,7 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - libboost-all-dev
-#             - clang++
-#             - g++
+            - cmake
 
 before_script:
     - mkdir release
@@ -23,7 +22,7 @@ before_script:
 
 script:
     - make
-    # - ctest
+    - test_dist/diff.sh
 
 notifications:
     email: false
