@@ -2,6 +2,8 @@
 # See readme.txt for an explanation on the structure of an input file.
 # Simulation results are sent to stdout.
 
+Output.Rna = 1
+
 ## Tree Section ################################################################
 #
 # Use a constant tree.
