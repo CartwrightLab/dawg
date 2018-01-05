@@ -8,7 +8,7 @@
 #include <dawg/mutt.h>
 #include <dawg/subst.h>
 #include <dawg/rate.h>
-#include <dawg/sequence.h>
+#include <dawg/residue.h>
 
 namespace dawg {
 
@@ -25,7 +25,7 @@ public:
 		residue::data_type b) const {
 		(this->*do_op)(seq,m,s,r,b);
 	}
-	
+
 	inline const std::string& label() const {
 		return name;
 	}
@@ -34,7 +34,7 @@ private:
 	// pointer that will hold our method
 	void (root_model::*do_op)(sequence &seq, mutt &m,
 		const subst_model &s, const rate_model &r, residue::data_type b) const;
-	
+
 	void do_stat(sequence &seq, mutt &m, const subst_model &s, const rate_model &r, residue::data_type b) const {
 		seq.resize(root_len);
 		for(sequence::iterator it=seq.begin(); it != seq.end(); ++it) {
@@ -43,7 +43,7 @@ private:
 			it->branch(b);
 		}
 	}
-	
+
 	unsigned int root_len;
 	std::string name;
 };
@@ -51,4 +51,3 @@ private:
 } // namespace dawg
 
 #endif // DAWG_ROOT_H
-

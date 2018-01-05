@@ -6,6 +6,7 @@
 
 #include <dawg/mutt.h>
 #include <dawg/trick.h>
+#include <dawg/residue.h>
 
 namespace dawg {
 

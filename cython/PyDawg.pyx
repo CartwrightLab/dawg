@@ -45,6 +45,7 @@ cdef class PyDawg:
     # Get the alignment string
     cpdef void bark(self):
         # self._thisptr.bark()
+        pass
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)

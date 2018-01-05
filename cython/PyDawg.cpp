@@ -953,7 +953,7 @@ static int __Pyx_check_binary_version(void);
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
-static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
+static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b, int __pyx_skip_dispatch); /* proto*/
 static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 
@@ -1314,7 +1314,7 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
  *     cpdef void run(self):
  *         self._thisptr.run()             # <<<<<<<<<<<<<<
  * 
- *     cpdef void bark(self):
+ *     # Get the alignment string
  */
   __pyx_v_self->_thisptr->run();
 
@@ -1374,16 +1374,16 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":45
- *         self._thisptr.run()
+/* "PyDawg.pyx":46
  * 
+ *     # Get the alignment string
  *     cpdef void bark(self):             # <<<<<<<<<<<<<<
- *         self._thisptr.bark()
- * 
+ *         # self._thisptr.bark()
+ *         pass
  */
 
 static PyObject *__pyx_pw_6PyDawg_6PyDawg_7bark(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch) {
+static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch) {
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
@@ -1394,7 +1394,7 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_bark); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_bark); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7bark)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1409,10 +1409,10 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_
         }
       }
       if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1423,21 +1423,12 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":46
- * 
+  /* "PyDawg.pyx":48
  *     cpdef void bark(self):
- *         self._thisptr.bark()             # <<<<<<<<<<<<<<
+ *         # self._thisptr.bark()
+ *         pass             # <<<<<<<<<<<<<<
  * 
  *     cpdef unsigned int rand(self, a, b):
- */
-  __pyx_v_self->_thisptr->bark();
-
-  /* "PyDawg.pyx":45
- *         self._thisptr.run()
- * 
- *     cpdef void bark(self):             # <<<<<<<<<<<<<<
- *         self._thisptr.bark()
- * 
  */
 
   /* function exit code */
@@ -1451,6 +1442,14 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
 }
+
+/* "PyDawg.pyx":46
+ * 
+ *     # Get the alignment string
+ *     cpdef void bark(self):             # <<<<<<<<<<<<<<
+ *         # self._thisptr.bark()
+ *         pass
+ */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_6PyDawg_6PyDawg_7bark(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
@@ -1471,7 +1470,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("bark", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_bark(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_bark(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1488,8 +1487,8 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg 
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":48
- *         self._thisptr.bark()
+/* "PyDawg.pyx":50
+ *         pass
  * 
  *     cpdef unsigned int rand(self, a, b):             # <<<<<<<<<<<<<<
  *         return self._thisptr.rand(a, b)
@@ -1513,7 +1512,7 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_rand); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_rand); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_9rand)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1532,7 +1531,7 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_a, __pyx_v_b};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else
@@ -1540,13 +1539,13 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_a, __pyx_v_b};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 48, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 50, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         if (__pyx_t_4) {
           __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -1557,12 +1556,12 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
         __Pyx_INCREF(__pyx_v_b);
         __Pyx_GIVEREF(__pyx_v_b);
         PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_b);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_t_2); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_t_2); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_r = __pyx_t_7;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1571,20 +1570,20 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":49
+  /* "PyDawg.pyx":51
  * 
  *     cpdef unsigned int rand(self, a, b):
  *         return self._thisptr.rand(a, b)             # <<<<<<<<<<<<<<
  * 
  *     cpdef void trickStats(self):
  */
-  __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_v_a); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
-  __pyx_t_8 = __Pyx_PyInt_As_unsigned_int(__pyx_v_b); if (unlikely((__pyx_t_8 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_v_a); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_unsigned_int(__pyx_v_b); if (unlikely((__pyx_t_8 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
   __pyx_r = __pyx_v_self->_thisptr->rand(__pyx_t_7, __pyx_t_8);
   goto __pyx_L0;
 
-  /* "PyDawg.pyx":48
- *         self._thisptr.bark()
+  /* "PyDawg.pyx":50
+ *         pass
  * 
  *     cpdef unsigned int rand(self, a, b):             # <<<<<<<<<<<<<<
  *         return self._thisptr.rand(a, b)
@@ -1633,11 +1632,11 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_9rand(PyObject *__pyx_v_self, PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, 1); __PYX_ERR(0, 48, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, 1); __PYX_ERR(0, 50, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 48, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 50, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -1650,7 +1649,7 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_9rand(PyObject *__pyx_v_self, PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 48, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 50, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("PyDawg.PyDawg.rand", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1669,7 +1668,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_8rand(struct __pyx_obj_6PyDawg_PyDawg 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("rand", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_f_6PyDawg_6PyDawg_rand(__pyx_v_self, __pyx_v_a, __pyx_v_b, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_f_6PyDawg_6PyDawg_rand(__pyx_v_self, __pyx_v_a, __pyx_v_b, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1686,7 +1685,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_8rand(struct __pyx_obj_6PyDawg_PyDawg 
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":51
+/* "PyDawg.pyx":53
  *         return self._thisptr.rand(a, b)
  * 
  *     cpdef void trickStats(self):             # <<<<<<<<<<<<<<
@@ -1706,7 +1705,7 @@ static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickStats); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickStats); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_11trickStats)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1721,10 +1720,10 @@ static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *
         }
       }
       if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1735,7 +1734,7 @@ static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":52
+  /* "PyDawg.pyx":54
  * 
  *     cpdef void trickStats(self):
  *         self._thisptr.trickStats()             # <<<<<<<<<<<<<<
@@ -1744,7 +1743,7 @@ static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *
  */
   __pyx_v_self->_thisptr->trickStats();
 
-  /* "PyDawg.pyx":51
+  /* "PyDawg.pyx":53
  *         return self._thisptr.rand(a, b)
  * 
  *     cpdef void trickStats(self):             # <<<<<<<<<<<<<<
@@ -1783,7 +1782,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_10trickStats(struct __pyx_obj_6PyDawg_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("trickStats", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_trickStats(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_trickStats(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1800,7 +1799,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_10trickStats(struct __pyx_obj_6PyDawg_
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":56
+/* "PyDawg.pyx":58
  *     # IO functions
  *     # trick takes in a bunch of
  *     def trick(self, s, **kwargs):             # <<<<<<<<<<<<<<
@@ -1836,7 +1835,7 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_13trick(PyObject *__pyx_v_self, PyObje
         else goto __pyx_L5_argtuple_error;
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "trick") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "trick") < 0)) __PYX_ERR(0, 58, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 1) {
       goto __pyx_L5_argtuple_error;
@@ -1847,7 +1846,7 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_13trick(PyObject *__pyx_v_self, PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("trick", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 56, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("trick", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 58, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
   __Pyx_AddTraceback("PyDawg.PyDawg.trick", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -1868,28 +1867,28 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_12trick(struct __pyx_obj_6PyDawg_PyDaw
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("trick", 0);
 
-  /* "PyDawg.pyx":57
+  /* "PyDawg.pyx":59
  *     # trick takes in a bunch of
  *     def trick(self, s, **kwargs):
  *         self.trickQueue = kwargs             # <<<<<<<<<<<<<<
  *         self.trickQueue.label = s
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue, __pyx_v_kwargs) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue, __pyx_v_kwargs) < 0) __PYX_ERR(0, 59, __pyx_L1_error)
 
-  /* "PyDawg.pyx":58
+  /* "PyDawg.pyx":60
  *     def trick(self, s, **kwargs):
  *         self.trickQueue = kwargs
  *         self.trickQueue.label = s             # <<<<<<<<<<<<<<
  * 
  *     def outputHandler(self):
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_label, __pyx_v_s) < 0) __PYX_ERR(0, 58, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_label, __pyx_v_s) < 0) __PYX_ERR(0, 60, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "PyDawg.pyx":56
+  /* "PyDawg.pyx":58
  *     # IO functions
  *     # trick takes in a bunch of
  *     def trick(self, s, **kwargs):             # <<<<<<<<<<<<<<
@@ -1910,7 +1909,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_12trick(struct __pyx_obj_6PyDawg_PyDaw
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":60
+/* "PyDawg.pyx":62
  *         self.trickQueue.label = s
  * 
  *     def outputHandler(self):             # <<<<<<<<<<<<<<
@@ -1943,7 +1942,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_14outputHandler(CYTHON_UNUSED struct _
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":63
+/* "PyDawg.pyx":65
  *         pass
  * 
  *     def help(self):             # <<<<<<<<<<<<<<
@@ -1970,18 +1969,18 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_16help(CYTHON_UNUSED struct __pyx_obj_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("help", 0);
 
-  /* "PyDawg.pyx":64
+  /* "PyDawg.pyx":66
  * 
  *     def help(self):
  *         print("""             # <<<<<<<<<<<<<<
  * dawg 2-current-rUnknown
  *     Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "PyDawg.pyx":63
+  /* "PyDawg.pyx":65
  *         pass
  * 
  *     def help(self):             # <<<<<<<<<<<<<<
@@ -2204,7 +2203,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 36, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 66, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -2214,14 +2213,14 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "PyDawg.pyx":64
+  /* "PyDawg.pyx":66
  * 
  *     def help(self):
  *         print("""             # <<<<<<<<<<<<<<
  * dawg 2-current-rUnknown
  *     Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_dawg_2_current_rUnknown_Copyrig); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_dawg_2_current_rUnknown_Copyrig); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
   __Pyx_RefNannyFinishContext();

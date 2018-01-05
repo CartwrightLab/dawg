@@ -33,6 +33,21 @@
 
 namespace dawg {
 
+namespace details {
+struct aligned_sequence {
+	std::string label;
+	std::string seq;
+};
+
+} // details
+class residue;
+typedef std::vector<residue> sequence;
+
+struct alignment : public std::vector<details::aligned_sequence> {
+	std::string::size_type max_label_width;
+	int seq_type;
+};
+
 class residue {
 public:
 	typedef boost::uint64_t data_type;
