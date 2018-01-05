@@ -49,7 +49,7 @@ dawg::Dawg::Dawg(const std::string& in,
 ///////////////////////////////////////////////////////////
 void dawg::Dawg::run()
 {
-    using std::string;
+    using namespace std;
 
     bool ret = true;
 	// for(string &ss : inFile) {
@@ -104,7 +104,8 @@ void dawg::Dawg::run()
 
 	// prepare sets of aligned sequences;
 	kimura.pre_walk(mAlignments.front());
-	for (unsigned int i = 0; i< reps; ++i) {
+	cout << "mAlignments.size(): " << mAlignments.size() << endl;
+	for (auto i = 0; i < reps; ++i) {
 		kimura.walk(mAlignments.at(i));
 		// alignments.insert(alignments.end(), aln);
 		// write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
@@ -151,7 +152,8 @@ void dawg::Dawg::trickStats() const {
 void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
 	using namespace std;
 	cout << "max_label_width: " << aln.max_label_width <<
-		"seq_type: " << aln.seq_type << endl;
-	// "label: " << mAlignments.at(i).label <<
-		// "seq: " << mAlignments.at(i).seq << endl;
+		"\nseq_type: " << aln.seq_type << "\n";
+	for (const auto &v : aln) {
+		cout << "label: " << v.label.c_str() << "\nseq: " << v.seq.c_str() << endl;
+	}
 }

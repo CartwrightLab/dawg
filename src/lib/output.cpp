@@ -33,7 +33,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 		if(mid != nullptr && mid != file_name+1) {
 #else
 		if(mid != nullptr) {
-#endif		
+#endif
 			// format:file
 			format = boost::make_iterator_range(file_name, mid);
 			file_name = mid+1;
@@ -51,7 +51,7 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 	label_width = 1+static_cast<unsigned int>(log10(1.0*max_rep));
 	current_label.assign(label_width, '0');
 	do_label = label;
-	
+
 	if(file_name != nullptr && file_name[0] != '\0' && strcmp(file_name, "-") != 0) {
 		// set append and split options before we open the file
 		do_append = append;
@@ -110,9 +110,9 @@ bool dawg::output::open_next() {
 	if(!do_split)
 		return true;
 
-	// replace 
+	// replace
 	split_file_name.replace(split_id_offset, label_width, current_label);
-	
+
 	if(!open_file(split_file_name.c_str()))
 		return DAWG_ERROR("unable to open output file \'" << split_file_name << "\'.");
 	return true;
@@ -133,7 +133,7 @@ void dawg::output::print_poo(const alignment& aln) {
 void dawg::output::print_fasta(const alignment& aln) {
 	ostream &out = *p_out;
 
-	for(const alignment::value_type& v : aln) {
+	for(const auto& v : aln) {
 		out << ">" << v.label;
 		if(do_label)
 			out << "_" << current_label;
@@ -213,28 +213,28 @@ void dawg::output::print_phylip(const alignment& aln) {
 // TODO: save sequence type in aln
 void dawg::output::print_nexus(const alignment& aln) {
 	ostream &out = *p_out;
-	
+
 	static constexpr char datatypes[][10] = {
 		"DNA", "RNA", "PROTEIN", "DNA",
 		"DNA", "RNA", "PROTEIN", "DNA"
 	};
-	
+
 	// TODO: Move this to the block support routine
 	out << "#NEXUS\n[Created by " PACKAGE_STRING "]" << endl;
 
 	out << "BEGIN DATA;\n"
 		   "\tDIMENSIONS NTAX=" << aln.size() << " NCHAR=" << aln[0].seq.size() << ";\n"
 	       "\tFORMAT DATATYPE=";
-	
+
 	out << datatypes[aln.seq_type];
 	out << " MISSING=? GAP=- MATCHCHAR=. EQUATE=\"+=-\";\n"
 	       "\tMATRIX" << endl;
-	
+
 	// Write sequences in non-interleaved format
 	string::size_type aln_label_width = do_label ?
 		aln.max_label_width+label_width+1 :
 		aln.max_label_width;
-	
+
 	for(const alignment::value_type& v : aln) {
 		out << v.label;
 		if(do_label)

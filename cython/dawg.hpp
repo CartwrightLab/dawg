@@ -26,7 +26,7 @@ public:
 private:
     std::string inFile;
     std::string outFile;
-    unsigned int reps;
+    std::size_t reps;
     unsigned int seed;
     std::vector<dawg::alignment> mAlignments;
     mutt rng;

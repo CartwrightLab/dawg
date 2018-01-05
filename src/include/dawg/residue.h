@@ -44,8 +44,8 @@ class residue;
 typedef std::vector<residue> sequence;
 
 struct alignment : public std::vector<details::aligned_sequence> {
-	std::string::size_type max_label_width;
-	int seq_type;
+	std::string::size_type max_label_width; // size of the largest node label
+	int seq_type; // DNA, AA, Codon ?
 };
 
 class residue {
