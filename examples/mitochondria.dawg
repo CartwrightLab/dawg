@@ -1,11 +1,12 @@
 # Test mitochondria root code
-# vertebrate root code -- https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi#SG2
+# Genetic codes -- https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi#SG2
+# 13 = The Ascidian Mitochondrial Code
 
-Tree.Tree = "(A:0.3, B:0.2)C;"
+Tree.Tree = "(A:0.3, B:0.2)~C;"
 Tree.Scale = 0.99999
 Root.Length = 100
-Root.Code = TTTTTTTTTTTTTTTTCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAAGGGGGGGGGGGGGGGGTTTTCCCCAAAAGGGGTTTTCCCCAAAAGGGGTTTTCCCCAAAAGGGGTTTTCCCCAAAAGGGGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAGTCAG
-Root.Seq = "AATGTCTCCTA"
+Root.Code = 13
+# Root.Seq = "AATGTCTCCTA"
 Sim.Reps = 10
 Sim.Seed = 42
 Root.Seg = 0

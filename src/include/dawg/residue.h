@@ -5,6 +5,15 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+/// \brief Residue Model
+/// create function
+// sequence type
+// creating a root
+// random residues
+// evolve residues
+// constant or variable residue widths
+// indel widths as well?
+
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
 #endif
