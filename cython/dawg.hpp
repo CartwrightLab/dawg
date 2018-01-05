@@ -31,6 +31,8 @@ private:
     std::vector<dawg::alignment> mAlignments;
     mutt rng;
     trick mInput;
+
+    void printAlignmentInfo(const dawg::alignment &aln) const;
 }; // class Dawg
 
 } // namespace dawg

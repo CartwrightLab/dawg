@@ -108,6 +108,7 @@ void dawg::Dawg::run()
 		kimura.walk(mAlignments.at(i));
 		// alignments.insert(alignments.end(), aln);
 		// write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
+		printAlignmentInfo(mAlignments.at(i));
     }
 
 } // run
@@ -145,4 +146,12 @@ void dawg::Dawg::trickStats() const {
             cout << "\n";
         }
     }
+}
+
+void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
+	using namespace std;
+	cout << "max_label_width: " << aln.max_label_width <<
+		"seq_type: " << aln.seq_type << endl;
+	// "label: " << mAlignments.at(i).label <<
+		// "seq: " << mAlignments.at(i).seq << endl;
 }
