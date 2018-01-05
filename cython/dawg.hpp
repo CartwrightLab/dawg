@@ -2,6 +2,7 @@
 #define DAWG_HPP
 
 #include <string>
+#include <vector>
 
 #include <dawg/mutt.h>
 #include <dawg/trick.h>
@@ -26,6 +27,7 @@ private:
     std::string outFile;
     unsigned int reps;
     unsigned int seed;
+    std::vector<dawg::alignment> mAlignments;
     mutt rng;
     trick mInput;
 }; // class Dawg

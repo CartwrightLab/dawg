@@ -5,6 +5,15 @@
  *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
+/// \brief from the old resid.h file
+/// create function
+/// sequence type
+/// creating a root
+/// random residues
+/// evolve residues
+/// constant or variable residue widths
+/// indel widths as well?
+
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
 #endif
@@ -28,7 +37,7 @@ class residue {
 public:
 	typedef boost::uint64_t data_type;
 
-	
+
 	static constexpr data_type base_mask      =  UINT64_C(0x00000000000000FF);
 	static constexpr data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
 	static constexpr data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
@@ -78,9 +87,9 @@ class residue_exchange {
 public:
 	enum { MODDNA = 0, MODRNA=2, MODAA=4, MODCOD=6, MODEND=30};
 	enum { DNA = 0, AA = 1, CODON = 2};
-	
+
 	typedef residue_exchange self_type;
-	
+
 	typedef boost::sub_range< const char [64] > str_type;
 
 	inline bool model(unsigned int type, unsigned int code, bool rna,
@@ -147,7 +156,7 @@ public:
 		code_ = code;
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
-		
+
 		switch(type_) {
 			case DNA:
 				cs_decode_ = &mods[nuc_*64];
@@ -163,16 +172,16 @@ public:
 		}
 		cs_encode_ = &rmods[type_*80];
 		cs_ins_ = &sIns[(markins_ ? 1 : 0)];
-		
+
 		gap_ = static_cast<unsigned int>(strchr(cs_decode_, '-')-cs_decode_);
-		
+
 		do_op_append =  (type_ == CODON) ?
 			&residue_exchange::do_op_append_cod :
 			&residue_exchange::do_op_append_res ;
-		do_op_appendi = (type_ == CODON) ? 
+		do_op_appendi = (type_ == CODON) ?
 			&residue_exchange::do_op_appendi_cod :
 			&residue_exchange::do_op_appendi_res ;
-		
+
 		return true;
 	};
 	inline bool is_same_type(unsigned int type, bool markins, bool keepempty) const {
@@ -190,22 +199,22 @@ public:
 	inline residue::data_type gap_base() const { return gap_; }
 
 	inline residue::data_type encode(char ch) const {
-		char ret = (ch >= '0') ? (cs_encode_[ch - '0']) : -1;	
+		char ret = (ch >= '0') ? (cs_encode_[ch - '0']) : -1;
 		return static_cast<residue::data_type>(ret);
 	}
-	
+
 	inline char decode(residue::data_type r) const {
 		return cs_decode_[r & 63];
 	}
-	
+
 	inline char decode(const residue &r) const {
 		return decode(r.base());
 	}
-	
+
 	inline char decode_ins() const {
 		return cs_ins_[0];
 	}
-	
+
 	// codon number -> cod64
 	static inline char codon_to_cod64(unsigned int p) {
 		const char s[] = "ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -258,7 +267,7 @@ public:
 	}
 
 	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
-	
+
 	inline static const char* get_protein_code(unsigned int code) {
 		static constexpr char s[] =
 			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
@@ -292,7 +301,7 @@ public:
 protected:
 	void (residue_exchange::*do_op_append)(std::string &ss, const residue &r) const;
 	void (residue_exchange::*do_op_appendi)(std::string &ss) const;
-	
+
 	void do_op_append_res(std::string &ss, const residue &r) const {
 		ss.append(1, decode(r));
 	}
@@ -323,4 +332,3 @@ protected:
 
 }
 #endif
-

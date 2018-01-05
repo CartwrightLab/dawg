@@ -38,6 +38,7 @@ dawg::Dawg::Dawg(const std::string& in,
 , outFile(out)
 , reps(r)
 , seed(s)
+, mAlignments(reps)
 {
 
 }
@@ -101,14 +102,12 @@ void dawg::Dawg::run()
 		return;
 	}
 
-	// create sets of aligned sequences;
-    std::vector<dawg::alignment> alignments;
-	dawg::alignment aln;
-	kimura.pre_walk(aln);
+	// prepare sets of aligned sequences;
+	kimura.pre_walk(mAlignments.front());
 	for (unsigned int i = 0; i< reps; ++i) {
-		kimura.walk(aln);
-		alignments.insert(alignments.end(), aln);
-		write_aln(aln); // this would print the aln data out to std::cout or a file
+		kimura.walk(mAlignments.at(i));
+		// alignments.insert(alignments.end(), aln);
+		// write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
     }
 
 } // run
@@ -119,7 +118,7 @@ void dawg::Dawg::bark() const {
         "outFile: " << outFile << ", " <<
         "reps: " << reps << ", " <<
         "seed: " << seed << "\n";
-}
+} // bark
 
 unsigned int
 dawg::Dawg::rand(unsigned int a, unsigned int b) {

@@ -2,6 +2,8 @@
 # distutils: language = c++
 # distutils: sources = dawg.cpp
 
+from Bio import SeqIO
+
 #from cpython.array cimport array
 #from libcpp.list cimport list
 #from libcpp.array cimport array
@@ -40,8 +42,9 @@ cdef class PyDawg:
     cpdef void run(self):
         self._thisptr.run()
 
+    # Get the alignment string
     cpdef void bark(self):
-        self._thisptr.bark()
+        # self._thisptr.bark()
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)
