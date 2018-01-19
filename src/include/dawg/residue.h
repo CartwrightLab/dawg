@@ -2,7 +2,7 @@
 #ifndef DAWG_RESIDUE_H
 #define DAWG_RESIDUE_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 /// \brief Residue Model
@@ -91,13 +91,13 @@ protected:
 	data_type data_;
 };
 
-template<class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait>&
-operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
-	if(!o.good()) return o;
-	o << v.base();
-	return o;
-}
+// template<class CharType, class CharTrait>
+// std::basic_ostream<CharType, CharTrait>&
+// operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
+// 	if(!o.good()) return o;
+// 	o << v.base();
+// 	return o;
+// }
 
 class residue_exchange {
 public:
@@ -108,8 +108,16 @@ public:
 
 	typedef boost::sub_range< const char [64] > str_type;
 
+	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
+
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
+
+		std::cout << "type: " << type << 
+		", code: " << code << ", rna: " << rna << ", lowercase: " <<
+		lowercase << ", markins: " << markins << ", keepempty: " << keepempty << std::endl;
+
+
 		static constexpr char sIns[] = "-+";
 		// table for going from base->char
 		// TODO: Allow codons to be translated into aa
@@ -167,10 +175,10 @@ public:
 		keepempty_ = keepempty;
 		lowercase_ = lowercase;
 		rna_ = rna;
-
-		type_ = type; // set sequence type NA, AA, or CODON
+		type_ = type; // set sequence type DNA, AA, or CODON
 		nuc_ = ((rna) ? MODRNA : MODDNA) | static_cast<unsigned int>((lowercase) ? 1 : 0);
 		code_ = code;
+		
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
 
@@ -310,8 +318,6 @@ public:
 	void append_ins(std::string &ss) const {
 		return (this->*do_op_appendi)(ss);
 	}
-
-	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
 
 	inline static const char* get_protein_code(unsigned int code) {
 		static constexpr char s[] =
