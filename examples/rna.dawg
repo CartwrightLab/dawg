@@ -1,14 +1,27 @@
 # Test rna evaluationary models
 
 Output.Rna = 1
+Output.lowercase = 1
+Output.markins = 1
+Output.keepempty = 1
 Tree.Tree = "(A:0.3, B:0.2)C;"
 Tree.Scale = 0.99999
 Root.Length = 100
 Root.Code = 2
-Root.Seq = "AATGCTTTTTTTTTTGGCCAA"
+Root.Seq = "AATGCTTTTTTTAAGCAAATGGCCAA"
 Sim.Reps = 4
 Sim.Seed = 42
 Root.Seg = 0
+
+[Indel]
+Params.Ins = 1.039000, 50
+Model.Ins = "GEO"
+Rate.Ins = 0.01
+Max.Ins = 50.0
+Params.Del = 1.039000, 50
+Model.Del = "POWER-LAW"
+Rate.Del = 0.01
+Max.Del = 50.0
 
 Subst.Model = "gtr"
 Subst.Freqs  = 0.2, 0.3, 0.3, 0.2

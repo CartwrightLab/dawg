@@ -110,13 +110,17 @@ public:
 
 	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
 
+	template <typename F, typename L>
+	void echo(F f, L l) const {
+		std::cout << "File: " << f << ", Line: " << l <<
+		", type: " << type_ << 
+		", code: " << code_ << ", rna: " << rna_ << ", lowercase: " <<
+		lowercase_ << ", markins: " << markins_ << ", keepempty: " << keepempty_ <<
+		", nuc: " << nuc_ << std::endl;
+	}
+
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
-
-		std::cout << "type: " << type << 
-		", code: " << code << ", rna: " << rna << ", lowercase: " <<
-		lowercase << ", markins: " << markins << ", keepempty: " << keepempty << std::endl;
-
 
 		static constexpr char sIns[] = "-+";
 		// table for going from base->char
@@ -171,6 +175,8 @@ public:
 			39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
 		};
 
+		echo(__FILE__, __LINE__);
+
 		markins_ = markins;
 		keepempty_ = keepempty;
 		lowercase_ = lowercase;
@@ -178,7 +184,9 @@ public:
 		type_ = type; // set sequence type DNA, AA, or CODON
 		nuc_ = ((rna) ? MODRNA : MODDNA) | static_cast<unsigned int>((lowercase) ? 1 : 0);
 		code_ = code;
-		
+
+		echo(__FILE__, __LINE__);
+
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
 
