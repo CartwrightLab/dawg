@@ -5,15 +5,6 @@
  *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-/// \brief Residue Model
-/// create function
-// sequence type
-// creating a root
-// random residues
-// evolve residues
-// constant or variable residue widths
-// indel widths as well?
-
 #ifndef __STDC_CONSTANT_MACROS
 #	define __STDC_CONSTANT_MACROS 1
 #endif
@@ -35,6 +26,10 @@
 namespace dawg {
 
 namespace details {
+
+///////////////////////////////////////////////////////////
+/// \brief Aligned Sequence
+///////////////////////////////////////////////////////////
 struct aligned_sequence {
 	std::string label;
 	std::string seq;
@@ -50,6 +45,16 @@ struct alignment : public std::vector<details::aligned_sequence> {
 	int seq_type;
 };
 
+///////////////////////////////////////////////////////////
+/// \brief Residue model
+///	\brief Create function
+/// \brief Sequence type
+/// \brief Creating a root
+/// \brief Random residues
+/// \brief Evolve residues
+/// \brief Constant or variable residue widths
+/// \brief Indel widths as well?
+///////////////////////////////////////////////////////////
 class residue {
 public:
 	typedef boost::uint64_t data_type;
@@ -99,6 +104,10 @@ protected:
 // 	return o;
 // }
 
+///////////////////////////////////////////////////////////
+/// \brief Residue Exchange
+/// Defines the model and coding functions for the residue
+///////////////////////////////////////////////////////////
 class residue_exchange {
 public:
 	enum { MODDNA = 0, MODRNA=2, MODAA=4, MODCOD=6, MODEND=30};
@@ -109,15 +118,6 @@ public:
 	typedef boost::sub_range< const char [64] > str_type;
 
 	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
-
-	template <typename F, typename L>
-	void echo(F f, L l) const {
-		std::cout << "File: " << f << ", Line: " << l <<
-		", type: " << type_ << 
-		", code: " << code_ << ", rna: " << rna_ << ", lowercase: " <<
-		lowercase_ << ", markins: " << markins_ << ", keepempty: " << keepempty_ <<
-		", nuc: " << nuc_ << std::endl;
-	}
 
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
@@ -175,8 +175,6 @@ public:
 			39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,-1,-1,-1,-1,-1
 		};
 
-		echo(__FILE__, __LINE__);
-
 		markins_ = markins;
 		keepempty_ = keepempty;
 		lowercase_ = lowercase;
@@ -184,8 +182,6 @@ public:
 		type_ = type; // set sequence type DNA, AA, or CODON
 		nuc_ = ((rna) ? MODRNA : MODDNA) | static_cast<unsigned int>((lowercase) ? 1 : 0);
 		code_ = code;
-
-		echo(__FILE__, __LINE__);
 
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
@@ -195,9 +191,7 @@ public:
 				cs_decode_ = &mods[nuc_*64];
 				break;
 			case AA:
-				// if (rna_) cs_decode_ = &mods[nuc_*64];
-				// else
-					cs_decode_ = &mods[(MODAA + (lowercase ? 1 : 0))*64];
+				cs_decode_ = &mods[(MODAA + (lowercase ? 1 : 0))*64];
 				break;
 			case CODON:
 				cs_decode_ = &mods[(MODCOD+code_)*64];
@@ -238,6 +232,10 @@ public:
 		return static_cast<residue::data_type>(ret);
 	}
 
+	///////////////////////////////////////////////////////////
+	/// \brief encode
+	/// \param root_seq The root sequence to encode
+	///////////////////////////////////////////////////////////
 	inline sequence encode(const std::string &root_seq) const {
 		static const auto getCodonNumber = []
 			(const char a, const char b, const char c)->unsigned int {
@@ -276,13 +274,13 @@ public:
 		return cs_ins_[0];
 	}
 
-	// codon number -> cod64
+	/// \brief codon number -> cod64
 	static inline char codon_to_cod64(unsigned int p) {
 		const char s[] = "ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		return s[p&63];
 	}
 
-	// cod64 -> codon number
+	/// \brief cod64 -> codon number
 	static inline unsigned int cod64_to_codon(char c) {
 		static constexpr char a[] = {
 			// cod64 -> codon number
@@ -294,7 +292,7 @@ public:
 		return (c >= '0') ? a[c-'0'] : -1;
 	}
 
-	// codon number -> triplet
+	/// \brief codon number -> triplet
 	static inline unsigned int codon_to_triplet(unsigned int p, int type=0) {
 		const char ss[] = "TCAGtcagUCAGucag";
 		const char *s = &ss[(type&3)*4];
@@ -304,7 +302,7 @@ public:
 		return u;
 	}
 
-	// triplet -> codon number
+	/// \brief triplet -> codon number
 	static inline unsigned int triplet_to_codon(unsigned int p) {
 		// randomly cryptic code:
 		// In ncbi descriptions of genetic code,
@@ -327,6 +325,7 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
+	/// \brief get the protein code from a genetic code
 	inline static const char* get_protein_code(unsigned int code) {
 		static constexpr char s[] =
 			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
@@ -389,5 +388,5 @@ protected:
 	const char *cs_decode_, *cs_ins_, *cs_encode_;
 };
 
-}
+} // namespace dawg
 #endif

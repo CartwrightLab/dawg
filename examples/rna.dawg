@@ -3,12 +3,12 @@
 Output.Rna = 1
 Output.lowercase = 1
 Output.markins = 1
-Output.keepempty = 1
+Output.keepempty = 0
 Tree.Tree = "(A:0.3, B:0.2)C;"
 Tree.Scale = 0.99999
 Root.Length = 100
 Root.Code = 2
-Root.Seq = "AATGCTTTTTTTAAGCAAATGGCCAA"
+Root.Seq = "ACGTACGT"
 Sim.Reps = 4
 Sim.Seed = 42
 Root.Seg = 0
