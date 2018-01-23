@@ -1,35 +1,37 @@
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
+
+#include <cstdint>
 
 #include <dawg/mutt.h>
 
 using namespace dawg;
- 
+
 // random zeta distribution with slope z > 1.0
 #ifdef DAWG_USE_ZETA_LUC
 // Devroye Luc (1986) Non-uniform random variate generation.
 //     Springer-Verlag: Berlin. p551
-boost::uint32_t dawg::mutt::rand_zeta(double z) {
+std::uint32_t dawg::mutt::rand_zeta(double z) {
 	double b = pow(2.0, z-1.0);
 	double x,t;
 	do {
 	 x = floor(pow(rand_real(), -1.0/(z-1.0)));
 	 t = pow(1.0+1.0/x, z-1.0);
 	} while( rand_real()*x*(t-1.0)*b > t*(b-1.0));
-	return static_cast<boost::uint32_t>(x);
+	return static_cast<std::uint32_t>(x);
 }
 #else
 // rejection-inversion method of H\"ormann and Derflinger (1996)
 // idea borrowed from Indelible
 // optimizations for usage in Dawg
-boost::uint32_t dawg::mutt::rand_zeta(double z) {
+std::uint32_t dawg::mutt::rand_zeta(double z) {
 	double z1 = 1.0-z;
 	double z2 = 1.0/z1;
 	double s = 2.0-zHi(zH(1.5,z1,z2)-pow(2.0,-z),z1,z2);
 	double Him = zH(4294967296.5,z1,z2);
 	double Hx0 = zH(0.5,z1,z2)-1.0-Him;
-	
+
 	double U, X,K;
 	for(;;) {
 		U = rand_real();
@@ -41,7 +43,7 @@ boost::uint32_t dawg::mutt::rand_zeta(double z) {
 		if(U > zH(K-0.5,z1,z2)-pow(K,-z))
 			break;
 	}
-	return static_cast<boost::uint32_t>(K);
+	return static_cast<std::uint32_t>(K);
 }
 #endif
 
@@ -70,7 +72,7 @@ double dawg::mutt::rand_gamma(double a, double b) {
 		v = v * v * v;
 		u = rand_real();
 		x *= x;
-		if (u < 1 - 0.0331 * x * x) 
+		if (u < 1 - 0.0331 * x * x)
 			break;
 		if (log(u) < 0.5 * x + d * (1 - v + log(v)))
 			break;
@@ -120,7 +122,7 @@ static constexpr double ytab[128] = {
 
 /* tabulated values for 2^24 times x[i]/x[i+1],
  * used to accept for U*x[i+1]<=x[i] without any floating point operations */
-static constexpr boost::uint32_t ktab[128] = {
+static constexpr std::uint32_t ktab[128] = {
   0, 12590644, 14272653, 14988939,
   15384584, 15635009, 15807561, 15933577,
   16029594, 16105155, 16166147, 16216399,
@@ -201,12 +203,12 @@ static constexpr double wtab[128] = {
  /* position of right-most step */
 #define PARAM_R 3.44428647676
 double dawg::mutt::rand_normal(double sigma) {
-	boost::uint32_t i, j;
+	std::uint32_t i, j;
 	int sign;
 	double x, y;
 
 	for(;;) {
-		boost::uint32_t k = rand_uint32();
+		std::uint32_t k = rand_uint32();
 		i = (k & 0xFF);
 		j = (k >> 8) & 0xFFFFFF;
 
@@ -232,7 +234,7 @@ double dawg::mutt::rand_normal(double sigma) {
 		if (y < exp(-0.5 * x * x))
 			break;
     }
-	return sign * sigma * x;	
+	return sign * sigma * x;
 }
 
 /************************************************************
@@ -373,8 +375,8 @@ const double dawg::mutt::ef[256] = {
 	2.14596774371890710e-003, 1.53629978030157260e-003, 9.67269282327174320e-004, 4.54134353841496600e-004
 };
 
-#define U UINT64_C
-const boost::uint64_t dawg::mutt::ek[256] = {
+#define U static_cast<std::uint64_t>
+const std::uint64_t dawg::mutt::ek[256] = {
 	U(0xe290a13924be2800), U(0x0000000000000000), U(0x9beadebce18ae800), U(0xc377ac71f9e02000),
 	U(0xd4ddb99075853000), U(0xde893fb8ca23d800), U(0xe4a8e87c4328d800), U(0xe8dff16ae1cb8000),
 	U(0xebf2deab58c59800), U(0xee49a6e8b9637800), U(0xf0204efd64ee4800), U(0xf19bdb8ea3c1b000),
