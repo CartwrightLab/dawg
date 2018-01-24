@@ -2,16 +2,10 @@
 #ifndef DAWG_DETAILS_MUTT_GEN_H
 #define DAWG_DETAILS_MUTT_GEN_H
 /****************************************************************************
- *  Copyright (C) 2012 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2012-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-#ifndef __STDC_CONSTANT_MACROS
-#	define __STDC_CONSTANT_MACROS 1
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#	define __STDC_LIMIT_MACROS 1
-#endif
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <utility>
 
 namespace dawg { namespace details {
@@ -23,7 +17,7 @@ http://wwwmaths.anu.edu.au/~brent/ftp/random/xorgens305.tar.gz
 */
 
 struct xorgen4096_32_mutt_gen {
-	typedef boost::uint32_t native_t;
+	typedef std::uint32_t native_t;
 	struct _state_t {
 		native_t y[128];
 		native_t w;
@@ -34,15 +28,15 @@ struct xorgen4096_32_mutt_gen {
 	xorgen4096_32_mutt_gen() {
 		seed(0);
 	}
-	
+
 	inline native_t rand_native() { return rand_uint32(); }
 
-	inline boost::uint64_t rand_uint64() {
+	inline std::uint64_t rand_uint64() {
 		native_t a = rand_uint32();
 		native_t b = rand_uint32();
 		return to_uint64(a,b);
 	}
-		
+
 	inline native_t rand_uint32() {
 		native_t t = y[i&127];
 		native_t v = y[(i+33)&127];
@@ -53,9 +47,9 @@ struct xorgen4096_32_mutt_gen {
 		w += 0x61c88647;
 		return v + (w^(w>>16));
 	}
-	
+
 	inline double rand_real()   { return to_double52(rand_uint64()); }
-	
+
 	inline state_t state() const {
 		state_t tmp;
 		std::copy(&y[0], &y[128], &tmp.y[0]);
@@ -68,8 +62,8 @@ struct xorgen4096_32_mutt_gen {
 		w = s.w;
 		i = s.i&127;
 	}
-	
-	inline void seed(boost::uint32_t xx) {
+
+	inline void seed(std::uint32_t xx) {
 		i = 0;
 		w = 0x61c88647;
 		native_t x = 0x6A7BCC42;
@@ -92,9 +86,9 @@ struct xorgen4096_32_mutt_gen {
 		for(int a=0;a<512;++a)
 			rand_native();
 	}
-	
+
 	template<int N>
-	inline void seed(boost::uint32_t (&xx)[N]) {
+	inline void seed(std::uint32_t (&xx)[N]) {
 		seed(&xx[0],&xx[N]);
 	}
 	template<typename _It>
@@ -123,7 +117,7 @@ struct xorgen4096_32_mutt_gen {
 		for(int a=0;a<512;++a)
 			rand_native();
 	}
-	
+
 private:
 	native_t y[128];
 	native_t w;

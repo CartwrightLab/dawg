@@ -2,15 +2,14 @@
 #ifndef DAWG_DAWG_INDEL_H
 #define DAWG_DAWG_INDEL_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #include <iostream>
 #include <algorithm>
 #include <vector>
 #include <limits>
-
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 #include <dawg/utils/specfunc.h>
 #include <dawg/utils.h>
@@ -23,18 +22,18 @@ namespace dawg {
 class indel_model {
 public:
 	typedef std::vector<double> params_type;
-	
+
 	indel_model() {
 		std::vector<double> a;
 		a.push_back(0.0);
 		a.push_back(1.0);
 		sample.create_inplace(a);
 	}
-	
+
 	inline double meansize() const { return mean_size; }
 	inline double rate() const { return total_rate; }
 	inline double upstream_rate() const { return total_upstream_rate; }
-	
+
 	// std::numeric_limits<uint32>::max()
 	template<typename It1, typename It2, typename It3>
 	bool create(It1 first_n, It1 last_n, It2 first_r, It2 last_r,
@@ -45,7 +44,7 @@ public:
 			std::string("yule-simon"), std::string("lavalette")
 		};
 
-		if(max_size > std::numeric_limits<boost::uint32_t>::max())
+		if(max_size > std::numeric_limits<std::uint32_t>::max())
 			return DAWG_ERROR("maximum indel size is out of range");
 	    if(first_n == last_n)
 	    	return DAWG_ERROR("invalid indel model; no model type specified");
@@ -82,7 +81,7 @@ public:
 				break;
 			case 2: // zeta power-law model
 			case 3:
-			case 4: 
+			case 4:
 				okay = create_zeta(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			case 5: // yule-simon model
@@ -98,12 +97,12 @@ public:
 				return DAWG_ERROR("indel model creation failed");
 			// cycle "name" as needed
 			if(++itn == last_n)
-				itn = first_n;		
+				itn = first_n;
 		}
 		// Calculate mean
 		double m = 0.0, w = 0.0;
 		std::vector<double> upstream_dist(mix_dist.size(),0.0);
-		for(boost::uint32_t x = static_cast<boost::uint32_t>(mix_dist.size()-1);
+		for(std::uint32_t x = static_cast<std::uint32_t>(mix_dist.size()-1);
 				x != 0; --x) {
 			m += mix_dist[x]*x;
 			w += mix_dist[x];
@@ -116,22 +115,22 @@ public:
 		total_upstream_rate = total_rate*(mean_size-1.0);
 		sample.create_inplace(mix_dist);
 		sample_upstream.create_inplace(upstream_dist);
-		
+
 		return true;
 	}
-		
-	boost::uint32_t operator()(mutt &m) const {
+
+	std::uint32_t operator()(mutt &m) const {
 		return sample(m.rand_uint64());
 	}
-	
-	boost::uint32_t sample_upstream_overlap(mutt &m) const {
+
+	std::uint32_t sample_upstream_overlap(mutt &m) const {
 		return sample_upstream(m.rand_uint64());
-	}	
+	}
 private:
 	template<typename It>
 	inline bool create_geo(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; geo requires 1 parameter");
 		double p = *first++;
 		if(p >= 1.0)
@@ -140,7 +139,7 @@ private:
 			return DAWG_ERROR("Invalid indel model; geo parameter '" << p
 				<< "' must be positive.");
 		double d = p;
-		for(boost::uint32_t n=1; n <= max_size; ++n) {
+		for(std::uint32_t n=1; n <= max_size; ++n) {
 			mix_dist[n] += f*d;
 			d *= (1.0-p);
 		}
@@ -150,29 +149,29 @@ private:
 	template<typename It>
 	inline bool create_zeta(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; zeta requires 1 parameter");
 		double z = *first++;
-		if(z <= 1.0) 
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; zeta parameter '" << z
 				<< "' must be > 1");
 		double zz = zeta(z);
-		for(boost::uint32_t n=1; n <= max_size; ++n) {
+		for(std::uint32_t n=1; n <= max_size; ++n) {
 			mix_dist[n] += f*pow(1.0*n,-z)/zz;
 		}
 		return true;
 	}
-	
+
 	template<typename It>
 	inline bool create_yule(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; yule requires 1 parameter");
 		double z = *first++;
-		if(z <= 1.0) 
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; yule parameter '" << z
 				<< "' must be > 1");
-		for(boost::uint32_t n=1; n <= max_size; ++n) {
+		for(std::uint32_t n=1; n <= max_size; ++n) {
 			mix_dist[n] += f*(z-1.0)*beta(n,z);
 		}
 		return true;
@@ -181,32 +180,32 @@ private:
 	template<typename It>
 	inline bool create_lavalette(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
 		double z = *first++;
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
- 		double dm = *first++; 
-		if(z <= 1.0) 
+ 		double dm = *first++;
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; lavalette slope '" << z
 				<< "' must be > 1");
 		if(dm <= 1.0)
 			return DAWG_ERROR("Invalid indel model; lavalette max '" << dm
 				<< "' must be > 1");
-		boost::uint32_t m = static_cast<boost::uint32_t>(dm);
+		std::uint32_t m = static_cast<std::uint32_t>(dm);
 		// find normalization curve
 		double d=0.0;
-		for(boost::uint32_t n=m; n != 0; --n) {
+		for(std::uint32_t n=m; n != 0; --n) {
 			d += pow(1.0*m*n/(m-n+1.0),-z);
 		}
 
-		for(boost::uint32_t n=1; n <= m && n <= max_size; ++n) {
+		for(std::uint32_t n=1; n <= m && n <= max_size; ++n) {
 			mix_dist[n] += f*pow(1.0*m*n/(m-n+1.0),-z)/d;
 		}
 		return true;
 	}
 
-	
+
 	template<typename It>
 	inline bool create_user(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
@@ -217,7 +216,7 @@ private:
 		// sum up parameters
 		for(;it != last && *it >= 0.0;++it)
 			d += *it;
-		for(boost::uint32_t n=1; first != it && n <= max_size; ++first,++n)
+		for(std::uint32_t n=1; first != it && n <= max_size; ++first,++n)
 			mix_dist[n] += f*(*first)/d;
 
 		// skip the '-1' terminator if it exists
@@ -226,13 +225,12 @@ private:
 		first = it;
 		return true;
 	}
-	
+
 	alias_table sample, sample_upstream;
 	double total_rate, total_upstream_rate;
 	double mean_size;
 };
 
 } /* namespace dawg */
- 
+
 #endif /* DAWG_INDEL_H */
- 
