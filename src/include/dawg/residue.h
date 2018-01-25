@@ -22,9 +22,9 @@ public:
 	typedef std::uint64_t data_type;
 
 
-	static constexpr data_type base_mask      =  static_cast<std::uint64_t>(0x00000000000000FF);
-	static constexpr data_type branch_mask    =  static_cast<std::uint64_t>(0x0000FFFFFFFFFF00);
-	static constexpr data_type rate_mask	  =  static_cast<std::uint64_t>(0xFFFF000000000000);
+	static constexpr data_type base_mask      =  0x00000000000000FFull;
+	static constexpr data_type branch_mask    =  0x0000FFFFFFFFFF00ull;
+	static constexpr data_type rate_mask	  =  0xFFFF000000000000ull;
 	static constexpr data_type rate_shift     =  48;
 	static constexpr data_type base_bit_width =  8;
 	static constexpr data_type branch_inc     =  0x100;
