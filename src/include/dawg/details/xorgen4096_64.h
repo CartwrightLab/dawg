@@ -2,10 +2,9 @@
 #ifndef DAWG_DETAILS_MUTT_GEN_H
 #define DAWG_DETAILS_MUTT_GEN_H
 /****************************************************************************
- *  Copyright (C) 2012-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2012 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <cstdint>
 #include <utility>
 
 namespace dawg { namespace details {
@@ -17,7 +16,7 @@ http://wwwmaths.anu.edu.au/~brent/ftp/random/xorgens305.tar.gz
 */
 
 struct xorgen4096_64_mutt_gen {
-	typedef std::uint64_t native_t;
+	typedef boost::uint64_t native_t;
 	struct _state_t {
 		native_t y[64];
 		native_t w;
@@ -31,8 +30,8 @@ struct xorgen4096_64_mutt_gen {
 
 	inline native_t rand_native() { return rand_uint64(); }
 
-	inline std::uint32_t rand_uint32() {
-		return static_cast<std::uint32_t>(rand_uint64() >> 32);
+	inline boost::uint32_t rand_uint32() {
+		return static_cast<boost::uint32_t>(rand_uint64() >> 32);
 	}
 
 	inline native_t rand_uint64() {
@@ -42,7 +41,7 @@ struct xorgen4096_64_mutt_gen {
 		v ^= v << 27; v ^= v >> 29; v ^= t;
 		y[i&63] = v;
 		i += 1;
-		w += static_cast<std::uint64_t>(0x61C8864680B583EB);
+		w += 0x61C8864680B583EBull;
 		return v + (w^(w>>27));
 	}
 
@@ -61,10 +60,10 @@ struct xorgen4096_64_mutt_gen {
 		i = s.i&63;
 	}
 
-	inline void seed(std::uint32_t xx) {
+	inline void seed(boost::uint32_t xx) {
 		i = 0;
-		w = static_cast<std::uint64_t>(0x61C8864680B583EB);
-		native_t x = 0x6A7BCC427F295846);
+		w = 0x61C8864680B583EBull;
+		native_t x = 0x6A7BCC427F295846ull;
 		// Fill array using xorshift_64's algorithm
 		for(int a=0;a<64;++a) {
 			x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
@@ -86,18 +85,18 @@ struct xorgen4096_64_mutt_gen {
 	}
 
 	template<int N>
-	inline void seed(std::uint32_t (&xx)[N]) {
+	inline void seed(boost::uint32_t (&xx)[N]) {
 		seed(&xx[0],&xx[N]);
 	}
 	template<typename _It>
 	inline void seed(_It first, _It last) {
 		i = 0;
-		w = static_cast<std::uint64_t>(0x61C8864680B583EB);
-		native_t x = static_cast<std::uint64_t>(0x6A7BCC427F295846);
+		w = 0x61C8864680B583EBull;
+		native_t x = 0x6A7BCC427F295846ull;
 		// Fill array using xorshift_64's algorithm
 		for(int a=0;a<64;++a) {
 			x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-			w += static_cast<std::uint64_t>(0x61C8864680B583EB);
+			w += 0x61C8864680B583EBull;
 			y[a] = x + (w^(w>>27));
 		}
 		// Merge seeds into array
@@ -107,7 +106,7 @@ struct xorgen4096_64_mutt_gen {
 				continue;
 			for(int a=0;a<64;++a) {
 				x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-				w += static_cast<std::uint64_t>(0x61C8864680B583EB);
+				w += 0x61C8864680B583EBull;
 				y[a] ^= x + (w^(w>>27));
 			}
 		}
