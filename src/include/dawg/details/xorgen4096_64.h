@@ -64,11 +64,11 @@ struct xorgen4096_64_mutt_gen {
 	inline void seed(std::uint32_t xx) {
 		i = 0;
 		w = static_cast<std::uint64_t>(0x61C8864680B583EB);
-		native_t x = static_cast<std::uint64_t>(0x6A7BCC427F295846);
+		native_t x = 0x6A7BCC427F295846);
 		// Fill array using xorshift_64's algorithm
 		for(int a=0;a<64;++a) {
 			x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-			w += static_cast<std::uint64_t>(0x61C8864680B583EB);
+			w += 0x61C8864680B583EBull;
 			y[a] = x + (w^(w>>27));
 		}
 		// Merge seed into array
@@ -76,7 +76,7 @@ struct xorgen4096_64_mutt_gen {
 			x = static_cast<native_t>(xx);
 			for(int a=0;a<64;++a) {
 				x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-				w += static_cast<std::uint64_t>(0x61C8864680B583EB);
+				w += 0x61C8864680B583EBull;
 				y[a] ^= x + (w^(w>>27));
 			}
 		}
