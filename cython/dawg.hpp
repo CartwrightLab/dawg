@@ -7,6 +7,7 @@
 #include <dawg/mutt.h>
 #include <dawg/trick.h>
 #include <dawg/residue.h>
+#include <dawg/matic.h>
 
 namespace dawg {
 
@@ -31,6 +32,8 @@ private:
     std::vector<dawg::alignment> mAlignments;
     mutt rng;
     trick mInput;
+    matic_section mMaticSection;
+
 
     void printAlignmentInfo(const dawg::alignment &aln) const;
 }; // class Dawg

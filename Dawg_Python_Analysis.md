@@ -119,3 +119,30 @@ rng.rand(0, 100)
   - Working on an example that uses Python methods to parse DAWG file
   and map directly to the DAWG trick/matic classes
   - Could try integrating with SISRS?
+
+
+
+### General Python Notes
+ - list comprehension syntax: [ expression for item in list if conditional ]
+
+ - generator expressions are functions that yield their iterators ...
+
+
+
+```python
+# The original example I got working
+# Must use bytes on the string from Cython -> CPP (Cython book)
+# donovan = pd.PyDawg(b"../examples/basic-dna.dawg", b"fasta:-", 10, 212121)
+# donovan.run()
+
+# PyDawg constructor can take in Tricks, Walks, and Bones
+# akita = pd.pd(
+# DawgBuilder(
+#     Trick(name="BasicDnaExample",
+#         Segments(name="__default__", inheritsFrom="LUCA",
+#             (tree_tree="((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);",
+#             root_length=1000, subst_model='hky',
+#             subst_freqs=[0.2, 0.3, 0.3, 0.2],
+#             subst_params=[0.2, 1.0], sim_reps=10))),
+#     Walk(), Bone("fasta:-")))
+```

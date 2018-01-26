@@ -12,9 +12,12 @@ from libcpp.string cimport string
 
 cdef extern from "dawg.hpp" namespace "dawg":
     cdef cppclass Dawg:
-        Dawg()
-        Dawg(unsigned int)
-        Dawg(string, string, unsigned int, unsigned int)
+        # Dawg()
+        # Dawg(unsigned int)
+        # Dawg(string, string, unsigned int, unsigned int)
+
+        # del model, del rate, del param 1, del param 2, max del
+        Dawg(string, float, float, float, float)
         void run()
         void bark()
         unsigned int rand(unsigned int, unsigned int)
@@ -25,12 +28,15 @@ cdef class PyDawg:
     cdef Dawg *_thisptr
 
     def __cinit__(self, *args):
-        if len(args) == 4:
-            self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
-        elif len(args) == 1:
-            self._thisptr = new Dawg(args[0])
-        else:
-            self._thisptr = new Dawg()
+        # if len(args) == 4:
+        #     self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
+        # elif len(args) == 1:
+        #     self._thisptr = new Dawg(args[0])
+        # else:
+        #     self._thisptr = new Dawg()
+
+        if len(args) == 5:
+            self._thisptr = new Dawg(args[0], args[1], args[2], args[3], args[4])
 
         if self._thisptr == NULL:
             raise MemoryError()

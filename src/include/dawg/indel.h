@@ -23,18 +23,18 @@ namespace dawg {
 class indel_model {
 public:
 	typedef std::vector<double> params_type;
-	
+
 	indel_model() {
 		std::vector<double> a;
 		a.push_back(0.0);
 		a.push_back(1.0);
 		sample.create_inplace(a);
 	}
-	
+
 	inline double meansize() const { return mean_size; }
 	inline double rate() const { return total_rate; }
 	inline double upstream_rate() const { return total_upstream_rate; }
-	
+
 	// std::numeric_limits<uint32>::max()
 	template<typename It1, typename It2, typename It3>
 	bool create(It1 first_n, It1 last_n, It2 first_r, It2 last_r,
@@ -82,7 +82,7 @@ public:
 				break;
 			case 2: // zeta power-law model
 			case 3:
-			case 4: 
+			case 4:
 				okay = create_zeta(fraction, first_p, last_p, max_size, mix_dist);
 				break;
 			case 5: // yule-simon model
@@ -98,7 +98,7 @@ public:
 				return DAWG_ERROR("indel model creation failed");
 			// cycle "name" as needed
 			if(++itn == last_n)
-				itn = first_n;		
+				itn = first_n;
 		}
 		// Calculate mean
 		double m = 0.0, w = 0.0;
@@ -116,22 +116,22 @@ public:
 		total_upstream_rate = total_rate*(mean_size-1.0);
 		sample.create_inplace(mix_dist);
 		sample_upstream.create_inplace(upstream_dist);
-		
+
 		return true;
 	}
-		
+
 	boost::uint32_t operator()(mutt &m) const {
 		return sample(m.rand_uint64());
 	}
-	
+
 	boost::uint32_t sample_upstream_overlap(mutt &m) const {
 		return sample_upstream(m.rand_uint64());
-	}	
+	}
 private:
 	template<typename It>
 	inline bool create_geo(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; geo requires 1 parameter");
 		double p = *first++;
 		if(p >= 1.0)
@@ -150,10 +150,10 @@ private:
 	template<typename It>
 	inline bool create_zeta(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; zeta requires 1 parameter");
 		double z = *first++;
-		if(z <= 1.0) 
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; zeta parameter '" << z
 				<< "' must be > 1");
 		double zz = zeta(z);
@@ -162,14 +162,14 @@ private:
 		}
 		return true;
 	}
-	
+
 	template<typename It>
 	inline bool create_yule(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; yule requires 1 parameter");
 		double z = *first++;
-		if(z <= 1.0) 
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; yule parameter '" << z
 				<< "' must be > 1");
 		for(boost::uint32_t n=1; n <= max_size; ++n) {
@@ -181,13 +181,13 @@ private:
 	template<typename It>
 	inline bool create_lavalette(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
 		double z = *first++;
-		if(first == last) 
+		if(first == last)
 			return DAWG_ERROR("Invalid indel model; lavalette requires 2 parameter");
- 		double dm = *first++; 
-		if(z <= 1.0) 
+ 		double dm = *first++;
+		if(z <= 1.0)
 			return DAWG_ERROR("Invalid indel model; lavalette slope '" << z
 				<< "' must be > 1");
 		if(dm <= 1.0)
@@ -206,7 +206,7 @@ private:
 		return true;
 	}
 
-	
+
 	template<typename It>
 	inline bool create_user(double f, It &first, It last, unsigned int max_size,
 	                       std::vector<double> &mix_dist) {
@@ -226,13 +226,12 @@ private:
 		first = it;
 		return true;
 	}
-	
+
 	alias_table sample, sample_upstream;
 	double total_rate, total_upstream_rate;
 	double mean_size;
 };
 
 } /* namespace dawg */
- 
+
 #endif /* DAWG_INDEL_H */
- 
