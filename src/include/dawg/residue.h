@@ -180,7 +180,7 @@ public:
 		lowercase_ = lowercase;
 		rna_ = rna;
 		type_ = type; // set sequence type DNA, AA, or CODON
-		nuc_ = ((rna) ? MODRNA : MODDNA) | static_cast<unsigned int>((lowercase) ? 1 : 0);
+		nuc_ = ((rna) ? MODRNA : MODDNA) | ((lowercase) ? 1 : 0);
 		code_ = code;
 
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
