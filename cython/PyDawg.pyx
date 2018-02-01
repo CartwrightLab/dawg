@@ -18,6 +18,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
         Dawg(string, string, unsigned int, unsigned int)
 
         void run()
+        void printAlignments()
         void bark()
         unsigned int rand(unsigned int, unsigned int)
         void trickStats()
@@ -77,6 +78,9 @@ cdef class PyDawg:
 
     cpdef void run(self):
         self._thisptr.run()
+
+    cpdef void printAlignments(self):
+        self._thisptr.printAlignments()
 
     # Security?
     cpdef void bark(self):

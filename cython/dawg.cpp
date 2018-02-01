@@ -28,8 +28,8 @@ dawg::Dawg::Dawg(const unsigned int s)
 
 dawg::Dawg::Dawg(const std::map<std::string, std::vector<std::string>>,
 	const std::string& o,
-	const unsigned int r,
-	const unsigned int s)
+	const unsigned int seed,
+	const unsigned int reps)
 {
     using namespace std;
     cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
@@ -42,13 +42,12 @@ dawg::Dawg::Dawg(const std::map<std::string, std::vector<std::string>>,
 ///////////////////////////////////////////////////////////
 dawg::Dawg::Dawg(const std::string& in,
     const std::string& out,
-    const unsigned int r,
-    const unsigned int s)
+    const unsigned int seed,
+    const unsigned int reps)
 : mInFile(in)
 , mOutFile(out)
-, mRepetitions(r)
-, mSeed(s)
-, mAlignments(r)
+, mSeed(seed)
+, mRepetitions(reps)
 , mTrickster()
 {
 	bool ret = true;
@@ -58,7 +57,7 @@ dawg::Dawg::Dawg(const std::string& in,
 	if (pos != std::string::npos)
 		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
 	else
-		ret &= mTrickster.parse(in.begin(), in.end());
+		ret &= mTrickster.parse(mInFile.begin(), mInFile.end());
 
 	if(!ret)
 		std::cerr << "Failure to parse DAWG file\n";
@@ -75,29 +74,8 @@ void dawg::Dawg::run()
 	// process aliases
 	mTrickster.read_aliases();
 
-	dawg::global_options glopts;
-	glopts.read_section(mTrickster.data.front());
-
-	dawg::output write_aln;
-
-	if (!write_aln.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
-		mRepetitions - 1,
-		false, // false
-		false, // false
-		false)) // false
-	{
-		DAWG_ERROR("bad configuration");
-		return;
-	}
-	write_aln.set_blocks(glopts.output_block_head.c_str(),
-		glopts.output_block_between.c_str(),
-		glopts.output_block_tail.c_str(),
-		glopts.output_block_before.c_str(),
-		glopts.output_block_after.c_str()
-	);
-
 	std::vector<dawg::ma> configs;
-	if (!dawg::ma::from_trick(mTrickster, configs)) { // throwing error
+	if (!dawg::ma::from_trick(mTrickster, configs)) {
 		DAWG_ERROR("bad configuration");
 		return;
 	}
@@ -116,16 +94,51 @@ void dawg::Dawg::run()
 	}
 
 	// prepare sets of aligned sequences;
-	kimura.pre_walk(mAlignments.front());
-	cout << "mAlignments.size(): " << mAlignments.size() << endl;
+	dawg::alignment aln;
+	kimura.pre_walk(aln);
 	for (auto i = 0; i < mRepetitions; ++i) {
-		kimura.walk(mAlignments.at(i));
-		// alignments.insert(alignments.end(), aln);
-		write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
-		// printAlignmentInfo(mAlignments.at(i));
+		kimura.walk(aln);
+		// printAlignmentInfo(aln);
+		// mAlignments.at(i) = std::move(aln);
+		mAlignments.emplace_back(aln);
     }
 
 } // run
+
+///////////////////////////////////////////////////////////
+/// \brief this would print the aln data out to std::cout or a file
+///////////////////////////////////////////////////////////
+void dawg::Dawg::printAlignments() {
+	using namespace std;
+	dawg::output write_aln;
+
+	dawg::global_options glopts;
+	glopts.read_section(mTrickster.data.front());
+
+	if (!write_aln.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
+		mRepetitions - 1,
+		false, // false
+		false, // false
+		false)) // false
+	{
+		DAWG_ERROR("bad configuration");
+		return;
+	}
+	write_aln.set_blocks(glopts.output_block_head.c_str(),
+		glopts.output_block_between.c_str(),
+		glopts.output_block_tail.c_str(),
+		glopts.output_block_before.c_str(),
+		glopts.output_block_after.c_str()
+	);
+
+	for (auto a : mAlignments) {
+#if defined(DAWG_DEBUG)
+	printAlignmentInfo(a);
+#endif // defined
+	
+		write_aln(a);
+	}
+}
 
 void dawg::Dawg::bark() const {
     using namespace std;
@@ -164,6 +177,7 @@ void dawg::Dawg::trickStats() const {
 
 void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
 	using namespace std;
+	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
 	cout << "max_label_width: " << aln.max_label_width <<
 		"\nseq_type: " << aln.seq_type << "\n";
 	for (const auto &v : aln) {

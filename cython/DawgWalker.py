@@ -27,11 +27,49 @@ Tree.Tree = ((A:0.02):0.2,(B:0.02,C:0.02):0.2);
 Root.Segment = 2
 """
 
-puppy = pd.PyDawg(simulationSeed=1111, simulationReps=222, 
-    inputFile=trickString, outputFile='fasta:-', 
-    outputRna=False, outputLowercase=False, outputKeepEmpty=False, outputMarkins=True)
-puppy.run()
+trickString2 = \
+"""
+# Example: Simulate DNA evolution along a tree
+# See readme.txt for an explanation on the structure of an input file.
+# Simulation results are sent to stdout.
 
+## Tree Section ################################################################
+# 
+# Use a constant tree.
+
+[Tree]
+Tree = "((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);"
+
+## Subst Section ###############################################################
+#
+# Use an HKY substitution model with a transition rate of 2.0 and a transversion
+# rate of 1.0.  Allele frequences are 0.3 A, 0.2 C, 0.2 G, and 0.3 T.
+
+[Subst]
+Model = "HKY"
+Params = 2.0, 1.0 
+Freqs = 0.3, 0.2, 0.2, 0.3
+
+## Root Section ################################################################
+#
+# Simulate a sequence that is 1000 nt long.
+
+[Root]
+Length = 1000
+
+## Sim Section #################################################################
+#
+# Simulate 10 alignments
+
+[Sim]
+Reps = 10
+"""
+
+puppy = pd.PyDawg(simulationSeed=1111111, 
+    inputFile=trickString2, outputFile='basic_dna_cython_1111111.fasta', 
+    outputRna=False, outputLowercase=False, outputKeepEmpty=False, outputMarkins=True)
+puppy.run() # call walk from dawgcpp
+puppy.printAlignments()
 
 # segmentMap = {
 #     "segment1" : pd.Segment(inheritsFrom="__default__",

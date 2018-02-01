@@ -20,22 +20,23 @@ public:
 
     explicit Dawg(const std::map<std::string, std::vector<std::string>>,
         const std::string& o,
-        const unsigned int r,
-        const unsigned int s);
+        const unsigned int seed,
+        const unsigned int reps);
 
-    explicit Dawg(const std::string& in,
-        const std::string& o,
-        const unsigned int r,
-        const unsigned int s);
+    explicit Dawg(const std::string& infile,
+        const std::string& outfile,
+        const unsigned int seed,
+        const unsigned int reps);
     void run();
+    void printAlignments();
     void bark() const;
     unsigned int rand(unsigned int a, unsigned int b);
     void trickStats() const;
 private:
     std::string mInFile;
     std::string mOutFile;
-    std::size_t mRepetitions;
     unsigned int mSeed;
+    std::size_t mRepetitions;
     std::vector<dawg::alignment> mAlignments;
     mutt mRng;
     trick mTrickster;
