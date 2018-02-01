@@ -2,8 +2,6 @@
 # distutils: language = c++
 # distutils: sources = dawg.cpp
 
-from Bio import SeqIO
-
 #from cpython.array cimport array
 #from libcpp.list cimport list
 #from libcpp.array cimport array
@@ -27,16 +25,20 @@ cdef class PyDawg:
 
     cdef Dawg *_thisptr
 
-    def __cinit__(self, *args):
-        # if len(args) == 4:
-        #     self._thisptr = new Dawg(args[0], args[1], args[2], args[3])
-        # elif len(args) == 1:
-        #     self._thisptr = new Dawg(args[0])
-        # else:
-        #     self._thisptr = new Dawg()
-
-        if len(args) == 5:
-            self._thisptr = new Dawg(args[0], args[1], args[2], args[3], args[4])
+    def __cinit__(self,
+        simulationSeed=0,
+        simulationReps=10,
+        inputFile='',
+        outputFile='fasta:-',
+        outputSplit=False,
+        outputAppend=False,
+        outputLabel=False,
+        outputRna=False,
+        outputProtein=False,
+        outputLowercase=False,
+        outputKeepEmpty=False,
+        outputMarkins=False,
+        segmentMap={}):
 
         if self._thisptr == NULL:
             raise MemoryError()
@@ -48,9 +50,8 @@ cdef class PyDawg:
     cpdef void run(self):
         self._thisptr.run()
 
-    # Get the alignment string
+    # Security?
     cpdef void bark(self):
-        # self._thisptr.bark()
         pass
 
     cpdef unsigned int rand(self, a, b):
@@ -69,70 +70,64 @@ cdef class PyDawg:
         pass
 
     def help(self):
-        print("""
-dawg 2-current-rUnknown
-    Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>
+        print("Mind your own business")
 
-Usage:
-  dawg [options] trick-1.dawg trick-2.dawg ...
+class Segment:
 
-Allowed Options:
-  --version                    display version information
-  --help-trick                 display description of common control variables
-  --help                       display help message
-  -o [ --output ] arg          output to this file
-  --seed arg (=0)              PRNG seed
-  --reps arg (=0)              the number of alignments to generate
-  --split [=arg(=on)] (=null)  split output into separate files
-  --append [=arg(=on)] (=null) append output to file
-  --label [=arg(=on)] (=null)  label each simulation with a unique id
-  --arg-file arg               read arguments from file
+    def __init__(self,
+        name='',
+        inheritsFrom='',
+        substitutionModel='',
+        substitutionParameters=[],
+        substitutionFrequencies=[],
+        substitutionRateModel='',
+        substitutionRateParameters=[],
+        indelModelInsertion='',
+        indelParametersInsertion='',
+        indelRateInsertion='',
+        indelMaxInsertion='',
+        indelModelDeletion='',
+        indelParametersDeletion='',
+        indelRateDeletion='',
+        indelMaxDeletion='',
+        treeModel='',
+        treeParameters='',
+        treeTree='', # Newick format, I assume
+        treeScale='',
+        rootLength=0,
+        rootSequence='',
+        rootRates=[],
+        rootCode=0,
+        rootSegment=0,
+        rootGapOverlap=False):
+        
+        self.name = name
+        self.inheritsFrom = inheritsFrom
+        
+        self.substitutionModel = substitutionModel
+        self.substitutionParameters = substitutionParameters
+        self.substitutionFrequencies = substitutionFrequencies
+        self.substitutionRateModel = substitutionRateModel
+        self.substitutionRateParameters = substitutionRateParameters
 
-[REGULAR PARAMETERS]
-Subst.Model - The identifier of the substitution model, e.g. JC, GTR, WAG,
-  CODGY.
-Subst.Params - A list specifying the parameters of the substitution model.
-  Model Dependant.
-Subst.Freqs - A list specifying the stationary frequencies of nucleotides,
-  amino acids, or codons. Model Dependant.
-Subst.Rate.Model - The identifier of the heterogeneous rate model, e.g.
-  CONST, GAMMA, or ZERO.
-Subst.Rate.Params - The parameters of the rate model.  Model Dependant.
-Indel.Model.Ins - The identifiers of the insertion models, e.g. USER, GEO,
-  POWER-LAW.
-Indel.Params.Ins - The parameters of the insertion models.  Model Dependant.
-Indel.Rate.Ins - The per-substitution rates of the mixture of insertion models.
-Indel.Max.Ins - The maximum size of an insertion
-Indel.Model.Del - The identifiers of the deletion models, e.g. USER, GEO,
-  POWER-LAW.
-Indel.Params.Del - The parameters of the deletion models.  Model Dependant.
-Indel.Rate.Del - The per-substitution rates of the mixture of deletion models.
-Indel.Max.Del - The maximum size of a deletion.
-Tree.Model - The identifier of the tree model.
-Tree.Params - The parameters of the tree model.  Model Dependant.
-Tree.Tree - The tree or tree template.
-Tree.Scale - Branch-lengths are scaled by this number in the simulation.
-Root.Length - The length of a randomly generated root sequence.
-Root.Seq - A specific root sequence.
-Root.Rates - The heterogeneous rates of the root sequence.
-Root.Code - The genetic code used when simulating codon evolution.
-Root.Segment - The segment number that the root belongs too.
-Root.Gapoverlap - Allow upstream deletions to affect this segment.
-Output.Markins - Distinguish insertions from deletions.
-Output.Keepempty - Keep empty columns instead of deleting them in the alignment.
-Output.Lowercase - Use lowercase for sequence output.
-Output.Rna - Output an RNA sequence instead of a DNA sequence
+        self.indelModelInsertion = indelModelInsertion
+        self.indelParametersInsertion = indelParametersInsertion
+        self.indelRateInsertion = indelRateInsertion
+        self.indelMaxInsertion = indelMaxInsertion
+        
+        self.indelModelDeletion = indelModelDeletion
+        self.indelParametersDeletion = indelParametersDeletion
+        self.indelRateDeletion = indelRateDeletion
+        self.indelMaxDeletion = indelMaxDeletion
 
-[GLOBAL PARAMETERS]
-Output.Block.Head - Text that will be written to the beginning of output.
-Output.Block.Tail - Text that will be written to the end of output.
-Output.Block.Before - Text that will be written before every replicate.
-Output.Block.After - Text that will be written after every replicate.
-Output.Block.Between - Text that will be written between replicates.
-Output.File - Path to the output file.
-Output.Split - Output each replicate to its own file.
-Output.Append - Append results to existing file.
-Output.Label - label each simulation with a unique id.
-Sim.Reps - Number of simulation replicates.
-Sim.Seed - The seed of the random number generator
-        """)
+        self.treeModel = treeModel
+        self.treeParameters = treeParameters
+        self.treeTree = treeTree
+        self.treeScale = treeScale
+
+        self.rootLength = rootLength
+        self.rootSequence = rootSequence
+        self.rootRates = rootRates
+        self.rootCode = rootCode
+        self.rootSegment = rootSegment
+        self.rootGapOverlap = rootGapOverlap

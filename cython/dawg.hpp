@@ -32,7 +32,7 @@ private:
     std::vector<dawg::alignment> mAlignments;
     mutt rng;
     trick mInput;
-    matic_section mMaticSection;
+    // matic_section mMaticSection;
 
 
     void printAlignmentInfo(const dawg::alignment &aln) const;
