@@ -667,6 +667,7 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "PyDawg.pyx",
+  "stringsource",
 };
 
 /*--- Type declarations ---*/
@@ -680,7 +681,7 @@ struct __pyx_defaults {
   PyObject *__pyx_arg_rootRates;
 };
 
-/* "PyDawg.pyx":24
+/* "PyDawg.pyx":25
  *         void trickStats()
  * 
  * cdef class PyDawg:             # <<<<<<<<<<<<<<
@@ -699,7 +700,6 @@ struct __pyx_vtabstruct_6PyDawg_PyDawg {
   void (*run)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch);
   void (*bark)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch);
   unsigned int (*rand)(struct __pyx_obj_6PyDawg_PyDawg *, PyObject *, PyObject *, int __pyx_skip_dispatch);
-  void (*trickStats)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6PyDawg_PyDawg *__pyx_vtabptr_6PyDawg_PyDawg;
 
@@ -997,7 +997,6 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b, int __pyx_skip_dispatch); /* proto*/
-static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 
 /* Module declarations from 'libc.string' */
 
@@ -1005,6 +1004,7 @@ static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *
 
 /* Module declarations from 'PyDawg' */
 static PyTypeObject *__pyx_ptype_6PyDawg_PyDawg = 0;
+static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
 #define __Pyx_MODULE_NAME "PyDawg"
 int __pyx_module_is_main_PyDawg = 0;
 
@@ -1014,7 +1014,6 @@ static PyObject *__pyx_builtin_print;
 static const char __pyx_k_[] = "";
 static const char __pyx_k_a[] = "a";
 static const char __pyx_k_b[] = "b";
-static const char __pyx_k_s[] = "s";
 static const char __pyx_k_doc[] = "__doc__";
 static const char __pyx_k_run[] = "run";
 static const char __pyx_k_bark[] = "bark";
@@ -1025,9 +1024,9 @@ static const char __pyx_k_rand[] = "rand";
 static const char __pyx_k_self[] = "self";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_fasta[] = "fasta:-";
-static const char __pyx_k_label[] = "label";
 static const char __pyx_k_print[] = "print";
 static const char __pyx_k_PyDawg[] = "PyDawg";
+static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_module[] = "__module__";
 static const char __pyx_k_Segment[] = "Segment";
 static const char __pyx_k_prepare[] = "__prepare__";
@@ -1044,8 +1043,6 @@ static const char __pyx_k_outputFile[] = "outputFile";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_rootLength[] = "rootLength";
 static const char __pyx_k_segmentMap[] = "segmentMap";
-static const char __pyx_k_trickQueue[] = "trickQueue";
-static const char __pyx_k_trickStats[] = "trickStats";
 static const char __pyx_k_MemoryError[] = "MemoryError";
 static const char __pyx_k_outputLabel[] = "outputLabel";
 static const char __pyx_k_outputSplit[] = "outputSplit";
@@ -1087,6 +1084,7 @@ static PyObject *__pyx_n_s_a;
 static PyObject *__pyx_n_s_b;
 static PyObject *__pyx_n_s_bark;
 static PyObject *__pyx_n_s_doc;
+static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_kp_u_fasta;
 static PyObject *__pyx_kp_s_home_zach_code_dawg_cython_PyDa;
 static PyObject *__pyx_n_s_indelMaxDeletion;
@@ -1100,7 +1098,6 @@ static PyObject *__pyx_n_s_indelRateInsertion;
 static PyObject *__pyx_n_s_inheritsFrom;
 static PyObject *__pyx_n_s_init;
 static PyObject *__pyx_n_s_inputFile;
-static PyObject *__pyx_n_s_label;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_metaclass;
 static PyObject *__pyx_n_s_module;
@@ -1126,7 +1123,6 @@ static PyObject *__pyx_n_s_rootRates;
 static PyObject *__pyx_n_s_rootSegment;
 static PyObject *__pyx_n_s_rootSequence;
 static PyObject *__pyx_n_s_run;
-static PyObject *__pyx_n_s_s;
 static PyObject *__pyx_n_s_segmentMap;
 static PyObject *__pyx_n_s_self;
 static PyObject *__pyx_n_s_simulationReps;
@@ -1141,17 +1137,12 @@ static PyObject *__pyx_n_s_treeModel;
 static PyObject *__pyx_n_s_treeParameters;
 static PyObject *__pyx_n_s_treeScale;
 static PyObject *__pyx_n_s_treeTree;
-static PyObject *__pyx_n_s_trickQueue;
-static PyObject *__pyx_n_s_trickStats;
-static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_simulationSeed, CYTHON_UNUSED PyObject *__pyx_v_simulationReps, CYTHON_UNUSED PyObject *__pyx_v_inputFile, CYTHON_UNUSED PyObject *__pyx_v_outputFile, CYTHON_UNUSED PyObject *__pyx_v_outputSplit, CYTHON_UNUSED PyObject *__pyx_v_outputAppend, CYTHON_UNUSED PyObject *__pyx_v_outputLabel, CYTHON_UNUSED PyObject *__pyx_v_outputRna, CYTHON_UNUSED PyObject *__pyx_v_outputProtein, CYTHON_UNUSED PyObject *__pyx_v_outputLowercase, CYTHON_UNUSED PyObject *__pyx_v_outputKeepEmpty, CYTHON_UNUSED PyObject *__pyx_v_outputMarkins, CYTHON_UNUSED PyObject *__pyx_v_segmentMap); /* proto */
+static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_simulationSeed, PyObject *__pyx_v_simulationReps, PyObject *__pyx_v_inputFile, PyObject *__pyx_v_outputFile, CYTHON_UNUSED PyObject *__pyx_v_outputSplit, CYTHON_UNUSED PyObject *__pyx_v_outputAppend, CYTHON_UNUSED PyObject *__pyx_v_outputLabel, CYTHON_UNUSED PyObject *__pyx_v_outputRna, CYTHON_UNUSED PyObject *__pyx_v_outputProtein, CYTHON_UNUSED PyObject *__pyx_v_outputLowercase, CYTHON_UNUSED PyObject *__pyx_v_outputKeepEmpty, CYTHON_UNUSED PyObject *__pyx_v_outputMarkins, CYTHON_UNUSED PyObject *__pyx_v_segmentMap); /* proto */
 static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg_6PyDawg_8rand(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_a, PyObject *__pyx_v_b); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_10trickStats(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_12trick(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_s, PyObject *__pyx_v_kwargs); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_14outputHandler(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_16help(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_10help(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg___defaults__(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_pf_6PyDawg_7Segment___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name, PyObject *__pyx_v_inheritsFrom, PyObject *__pyx_v_substitutionModel, PyObject *__pyx_v_substitutionParameters, PyObject *__pyx_v_substitutionFrequencies, PyObject *__pyx_v_substitutionRateModel, PyObject *__pyx_v_substitutionRateParameters, PyObject *__pyx_v_indelModelInsertion, PyObject *__pyx_v_indelParametersInsertion, PyObject *__pyx_v_indelRateInsertion, PyObject *__pyx_v_indelMaxInsertion, PyObject *__pyx_v_indelModelDeletion, PyObject *__pyx_v_indelParametersDeletion, PyObject *__pyx_v_indelRateDeletion, PyObject *__pyx_v_indelMaxDeletion, PyObject *__pyx_v_treeModel, PyObject *__pyx_v_treeParameters, PyObject *__pyx_v_treeTree, PyObject *__pyx_v_treeScale, PyObject *__pyx_v_rootLength, PyObject *__pyx_v_rootSequence, PyObject *__pyx_v_rootRates, PyObject *__pyx_v_rootCode, PyObject *__pyx_v_rootSegment, PyObject *__pyx_v_rootGapOverlap); /* proto */
 static PyObject *__pyx_tp_new_6PyDawg_PyDawg(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -1162,7 +1153,7 @@ static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
 static PyObject *__pyx_codeobj__5;
 
-/* "PyDawg.pyx":28
+/* "PyDawg.pyx":29
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
@@ -1173,10 +1164,10 @@ static PyObject *__pyx_codeobj__5;
 /* Python wrapper */
 static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  CYTHON_UNUSED PyObject *__pyx_v_simulationSeed = 0;
-  CYTHON_UNUSED PyObject *__pyx_v_simulationReps = 0;
-  CYTHON_UNUSED PyObject *__pyx_v_inputFile = 0;
-  CYTHON_UNUSED PyObject *__pyx_v_outputFile = 0;
+  PyObject *__pyx_v_simulationSeed = 0;
+  PyObject *__pyx_v_simulationReps = 0;
+  PyObject *__pyx_v_inputFile = 0;
+  PyObject *__pyx_v_outputFile = 0;
   CYTHON_UNUSED PyObject *__pyx_v_outputSplit = 0;
   CYTHON_UNUSED PyObject *__pyx_v_outputAppend = 0;
   CYTHON_UNUSED PyObject *__pyx_v_outputLabel = 0;
@@ -1197,7 +1188,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
     values[2] = ((PyObject *)__pyx_kp_u_);
     values[3] = ((PyObject *)__pyx_kp_u_fasta);
 
-    /* "PyDawg.pyx":33
+    /* "PyDawg.pyx":34
  *         inputFile='',
  *         outputFile='fasta:-',
  *         outputSplit=False,             # <<<<<<<<<<<<<<
@@ -1206,7 +1197,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[4] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":34
+    /* "PyDawg.pyx":35
  *         outputFile='fasta:-',
  *         outputSplit=False,
  *         outputAppend=False,             # <<<<<<<<<<<<<<
@@ -1215,7 +1206,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[5] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":35
+    /* "PyDawg.pyx":36
  *         outputSplit=False,
  *         outputAppend=False,
  *         outputLabel=False,             # <<<<<<<<<<<<<<
@@ -1224,7 +1215,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[6] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":36
+    /* "PyDawg.pyx":37
  *         outputAppend=False,
  *         outputLabel=False,
  *         outputRna=False,             # <<<<<<<<<<<<<<
@@ -1233,7 +1224,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[7] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":37
+    /* "PyDawg.pyx":38
  *         outputLabel=False,
  *         outputRna=False,
  *         outputProtein=False,             # <<<<<<<<<<<<<<
@@ -1242,7 +1233,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[8] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":38
+    /* "PyDawg.pyx":39
  *         outputRna=False,
  *         outputProtein=False,
  *         outputLowercase=False,             # <<<<<<<<<<<<<<
@@ -1251,20 +1242,20 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
  */
     values[9] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":39
+    /* "PyDawg.pyx":40
  *         outputProtein=False,
  *         outputLowercase=False,
  *         outputKeepEmpty=False,             # <<<<<<<<<<<<<<
  *         outputMarkins=False,
- *         segmentMap={}):
+ *         segmentMap=dict()):
  */
     values[10] = ((PyObject *)Py_False);
 
-    /* "PyDawg.pyx":40
+    /* "PyDawg.pyx":41
  *         outputLowercase=False,
  *         outputKeepEmpty=False,
  *         outputMarkins=False,             # <<<<<<<<<<<<<<
- *         segmentMap={}):
+ *         segmentMap=dict()):
  * 
  */
     values[11] = ((PyObject *)Py_False);
@@ -1358,7 +1349,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 28, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) __PYX_ERR(0, 29, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1395,7 +1386,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 13, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 28, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 0, 13, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 29, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("PyDawg.PyDawg.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1403,7 +1394,7 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_6PyDawg_6PyDawg___cinit__(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self), __pyx_v_simulationSeed, __pyx_v_simulationReps, __pyx_v_inputFile, __pyx_v_outputFile, __pyx_v_outputSplit, __pyx_v_outputAppend, __pyx_v_outputLabel, __pyx_v_outputRna, __pyx_v_outputProtein, __pyx_v_outputLowercase, __pyx_v_outputKeepEmpty, __pyx_v_outputMarkins, __pyx_v_segmentMap);
 
-  /* "PyDawg.pyx":28
+  /* "PyDawg.pyx":29
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
@@ -1416,33 +1407,95 @@ static int __pyx_pw_6PyDawg_6PyDawg_1__cinit__(PyObject *__pyx_v_self, PyObject 
   return __pyx_r;
 }
 
-static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_simulationSeed, CYTHON_UNUSED PyObject *__pyx_v_simulationReps, CYTHON_UNUSED PyObject *__pyx_v_inputFile, CYTHON_UNUSED PyObject *__pyx_v_outputFile, CYTHON_UNUSED PyObject *__pyx_v_outputSplit, CYTHON_UNUSED PyObject *__pyx_v_outputAppend, CYTHON_UNUSED PyObject *__pyx_v_outputLabel, CYTHON_UNUSED PyObject *__pyx_v_outputRna, CYTHON_UNUSED PyObject *__pyx_v_outputProtein, CYTHON_UNUSED PyObject *__pyx_v_outputLowercase, CYTHON_UNUSED PyObject *__pyx_v_outputKeepEmpty, CYTHON_UNUSED PyObject *__pyx_v_outputMarkins, CYTHON_UNUSED PyObject *__pyx_v_segmentMap) {
+static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_simulationSeed, PyObject *__pyx_v_simulationReps, PyObject *__pyx_v_inputFile, PyObject *__pyx_v_outputFile, CYTHON_UNUSED PyObject *__pyx_v_outputSplit, CYTHON_UNUSED PyObject *__pyx_v_outputAppend, CYTHON_UNUSED PyObject *__pyx_v_outputLabel, CYTHON_UNUSED PyObject *__pyx_v_outputRna, CYTHON_UNUSED PyObject *__pyx_v_outputProtein, CYTHON_UNUSED PyObject *__pyx_v_outputLowercase, CYTHON_UNUSED PyObject *__pyx_v_outputKeepEmpty, CYTHON_UNUSED PyObject *__pyx_v_outputMarkins, CYTHON_UNUSED PyObject *__pyx_v_segmentMap) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  std::string __pyx_t_4;
+  std::string __pyx_t_5;
+  unsigned int __pyx_t_6;
+  unsigned int __pyx_t_7;
+  int __pyx_t_8;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "PyDawg.pyx":43
- *         segmentMap={}):
+  /* "PyDawg.pyx":66
+ *         #     #         trickString.write(segmentMap[i].segment[j])
+ * 
+ *         self._thisptr = new Dawg(inputFile.encode(), outputFile.encode(), simulationSeed, simulationReps)             # <<<<<<<<<<<<<<
+ *         # else:
+ *         # self._thisptr = new Dawg(inputFile, outputFile, simulationSeed, simulationReps)
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_inputFile, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (__pyx_t_3) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_outputFile, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (__pyx_t_3) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_6 = __Pyx_PyInt_As_unsigned_int(__pyx_v_simulationSeed); if (unlikely((__pyx_t_6 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_v_simulationReps); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_v_self->_thisptr = new dawg::Dawg(__pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7);
+
+  /* "PyDawg.pyx":71
+ * 
  * 
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
  * 
  */
-  __pyx_t_1 = ((__pyx_v_self->_thisptr == NULL) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_8 = ((__pyx_v_self->_thisptr == NULL) != 0);
+  if (__pyx_t_8) {
 
-    /* "PyDawg.pyx":44
+    /* "PyDawg.pyx":72
  * 
  *         if self._thisptr == NULL:
  *             raise MemoryError()             # <<<<<<<<<<<<<<
  * 
  *     def __dealloc__(self):
  */
-    PyErr_NoMemory(); __PYX_ERR(0, 44, __pyx_L1_error)
+    PyErr_NoMemory(); __PYX_ERR(0, 72, __pyx_L1_error)
 
-    /* "PyDawg.pyx":43
- *         segmentMap={}):
+    /* "PyDawg.pyx":71
+ * 
  * 
  *         if self._thisptr == NULL:             # <<<<<<<<<<<<<<
  *             raise MemoryError()
@@ -1450,7 +1503,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
  */
   }
 
-  /* "PyDawg.pyx":28
+  /* "PyDawg.pyx":29
  *     cdef Dawg *_thisptr
  * 
  *     def __cinit__(self,             # <<<<<<<<<<<<<<
@@ -1462,6 +1515,9 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_AddTraceback("PyDawg.PyDawg.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -1469,7 +1525,7 @@ static int __pyx_pf_6PyDawg_6PyDawg___cinit__(struct __pyx_obj_6PyDawg_PyDawg *_
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":46
+/* "PyDawg.pyx":74
  *             raise MemoryError()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1493,7 +1549,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "PyDawg.pyx":47
+  /* "PyDawg.pyx":75
  * 
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -1503,7 +1559,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   __pyx_t_1 = ((__pyx_v_self->_thisptr != NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "PyDawg.pyx":48
+    /* "PyDawg.pyx":76
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:
  *             del self._thisptr             # <<<<<<<<<<<<<<
@@ -1512,7 +1568,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
  */
     delete __pyx_v_self->_thisptr;
 
-    /* "PyDawg.pyx":47
+    /* "PyDawg.pyx":75
  * 
  *     def __dealloc__(self):
  *         if self._thisptr != NULL:             # <<<<<<<<<<<<<<
@@ -1521,7 +1577,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
  */
   }
 
-  /* "PyDawg.pyx":46
+  /* "PyDawg.pyx":74
  *             raise MemoryError()
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1533,7 +1589,7 @@ static void __pyx_pf_6PyDawg_6PyDawg_2__dealloc__(struct __pyx_obj_6PyDawg_PyDaw
   __Pyx_RefNannyFinishContext();
 }
 
-/* "PyDawg.pyx":50
+/* "PyDawg.pyx":78
  *             del self._thisptr
  * 
  *     cpdef void run(self):             # <<<<<<<<<<<<<<
@@ -1553,7 +1609,7 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_run); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_run); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_5run)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1568,10 +1624,10 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
         }
       }
       if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1582,7 +1638,7 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":51
+  /* "PyDawg.pyx":79
  * 
  *     cpdef void run(self):
  *         self._thisptr.run()             # <<<<<<<<<<<<<<
@@ -1591,7 +1647,7 @@ static void __pyx_f_6PyDawg_6PyDawg_run(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v
  */
   __pyx_v_self->_thisptr->run();
 
-  /* "PyDawg.pyx":50
+  /* "PyDawg.pyx":78
  *             del self._thisptr
  * 
  *     cpdef void run(self):             # <<<<<<<<<<<<<<
@@ -1630,7 +1686,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("run", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_run(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_run(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1647,7 +1703,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_4run(struct __pyx_obj_6PyDawg_PyDawg *
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":54
+/* "PyDawg.pyx":82
  * 
  *     # Security?
  *     cpdef void bark(self):             # <<<<<<<<<<<<<<
@@ -1667,7 +1723,7 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_bark); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_bark); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7bark)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1682,10 +1738,10 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_
         }
       }
       if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
       }
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1696,7 +1752,7 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":55
+  /* "PyDawg.pyx":83
  *     # Security?
  *     cpdef void bark(self):
  *         pass             # <<<<<<<<<<<<<<
@@ -1716,7 +1772,7 @@ static void __pyx_f_6PyDawg_6PyDawg_bark(CYTHON_UNUSED struct __pyx_obj_6PyDawg_
   __Pyx_RefNannyFinishContext();
 }
 
-/* "PyDawg.pyx":54
+/* "PyDawg.pyx":82
  * 
  *     # Security?
  *     cpdef void bark(self):             # <<<<<<<<<<<<<<
@@ -1743,7 +1799,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("bark", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_bark(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_bark(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 82, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1760,7 +1816,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_6bark(struct __pyx_obj_6PyDawg_PyDawg 
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":57
+/* "PyDawg.pyx":85
  *         pass
  * 
  *     cpdef unsigned int rand(self, a, b):             # <<<<<<<<<<<<<<
@@ -1785,7 +1841,7 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
   if (unlikely(__pyx_skip_dispatch)) ;
   /* Check if overridden in Python */
   else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_rand); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_rand); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_9rand)) {
       __Pyx_INCREF(__pyx_t_1);
@@ -1804,7 +1860,7 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_a, __pyx_v_b};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else
@@ -1812,13 +1868,13 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_a, __pyx_v_b};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_5, 2+__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 57, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 85, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         if (__pyx_t_4) {
           __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -1829,12 +1885,12 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
         __Pyx_INCREF(__pyx_v_b);
         __Pyx_GIVEREF(__pyx_v_b);
         PyTuple_SET_ITEM(__pyx_t_6, 1+__pyx_t_5, __pyx_v_b);
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 57, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 85, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_t_2); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_t_2); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __pyx_r = __pyx_t_7;
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1843,19 +1899,19 @@ static unsigned int __pyx_f_6PyDawg_6PyDawg_rand(struct __pyx_obj_6PyDawg_PyDawg
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "PyDawg.pyx":58
+  /* "PyDawg.pyx":86
  * 
  *     cpdef unsigned int rand(self, a, b):
  *         return self._thisptr.rand(a, b)             # <<<<<<<<<<<<<<
  * 
- *     cpdef void trickStats(self):
+ *     def help(self):
  */
-  __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_v_a); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
-  __pyx_t_8 = __Pyx_PyInt_As_unsigned_int(__pyx_v_b); if (unlikely((__pyx_t_8 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_unsigned_int(__pyx_v_a); if (unlikely((__pyx_t_7 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_unsigned_int(__pyx_v_b); if (unlikely((__pyx_t_8 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
   __pyx_r = __pyx_v_self->_thisptr->rand(__pyx_t_7, __pyx_t_8);
   goto __pyx_L0;
 
-  /* "PyDawg.pyx":57
+  /* "PyDawg.pyx":85
  *         pass
  * 
  *     cpdef unsigned int rand(self, a, b):             # <<<<<<<<<<<<<<
@@ -1905,11 +1961,11 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_9rand(PyObject *__pyx_v_self, PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, 1); __PYX_ERR(0, 57, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, 1); __PYX_ERR(0, 85, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 57, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 85, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -1922,7 +1978,7 @@ static PyObject *__pyx_pw_6PyDawg_6PyDawg_9rand(PyObject *__pyx_v_self, PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 57, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rand", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 85, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("PyDawg.PyDawg.rand", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1941,7 +1997,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_8rand(struct __pyx_obj_6PyDawg_PyDawg 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("rand", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_f_6PyDawg_6PyDawg_rand(__pyx_v_self, __pyx_v_a, __pyx_v_b, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_unsigned_int(__pyx_f_6PyDawg_6PyDawg_rand(__pyx_v_self, __pyx_v_a, __pyx_v_b, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1958,265 +2014,8 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_8rand(struct __pyx_obj_6PyDawg_PyDawg 
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":60
+/* "PyDawg.pyx":88
  *         return self._thisptr.rand(a, b)
- * 
- *     cpdef void trickStats(self):             # <<<<<<<<<<<<<<
- *         self._thisptr.trickStats()
- * 
- */
-
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_11trickStats(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static void __pyx_f_6PyDawg_6PyDawg_trickStats(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, int __pyx_skip_dispatch) {
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  __Pyx_RefNannySetupContext("trickStats", 0);
-  /* Check if called by wrapper */
-  if (unlikely(__pyx_skip_dispatch)) ;
-  /* Check if overridden in Python */
-  else if (unlikely(Py_TYPE(((PyObject *)__pyx_v_self))->tp_dictoffset != 0)) {
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickStats); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    if (!PyCFunction_Check(__pyx_t_1) || (PyCFunction_GET_FUNCTION(__pyx_t_1) != (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_11trickStats)) {
-      __Pyx_INCREF(__pyx_t_1);
-      __pyx_t_3 = __pyx_t_1; __pyx_t_4 = NULL;
-      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
-        __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
-        if (likely(__pyx_t_4)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-          __Pyx_INCREF(__pyx_t_4);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_3, function);
-        }
-      }
-      if (__pyx_t_4) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      } else {
-        __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-      }
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      goto __pyx_L0;
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  }
-
-  /* "PyDawg.pyx":61
- * 
- *     cpdef void trickStats(self):
- *         self._thisptr.trickStats()             # <<<<<<<<<<<<<<
- * 
- *     # IO functions
- */
-  __pyx_v_self->_thisptr->trickStats();
-
-  /* "PyDawg.pyx":60
- *         return self._thisptr.rand(a, b)
- * 
- *     cpdef void trickStats(self):             # <<<<<<<<<<<<<<
- *         self._thisptr.trickStats()
- * 
- */
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_WriteUnraisable("PyDawg.PyDawg.trickStats", __pyx_clineno, __pyx_lineno, __pyx_filename, 0, 0);
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-}
-
-/* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_11trickStats(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_11trickStats(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("trickStats (wrapper)", 0);
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_10trickStats(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_10trickStats(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("trickStats", 0);
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_void_to_None(__pyx_f_6PyDawg_6PyDawg_trickStats(__pyx_v_self, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("PyDawg.PyDawg.trickStats", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "PyDawg.pyx":65
- *     # IO functions
- *     # trick takes in a bunch of
- *     def trick(self, s, **kwargs):             # <<<<<<<<<<<<<<
- *         self.trickQueue = kwargs
- *         self.trickQueue.label = s
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_13trick(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_13trick(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  PyObject *__pyx_v_s = 0;
-  PyObject *__pyx_v_kwargs = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("trick (wrapper)", 0);
-  __pyx_v_kwargs = PyDict_New(); if (unlikely(!__pyx_v_kwargs)) return NULL;
-  __Pyx_GOTREF(__pyx_v_kwargs);
-  {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_s,0};
-    PyObject* values[1] = {0};
-    if (unlikely(__pyx_kwds)) {
-      Py_ssize_t kw_args;
-      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
-      switch (pos_args) {
-        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      kw_args = PyDict_Size(__pyx_kwds);
-      switch (pos_args) {
-        case  0:
-        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_s)) != 0)) kw_args--;
-        else goto __pyx_L5_argtuple_error;
-      }
-      if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, __pyx_v_kwargs, values, pos_args, "trick") < 0)) __PYX_ERR(0, 65, __pyx_L3_error)
-      }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 1) {
-      goto __pyx_L5_argtuple_error;
-    } else {
-      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-    }
-    __pyx_v_s = values[0];
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("trick", 1, 1, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 65, __pyx_L3_error)
-  __pyx_L3_error:;
-  __Pyx_DECREF(__pyx_v_kwargs); __pyx_v_kwargs = 0;
-  __Pyx_AddTraceback("PyDawg.PyDawg.trick", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_12trick(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self), __pyx_v_s, __pyx_v_kwargs);
-
-  /* function exit code */
-  __Pyx_XDECREF(__pyx_v_kwargs);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_12trick(struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self, PyObject *__pyx_v_s, PyObject *__pyx_v_kwargs) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("trick", 0);
-
-  /* "PyDawg.pyx":66
- *     # trick takes in a bunch of
- *     def trick(self, s, **kwargs):
- *         self.trickQueue = kwargs             # <<<<<<<<<<<<<<
- *         self.trickQueue.label = s
- * 
- */
-  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue, __pyx_v_kwargs) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
-
-  /* "PyDawg.pyx":67
- *     def trick(self, s, **kwargs):
- *         self.trickQueue = kwargs
- *         self.trickQueue.label = s             # <<<<<<<<<<<<<<
- * 
- *     def outputHandler(self):
- */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_trickQueue); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_label, __pyx_v_s) < 0) __PYX_ERR(0, 67, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "PyDawg.pyx":65
- *     # IO functions
- *     # trick takes in a bunch of
- *     def trick(self, s, **kwargs):             # <<<<<<<<<<<<<<
- *         self.trickQueue = kwargs
- *         self.trickQueue.label = s
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("PyDawg.PyDawg.trick", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "PyDawg.pyx":69
- *         self.trickQueue.label = s
- * 
- *     def outputHandler(self):             # <<<<<<<<<<<<<<
- *         pass
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_15outputHandler(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_15outputHandler(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("outputHandler (wrapper)", 0);
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_14outputHandler(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_14outputHandler(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("outputHandler", 0);
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "PyDawg.pyx":72
- *         pass
  * 
  *     def help(self):             # <<<<<<<<<<<<<<
  *         print("Mind your own business")
@@ -2224,37 +2023,37 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_14outputHandler(CYTHON_UNUSED struct _
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_17help(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_6PyDawg_6PyDawg_17help(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_11help(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_6PyDawg_6PyDawg_11help(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("help (wrapper)", 0);
-  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_16help(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
+  __pyx_r = __pyx_pf_6PyDawg_6PyDawg_10help(((struct __pyx_obj_6PyDawg_PyDawg *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6PyDawg_6PyDawg_16help(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
+static PyObject *__pyx_pf_6PyDawg_6PyDawg_10help(CYTHON_UNUSED struct __pyx_obj_6PyDawg_PyDawg *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("help", 0);
 
-  /* "PyDawg.pyx":73
+  /* "PyDawg.pyx":89
  * 
  *     def help(self):
  *         print("Mind your own business")             # <<<<<<<<<<<<<<
  * 
  * class Segment:
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_print, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "PyDawg.pyx":72
- *         pass
+  /* "PyDawg.pyx":88
+ *         return self._thisptr.rand(a, b)
  * 
  *     def help(self):             # <<<<<<<<<<<<<<
  *         print("Mind your own business")
@@ -2274,7 +2073,7 @@ static PyObject *__pyx_pf_6PyDawg_6PyDawg_16help(CYTHON_UNUSED struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "PyDawg.pyx":77
+/* "PyDawg.pyx":93
  * class Segment:
  * 
  *     def __init__(self,             # <<<<<<<<<<<<<<
@@ -2290,14 +2089,14 @@ static PyObject *__pyx_pf_6PyDawg___defaults__(CYTHON_UNUSED PyObject *__pyx_sel
   __Pyx_RefNannySetupContext("__defaults__", 0);
   __Pyx_XDECREF(__pyx_r);
 
-  /* "PyDawg.pyx":102
+  /* "PyDawg.pyx":118
  *         rootCode=0,
  *         rootSegment=0,
  *         rootGapOverlap=False):             # <<<<<<<<<<<<<<
  * 
  *         self.name = name
  */
-  __pyx_t_1 = PyTuple_New(25); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(25); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject*)__pyx_kp_u_));
   __Pyx_GIVEREF(((PyObject*)__pyx_kp_u_));
@@ -2375,14 +2174,14 @@ static PyObject *__pyx_pf_6PyDawg___defaults__(CYTHON_UNUSED PyObject *__pyx_sel
   __Pyx_GIVEREF(((PyObject *)Py_False));
   PyTuple_SET_ITEM(__pyx_t_1, 24, ((PyObject *)Py_False));
 
-  /* "PyDawg.pyx":77
+  /* "PyDawg.pyx":93
  * class Segment:
  * 
  *     def __init__(self,             # <<<<<<<<<<<<<<
  *         name='',
  *         inheritsFrom='',
  */
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -2633,7 +2432,7 @@ static PyObject *__pyx_pw_6PyDawg_7Segment_1__init__(PyObject *__pyx_self, PyObj
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 77, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 93, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2696,7 +2495,7 @@ static PyObject *__pyx_pw_6PyDawg_7Segment_1__init__(PyObject *__pyx_self, PyObj
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 26, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 77, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 26, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 93, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("PyDawg.Segment.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2714,229 +2513,229 @@ static PyObject *__pyx_pf_6PyDawg_7Segment___init__(CYTHON_UNUSED PyObject *__py
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "PyDawg.pyx":104
+  /* "PyDawg.pyx":120
  *         rootGapOverlap=False):
  * 
  *         self.name = name             # <<<<<<<<<<<<<<
  *         self.inheritsFrom = inheritsFrom
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_name, __pyx_v_name) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_name, __pyx_v_name) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
 
-  /* "PyDawg.pyx":105
+  /* "PyDawg.pyx":121
  * 
  *         self.name = name
  *         self.inheritsFrom = inheritsFrom             # <<<<<<<<<<<<<<
  * 
  *         self.substitutionModel = substitutionModel
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_inheritsFrom, __pyx_v_inheritsFrom) < 0) __PYX_ERR(0, 105, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_inheritsFrom, __pyx_v_inheritsFrom) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
 
-  /* "PyDawg.pyx":107
+  /* "PyDawg.pyx":123
  *         self.inheritsFrom = inheritsFrom
  * 
  *         self.substitutionModel = substitutionModel             # <<<<<<<<<<<<<<
  *         self.substitutionParameters = substitutionParameters
  *         self.substitutionFrequencies = substitutionFrequencies
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionModel, __pyx_v_substitutionModel) < 0) __PYX_ERR(0, 107, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionModel, __pyx_v_substitutionModel) < 0) __PYX_ERR(0, 123, __pyx_L1_error)
 
-  /* "PyDawg.pyx":108
+  /* "PyDawg.pyx":124
  * 
  *         self.substitutionModel = substitutionModel
  *         self.substitutionParameters = substitutionParameters             # <<<<<<<<<<<<<<
  *         self.substitutionFrequencies = substitutionFrequencies
  *         self.substitutionRateModel = substitutionRateModel
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionParameters, __pyx_v_substitutionParameters) < 0) __PYX_ERR(0, 108, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionParameters, __pyx_v_substitutionParameters) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
 
-  /* "PyDawg.pyx":109
+  /* "PyDawg.pyx":125
  *         self.substitutionModel = substitutionModel
  *         self.substitutionParameters = substitutionParameters
  *         self.substitutionFrequencies = substitutionFrequencies             # <<<<<<<<<<<<<<
  *         self.substitutionRateModel = substitutionRateModel
  *         self.substitutionRateParameters = substitutionRateParameters
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionFrequencies, __pyx_v_substitutionFrequencies) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionFrequencies, __pyx_v_substitutionFrequencies) < 0) __PYX_ERR(0, 125, __pyx_L1_error)
 
-  /* "PyDawg.pyx":110
+  /* "PyDawg.pyx":126
  *         self.substitutionParameters = substitutionParameters
  *         self.substitutionFrequencies = substitutionFrequencies
  *         self.substitutionRateModel = substitutionRateModel             # <<<<<<<<<<<<<<
  *         self.substitutionRateParameters = substitutionRateParameters
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionRateModel, __pyx_v_substitutionRateModel) < 0) __PYX_ERR(0, 110, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionRateModel, __pyx_v_substitutionRateModel) < 0) __PYX_ERR(0, 126, __pyx_L1_error)
 
-  /* "PyDawg.pyx":111
+  /* "PyDawg.pyx":127
  *         self.substitutionFrequencies = substitutionFrequencies
  *         self.substitutionRateModel = substitutionRateModel
  *         self.substitutionRateParameters = substitutionRateParameters             # <<<<<<<<<<<<<<
  * 
  *         self.indelModelInsertion = indelModelInsertion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionRateParameters, __pyx_v_substitutionRateParameters) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_substitutionRateParameters, __pyx_v_substitutionRateParameters) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
 
-  /* "PyDawg.pyx":113
+  /* "PyDawg.pyx":129
  *         self.substitutionRateParameters = substitutionRateParameters
  * 
  *         self.indelModelInsertion = indelModelInsertion             # <<<<<<<<<<<<<<
  *         self.indelParametersInsertion = indelParametersInsertion
  *         self.indelRateInsertion = indelRateInsertion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelModelInsertion, __pyx_v_indelModelInsertion) < 0) __PYX_ERR(0, 113, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelModelInsertion, __pyx_v_indelModelInsertion) < 0) __PYX_ERR(0, 129, __pyx_L1_error)
 
-  /* "PyDawg.pyx":114
+  /* "PyDawg.pyx":130
  * 
  *         self.indelModelInsertion = indelModelInsertion
  *         self.indelParametersInsertion = indelParametersInsertion             # <<<<<<<<<<<<<<
  *         self.indelRateInsertion = indelRateInsertion
  *         self.indelMaxInsertion = indelMaxInsertion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelParametersInsertion, __pyx_v_indelParametersInsertion) < 0) __PYX_ERR(0, 114, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelParametersInsertion, __pyx_v_indelParametersInsertion) < 0) __PYX_ERR(0, 130, __pyx_L1_error)
 
-  /* "PyDawg.pyx":115
+  /* "PyDawg.pyx":131
  *         self.indelModelInsertion = indelModelInsertion
  *         self.indelParametersInsertion = indelParametersInsertion
  *         self.indelRateInsertion = indelRateInsertion             # <<<<<<<<<<<<<<
  *         self.indelMaxInsertion = indelMaxInsertion
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelRateInsertion, __pyx_v_indelRateInsertion) < 0) __PYX_ERR(0, 115, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelRateInsertion, __pyx_v_indelRateInsertion) < 0) __PYX_ERR(0, 131, __pyx_L1_error)
 
-  /* "PyDawg.pyx":116
+  /* "PyDawg.pyx":132
  *         self.indelParametersInsertion = indelParametersInsertion
  *         self.indelRateInsertion = indelRateInsertion
  *         self.indelMaxInsertion = indelMaxInsertion             # <<<<<<<<<<<<<<
  * 
  *         self.indelModelDeletion = indelModelDeletion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelMaxInsertion, __pyx_v_indelMaxInsertion) < 0) __PYX_ERR(0, 116, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelMaxInsertion, __pyx_v_indelMaxInsertion) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
-  /* "PyDawg.pyx":118
+  /* "PyDawg.pyx":134
  *         self.indelMaxInsertion = indelMaxInsertion
  * 
  *         self.indelModelDeletion = indelModelDeletion             # <<<<<<<<<<<<<<
  *         self.indelParametersDeletion = indelParametersDeletion
  *         self.indelRateDeletion = indelRateDeletion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelModelDeletion, __pyx_v_indelModelDeletion) < 0) __PYX_ERR(0, 118, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelModelDeletion, __pyx_v_indelModelDeletion) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
 
-  /* "PyDawg.pyx":119
+  /* "PyDawg.pyx":135
  * 
  *         self.indelModelDeletion = indelModelDeletion
  *         self.indelParametersDeletion = indelParametersDeletion             # <<<<<<<<<<<<<<
  *         self.indelRateDeletion = indelRateDeletion
  *         self.indelMaxDeletion = indelMaxDeletion
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelParametersDeletion, __pyx_v_indelParametersDeletion) < 0) __PYX_ERR(0, 119, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelParametersDeletion, __pyx_v_indelParametersDeletion) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
 
-  /* "PyDawg.pyx":120
+  /* "PyDawg.pyx":136
  *         self.indelModelDeletion = indelModelDeletion
  *         self.indelParametersDeletion = indelParametersDeletion
  *         self.indelRateDeletion = indelRateDeletion             # <<<<<<<<<<<<<<
  *         self.indelMaxDeletion = indelMaxDeletion
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelRateDeletion, __pyx_v_indelRateDeletion) < 0) __PYX_ERR(0, 120, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelRateDeletion, __pyx_v_indelRateDeletion) < 0) __PYX_ERR(0, 136, __pyx_L1_error)
 
-  /* "PyDawg.pyx":121
+  /* "PyDawg.pyx":137
  *         self.indelParametersDeletion = indelParametersDeletion
  *         self.indelRateDeletion = indelRateDeletion
  *         self.indelMaxDeletion = indelMaxDeletion             # <<<<<<<<<<<<<<
  * 
  *         self.treeModel = treeModel
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelMaxDeletion, __pyx_v_indelMaxDeletion) < 0) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_indelMaxDeletion, __pyx_v_indelMaxDeletion) < 0) __PYX_ERR(0, 137, __pyx_L1_error)
 
-  /* "PyDawg.pyx":123
+  /* "PyDawg.pyx":139
  *         self.indelMaxDeletion = indelMaxDeletion
  * 
  *         self.treeModel = treeModel             # <<<<<<<<<<<<<<
  *         self.treeParameters = treeParameters
  *         self.treeTree = treeTree
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeModel, __pyx_v_treeModel) < 0) __PYX_ERR(0, 123, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeModel, __pyx_v_treeModel) < 0) __PYX_ERR(0, 139, __pyx_L1_error)
 
-  /* "PyDawg.pyx":124
+  /* "PyDawg.pyx":140
  * 
  *         self.treeModel = treeModel
  *         self.treeParameters = treeParameters             # <<<<<<<<<<<<<<
  *         self.treeTree = treeTree
  *         self.treeScale = treeScale
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeParameters, __pyx_v_treeParameters) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeParameters, __pyx_v_treeParameters) < 0) __PYX_ERR(0, 140, __pyx_L1_error)
 
-  /* "PyDawg.pyx":125
+  /* "PyDawg.pyx":141
  *         self.treeModel = treeModel
  *         self.treeParameters = treeParameters
  *         self.treeTree = treeTree             # <<<<<<<<<<<<<<
  *         self.treeScale = treeScale
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeTree, __pyx_v_treeTree) < 0) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeTree, __pyx_v_treeTree) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
 
-  /* "PyDawg.pyx":126
+  /* "PyDawg.pyx":142
  *         self.treeParameters = treeParameters
  *         self.treeTree = treeTree
  *         self.treeScale = treeScale             # <<<<<<<<<<<<<<
  * 
  *         self.rootLength = rootLength
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeScale, __pyx_v_treeScale) < 0) __PYX_ERR(0, 126, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_treeScale, __pyx_v_treeScale) < 0) __PYX_ERR(0, 142, __pyx_L1_error)
 
-  /* "PyDawg.pyx":128
+  /* "PyDawg.pyx":144
  *         self.treeScale = treeScale
  * 
  *         self.rootLength = rootLength             # <<<<<<<<<<<<<<
  *         self.rootSequence = rootSequence
  *         self.rootRates = rootRates
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootLength, __pyx_v_rootLength) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootLength, __pyx_v_rootLength) < 0) __PYX_ERR(0, 144, __pyx_L1_error)
 
-  /* "PyDawg.pyx":129
+  /* "PyDawg.pyx":145
  * 
  *         self.rootLength = rootLength
  *         self.rootSequence = rootSequence             # <<<<<<<<<<<<<<
  *         self.rootRates = rootRates
  *         self.rootCode = rootCode
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootSequence, __pyx_v_rootSequence) < 0) __PYX_ERR(0, 129, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootSequence, __pyx_v_rootSequence) < 0) __PYX_ERR(0, 145, __pyx_L1_error)
 
-  /* "PyDawg.pyx":130
+  /* "PyDawg.pyx":146
  *         self.rootLength = rootLength
  *         self.rootSequence = rootSequence
  *         self.rootRates = rootRates             # <<<<<<<<<<<<<<
  *         self.rootCode = rootCode
  *         self.rootSegment = rootSegment
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootRates, __pyx_v_rootRates) < 0) __PYX_ERR(0, 130, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootRates, __pyx_v_rootRates) < 0) __PYX_ERR(0, 146, __pyx_L1_error)
 
-  /* "PyDawg.pyx":131
+  /* "PyDawg.pyx":147
  *         self.rootSequence = rootSequence
  *         self.rootRates = rootRates
  *         self.rootCode = rootCode             # <<<<<<<<<<<<<<
  *         self.rootSegment = rootSegment
  *         self.rootGapOverlap = rootGapOverlap
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootCode, __pyx_v_rootCode) < 0) __PYX_ERR(0, 131, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootCode, __pyx_v_rootCode) < 0) __PYX_ERR(0, 147, __pyx_L1_error)
 
-  /* "PyDawg.pyx":132
+  /* "PyDawg.pyx":148
  *         self.rootRates = rootRates
  *         self.rootCode = rootCode
  *         self.rootSegment = rootSegment             # <<<<<<<<<<<<<<
  *         self.rootGapOverlap = rootGapOverlap
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootSegment, __pyx_v_rootSegment) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootSegment, __pyx_v_rootSegment) < 0) __PYX_ERR(0, 148, __pyx_L1_error)
 
-  /* "PyDawg.pyx":133
+  /* "PyDawg.pyx":149
  *         self.rootCode = rootCode
  *         self.rootSegment = rootSegment
  *         self.rootGapOverlap = rootGapOverlap             # <<<<<<<<<<<<<<
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootGapOverlap, __pyx_v_rootGapOverlap) < 0) __PYX_ERR(0, 133, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_rootGapOverlap, __pyx_v_rootGapOverlap) < 0) __PYX_ERR(0, 149, __pyx_L1_error)
 
-  /* "PyDawg.pyx":77
+  /* "PyDawg.pyx":93
  * class Segment:
  * 
  *     def __init__(self,             # <<<<<<<<<<<<<<
@@ -2952,6 +2751,58 @@ static PyObject *__pyx_pf_6PyDawg_7Segment___init__(CYTHON_UNUSED PyObject *__py
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "string.from_py":13
+ * 
+ * @cname("__pyx_convert_string_from_py_std__in_string")
+ * cdef string __pyx_convert_string_from_py_std__in_string(object o) except *:             # <<<<<<<<<<<<<<
+ *     cdef Py_ssize_t length
+ *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)
+ */
+
+static std::string __pyx_convert_string_from_py_std__in_string(PyObject *__pyx_v_o) {
+  Py_ssize_t __pyx_v_length;
+  char *__pyx_v_data;
+  std::string __pyx_r;
+  __Pyx_RefNannyDeclarations
+  char *__pyx_t_1;
+  __Pyx_RefNannySetupContext("__pyx_convert_string_from_py_std__in_string", 0);
+
+  /* "string.from_py":15
+ * cdef string __pyx_convert_string_from_py_std__in_string(object o) except *:
+ *     cdef Py_ssize_t length
+ *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)             # <<<<<<<<<<<<<<
+ *     return string(data, length)
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_AsStringAndSize(__pyx_v_o, (&__pyx_v_length)); if (unlikely(__pyx_t_1 == NULL)) __PYX_ERR(1, 15, __pyx_L1_error)
+  __pyx_v_data = __pyx_t_1;
+
+  /* "string.from_py":16
+ *     cdef Py_ssize_t length
+ *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)
+ *     return string(data, length)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = std::string(__pyx_v_data, __pyx_v_length);
+  goto __pyx_L0;
+
+  /* "string.from_py":13
+ * 
+ * @cname("__pyx_convert_string_from_py_std__in_string")
+ * cdef string __pyx_convert_string_from_py_std__in_string(object o) except *:             # <<<<<<<<<<<<<<
+ *     cdef Py_ssize_t length
+ *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("string.from_py.__pyx_convert_string_from_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -2996,10 +2847,7 @@ static PyMethodDef __pyx_methods_6PyDawg_PyDawg[] = {
   {"run", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_5run, METH_NOARGS, 0},
   {"bark", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_7bark, METH_NOARGS, 0},
   {"rand", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_9rand, METH_VARARGS|METH_KEYWORDS, 0},
-  {"trickStats", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_11trickStats, METH_NOARGS, 0},
-  {"trick", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_13trick, METH_VARARGS|METH_KEYWORDS, 0},
-  {"outputHandler", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_15outputHandler, METH_NOARGS, 0},
-  {"help", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_17help, METH_NOARGS, 0},
+  {"help", (PyCFunction)__pyx_pw_6PyDawg_6PyDawg_11help, METH_NOARGS, 0},
   {0, 0, 0, 0}
 };
 
@@ -3094,6 +2942,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_b, __pyx_k_b, sizeof(__pyx_k_b), 0, 0, 1, 1},
   {&__pyx_n_s_bark, __pyx_k_bark, sizeof(__pyx_k_bark), 0, 0, 1, 1},
   {&__pyx_n_s_doc, __pyx_k_doc, sizeof(__pyx_k_doc), 0, 0, 1, 1},
+  {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_kp_u_fasta, __pyx_k_fasta, sizeof(__pyx_k_fasta), 0, 1, 0, 0},
   {&__pyx_kp_s_home_zach_code_dawg_cython_PyDa, __pyx_k_home_zach_code_dawg_cython_PyDa, sizeof(__pyx_k_home_zach_code_dawg_cython_PyDa), 0, 0, 1, 0},
   {&__pyx_n_s_indelMaxDeletion, __pyx_k_indelMaxDeletion, sizeof(__pyx_k_indelMaxDeletion), 0, 0, 1, 1},
@@ -3107,7 +2956,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_inheritsFrom, __pyx_k_inheritsFrom, sizeof(__pyx_k_inheritsFrom), 0, 0, 1, 1},
   {&__pyx_n_s_init, __pyx_k_init, sizeof(__pyx_k_init), 0, 0, 1, 1},
   {&__pyx_n_s_inputFile, __pyx_k_inputFile, sizeof(__pyx_k_inputFile), 0, 0, 1, 1},
-  {&__pyx_n_s_label, __pyx_k_label, sizeof(__pyx_k_label), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
   {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
@@ -3133,7 +2981,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_rootSegment, __pyx_k_rootSegment, sizeof(__pyx_k_rootSegment), 0, 0, 1, 1},
   {&__pyx_n_s_rootSequence, __pyx_k_rootSequence, sizeof(__pyx_k_rootSequence), 0, 0, 1, 1},
   {&__pyx_n_s_run, __pyx_k_run, sizeof(__pyx_k_run), 0, 0, 1, 1},
-  {&__pyx_n_s_s, __pyx_k_s, sizeof(__pyx_k_s), 0, 0, 1, 1},
   {&__pyx_n_s_segmentMap, __pyx_k_segmentMap, sizeof(__pyx_k_segmentMap), 0, 0, 1, 1},
   {&__pyx_n_s_self, __pyx_k_self, sizeof(__pyx_k_self), 0, 0, 1, 1},
   {&__pyx_n_s_simulationReps, __pyx_k_simulationReps, sizeof(__pyx_k_simulationReps), 0, 0, 1, 1},
@@ -3148,13 +2995,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_treeParameters, __pyx_k_treeParameters, sizeof(__pyx_k_treeParameters), 0, 0, 1, 1},
   {&__pyx_n_s_treeScale, __pyx_k_treeScale, sizeof(__pyx_k_treeScale), 0, 0, 1, 1},
   {&__pyx_n_s_treeTree, __pyx_k_treeTree, sizeof(__pyx_k_treeTree), 0, 0, 1, 1},
-  {&__pyx_n_s_trickQueue, __pyx_k_trickQueue, sizeof(__pyx_k_trickQueue), 0, 0, 1, 1},
-  {&__pyx_n_s_trickStats, __pyx_k_trickStats, sizeof(__pyx_k_trickStats), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 44, __pyx_L1_error)
-  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 89, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -3164,28 +3009,28 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "PyDawg.pyx":73
+  /* "PyDawg.pyx":89
  * 
  *     def help(self):
  *         print("Mind your own business")             # <<<<<<<<<<<<<<
  * 
  * class Segment:
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Mind_your_own_business); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_u_Mind_your_own_business); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 89, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "PyDawg.pyx":77
+  /* "PyDawg.pyx":93
  * class Segment:
  * 
  *     def __init__(self,             # <<<<<<<<<<<<<<
  *         name='',
  *         inheritsFrom='',
  */
-  __pyx_tuple__4 = PyTuple_Pack(26, __pyx_n_s_self, __pyx_n_s_name, __pyx_n_s_inheritsFrom, __pyx_n_s_substitutionModel, __pyx_n_s_substitutionParameters, __pyx_n_s_substitutionFrequencies, __pyx_n_s_substitutionRateModel, __pyx_n_s_substitutionRateParameters, __pyx_n_s_indelModelInsertion, __pyx_n_s_indelParametersInsertion, __pyx_n_s_indelRateInsertion, __pyx_n_s_indelMaxInsertion, __pyx_n_s_indelModelDeletion, __pyx_n_s_indelParametersDeletion, __pyx_n_s_indelRateDeletion, __pyx_n_s_indelMaxDeletion, __pyx_n_s_treeModel, __pyx_n_s_treeParameters, __pyx_n_s_treeTree, __pyx_n_s_treeScale, __pyx_n_s_rootLength, __pyx_n_s_rootSequence, __pyx_n_s_rootRates, __pyx_n_s_rootCode, __pyx_n_s_rootSegment, __pyx_n_s_rootGapOverlap); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(26, __pyx_n_s_self, __pyx_n_s_name, __pyx_n_s_inheritsFrom, __pyx_n_s_substitutionModel, __pyx_n_s_substitutionParameters, __pyx_n_s_substitutionFrequencies, __pyx_n_s_substitutionRateModel, __pyx_n_s_substitutionRateParameters, __pyx_n_s_indelModelInsertion, __pyx_n_s_indelParametersInsertion, __pyx_n_s_indelRateInsertion, __pyx_n_s_indelMaxInsertion, __pyx_n_s_indelModelDeletion, __pyx_n_s_indelParametersDeletion, __pyx_n_s_indelRateDeletion, __pyx_n_s_indelMaxDeletion, __pyx_n_s_treeModel, __pyx_n_s_treeParameters, __pyx_n_s_treeTree, __pyx_n_s_treeScale, __pyx_n_s_rootLength, __pyx_n_s_rootSequence, __pyx_n_s_rootRates, __pyx_n_s_rootCode, __pyx_n_s_rootSegment, __pyx_n_s_rootGapOverlap); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(26, 0, 26, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_zach_code_dawg_cython_PyDa, __pyx_n_s_init, 77, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(26, 0, 26, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_home_zach_code_dawg_cython_PyDa, __pyx_n_s_init, 93, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3292,11 +3137,10 @@ PyMODINIT_FUNC PyInit_PyDawg(void)
   __pyx_vtable_6PyDawg_PyDawg.run = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_run;
   __pyx_vtable_6PyDawg_PyDawg.bark = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_bark;
   __pyx_vtable_6PyDawg_PyDawg.rand = (unsigned int (*)(struct __pyx_obj_6PyDawg_PyDawg *, PyObject *, PyObject *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_rand;
-  __pyx_vtable_6PyDawg_PyDawg.trickStats = (void (*)(struct __pyx_obj_6PyDawg_PyDawg *, int __pyx_skip_dispatch))__pyx_f_6PyDawg_6PyDawg_trickStats;
-  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
   __pyx_type_6PyDawg_PyDawg.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_6PyDawg_PyDawg.tp_dict, __pyx_vtabptr_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "PyDawg", (PyObject *)&__pyx_type_6PyDawg_PyDawg) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
   __pyx_ptype_6PyDawg_PyDawg = &__pyx_type_6PyDawg_PyDawg;
   /*--- Type import code ---*/
   /*--- Variable import code ---*/
@@ -3306,105 +3150,105 @@ PyMODINIT_FUNC PyInit_PyDawg(void)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "PyDawg.pyx":41
+  /* "PyDawg.pyx":42
  *         outputKeepEmpty=False,
  *         outputMarkins=False,
- *         segmentMap={}):             # <<<<<<<<<<<<<<
+ *         segmentMap=dict()):             # <<<<<<<<<<<<<<
  * 
- *         if self._thisptr == NULL:
+ *         # self.simulationSeed = simulationSeed
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k__2 = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "PyDawg.pyx":75
+  /* "PyDawg.pyx":91
  *         print("Mind your own business")
  * 
  * class Segment:             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self,
  */
-  __pyx_t_1 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Segment, __pyx_n_s_Segment, (PyObject *) NULL, __pyx_n_s_PyDawg, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Segment, __pyx_n_s_Segment, (PyObject *) NULL, __pyx_n_s_PyDawg, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "PyDawg.pyx":77
+  /* "PyDawg.pyx":93
  * class Segment:
  * 
  *     def __init__(self,             # <<<<<<<<<<<<<<
  *         name='',
  *         inheritsFrom='',
  */
-  __pyx_t_2 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6PyDawg_7Segment_1__init__, 0, __pyx_n_s_Segment___init, NULL, __pyx_n_s_PyDawg, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_NewEx(&__pyx_mdef_6PyDawg_7Segment_1__init__, 0, __pyx_n_s_Segment___init, NULL, __pyx_n_s_PyDawg, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults), 4)) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (!__Pyx_CyFunction_InitDefaults(__pyx_t_2, sizeof(__pyx_defaults), 4)) __PYX_ERR(0, 93, __pyx_L1_error)
 
-  /* "PyDawg.pyx":81
+  /* "PyDawg.pyx":97
  *         inheritsFrom='',
  *         substitutionModel='',
  *         substitutionParameters=[],             # <<<<<<<<<<<<<<
  *         substitutionFrequencies=[],
  *         substitutionRateModel='',
  */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_substitutionParameters = __pyx_t_3;
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "PyDawg.pyx":82
+  /* "PyDawg.pyx":98
  *         substitutionModel='',
  *         substitutionParameters=[],
  *         substitutionFrequencies=[],             # <<<<<<<<<<<<<<
  *         substitutionRateModel='',
  *         substitutionRateParameters=[],
  */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 98, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_substitutionFrequencies = __pyx_t_3;
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "PyDawg.pyx":84
+  /* "PyDawg.pyx":100
  *         substitutionFrequencies=[],
  *         substitutionRateModel='',
  *         substitutionRateParameters=[],             # <<<<<<<<<<<<<<
  *         indelModelInsertion='',
  *         indelParametersInsertion='',
  */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_substitutionRateParameters = __pyx_t_3;
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "PyDawg.pyx":99
+  /* "PyDawg.pyx":115
  *         rootLength=0,
  *         rootSequence='',
  *         rootRates=[],             # <<<<<<<<<<<<<<
  *         rootCode=0,
  *         rootSegment=0,
  */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_CyFunction_Defaults(__pyx_defaults, __pyx_t_2)->__pyx_arg_rootRates = __pyx_t_3;
   __Pyx_GIVEREF(__pyx_t_3);
   __pyx_t_3 = 0;
   __Pyx_CyFunction_SetDefaultsGetter(__pyx_t_2, __pyx_pf_6PyDawg___defaults__);
-  if (PyObject_SetItem(__pyx_t_1, __pyx_n_s_init, __pyx_t_2) < 0) __PYX_ERR(0, 77, __pyx_L1_error)
+  if (PyObject_SetItem(__pyx_t_1, __pyx_n_s_init, __pyx_t_2) < 0) __PYX_ERR(0, 93, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "PyDawg.pyx":75
+  /* "PyDawg.pyx":91
  *         print("Mind your own business")
  * 
  * class Segment:             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self,
  */
-  __pyx_t_2 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_Segment, __pyx_empty_tuple, __pyx_t_1, NULL, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_Segment, __pyx_empty_tuple, __pyx_t_1, NULL, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Segment, __pyx_t_2) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Segment, __pyx_t_2) < 0) __PYX_ERR(0, 91, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -3417,6 +3261,14 @@ PyMODINIT_FUNC PyInit_PyDawg(void)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "string.from_py":13
+ * 
+ * @cname("__pyx_convert_string_from_py_std__in_string")
+ * cdef string __pyx_convert_string_from_py_std__in_string(object o) except *:             # <<<<<<<<<<<<<<
+ *     cdef Py_ssize_t length
+ *     cdef char* data = __Pyx_PyObject_AsStringAndSize(o, &length)
+ */
 
   /*--- Wrapped vars code ---*/
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <dawg/mutt.h>
 #include <dawg/trick.h>
@@ -16,6 +17,12 @@ class Dawg
 public:
     explicit Dawg();
     explicit Dawg(const unsigned int s);
+
+    explicit Dawg(const std::map<std::string, std::vector<std::string>>,
+        const std::string& o,
+        const unsigned int r,
+        const unsigned int s);
+
     explicit Dawg(const std::string& in,
         const std::string& o,
         const unsigned int r,
@@ -25,13 +32,13 @@ public:
     unsigned int rand(unsigned int a, unsigned int b);
     void trickStats() const;
 private:
-    std::string inFile;
-    std::string outFile;
-    std::size_t reps;
-    unsigned int seed;
+    std::string mInFile;
+    std::string mOutFile;
+    std::size_t mRepetitions;
+    unsigned int mSeed;
     std::vector<dawg::alignment> mAlignments;
-    mutt rng;
-    trick mInput;
+    mutt mRng;
+    trick mTrickster;
     // matic_section mMaticSection;
 
 

@@ -6,16 +6,17 @@
 #from libcpp.list cimport list
 #from libcpp.array cimport array
 from libcpp.string cimport string
-#from libcpp.map cimport map
+# from libcpp.map cimport map as cppMap
+# from libcpp.vector cimport vector
 
 cdef extern from "dawg.hpp" namespace "dawg":
     cdef cppclass Dawg:
-        # Dawg()
-        # Dawg(unsigned int)
-        # Dawg(string, string, unsigned int, unsigned int)
+        Dawg()
+        Dawg(unsigned int seed)
+        # Dawg(cppMap, string, unsigned int, unsigned int)
+        # infile, outfile, seed, reps
+        Dawg(string, string, unsigned int, unsigned int)
 
-        # del model, del rate, del param 1, del param 2, max del
-        Dawg(string, float, float, float, float)
         void run()
         void bark()
         unsigned int rand(unsigned int, unsigned int)
@@ -38,7 +39,34 @@ cdef class PyDawg:
         outputLowercase=False,
         outputKeepEmpty=False,
         outputMarkins=False,
-        segmentMap={}):
+        segmentMap=dict()):
+
+        # self.simulationSeed = simulationSeed
+        # self.simulationReps = simulationReps
+        # self.inputFile = inputFile
+        # self.outputFile = outputFile
+        # self.outputSplit = outputSplit
+        # self.outputAppend = outputAppend
+        # self.outputLabel = outputLabel
+        # self.outputRna = outputRna
+        # self.outputProtein = outputProtein
+        # self.outputLowercase = outputLowercase
+        # self.outputKeepEmpty = outputKeepEmpty
+        # self.outputMarkins = outputMarkins
+        # self.segmentMap = segmentMap
+
+        # Input file is the main variant which we use to determine CPP Dawg args
+        # if not inputFile:
+        #     trickString = ''
+        #     # for i in range(segmentMap):
+        #     #     trickString.write(segmentMap.name)
+        #     #     for j in range(segmentMap[i]):
+        #     #         trickString.write(segmentMap[i].segment[j])
+
+        self._thisptr = new Dawg(inputFile.encode(), outputFile.encode(), simulationSeed, simulationReps)
+        # else:
+        # self._thisptr = new Dawg(inputFile, outputFile, simulationSeed, simulationReps)
+
 
         if self._thisptr == NULL:
             raise MemoryError()
@@ -56,18 +84,6 @@ cdef class PyDawg:
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)
-
-    cpdef void trickStats(self):
-        self._thisptr.trickStats()
-
-    # IO functions
-    # trick takes in a bunch of
-    def trick(self, s, **kwargs):
-        self.trickQueue = kwargs
-        self.trickQueue.label = s
-
-    def outputHandler(self):
-        pass
 
     def help(self):
         print("Mind your own business")

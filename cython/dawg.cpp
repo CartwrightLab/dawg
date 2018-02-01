@@ -11,6 +11,7 @@
 #include <dawg/global.h>
 #include <dawg/output.h>
 
+// Example constructor to make sure things work
 dawg::Dawg::Dawg()
 {
     using namespace std;
@@ -18,11 +19,20 @@ dawg::Dawg::Dawg()
 }
 
 dawg::Dawg::Dawg(const unsigned int s)
-: seed(s)
-, rng()
+: mSeed(s)
+, mRng()
 {
     using namespace std;
-    rng.seed(s);
+    mRng.seed(s);
+}
+
+dawg::Dawg::Dawg(const std::map<std::string, std::vector<std::string>>,
+	const std::string& o,
+	const unsigned int r,
+	const unsigned int s)
+{
+    using namespace std;
+    cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
 }
 
 ///////////////////////////////////////////////////////////
@@ -34,13 +44,24 @@ dawg::Dawg::Dawg(const std::string& in,
     const std::string& out,
     const unsigned int r,
     const unsigned int s)
-: inFile(in)
-, outFile(out)
-, reps(r)
-, seed(s)
-, mAlignments(reps)
+: mInFile(in)
+, mOutFile(out)
+, mRepetitions(r)
+, mSeed(s)
+, mAlignments(r)
+, mTrickster()
 {
+	bool ret = true;
 
+	auto pos = in.rfind(".dawg");
+
+	if (pos != std::string::npos)
+		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
+	else
+		ret &= mTrickster.parse(in.begin(), in.end());
+
+	if(!ret)
+		std::cerr << "Failure to parse DAWG file\n";
 }
 
 ///////////////////////////////////////////////////////////
@@ -51,24 +72,16 @@ void dawg::Dawg::run()
 {
     using namespace std;
 
-    bool ret = true;
-	// for(string &ss : inFile) {
-		ret &= dawg::trick::parse_file(mInput, inFile.c_str());
-	// }
-
-	if(!ret)
-		std::cerr << "Failure to parse DAWG file\n";
-
 	// process aliases
-	mInput.read_aliases();
+	mTrickster.read_aliases();
 
 	dawg::global_options glopts;
-	glopts.read_section(mInput.data.front());
+	glopts.read_section(mTrickster.data.front());
 
 	dawg::output write_aln;
 
-	if (!write_aln.open(/*glopts.output_file.c_str()*/ outFile.c_str(),
-		reps - 1,
+	if (!write_aln.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
+		mRepetitions - 1,
 		false, // false
 		false, // false
 		false)) // false
@@ -84,7 +97,7 @@ void dawg::Dawg::run()
 	);
 
 	std::vector<dawg::ma> configs;
-	if (!dawg::ma::from_trick(mInput, configs)) { // throwing error
+	if (!dawg::ma::from_trick(mTrickster, configs)) { // throwing error
 		DAWG_ERROR("bad configuration");
 		return;
 	}
@@ -93,8 +106,8 @@ void dawg::Dawg::run()
 	// work for us.  Configure its sections.
 	dawg::matic kimura;
     // if a seed was specified, use it
-	if(seed != 0) {
-		kimura.seed(this->seed);
+	if(mSeed != 0) {
+		kimura.seed(this->mSeed);
 	}
 
 	if (!kimura.configure(configs.begin(), configs.end())) {
@@ -105,28 +118,28 @@ void dawg::Dawg::run()
 	// prepare sets of aligned sequences;
 	kimura.pre_walk(mAlignments.front());
 	cout << "mAlignments.size(): " << mAlignments.size() << endl;
-	for (auto i = 0; i < reps; ++i) {
+	for (auto i = 0; i < mRepetitions; ++i) {
 		kimura.walk(mAlignments.at(i));
 		// alignments.insert(alignments.end(), aln);
-		// write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
-		printAlignmentInfo(mAlignments.at(i));
+		write_aln(mAlignments.at(i)); // this would print the aln data out to std::cout or a file
+		// printAlignmentInfo(mAlignments.at(i));
     }
 
 } // run
 
 void dawg::Dawg::bark() const {
     using namespace std;
-    cout << "inFile: " << inFile << ", " <<
-        "outFile: " << outFile << ", " <<
-        "reps: " << reps << ", " <<
-        "seed: " << seed << "\n";
+    cout << "inFile: " << mInFile << ", " <<
+        "outFile: " << mOutFile << ", " <<
+        "reps: " << mRepetitions << ", " <<
+        "seed: " << mSeed << "\n";
 } // bark
 
 unsigned int
 dawg::Dawg::rand(unsigned int a, unsigned int b) {
     using namespace std;
     // cout << "Hello rand(" << a << ", " << b << ")\n";
-    auto n = rng.rand_uint();
+    auto n = mRng.rand_uint();
     // cout << "n: " << n << "\n";
     return n % b + a;
 }
@@ -135,7 +148,7 @@ void dawg::Dawg::trickStats() const {
     using namespace dawg;
     using namespace std;
 
-    auto sections = mInput.data;
+    auto sections = mTrickster.data;
     for (auto sec : sections) {
         cout << "section: " << sec.name << "\n" <<
         "inherits: " << sec.inherits << "\n";
