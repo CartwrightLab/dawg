@@ -23,6 +23,7 @@ namespace dawg {
 ///	std::vector<double> subst_freqs
 ///	std::string subst_rate_model
 ///	std::vector<double> subst_rate_params 
+
 ///	std::vector<std::string> indel_model_ins 
 ///	std::vector<double> indel_params_ins 
 ///	std::vector<double> indel_rate_ins 
@@ -31,16 +32,19 @@ namespace dawg {
 ///	std::vector<double> indel_params_del 
 ///	std::vector<double> indel_rate_del 
 ///	unsigned int indel_max_del 
+///
 ///	std::string tree_model 
 ///	std::vector<double> tree_params 
 ///	std::string tree_tree 
-///	double tree_scale 
+///	double tree_scale
+///
 ///	unsigned int root_length 
 ///	std::string root_seq 
 ///	std::vector<double> root_rates 
 ///	unsigned int root_code 
 ///	unsigned int root_segment 
 ///	bool root_gapoverlap 
+///
 ///	bool output_markins 
 ///	bool output_keepempty 
 ///	bool output_lowercase 

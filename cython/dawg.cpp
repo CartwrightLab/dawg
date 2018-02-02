@@ -4,6 +4,9 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <cstdlib> // atof
+
+#include <boost/algorithm/string.hpp>
 
 #include <dawg/ma.h>
 #include <dawg/matic.h>
@@ -14,25 +17,30 @@
 // Example constructor to make sure things work
 dawg::Dawg::Dawg()
 {
-    using namespace std;
-    cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
+    dawgErrorLog("no param constructor", __FILE__, __LINE__);
 }
 
 dawg::Dawg::Dawg(const unsigned int s)
 : mSeed(s)
 , mRng()
 {
-    using namespace std;
     mRng.seed(s);
 }
 
-dawg::Dawg::Dawg(const std::map<std::string, std::vector<std::string>>,
-	const std::string& o,
+///////////////////////////////////////////////////////////
+/// \brief 3 param constructor does not take an input string/file
+///	The simulation parameters can be assembled with 'addSegments'
+///////////////////////////////////////////////////////////
+dawg::Dawg::Dawg(
+	const std::string& output,
 	const unsigned int seed,
 	const unsigned int reps)
+: mInFile()
+, mOutFile(output)
+, mSeed(seed)
+, mRepetitions(reps)
 {
-    using namespace std;
-    cout << "Hello PyDawg: " << __FILE__ << ", " << __LINE__ << endl;
+    
 }
 
 ///////////////////////////////////////////////////////////
@@ -50,6 +58,7 @@ dawg::Dawg::Dawg(const std::string& in,
 , mRepetitions(reps)
 , mTrickster()
 , mKimura()
+, mSegmentModels()
 {
 	// Parse the input file
 	bool ret = true;
@@ -73,14 +82,104 @@ dawg::Dawg::Dawg(const std::string& in,
 
 	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
-	dawg::matic kimura;
+	// dawg::matic kimura;
     // if a seed was specified, use it
 	if(mSeed != 0) {
-		kimura.seed(this->mSeed);
+		mKimura.seed(this->mSeed);
 	}
 
-	if (!kimura.configure(configs.begin(), configs.end())) {
+	if (!mKimura.configure(configs.begin(), configs.end())) {
 		DAWG_ERROR("bad configuration");
+	}
+}
+
+///////////////////////////////////////////////////////////
+/// \brief addSegment
+///////////////////////////////////////////////////////////
+void dawg::Dawg::addSegment(const std::string &name,
+		const std::string &subst_model,
+        const std::string &subst_params,
+        const std::string &subst_freqs,
+        const std::string &subst_rate_model,
+        const std::string &subst_rate_params,
+
+        const std::string &indel_model_ins,
+        const std::string &indel_params_ins,
+        const std::string &indel_rate_ins,
+        const unsigned int indel_max_ins,
+        const std::string &indel_model_del,
+        const std::string &indel_params_del,
+        const std::string &indel_rate_del,
+        const unsigned int indel_max_del,
+        
+        const std::string &tree_model,
+        const std::string &tree_params,
+        const std::string &tree_tree,
+        const double tree_scale,
+        
+        const unsigned int root_length,
+        const std::string &root_seq,
+        const std::string &root_rates,
+        const unsigned int root_code,
+        const unsigned int root_segment,
+        const bool root_gapoverlap,
+        
+        const bool output_markins,
+        const bool output_keepempty,
+        const bool output_lowercase,
+        const bool output_rna) {
+
+	using namespace std;
+
+	dawg::ma segmentModel;
+
+	// initialize all the strings first (the ones that we don't need to parse)
+	segmentModel.name = name;
+	segmentModel.subst_model = subst_model;
+	segmentModel.subst_rate_model = subst_rate_model;
+	segmentModel.indel_max_ins = indel_max_ins;
+	segmentModel.indel_max_del = indel_max_del;
+	segmentModel.tree_model = tree_model;
+	segmentModel.tree_scale = tree_scale;
+	segmentModel.root_length = root_length;
+	segmentModel.root_seq = root_seq;
+	segmentModel.root_code = root_code;
+	segmentModel.root_segment = root_segment;
+	segmentModel.root_gapoverlap = root_gapoverlap;
+	segmentModel.output_markins = output_markins;
+	segmentModel.output_lowercase = output_lowercase;
+	segmentModel.output_rna = output_rna;
+
+	std::vector<string> string_split;
+	boost::algorithm::split(string_split, subst_params, boost::is_any_of(","));
+
+	std::vector<double> string_to_double;
+	for (auto params : string_split) {
+		string_to_double.emplace_back(atof(params.c_str())); // consider strtod
+	}
+	segmentModel.subst_params = string_to_double;
+
+	mSegmentModels.emplace_back(segmentModel);
+}
+
+
+///////////////////////////////////////////////////////////
+///	\brief echoSegments :: Print out segments to stdout
+///  segment: name, segment: inheritsFrom, ... ,
+///	 segment: subst_model, segment: indel_max_del, ...
+///////////////////////////////////////////////////////////
+void dawg::Dawg::echoSegments() const {
+	using namespace std;
+
+	for (auto &&segment : mSegmentModels) {
+		cout << "segment.name: " << segment.name << "\n" <<
+		"segment.subst_model: " << segment.subst_model << "\n" <<
+		"segment.subst_params: "; printVectorContents(segment.subst_params);
+		cout << "segment.subst_freqs: "; printVectorContents(segment.subst_freqs);
+		cout << "segment.rate_model: " << segment.subst_rate_model << "\n"
+		<< "segment.subst_rate_params: "; printVectorContents(segment.subst_rate_params);
+		cout << "segment.indel_model_ins: "; printVectorContents(segment.indel_model_ins);
+		cout << "\n";
 	}
 }
 
@@ -94,9 +193,9 @@ void dawg::Dawg::run()
 
 	// prepare sets of aligned sequences;
 	dawg::alignment aln;
-	kimura.pre_walk(aln);
+	mKimura.pre_walk(aln);
 	for (auto i = 0; i < mRepetitions; ++i) {
-		kimura.walk(aln);
+		mKimura.walk(aln);
 		// printAlignmentInfo(aln);
 		// mAlignments.at(i) = std::move(aln);
 		mAlignments.emplace_back(aln);
@@ -166,6 +265,15 @@ void dawg::Dawg::trickStats() const {
             cout << "\n";
         }
     }
+}
+
+template <typename VectorType>
+void dawg::Dawg::printVectorContents(VectorType &vec) const {
+	using namespace std;
+	for (auto v : vec) {
+		cout << v << ", ";
+	}
+	cout << "\n";
 }
 
 void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {

@@ -65,47 +65,80 @@ Length = 1000
 Reps = 10
 """
 
-puppy = pd.PyDawg(simulationSeed=1111111, 
-    inputFile=trickString2, outputFile='basic_dna_cython_1111111.fasta', 
-    outputRna=False, outputLowercase=False, outputKeepEmpty=False, outputMarkins=True)
-puppy.run() # call walk from dawgcpp
-puppy.printAlignments()
+puppy = pd.PyDawg(output_file='basic_dna_cython_1111111.fasta', 
+    simulation_seed=1111111, simulation_reps=10)
+puppy.addSegment(
+    name='_default_',
+    inherits_from='_initial_',
+    substitution_model='jc',
+    substitution_parameters='0.3, 0.2',
+    substitution_frequencies='',
+    substitution_rate_model='',
+    substitution_rate_parameters='',
 
-# segmentMap = {
-#     "segment1" : pd.Segment(inheritsFrom="__default__",
-# 	treeModel="((A:0.1, B:0.4)C);",
-# 	substitutionModel="jc",
-# 	substitutionParameters=[0.3, 0.2],
-# 	indelModelInsertion="POWER-LAW",
-# 	indelParametersInsertion= [0.3, 10.0],
-# 	indelRateInsertion=0.335,
-# 	indelMaxInsertion=10.0,
-# 	indelModelDeletion="ZERO",
-# 	indelParametersDeletion= [0.01, 4.0],
-# 	indelRateDeletion=0.03322,
-# 	indelMaxDeletion=4.0,
-# 	rootCode=1,
-# 	rootSequence="AATTTGGGGAAAAAAAAATTCC"),
-#     "segment2" : pd.Segment(
-# 	inheritsFrom="segment1",
-# 	treeModel="((A:0.4, B:0.6)C);",
-# 	substitutionModel="GAMMA",
-# 	substitutionParameters=[0.3, 0.2],
-# 	indelModelInsertion="POWER-LAW",
-# 	indelParametersInsertion= [0.3, 10.0],
-# 	indelRateInsertion=0.335,
-# 	indelMaxInsertion=10.0,
-# 	indelModelDeletion="ZERO",
-# 	indelParametersDeletion= [0.01, 4.0],
-# 	indelRateDeletion=0.03322,
-# 	indelMaxDeletion=4.0,
-#     rootCode=1,
-# 	rootSequence="AATTTGGGGAAAAAAAAATTCC")}
-# for key, value in segmentMap.items():
-#     print(key, 'corresponds to: ', segmentMap[key])
-#     for segment in segmentMap[key]:
-#         print()
-# puppy.run()
+    indel_model_insertion='POWER-LAW',
+    indel_parameters_insertion='0.3, 10.0',
+    indel_rate_insertion='',
+    indel_max_insertion=1,
+    indel_model_deletion='',
+    indel_parameters_deletion='',
+    indel_rate_deletion='',
+    indel_max_deletion=1,
+
+    tree_model='',
+    tree_parameters='',
+    tree_tree='\"((A:0.1, B:0.4)C);\"',
+    tree_scale=0,
+
+    root_length=0,
+    root_sequence='',
+    root_rates='',
+    root_code=0,
+    root_segment=0,
+    root_gapoverlap=False,
+
+    output_rna=False,
+    output_lowercase=False,
+    output_keepempty=False,
+    output_markins=True)
+puppy.addSegment(
+    name='segment2',
+    inherits_from='segment1',
+    substitution_model='jc',
+    substitution_parameters='0.3, 0.2',
+    substitution_frequencies='',
+    substitution_rate_model='',
+    substitution_rate_parameters='',
+
+    indel_model_insertion='POWER-LAW',
+    indel_parameters_insertion='0.25, 10.0',
+    indel_rate_insertion='',
+    indel_max_insertion='',
+    indel_model_deletion='',
+    indel_parameters_deletion='',
+    indel_rate_deletion='',
+    indel_max_deletion='',
+
+    tree_model='',
+    tree_parameters='',
+    tree_tree='((X:0.1, Y:0.4)Z);',
+    tree_scale=0,
+
+    root_length=0,
+    root_sequence='',
+    root_rates='',
+    root_code=1,
+    root_segment=0,
+    root_gapoverlap=False,
+
+    output_rna=False,
+    output_lowercase=False,
+    output_keepempty=False,
+    output_markins=True)
+
+puppy.echoSegments()
+# puppy.run() # call walk from dawgcpp
+# puppy.printAlignments()
 
     # # alignmentList is a list of strings containing the simulated alignments
     # alignmentList = dawg.fetchAlignments()
