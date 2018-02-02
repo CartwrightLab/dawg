@@ -49,11 +49,11 @@ dawg::Dawg::Dawg(const std::string& in,
 , mSeed(seed)
 , mRepetitions(reps)
 , mTrickster()
+, mKimura()
 {
+	// Parse the input file
 	bool ret = true;
-
 	auto pos = in.rfind(".dawg");
-
 	if (pos != std::string::npos)
 		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
 	else
@@ -61,23 +61,14 @@ dawg::Dawg::Dawg(const std::string& in,
 
 	if(!ret)
 		std::cerr << "Failure to parse DAWG file\n";
-}
 
-///////////////////////////////////////////////////////////
-/// \brief Create the alignments
-///
-///////////////////////////////////////////////////////////
-void dawg::Dawg::run()
-{
-    using namespace std;
 
 	// process aliases
 	mTrickster.read_aliases();
 
 	std::vector<dawg::ma> configs;
 	if (!dawg::ma::from_trick(mTrickster, configs)) {
-		DAWG_ERROR("bad configuration");
-		return;
+		std::cerr << "bad configuration: " << __FILE__ << __LINE__ << std::endl;
 	}
 
 	// Create the object that will do all the simulation
@@ -90,8 +81,16 @@ void dawg::Dawg::run()
 
 	if (!kimura.configure(configs.begin(), configs.end())) {
 		DAWG_ERROR("bad configuration");
-		return;
 	}
+}
+
+///////////////////////////////////////////////////////////
+/// \brief Create the alignments
+///	tell the dawg to run, but then just walk it
+///////////////////////////////////////////////////////////
+void dawg::Dawg::run()
+{
+    using namespace std;
 
 	// prepare sets of aligned sequences;
 	dawg::alignment aln;
@@ -124,18 +123,12 @@ void dawg::Dawg::printAlignments() {
 		DAWG_ERROR("bad configuration");
 		return;
 	}
-	write_aln.set_blocks(glopts.output_block_head.c_str(),
-		glopts.output_block_between.c_str(),
-		glopts.output_block_tail.c_str(),
-		glopts.output_block_before.c_str(),
-		glopts.output_block_after.c_str()
-	);
 
 	for (auto a : mAlignments) {
 #if defined(DAWG_DEBUG)
 	printAlignmentInfo(a);
 #endif // defined
-	
+
 		write_aln(a);
 	}
 }
@@ -183,4 +176,11 @@ void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
 	for (const auto &v : aln) {
 		cout << "label: " << v.label.c_str() << "\nseq: " << v.seq.c_str() << endl;
 	}
+}
+
+// Log an error message
+template <typename Line, typename File>
+void dawg::Dawg::dawgErrorLog(const std::string &msg, Line l, File f) const {
+	using namespace std;
+	cerr << msg << ", file: " << f << ", line: " << l << endl;
 }

@@ -40,10 +40,12 @@ private:
     std::vector<dawg::alignment> mAlignments;
     mutt mRng;
     trick mTrickster;
-    // matic_section mMaticSection;
-
+    dawg::matic mKimura;
 
     void printAlignmentInfo(const dawg::alignment &aln) const;
+
+    template <typename Line, typename File>
+    void dawgErrorLog(const std::string &msg, Line l, File f) const;
 }; // class Dawg
 
 } // namespace dawg
