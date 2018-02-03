@@ -113,11 +113,11 @@ puppy.addSegment(
     indel_model_insertion='POWER-LAW',
     indel_parameters_insertion='0.25, 10.0',
     indel_rate_insertion='',
-    indel_max_insertion='',
+    indel_max_insertion=1,
     indel_model_deletion='',
     indel_parameters_deletion='',
     indel_rate_deletion='',
-    indel_max_deletion='',
+    indel_max_deletion=1,
 
     tree_model='',
     tree_parameters='',
