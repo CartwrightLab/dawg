@@ -16,7 +16,7 @@ namespace dawg {
 
 class root_model {
 public:
-	bool create(unsigned int len, sequence &&root_seq) {
+	bool create(unsigned int len, sequence &root_seq) {
 		this->root_seq = root_seq;
 		root_len = len;
 

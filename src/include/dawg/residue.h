@@ -125,7 +125,7 @@ public:
 		static constexpr char sIns[] = "-+";
 		// table for going from base->char
 		// TODO: Allow codons to be translated into aa
-		// table is 63 wide and 30 down
+		// table is 64 wide and 30 down
 		static constexpr char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
 			"acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // dna
