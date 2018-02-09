@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+# like wrappers do
+
 # The **basic-dna.dawg** trick file with 10 reps, seed=212121 is used
 BOOST_FASTA_FILE="boostPython.fasta"
 CYTHON_FASTA_FILE="cython.fasta"
