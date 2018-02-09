@@ -60,6 +60,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
         void bark()
         unsigned int rand(unsigned int, unsigned int)
         void trickStats()
+        string getEvolvedSequences()
 
 """
 The PyDawg module is the official Python module we can import,
@@ -70,7 +71,7 @@ cdef class PyDawg:
 
     cdef Dawg *_thisptr
 
-    def __cinit__(self, input_file='', output_file='fasta:-', 
+    def __cinit__(self, input_file='', output_file='fasta:-',
         simulation_seed=0, simulation_reps=10):
         # output_split=False,
         # output_append=False,
@@ -81,7 +82,7 @@ cdef class PyDawg:
         if not input_file:
             self._thisptr = new Dawg(output_file.encode(), simulation_seed, simulation_reps)
         else:
-            self._thisptr = new Dawg(input_file.encode(), output_file.encode(), 
+            self._thisptr = new Dawg(input_file.encode(), output_file.encode(),
                 simulation_seed, simulation_reps)
 
         if self._thisptr == NULL:
@@ -127,13 +128,13 @@ cdef class PyDawg:
         output_keepempty=False,
         output_markins=True):
             self._thisptr.addSegment(name.encode(),
-            #inheritsFrom.encode(), 
+            #inheritsFrom.encode(),
             substitution_model.encode(),
             substitution_parameters.encode(),
             substitution_frequencies.encode(),
             substitution_rate_model.encode(),
             substitution_rate_parameters.encode(),
-            
+
             indel_model_insertion.encode(),
             indel_parameters_insertion.encode(),
             indel_rate_insertion.encode(),
@@ -172,6 +173,9 @@ cdef class PyDawg:
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)
+
+    cpdef string fetchEvolvedSequences(self):
+        return self._thisptr.getEvolvedSequences()
 
     def help(self):
         print("Help me.")

@@ -202,7 +202,7 @@ void dawg::matic::walk(alignment& aln) {
 				branch_color += dawg::residue::branch_inc;
 			}
 		}
-		align(aln, seqs, configs[0].rex);
+		// align(aln, seqs, configs[0].rex);
 	}
 
 	for(const segment &seg : configs) {
@@ -237,7 +237,7 @@ void dawg::matic::walk(alignment& aln) {
 
 		}
 		// Align segment
-		align(aln, seqs, seg.rex);
+		// align(aln, seqs, seg.rex);
 	}
 }
 

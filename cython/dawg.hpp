@@ -55,7 +55,7 @@ public:
         const unsigned int root_code,
         const unsigned int root_segment,
         const bool root_gapoverlap,
-        
+
         const bool output_markins,
         const bool output_keepempty,
         const bool output_lowercase,
@@ -68,6 +68,8 @@ public:
     void bark() const;
     unsigned int rand(unsigned int a, unsigned int b);
     void trickStats() const;
+
+    const char * getEvolvedSequences() const;
 private:
     std::string mInFile;
     std::string mOutFile;

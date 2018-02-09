@@ -40,7 +40,7 @@ dawg::Dawg::Dawg(
 , mSeed(seed)
 , mRepetitions(reps)
 {
-    
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -111,19 +111,19 @@ void dawg::Dawg::addSegment(const std::string &name,
         const std::string &indel_params_del,
         const std::string &indel_rate_del,
         const unsigned int indel_max_del,
-        
+
         const std::string &tree_model,
         const std::string &tree_params,
         const std::string &tree_tree,
         const double tree_scale,
-        
+
         const unsigned int root_length,
         const std::string &root_seq,
         const std::string &root_rates,
         const unsigned int root_code,
         const unsigned int root_segment,
         const bool root_gapoverlap,
-        
+
         const bool output_markins,
         const bool output_keepempty,
         const bool output_lowercase,
@@ -196,8 +196,6 @@ void dawg::Dawg::run()
 	mKimura.pre_walk(aln);
 	for (auto i = 0; i < mRepetitions; ++i) {
 		mKimura.walk(aln);
-		// printAlignmentInfo(aln);
-		// mAlignments.at(i) = std::move(aln);
 		mAlignments.emplace_back(aln);
     }
 
@@ -265,6 +263,23 @@ void dawg::Dawg::trickStats() const {
             cout << "\n";
         }
     }
+}
+
+///////////////////////////////////////////////////////////
+/// \brief This is hacky and imperfect
+/// We assume that the 'align' method in Dawg's evolver methods
+/// are commented out. And then we just mash the alignment vector
+///	together and return it as one giant c-string
+///////////////////////////////////////////////////////////
+const char * dawg::Dawg::getEvolvedSequences() const {
+	using namespace std;
+	string temp; // the string to append to
+	for (const auto &aln : mAlignments) {
+		for (const auto &s : aln) {
+			temp += s.label + s.seq + ":";
+		}
+	}
+	return temp.c_str();
 }
 
 template <typename VectorType>
