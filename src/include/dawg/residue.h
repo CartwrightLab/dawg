@@ -12,6 +12,8 @@
 #	define __STDC_LIMIT_MACROS 1
 #endif
 
+#include <dawg/log.h>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -243,20 +245,26 @@ public:
 			};
 		sequence residues;
 		if (type_ != CODON) {
-			for (auto i = 0; i != root_seq.size(); ++i) {
+			for (size_t i = 0; i != root_seq.size(); ++i) {
 				auto base = encode(root_seq.at(i));
-				if (base == -1)
+				if (base == static_cast<decltype(base)>(-1)) {
 					DAWG_ERROR("Invalid user sequence");
+					return {};
+				}
 				residues.emplace_back(base, 0, 0);
 			}
 		} else {
-			if (root_seq.size() % 3 != 0)
+			if (root_seq.size() % 3 != 0) {
 				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
-			for (auto i = 0; i + 2 < root_seq.size(); i += 3) {
+				return {};
+			}
+			for (size_t i = 0; i + 2 < root_seq.size(); i += 3) {
 				residues.emplace_back(triplet_to_codon(
 					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
-				if (residues.back().data() == -1)
+				if (residues.back().data() == -1) {
 					DAWG_ERROR("Invalid user sequence");
+					return {};
+				}
 			}
 		}
 		return residues;
