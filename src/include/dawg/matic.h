@@ -2,7 +2,7 @@
 #ifndef DAWG_MATIC_H
 #define DAWG_MATIC_H
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #include <dawg/mutt.h>
@@ -19,12 +19,13 @@
 #include <stack>
 #include <map>
 #include <memory>
+#include <cstdint>
 
 namespace dawg {
 namespace details {
 
 struct indel_data {
-	typedef std::pair<double, boost::uint32_t> element;
+	typedef std::pair<double, std::uint32_t> element;
 	typedef std::stack<element> stack;
 
 	stack ins;
@@ -66,7 +67,11 @@ public:
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const;
 
+<<<<<<< HEAD
 	inline boost::uint32_t next_indel(double d, double &f, bool bDel) const {
+=======
+	inline std::uint32_t next_indel(double d, double &f, bool bDel) const {
+>>>>>>> Replace boost stdint types with cpp stdint in dawg details \
 		double ins_rate = ins_mod.rate();
 		double del_rate = del_mod.rate();
 		double indel_rate = ins_rate+del_rate;
@@ -79,16 +84,16 @@ public:
 		}
 		f = modf(d/indel_rate, &d);
 		f *= (indel_rate);
-		boost::uint32_t x = 2*static_cast<boost::uint32_t>(d);
+		std::uint32_t x = 2*static_cast<std::uint32_t>(d);
 		if(f < del_rate)
 			return x + ((bDel) ? 3 : 1);
 		f -= del_rate;
 		return x + ((bDel) ? 4 : 2);
 	}
 
-	inline boost::uint32_t mark_del(boost::uint32_t u, sequence &child,
+	inline std::uint32_t mark_del(std::uint32_t u, sequence &child,
 			sequence::const_iterator &first, sequence::const_iterator last) const {
-		boost::uint32_t uu;
+		std::uint32_t uu;
 		for(uu=0;uu != u && first != last;++first) {
 			child.push_back(*first);
 			if(first->base() == gap_base)

@@ -1,6 +1,9 @@
 /****************************************************************************
- *  Copyright (C) 2009 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
+
+#include <cstdint>
+#include <cfloat>
 
 #include <dawg/wood_parse.h>
 #include <dawg/matic.h>
@@ -299,195 +302,195 @@ void dawg::details::matic_section::evolve_upstream(
 
 dawg::sequence::const_iterator
 dawg::details::matic_section::evolve_indels(
-        sequence &child, indel_data &indels, double T, residue::data_type branch_color,
-        sequence::const_iterator first, sequence::const_iterator last,
-        mutt &m) const {
-    double f, t;
-    double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
-    //double indel_rate = ins_rate+del_rate;
+		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m) const {
+	double f, t;
+	double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
+	//double indel_rate = ins_rate+del_rate;
 
-    for(;;) {
-        // Is there a deletion that needs to be processed?
-        if(!indels.del.empty()) {
-            indel_data::element &r = indels.del.top();
-            // Something has to be deleted
-            if(!indels.ins.empty()) {
-                // Deleted Insertion
-                indel_data::element &n = indels.ins.top();
-                // Did anything happen between the deletion and this insertion
-                assert(r.first >= n.first && 1.0 > r.first-n.first );
-                t = r.first-n.first;
-                double tt = n.first;
-                boost::uint32_t u = std::min(r.second, n.second);
-                // Determine where the next event occurs
-                boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
-                if(x <= 2*u) {
-                    // the next event occured between these two
-                    // how may sites are deleted
-                    u = x/2;
-                    // adjust stacks
-                    r.second -= u;
-                    n.second -= u;
-                    if(r.second == 0)
-                        indels.del.pop();
-                    if(n.second == 0)
-                        indels.ins.pop();
-                    // push the new event on the proper stack
-                    if((x&1) == 1) {
-                        indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
-                    } else {
-                        do {
-                            indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
-                            f += m.rand_exp(t*T);
-                        } while( f < ins_rate );
-                    }
-                } else {
-                    r.second -= u;
-                    n.second -= u;
-                    if(r.second == 0)
-                        indels.del.pop();
-                    if(n.second == 0)
-                        indels.ins.pop();
-                }
+	for(;;) {
+		// Is there a deletion that needs to be processed?
+		if(!indels.del.empty()) {
+			indel_data::element &r = indels.del.top();
+			// Something has to be deleted
+			if(!indels.ins.empty()) {
+				// Deleted Insertion
+				indel_data::element &n = indels.ins.top();
+				// Did anything happen between the deletion and this insertion
+				assert(r.first >= n.first && 1.0 > r.first-n.first );
+				t = r.first-n.first;
+				double tt = n.first;
+				std::uint32_t u = std::min(r.second, n.second);
+				// Determine where the next event occurs
+				std::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
+				if(x <= 2*u) {
+					// the next event occured between these two
+					// how may sites are deleted
+					u = x/2;
+					// adjust stacks
+					r.second -= u;
+					n.second -= u;
+					if(r.second == 0)
+						indels.del.pop();
+					if(n.second == 0)
+						indels.ins.pop();
+					// push the new event on the proper stack
+					if((x&1) == 1) {
+						indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
+					} else {
+						do {
+							indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
+							f += m.rand_exp(t*T);
+						} while( f < ins_rate );
+					}
+				} else {
+					r.second -= u;
+					n.second -= u;
+					if(r.second == 0)
+						indels.del.pop();
+					if(n.second == 0)
+						indels.ins.pop();
+				}
 
-                // insert u "deleted insertions" into buffer
-                child.insert(child.end(), u, residue(gap_base, 0, branch_color));
-                // remove u sites from both stacks, pop if empty
-            } else if(first != last) {
-                // Deleted Original
-                assert(r.first < 1.0);
-                t = r.first;
-                // Determine where the next event occurs
-                boost::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
-                if(x <= 2*r.second) {
-                    // copy and mark at most x/2 nucleotides as deleted
-                    boost::uint32_t u = mark_del(x/2, child, first, last);
-                    if(u == r.second)
-                        indels.del.pop();
-                    else
-                        r.second -= u;
-                    if((x&1) == 1) {
-                        indels.del.push(indel_data::element(t*f/del_rate, del_mod(m)));
-                    } else {
-                        do {
-                            indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
-                            f += m.rand_exp(t*T);
-                        } while( f < ins_rate );
-                    }
-                } else {
-                    // copy and mark at most r.second nucleotides as deleted
-                    boost::uint32_t u = mark_del(r.second, child, first, last);
-                    // remove sites from stack, pop if empty
-                    if(u == r.second)
-                        indels.del.pop();
-                    else
-                        r.second -= u;
-                }
-            } else {
-                // everything possible has been deleted
-                break;
-            }
-        } else if(!indels.ins.empty()) {
-            indel_data::element &n = indels.ins.top();
-            assert(n.first < 1.0);
-            t = 1.0-n.first;
-            // Find location of next event
-            boost::uint32_t x = next_indel(m.rand_exp(t*T), f, false);
-            boost::uint32_t u = n.second;
-            if(x <= 2*u) {
-                // next event overlaps this one
-                // remove u sites from the location and pop if empty
-                u = x/2;
-                n.second -= u;
-                double tt = n.first;
-                if(n.second == 0)
-                    indels.ins.pop();
-                // push the new event(s) on the proper stack
-                if((x&1) == 1) {
-                    indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
-                } else {
-                    do {
-                        indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
-                        f += m.rand_exp(t*T);
-                    } while( f < ins_rate );
-                }
-            } else {
-                indels.ins.pop();
-            }
-            // Insert u random nucleotides into buffer
-            while(u--)
-                child.push_back(residue(sub_mod(m), rat_mod(m), branch_color));
-        } else {
-            break; // nothing to do
-        }
-    }
-    return first;
+				// insert u "deleted insertions" into buffer
+				child.insert(child.end(), u, residue(gap_base, 0, branch_color));
+				// remove u sites from both stacks, pop if empty
+			} else if(first != last) {
+				// Deleted Original
+				assert(r.first < 1.0);
+				t = r.first;
+				// Determine where the next event occurs
+				std::uint32_t x = next_indel(m.rand_exp(t*T), f, true);
+				if(x <= 2*r.second) {
+					// copy and mark at most x/2 nucleotides as deleted
+					std::uint32_t u = mark_del(x/2, child, first, last);
+					if(u == r.second)
+						indels.del.pop();
+					else
+						r.second -= u;
+					if((x&1) == 1) {
+						indels.del.push(indel_data::element(t*f/del_rate, del_mod(m)));
+					} else {
+						do {
+							indels.ins.push(indel_data::element(t*f/ins_rate, ins_mod(m)));
+							f += m.rand_exp(t*T);
+						} while( f < ins_rate );
+					}
+				} else {
+					// copy and mark at most r.second nucleotides as deleted
+					std::uint32_t u = mark_del(r.second, child, first, last);
+					// remove sites from stack, pop if empty
+					if(u == r.second)
+						indels.del.pop();
+					else
+						r.second -= u;
+				}
+			} else {
+				// everything possible has been deleted
+				break;
+			}
+		} else if(!indels.ins.empty()) {
+			indel_data::element &n = indels.ins.top();
+			assert(n.first < 1.0);
+			t = 1.0-n.first;
+			// Find location of next event
+			std::uint32_t x = next_indel(m.rand_exp(t*T), f, false);
+			std::uint32_t u = n.second;
+			if(x <= 2*u) {
+				// next event overlaps this one
+				// remove u sites from the location and pop if empty
+				u = x/2;
+				n.second -= u;
+				double tt = n.first;
+				if(n.second == 0)
+					indels.ins.pop();
+				// push the new event(s) on the proper stack
+				if((x&1) == 1) {
+					indels.del.push(indel_data::element(tt+t*f/del_rate, del_mod(m)));
+				} else {
+					do {
+						indels.ins.push(indel_data::element(tt+t*f/ins_rate, ins_mod(m)));
+						f += m.rand_exp(t*T);
+					} while( f < ins_rate );
+				}
+			} else {
+				indels.ins.pop();
+			}
+			// Insert u random nucleotides into buffer
+			while(u--)
+				child.push_back(residue(sub_mod(m), rat_mod(m), branch_color));
+		} else {
+			break; // nothing to do
+		}
+	}
+	return first;
 }
 
 void dawg::details::matic_section::evolve(
-        sequence &child, indel_data &indels, double T, residue::data_type branch_color,
-        sequence::const_iterator first, sequence::const_iterator last,
-        mutt &m) const {
+		sequence &child, indel_data &indels, double T, residue::data_type branch_color,
+		sequence::const_iterator first, sequence::const_iterator last,
+		mutt &m) const {
 
-    if(T <= 0.0) {
-        child.insert(child.end(), first, last);
-        return;
-    }
-    //process any existing indels.
-    first = evolve_indels(child, indels, T, branch_color, first, last, m);
+	if(T <= 0.0) {
+		child.insert(child.end(), first, last);
+		return;
+	}
+	//process any existing indels.
+	first = evolve_indels(child, indels, T, branch_color, first, last, m);
 
-    const double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
-    const double indel_rate = ins_rate+del_rate;
-    const double uni_scale = sub_mod.uniform_scale();
-    double d = m.rand_exp(T);
-    for(;;) {
-        sequence::const_iterator start = first;
-        for(;first != last; ++first) {
-            if(d < indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale)
-                break;
-            d -= indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale;
-        }
+	const double ins_rate = ins_mod.rate(), del_rate = del_mod.rate();
+	const double indel_rate = ins_rate+del_rate;
+	const double uni_scale = sub_mod.uniform_scale();
+	double d = m.rand_exp(T);
+	for(;;) {
+		sequence::const_iterator start = first;
+		for(;first != last; ++first) {
+			if(d < indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale)
+				break;
+			d -= indel_rate+rat_mod.values()[first->rate_cat()]*uni_scale;
+		}
 
-        // check to see if offset is beyond end of sequence
-        if(first == last) {
-            child.insert(child.end(), start, first);
-            break;
-        }
-        // check to see if we landed on a gap
-        if(first->base() == gap_base) {
-            ++first;
-            child.insert(child.end(), start, first);
-            d = m.rand_exp(T);
-            continue;
-        }
-        // copy unmodified sites into buffer.
-        child.insert(child.end(), start, first);
-        if(d < del_rate) {
-            indels.del.push(indel_data::element(d/del_rate, del_mod(m)));
-            first = evolve_indels(child, indels, T, branch_color, first, last, m);
-            d = m.rand_exp(T);
-            continue;
-        } else
-            d -= del_rate;
-        double w = rat_mod.values()[first->rate_cat()]*uni_scale;
-        //double w = uni_scale;
-        residue rez = *first;
-        ++first;
-        while(d < w) {
-            rez.base(sub_mod(m,rez.base()));
-            d += m.rand_exp(T);
-        }
-        d -= w;
-        child.push_back(rez);
-        if(d < ins_rate) {
-            do {
-                indels.ins.push(indel_data::element(d/ins_rate, ins_mod(m)));
-                d += m.rand_exp(T);
-            } while(d < ins_rate);
-            first = evolve_indels(child, indels, T, branch_color, first, last, m);
-        }
-        d -= ins_rate;
-    }
+		// check to see if offset is beyond end of sequence
+		if(first == last) {
+			child.insert(child.end(), start, first);
+			break;
+		}
+		// check to see if we landed on a gap
+		if(first->base() == gap_base) {
+			++first;
+			child.insert(child.end(), start, first);
+			d = m.rand_exp(T);
+			continue;
+		}
+		// copy unmodified sites into buffer.
+		child.insert(child.end(), start, first);
+		if(d < del_rate) {
+			indels.del.push(indel_data::element(d/del_rate, del_mod(m)));
+			first = evolve_indels(child, indels, T, branch_color, first, last, m);
+			d = m.rand_exp(T);
+			continue;
+		} else
+			d -= del_rate;
+		double w = rat_mod.values()[first->rate_cat()]*uni_scale;
+		//double w = uni_scale;
+		residue rez = *first;
+		++first;
+		while(d < w) {
+			rez.base(sub_mod(m,rez.base()));
+			d += m.rand_exp(T);
+		}
+		d -= w;
+		child.push_back(rez);
+		if(d < ins_rate) {
+			do {
+				indels.ins.push(indel_data::element(d/ins_rate, ins_mod(m)));
+				d += m.rand_exp(T);
+			} while(d < ins_rate);
+			first = evolve_indels(child, indels, T, branch_color, first, last, m);
+		}
+		d -= ins_rate;
+	}
 }
 
 struct aligner_data {
@@ -499,60 +502,60 @@ struct aligner_data {
 };
 
 void dawg::matic::align(alignment& aln, const seq_buffers_type &seqs, const residue_exchange &rex) {
-    assert(aln.size() <= seqs.size());
+	assert(aln.size() <= seqs.size());
 
-    //unsigned uFlags = 0; //temporary
+	//unsigned uFlags = 0; //temporary
 
-    // construct a table to hold alignment information
-    // TODO: Cache this?
-    std::vector<aligner_data> aln_table;
-    for(alignment::size_type u=0;u<aln.size();++u) {
-        aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
-    }
+	// construct a table to hold alignment information
+	// TODO: Cache this?
+	std::vector<aligner_data> aln_table;
+	for(alignment::size_type u=0;u<aln.size();++u) {
+		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
+	}
 
-    // Alignment rules:
-    // Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
-    // Deletion & Original Nucleotide : w/ del, original nucl
+	// Alignment rules:
+	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
+	// Deletion & Original Nucleotide : w/ del, original nucl
 
-    unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3;
+	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3;
 
-    residue::data_type uBranch = 0, uBranchN = 0;
+	residue::data_type uBranch = 0, uBranchN = 0;
 
-    // Go through each column, adding gaps where neccessary
-    for(;;) {
-        unsigned int uState =  uStateQuit; // Set to quit
-        uBranch = 0; // Set to lowest branch
-        // Find column state(s)
-        for(aligner_data &v : aln_table) {
-            if(v.it == v.last)
-                continue; // Sequence is done
-            uBranchN = v.it->branch();
-            if(uBranchN == uBranch) {
-                uState &= ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
-            } else if(uBranchN > uBranch) {
-                uBranch = uBranchN;
-                uState = uStateQuit & ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
-            }
-        }
-        switch(uState&3) {
-            case 3:
-            case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
-            case 1: // Empty column that we want to ignore
-                for(aligner_data &v : aln_table) {
-                    if(v.it != v.last && v.it->branch() == uBranch)
-                        ++v.it;
-                }
-                break;
-            case 0: // Unempty column
-                for(aligner_data &v : aln_table) {
-                    if(v.it == v.last || v.it->branch() != uBranch) {
-                        rex.append_ins(*v.str);
-                    } else {
-                        rex.append_residue(*v.str, *(v.it++));
-                    }
-                }
-        };
-    }
+	// Go through each column, adding gaps where neccessary
+	for(;;) {
+		unsigned int uState =  uStateQuit; // Set to quit
+		uBranch = 0; // Set to lowest branch
+		// Find column state(s)
+		for(aligner_data &v : aln_table) {
+			if(v.it == v.last)
+				continue; // Sequence is done
+			uBranchN = v.it->branch();
+			if(uBranchN == uBranch) {
+				uState &= ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			} else if(uBranchN > uBranch) {
+				uBranch = uBranchN;
+				uState = uStateQuit & ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			}
+		}
+		switch(uState&3) {
+			case 3:
+			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
+			case 1: // Empty column that we want to ignore
+				for(aligner_data &v : aln_table) {
+					if(v.it != v.last && v.it->branch() == uBranch)
+						++v.it;
+				}
+				break;
+			case 0: // Unempty column
+				for(aligner_data &v : aln_table) {
+					if(v.it == v.last || v.it->branch() != uBranch) {
+						rex.append_ins(*v.str);
+					} else {
+						rex.append_residue(*v.str, *(v.it++));
+					}
+				}
+		};
+	}
 ENDFOR:
     /*noop*/;
 }

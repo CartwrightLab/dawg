@@ -1,40 +1,44 @@
 #pragma once
 #ifndef ALIASTABLE_H
 #define ALIASTABLE_H
+/****************************************************************************
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
+ ****************************************************************************/
 
 #include <vector>
 #include <numeric>
 #include <cassert>
 #include <ostream>
+#include <cstdint>
+
 #include <boost/range.hpp>
-#include <boost/cstdint.hpp>
 
 class alias_table {
 public:
-	typedef boost::uint64_t uint64;
-	typedef boost::uint32_t uint32;
+	typedef std::uint64_t uint64;
+	typedef std::uint32_t uint32;
 	typedef uint32 category_type;
-	
+
 	alias_table() { }
-	
+
 	template< typename T >
 	explicit alias_table(const T &v) {
 		create(v);
 	}
-	
+
 	category_type get(uint64 u) const {
 		uint32 x = static_cast<uint32>(u >> shr_);
 		uint32 y = static_cast<uint32>(u);
 		return ( y < p_[x]) ? x : a_[x];
 	}
-	
+
 	const std::vector<uint32>& a() const { return a_;}
 	const std::vector<uint32>& p() const { return p_;}
 
 	category_type operator()(uint64 u) const {
 		return get(u);
 	}
-	
+
 	// create the alias table
 	template< typename T >
 	void create(const T &v) {
@@ -47,7 +51,7 @@ public:
 		std::vector<double> vv(first,last);
 		create_inplace(vv);
 	}
-	
+
 	// create the alias table
 	void create_inplace(std::vector<double> &v) {
 		assert(v.size() <= std::numeric_limits<uint32>::max());
@@ -59,10 +63,10 @@ public:
 		p_.resize(sz,0);
 		// use the number of bits to calculate the right shift operand
 		shr_ = 64 - ru.second;
-		
+
 		// find scale for input vector
 		double d = std::accumulate(v.begin(),v.end(),0.0)/sz;
-		
+
 		// find first large and small values
 		//     g: current large value index
 		//     m: current small value index
@@ -73,7 +77,7 @@ public:
 		for(m=0; m<sz && v[m] >= d; ++m)
 			/*noop*/;
 		mm = m+1;
-		
+
 		// contruct table
 		while(g < sz && m < sz) {
 			assert(v[m] < d);
@@ -119,7 +123,7 @@ public:
 			o << n << "\t" << a_[n] << "\t" << p_[n] << "\n";
 		}
 	}
-	
+
 private:
 	template<typename T>
 	inline static std::pair<T,int> round_up(T x) {
@@ -137,7 +141,7 @@ private:
 template<class CharType, class CharTrait, class T, class A>
 inline std::basic_ostream<CharType, CharTrait>&
 operator<<(std::basic_ostream<CharType, CharTrait>& o, const alias_table &a) {
-	
+
 }
 
 

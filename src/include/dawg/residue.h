@@ -5,23 +5,12 @@
  *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-#ifndef __STDC_CONSTANT_MACROS
-#	define __STDC_CONSTANT_MACROS 1
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#	define __STDC_LIMIT_MACROS 1
-#endif
-
-#include <dawg/log.h>
-
 #include <vector>
 #include <iostream>
 #include <algorithm>
 #include <functional>
 #include <cstring>
-#include <unordered_map>
 
-#include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
 #include <boost/range/sub_range.hpp>
 
@@ -59,11 +48,12 @@ struct alignment : public std::vector<details::aligned_sequence> {
 ///////////////////////////////////////////////////////////
 class residue {
 public:
-	typedef boost::uint64_t data_type;
+	typedef std::uint64_t data_type;
 
-	static constexpr data_type base_mask      =  UINT64_C(0x00000000000000FF);
-	static constexpr data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
-	static constexpr data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
+
+	static constexpr data_type base_mask      =  static_cast<std::uint64_t>(0x00000000000000FF);
+	static constexpr data_type branch_mask    =  static_cast<std::uint64_t>(0x0000FFFFFFFFFF00);
+	static constexpr data_type rate_mask	  =  static_cast<std::uint64_t>(0xFFFF000000000000);
 	static constexpr data_type rate_shift     =  48;
 	static constexpr data_type base_bit_width =  8;
 	static constexpr data_type branch_inc     =  0x100;

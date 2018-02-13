@@ -2,16 +2,10 @@
 #ifndef DAWG_DETAILS_MUTT_GEN_H
 #define DAWG_DETAILS_MUTT_GEN_H
 /****************************************************************************
- *  Copyright (C) 2012 Reed A. Cartwright, PhD <reed@scit.us>               *
+ *  Copyright (C) 2012-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-#ifndef __STDC_CONSTANT_MACROS
-#	define __STDC_CONSTANT_MACROS 1
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#	define __STDC_LIMIT_MACROS 1
-#endif
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <utility>
 
 namespace dawg { namespace details {
@@ -23,7 +17,7 @@ http://wwwmaths.anu.edu.au/~brent/ftp/random/xorgens305.tar.gz
 */
 
 struct xorgen4096_64_mutt_gen {
-	typedef boost::uint64_t native_t;
+	typedef std::uint64_t native_t;
 	struct _state_t {
 		native_t y[64];
 		native_t w;
@@ -34,13 +28,13 @@ struct xorgen4096_64_mutt_gen {
 	xorgen4096_64_mutt_gen() {
 		seed(0);
 	}
-	
+
 	inline native_t rand_native() { return rand_uint64(); }
 
-	inline boost::uint32_t rand_uint32() {
-		return static_cast<boost::uint32_t>(rand_uint64() >> 32);
+	inline std::uint32_t rand_uint32() {
+		return static_cast<std::uint32_t>(rand_uint64() >> 32);
 	}
-	
+
 	inline native_t rand_uint64() {
 		native_t t = y[i&63];
 		native_t v = y[(i+11)&63];
@@ -48,12 +42,12 @@ struct xorgen4096_64_mutt_gen {
 		v ^= v << 27; v ^= v >> 29; v ^= t;
 		y[i&63] = v;
 		i += 1;
-		w += UINT64_C(0x61C8864680B583EB);
+		w += static_cast<std::uint64_t>(0x61C8864680B583EB);
 		return v + (w^(w>>27));
 	}
-	
+
 	inline double rand_real()   { return to_double52(rand_uint64()); }
-	
+
 	inline state_t state() const {
 		state_t tmp;
 		std::copy(&y[0], &y[64], &tmp.y[0]);
@@ -66,15 +60,15 @@ struct xorgen4096_64_mutt_gen {
 		w = s.w;
 		i = s.i&63;
 	}
-	
-	inline void seed(boost::uint32_t xx) {
+
+	inline void seed(std::uint32_t xx) {
 		i = 0;
-		w = UINT64_C(0x61C8864680B583EB);
-		native_t x = UINT64_C(0x6A7BCC427F295846);
+		w = static_cast<std::uint64_t>(0x61C8864680B583EB);
+		native_t x = static_cast<std::uint64_t>(0x6A7BCC427F295846);
 		// Fill array using xorshift_64's algorithm
 		for(int a=0;a<64;++a) {
 			x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-			w += UINT64_C(0x61C8864680B583EB);
+			w += static_cast<std::uint64_t>(0x61C8864680B583EB);
 			y[a] = x + (w^(w>>27));
 		}
 		// Merge seed into array
@@ -82,7 +76,7 @@ struct xorgen4096_64_mutt_gen {
 			x = static_cast<native_t>(xx);
 			for(int a=0;a<64;++a) {
 				x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-				w += UINT64_C(0x61C8864680B583EB);
+				w += static_cast<std::uint64_t>(0x61C8864680B583EB);
 				y[a] ^= x + (w^(w>>27));
 			}
 		}
@@ -90,20 +84,20 @@ struct xorgen4096_64_mutt_gen {
 		for(int a=0;a<256;++a)
 			rand_native();
 	}
-	
+
 	template<int N>
-	inline void seed(boost::uint32_t (&xx)[N]) {
+	inline void seed(std::uint32_t (&xx)[N]) {
 		seed(&xx[0],&xx[N]);
 	}
 	template<typename _It>
 	inline void seed(_It first, _It last) {
 		i = 0;
-		w = UINT64_C(0x61C8864680B583EB);
-		native_t x = UINT64_C(0x6A7BCC427F295846);
+		w = static_cast<std::uint64_t>(0x61C8864680B583EB);
+		native_t x = static_cast<std::uint64_t>(0x6A7BCC427F295846);
 		// Fill array using xorshift_64's algorithm
 		for(int a=0;a<64;++a) {
 			x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-			w += UINT64_C(0x61C8864680B583EB);
+			w += static_cast<std::uint64_t>(0x61C8864680B583EB);
 			y[a] = x + (w^(w>>27));
 		}
 		// Merge seeds into array
@@ -113,7 +107,7 @@ struct xorgen4096_64_mutt_gen {
 				continue;
 			for(int a=0;a<64;++a) {
 				x ^= (x << 5); x ^= (x >> 15); x ^= (x << 27);
-				w += UINT64_C(0x61C8864680B583EB);
+				w += static_cast<std::uint64_t>(0x61C8864680B583EB);
 				y[a] ^= x + (w^(w>>27));
 			}
 		}
@@ -121,7 +115,7 @@ struct xorgen4096_64_mutt_gen {
 		for(int a=0;a<256;++a)
 			rand_native();
 	}
-	
+
 private:
 	native_t y[64];
 	native_t w;
