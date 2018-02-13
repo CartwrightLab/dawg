@@ -67,11 +67,7 @@ public:
 		sequence::const_iterator first, sequence::const_iterator last,
 		mutt &m) const;
 
-<<<<<<< HEAD
-	inline boost::uint32_t next_indel(double d, double &f, bool bDel) const {
-=======
 	inline std::uint32_t next_indel(double d, double &f, bool bDel) const {
->>>>>>> Replace boost stdint types with cpp stdint in dawg details \
 		double ins_rate = ins_mod.rate();
 		double del_rate = del_mod.rate();
 		double indel_rate = ins_rate+del_rate;
