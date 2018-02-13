@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <cstdint>
 
 #include <boost/bind.hpp>
 #include <boost/range/sub_range.hpp>
@@ -49,7 +50,6 @@ struct alignment : public std::vector<details::aligned_sequence> {
 class residue {
 public:
 	typedef std::uint64_t data_type;
-
 
 	static constexpr data_type base_mask      =  0x00000000000000FFull;
 	static constexpr data_type branch_mask    =  0x0000FFFFFFFFFF00ull;
