@@ -17,18 +17,14 @@ class Dawg
 {
 public:
     explicit Dawg();
-    explicit Dawg(const unsigned int s);
-
-    explicit Dawg(const std::string& output,
+    explicit Dawg(const unsigned int seed);
+    explicit Dawg(const std::string& in,
+        const std::string& out,
         const unsigned int seed,
         const unsigned int reps);
 
-    explicit Dawg(const std::string& infile,
-        const std::string& outfile,
-        const unsigned int seed,
-        const unsigned int reps);
-
-    void addSegment(const std::string &name,
+    void addModelArgument(const std::string &name,
+        const std::string &inherits_from,
         const std::string &subst_model,
         const std::string &subst_params,
         const std::string &subst_freqs,
@@ -44,9 +40,9 @@ public:
         const std::string &indel_rate_del,
         const unsigned int indel_max_del,
 
+        const std::string &tree,
         const std::string &tree_model,
         const std::string &tree_params,
-        const std::string &tree_tree,
         const double tree_scale,
 
         const unsigned int root_length,
@@ -60,16 +56,11 @@ public:
         const bool output_keepempty,
         const bool output_lowercase,
         const bool output_rna);
-
-    void echoSegments() const;
-
     void run();
     void printAlignments();
-    void bark() const;
+    std::string getEvolvedSequences() const;
     unsigned int rand(unsigned int a, unsigned int b);
-    void trickStats() const;
-
-    const char * getEvolvedSequences() const;
+    void bark() const;
 private:
     std::string mInFile;
     std::string mOutFile;
@@ -79,14 +70,17 @@ private:
     mutt mRng;
     trick mTrickster;
     dawg::matic mKimura;
-    std::vector<dawg::ma>  mSegmentModels;
+    std::vector<dawg::ma> mModelArguments;
+
+    std::vector<std::string> splitIntoVectorString(const std::string &s) const;
+    std::vector<double> splitIntoVectorDouble(const std::string &s) const;
 
     template <typename VectorType>
     void printVectorContents(VectorType &vec) const;
     void printAlignmentInfo(const dawg::alignment &aln) const;
 
     template <typename Line, typename File>
-    void dawgErrorLog(const std::string &msg, Line l, File f) const;
+    void error(const std::string &msg, Line l, File f) const;
 }; // class Dawg
 
 } // namespace dawg

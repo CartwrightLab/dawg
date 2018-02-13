@@ -14,41 +14,26 @@
 #include <dawg/global.h>
 #include <dawg/output.h>
 
+using namespace dawg;
+
 // Example constructor to make sure things work
-dawg::Dawg::Dawg()
-{
-    dawgErrorLog("no param constructor", __FILE__, __LINE__);
+Dawg::Dawg() {
+    error("no param constructor", __FILE__, __LINE__);
 }
 
-dawg::Dawg::Dawg(const unsigned int s)
-: mSeed(s)
-, mRng()
-{
-    mRng.seed(s);
-}
-
-///////////////////////////////////////////////////////////
-/// \brief 3 param constructor does not take an input string/file
-///	The simulation parameters can be assembled with 'addSegments'
-///////////////////////////////////////////////////////////
-dawg::Dawg::Dawg(
-	const std::string& output,
-	const unsigned int seed,
-	const unsigned int reps)
-: mInFile()
-, mOutFile(output)
-, mSeed(seed)
-, mRepetitions(reps)
-{
-
+Dawg::Dawg(const unsigned int seed)
+: mSeed(seed)
+, mRng() {
+    mRng.seed(seed);
 }
 
 ///////////////////////////////////////////////////////////
-/// \param s is the input string
+/// \param input can be optional
 /// For instance, "dawg --seed=111 basic-dna.dawg -o fasta:-"
 /// in the form of { in, out, r, s }
+/// Test input to see if we need to use Dawg's Trick parser
 ///////////////////////////////////////////////////////////
-dawg::Dawg::Dawg(const std::string& in,
+Dawg::Dawg(const std::string& in,
     const std::string& out,
     const unsigned int seed,
     const unsigned int reps)
@@ -58,8 +43,7 @@ dawg::Dawg::Dawg(const std::string& in,
 , mRepetitions(reps)
 , mTrickster()
 , mKimura()
-, mSegmentModels()
-{
+, mModelArguments() {
 	// Parse the input file
 	bool ret = true;
 	auto pos = in.rfind(".dawg");
@@ -94,93 +78,83 @@ dawg::Dawg::Dawg(const std::string& in,
 }
 
 ///////////////////////////////////////////////////////////
-/// \brief addSegment
+/// \brief addModelArgument
 ///////////////////////////////////////////////////////////
-void dawg::Dawg::addSegment(const std::string &name,
-		const std::string &subst_model,
-        const std::string &subst_params,
-        const std::string &subst_freqs,
-        const std::string &subst_rate_model,
-        const std::string &subst_rate_params,
+void dawg::Dawg::addModelArgument(const std::string &name,
+	const std::string &inherits_from,
+	const std::string &subst_model,
+    const std::string &subst_params,
+    const std::string &subst_freqs,
+    const std::string &subst_rate_model,
+    const std::string &subst_rate_params,
 
-        const std::string &indel_model_ins,
-        const std::string &indel_params_ins,
-        const std::string &indel_rate_ins,
-        const unsigned int indel_max_ins,
-        const std::string &indel_model_del,
-        const std::string &indel_params_del,
-        const std::string &indel_rate_del,
-        const unsigned int indel_max_del,
+    const std::string &indel_model_ins,
+    const std::string &indel_params_ins,
+    const std::string &indel_rate_ins,
+    const unsigned int indel_max_ins,
+    const std::string &indel_model_del,
+    const std::string &indel_params_del,
+    const std::string &indel_rate_del,
+    const unsigned int indel_max_del,
 
-        const std::string &tree_model,
-        const std::string &tree_params,
-        const std::string &tree_tree,
-        const double tree_scale,
+	const std::string &tree,
+    const std::string &tree_model,
+    const std::string &tree_params,
+    const double tree_scale,
 
-        const unsigned int root_length,
-        const std::string &root_seq,
-        const std::string &root_rates,
-        const unsigned int root_code,
-        const unsigned int root_segment,
-        const bool root_gapoverlap,
+    const unsigned int root_length,
+    const std::string &root_seq,
+    const std::string &root_rates,
+    const unsigned int root_code,
+    const unsigned int root_segment,
+    const bool root_gapoverlap,
 
-        const bool output_markins,
-        const bool output_keepempty,
-        const bool output_lowercase,
-        const bool output_rna) {
+    const bool output_markins,
+    const bool output_keepempty,
+    const bool output_lowercase,
+    const bool output_rna) {
 
 	using namespace std;
 
-	dawg::ma segmentModel;
+	dawg::ma modelArgument;
 
-	// initialize all the strings first (the ones that we don't need to parse)
-	segmentModel.name = name;
-	segmentModel.subst_model = subst_model;
-	segmentModel.subst_rate_model = subst_rate_model;
-	segmentModel.indel_max_ins = indel_max_ins;
-	segmentModel.indel_max_del = indel_max_del;
-	segmentModel.tree_model = tree_model;
-	segmentModel.tree_scale = tree_scale;
-	segmentModel.root_length = root_length;
-	segmentModel.root_seq = root_seq;
-	segmentModel.root_code = root_code;
-	segmentModel.root_segment = root_segment;
-	segmentModel.root_gapoverlap = root_gapoverlap;
-	segmentModel.output_markins = output_markins;
-	segmentModel.output_lowercase = output_lowercase;
-	segmentModel.output_rna = output_rna;
+	// initialize all variables directly unless they might be a list
+	modelArgument.name = name;
+	// modelArgument.inherits_from = inherits_from;
 
-	std::vector<string> string_split;
-	boost::algorithm::split(string_split, subst_params, boost::is_any_of(","));
+	modelArgument.subst_model = subst_model;
+	modelArgument.subst_params = splitIntoVectorDouble(subst_params);
+	modelArgument.subst_freqs = splitIntoVectorDouble(subst_freqs);
+	modelArgument.subst_rate_model = subst_rate_model;
+	modelArgument.subst_rate_params = splitIntoVectorDouble(subst_rate_params);
 
-	std::vector<double> string_to_double;
-	for (auto params : string_split) {
-		string_to_double.emplace_back(atof(params.c_str())); // consider strtod
-	}
-	segmentModel.subst_params = string_to_double;
+	modelArgument.indel_model_ins = splitIntoVectorString(indel_model_ins);
+	modelArgument.indel_params_ins = splitIntoVectorDouble(indel_params_ins);
+	modelArgument.indel_rate_ins = splitIntoVectorDouble(indel_rate_ins);
+	modelArgument.indel_max_ins = indel_max_ins;
+	modelArgument.indel_model_del = splitIntoVectorString(indel_model_del);
+	modelArgument.indel_params_del = splitIntoVectorDouble(indel_model_del);
+	modelArgument.indel_rate_del = splitIntoVectorDouble(indel_rate_del);
+	modelArgument.indel_max_del = indel_max_del;
 
-	mSegmentModels.emplace_back(segmentModel);
-}
+	modelArgument.tree_tree = tree;
+	modelArgument.tree_params = splitIntoVectorDouble(tree_params);
+	modelArgument.tree_model = tree_model;
+	modelArgument.tree_scale = tree_scale;
 
+	modelArgument.root_length = root_length;
+	modelArgument.root_seq = root_seq;
+	modelArgument.root_rates = splitIntoVectorDouble(root_rates);
+	modelArgument.root_code = root_code;
+	modelArgument.root_segment = root_segment;
+	modelArgument.root_gapoverlap = root_gapoverlap;
 
-///////////////////////////////////////////////////////////
-///	\brief echoSegments :: Print out segments to stdout
-///  segment: name, segment: inheritsFrom, ... ,
-///	 segment: subst_model, segment: indel_max_del, ...
-///////////////////////////////////////////////////////////
-void dawg::Dawg::echoSegments() const {
-	using namespace std;
+	modelArgument.output_rna = output_rna;
+	modelArgument.output_keepempty = output_keepempty;
+	modelArgument.output_markins = output_markins;
+	modelArgument.output_lowercase = output_lowercase;
 
-	for (auto &&segment : mSegmentModels) {
-		cout << "segment.name: " << segment.name << "\n" <<
-		"segment.subst_model: " << segment.subst_model << "\n" <<
-		"segment.subst_params: "; printVectorContents(segment.subst_params);
-		cout << "segment.subst_freqs: "; printVectorContents(segment.subst_freqs);
-		cout << "segment.rate_model: " << segment.subst_rate_model << "\n"
-		<< "segment.subst_rate_params: "; printVectorContents(segment.subst_rate_params);
-		cout << "segment.indel_model_ins: "; printVectorContents(segment.indel_model_ins);
-		cout << "\n";
-	}
+	mModelArguments.emplace_back(modelArgument);
 }
 
 ///////////////////////////////////////////////////////////
@@ -230,13 +204,22 @@ void dawg::Dawg::printAlignments() {
 	}
 }
 
-void dawg::Dawg::bark() const {
-    using namespace std;
-    cout << "inFile: " << mInFile << ", " <<
-        "outFile: " << mOutFile << ", " <<
-        "reps: " << mRepetitions << ", " <<
-        "seed: " << mSeed << "\n";
-} // bark
+///////////////////////////////////////////////////////////
+/// \brief This is hacky and imperfect
+/// We assume that the 'align' method in Dawg's evolver methods
+/// are commented out. And then we just mash the alignment vector
+///	together and return it as one giant string
+///////////////////////////////////////////////////////////
+std::string dawg::Dawg::getEvolvedSequences() const {
+	using namespace std;
+	string temp; // the string to append to
+	for (const auto &aln : mAlignments) {
+		for (const auto &s : aln) {
+			temp += s.label + s.seq + ":";
+		}
+	}
+	return temp;
+}
 
 unsigned int
 dawg::Dawg::rand(unsigned int a, unsigned int b) {
@@ -247,39 +230,50 @@ dawg::Dawg::rand(unsigned int a, unsigned int b) {
     return n % b + a;
 }
 
-void dawg::Dawg::trickStats() const {
-    using namespace dawg;
-    using namespace std;
+///////////////////////////////////////////////////////////
+///	\brief bark :: Print out segments (model args) to stdout
+///  segment: name, segment: inheritsFrom, ... ,
+///	 segment: subst_model, segment: indel_max_del, ...
+///////////////////////////////////////////////////////////
+void Dawg::bark() const {
+	using namespace std;
 
-    auto sections = mTrickster.data;
-    for (auto sec : sections) {
-        cout << "section: " << sec.name << "\n" <<
-        "inherits: " << sec.inherits << "\n";
-        for (auto node : sec.db) {
-            cout << "node: " << node.first << ", values: ";
-            for (auto value : node.second) {
-                cout << value << ", ";
-            }
-            cout << "\n";
-        }
-    }
+	for (auto arg : mModelArguments) {
+		cout << arg << endl;
+	}
+
+	// for (auto &&arg : mModelArguments) {
+	// 	cout << "segment.name: " << arg.name << "\n";
+	// 	cout << "arg.subst_model: " << arg.subst_model << "\n";
+	// 	"arg.subst_params: "; printVectorContents(arg.subst_params);
+	// 	cout << "arg.subst_freqs: "; printVectorContents(arg.subst_freqs);
+	// 	cout << "arg.rate_model: " << arg.subst_rate_model << "\n"
+	// 	<< "arg.subst_rate_params: "; printVectorContents(arg.subst_rate_params);
+	// 	cout << "arg.indel_model_ins: "; printVectorContents(arg.indel_model_ins);
+	// 	cout << "\n";
+	// }
 }
 
-///////////////////////////////////////////////////////////
-/// \brief This is hacky and imperfect
-/// We assume that the 'align' method in Dawg's evolver methods
-/// are commented out. And then we just mash the alignment vector
-///	together and return it as one giant c-string
-///////////////////////////////////////////////////////////
-const char * dawg::Dawg::getEvolvedSequences() const {
+std::vector<std::string> Dawg::splitIntoVectorString(const std::string &s) const {
 	using namespace std;
-	string temp; // the string to append to
-	for (const auto &aln : mAlignments) {
-		for (const auto &s : aln) {
-			temp += s.label + s.seq + ":";
-		}
+
+	vector<string> string_split;
+	boost::algorithm::split(string_split, s, boost::is_any_of(","));
+
+	return string_split;
+}
+
+std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
+	using namespace std;
+
+	vector<string> string_split;
+	boost::algorithm::split(string_split, s, boost::is_any_of(","));
+
+	vector<double> string_to_double;
+	for (auto params : string_split) {
+		string_to_double.emplace_back(atof(params.c_str())); // consider strtod
 	}
-	return temp.c_str();
+	return string_to_double;
 }
 
 template <typename VectorType>
@@ -303,7 +297,7 @@ void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
 
 // Log an error message
 template <typename Line, typename File>
-void dawg::Dawg::dawgErrorLog(const std::string &msg, Line l, File f) const {
+void dawg::Dawg::error(const std::string &msg, Line l, File f) const {
 	using namespace std;
 	cerr << msg << ", file: " << f << ", line: " << l << endl;
 }
