@@ -60,8 +60,6 @@ XM((root)(length),  unsigned int, 0,
 	"The length of a randomly generated root sequence.")
 XM((root)(seq),     std::string, ,
 	"A specific root sequence.")
-XM((root)(rates),   std::vector<double>, ,
-	"The heterogeneous rates of the root sequence.")
 XM((root)(code),    unsigned int, 0,
 	"The genetic code used when simulating codon evolution.")
 XM((root)(segment), unsigned int, 0,
@@ -84,5 +82,3 @@ XM((output)(rna), bool, false,
  *    cleanup                                                              *
  ***************************************************************************/
 #include <dawg/details/xm.h>
-
-

@@ -231,14 +231,15 @@ void dawg::output::print_nexus(const alignment& aln) {
 	       "\tMATRIX" << endl;
 	
 	// Write sequences in non-interleaved format
-	string::size_type aln_label_width = do_label ?
-		aln.max_label_width+label_width+1 :
-		aln.max_label_width;
+	// string::size_type aln_label_width = do_label ?
+	// 	aln.max_label_width+label_width+1 :
+	// 	aln.max_label_width;
 	
 	for(const alignment::value_type& v : aln) {
 		out << v.label;
-		if(do_label)
+		if(do_label) {
 			out << '_' << current_label;
+		}
 		out << setw(aln.max_label_width-v.label.length()+1) << ' ';
 		out << v.seq << endl;
 	}
