@@ -2,16 +2,10 @@
 #ifndef DAWG_DETAILS_MUTT_GEN_H
 #define DAWG_DETAILS_MUTT_GEN_H
 /****************************************************************************
- *  Copyright (C) 2009-2012 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
-#ifndef __STDC_CONSTANT_MACROS
-#	define __STDC_CONSTANT_MACROS 1
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#	define __STDC_LIMIT_MACROS 1
-#endif
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <utility>
 
 namespace dawg { namespace details {
@@ -26,7 +20,7 @@ Uses the 2x32-bit parameters from http://wwwmaths.anu.edu.au/~brent/ftp/random/x
 */
 
 struct xorshift_32_mutt_gen {
-	typedef boost::uint32_t native_t;
+	typedef std::uint32_t native_t;
 	struct _state_t {
 		native_t x,y,w;
 	};
@@ -35,10 +29,10 @@ struct xorshift_32_mutt_gen {
 	xorshift_32_mutt_gen() {
 		seed(0);
 	}
-	
+
 	inline native_t rand_native() { return rand_uint32(); }
 
-	inline boost::uint64_t rand_uint64() {
+	inline std::uint64_t rand_uint64() {
 		native_t a = rand_uint32();
 		native_t b = rand_uint32();
 		return to_uint64(a,b);
@@ -47,7 +41,7 @@ struct xorshift_32_mutt_gen {
 		x ^= x << 17; x ^= x >> 14;
 		y ^= y << 12; y ^= y >> 19;
 		y ^= x; x ^= y;
-#ifndef DAWG_DISABLE_WEYL_GENERATOR			
+#ifndef DAWG_DISABLE_WEYL_GENERATOR
 		w += 0x61c88647;
 		return y+(w^(w>>16));
 #else
@@ -66,17 +60,17 @@ struct xorshift_32_mutt_gen {
 		x = z.x; y = z.y; w = z.w;
 	}
 
-	inline void seed(boost::uint32_t xx) {
+	inline void seed(std::uint32_t xx) {
 		x = 0x7F295846; y = 0x6A7BCC42; w = 0x61c88647;
 		if(xx != 0) {
 			rand_native();
-			x ^= static_cast<native_t>(xx);	
+			x ^= static_cast<native_t>(xx);
 		}
 		for(int i=0;i<128;++i)
 			rand_native();
 	}
 	template<int N>
-	inline void seed(boost::uint32_t (&xx)[N]) {
+	inline void seed(std::uint32_t (&xx)[N]) {
 		seed(&xx[0],&xx[N]);
 	}
 	template<typename _It>
@@ -84,12 +78,12 @@ struct xorshift_32_mutt_gen {
 		x = 0x7F295846; y = 0x6A7BCC42; w = 0x61c88647;
 		for(;first != last;++first) {
 			rand_native();
-			x ^= static_cast<native_t>(*first);			
+			x ^= static_cast<native_t>(*first);
 		}
 		for(int i=0;i<128;++i)
 			rand_native();
 	}
-	
+
 	private:
 		native_t x,y,w;
 };
