@@ -16,7 +16,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "../version.h"
-//#include "dawg.h"
+#include "dawg.h"
 
 #include <dawg/matic.h>
 
@@ -31,7 +31,6 @@
 #include <dawg/output.h>
 
 #include "dawg_app.h"
-#include "dawg.h"
 
 using namespace std;
 using namespace boost;

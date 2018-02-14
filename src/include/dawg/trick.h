@@ -29,18 +29,18 @@ struct trick {
 		inline void get(const std::string& k, T& r) const;
 		template<typename T, typename A>
 		inline void get(const std::string& k, std::vector<T,A>& r) const;
-
+		
 		//inline void get(const std::string& k, trick::section& r) const;
-
+		
 		inline void read_aliases();
-
+		
 	private:
 		static inline void conv(const std::string& ss, std::string& r);
 		static inline void conv(const std::string& ss, double& r);
 		static inline void conv(const std::string& ss, bool& r);
 		static inline void conv(const std::string& ss, unsigned int& r);
 		static inline void conv(const std::string& ss, int& r);
-
+		
 		inline void read_alias(const std::string& a, const std::string& b);
 	};
 	typedef std::vector<section> data_type;
@@ -51,14 +51,14 @@ struct trick {
 	bool parse(Iterator first, Iterator last);
 	template<typename Char, typename Traits>
 	inline bool parse_stream(std::basic_istream<Char, Traits>& is);
-
+	
 	trick() {
 		data.push_back(section());
 		data.back().name = "_initial_";
 		data.back().inherits = "_default_";
 	}
-
-	inline void read_aliases();
+	
+	inline void read_aliases();	
 };
 
 template<typename T>

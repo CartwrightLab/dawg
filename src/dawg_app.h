@@ -91,7 +91,7 @@ class dawg_app  {
 public:
 	dawg_app(int argc, char *argv[]);
 	virtual ~dawg_app() { }
-
+	
 	virtual int run();
 
 	std::string runname;
@@ -100,14 +100,14 @@ public:
 	po::variables_map vm;
 
 	struct args
-	{
+	{			
 	// use X-Macros to specify argument variables
 #	define XM(lname, sname, desc, type, def) type XV(lname) ;
 #	include "dawgarg.xmh"
 #	undef XM
 		std::vector< std::string > input;
 	};
-
+	
 protected:
 	args arg;
 };
