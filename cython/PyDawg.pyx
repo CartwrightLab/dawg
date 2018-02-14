@@ -46,8 +46,10 @@ cdef extern from "dawg.hpp" namespace "dawg":
             bint output_lowercase,
             bint output_keepempty,
             bint output_markins)
-        void run()
-        void printAlignments()
+        void configureMatic()
+        void walk()
+        void write()
+        # void printAlignments()
         string getEvolvedSequences()
         unsigned int rand(unsigned int, unsigned int)
         void bark()
@@ -56,6 +58,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
 The PyDawg module is the official Python module we can import,
 it acts as an opaque pointer to the Cython cppclass
 The constructor takes in the global options of the simulation
+Validation happens on CPP side
 """
 cdef class PyDawg:
 
@@ -144,11 +147,17 @@ cdef class PyDawg:
             output_keepempty,
             output_markins)
 
-    cpdef void run(self):
-        self._thisptr.run()
+    cpdef void configureMatic(self):
+        self._thisptr.configureMatic()
 
-    cpdef void printAlignments(self):
-        self._thisptr.printAlignments()
+    cpdef void walk(self):
+        self._thisptr.walk()
+
+    cpdef void write(self):
+        self._thisptr.write()
+
+    # cpdef void printAlignments(self):
+        # self._thisptr.printAlignments()
 
     cpdef string fetchEvolvedSequences(self):
         return self._thisptr.getEvolvedSequences()

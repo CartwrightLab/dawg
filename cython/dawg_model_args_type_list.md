@@ -1,4 +1,5 @@
-# List of dawg's model arguments, order of types matters when it gets sent to CPP
+# List of dawg's model arguments, order of types matters when it gets # sent to CPP. Should match parameters in 'addModelArgument' in
+# PyDawg.pyx
 # The hard part is some of the strings are really lists,
 # and some are just strings.
 # Example? Tree is always a string,

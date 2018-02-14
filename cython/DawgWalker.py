@@ -32,17 +32,18 @@ Root.Segment = 2
 # Better method that elimates parsing on Dawg's end,
 # we configure the model arguments directly
 goldenRetriever = pd.PyDawg(output='cython_modelargs.fasta',
-    simulation_seed=1111111, simulation_reps=42)
+    simulation_seed=1111111, simulation_reps=10)
 goldenRetriever.addModelArgument(name='whatever', inherits_from='LUCA',
     tree="((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);",
     substitution_model='HKY',
     substitution_params='2.0, 1.0',
     substitution_freqs='0.3, 0.2, 0.2, 0.3',
     root_length=1000)
-goldenRetriever.bark()
+# goldenRetriever.bark()
 # And then just run (configure, walk, aln)
-# puppy.run() # call walk from dawgcpp
-# puppy.printAlignments()
+goldenRetriever.configureMatic()
+goldenRetriever.walk()
+goldenRetriever.write()
 
 # We can also try elimating DAWG's output printer
 # and use BioPython multiple-sequence alignment and fasta formatter

@@ -12,15 +12,17 @@
 #include <dawg/matic.h>
 #include <dawg/trick_parse.h>
 #include <dawg/global.h>
-#include <dawg/output.h>
 
 using namespace dawg;
 
 // Example constructor to make sure things work
 Dawg::Dawg() {
-    error("no param constructor", __FILE__, __LINE__);
+    info("no param constructor", __FILE__, __LINE__);
 }
 
+///////////////////////////////////////////////////////////
+/// \brief constructor for using rng
+///////////////////////////////////////////////////////////
 Dawg::Dawg(const unsigned int seed)
 : mSeed(seed)
 , mRng() {
@@ -43,26 +45,11 @@ Dawg::Dawg(const std::string& in,
 , mRepetitions(reps)
 , mTrickster()
 , mKimura()
-, mModelArguments() {
-	// Parse the input file
-	bool ret = true;
-	auto pos = in.rfind(".dawg");
-	if (pos != std::string::npos)
-		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
-	else
-		ret &= mTrickster.parse(mInFile.begin(), mInFile.end());
-
-	if(!ret)
-		std::cerr << "Failure to parse DAWG file\n";
-
-
-	// process aliases
-	mTrickster.read_aliases();
-
-	std::vector<dawg::ma> configs;
-	if (!dawg::ma::from_trick(mTrickster, configs)) {
-		std::cerr << "bad configuration: " << __FILE__ << __LINE__ << std::endl;
-	}
+, mModelArguments()
+, mWriter()
+ {
+	if (!in.empty())
+		parseInput();
 
 	// Create the object that will do all the simulation
 	// work for us.  Configure its sections.
@@ -71,9 +58,31 @@ Dawg::Dawg(const std::string& in,
 	if(mSeed != 0) {
 		mKimura.seed(this->mSeed);
 	}
+}
 
-	if (!mKimura.configure(configs.begin(), configs.end())) {
+void Dawg::configureMatic() {
+	if (!mKimura.configure(mModelArguments.begin(), mModelArguments.end())) {
 		DAWG_ERROR("bad configuration");
+	}
+}
+
+void Dawg::parseInput() {
+	// Parse the input file
+	bool ret = true;
+	auto pos = mInFile.rfind(".dawg");
+	if (pos != std::string::npos)
+		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
+	else
+		ret &= mTrickster.parse(mInFile.begin(), mInFile.end());
+
+	if(!ret)
+		error("Failure to parse DAWG file\n", __FILE__, __LINE__);
+
+	// process aliases
+	mTrickster.read_aliases();
+
+	if (!dawg::ma::from_trick(mTrickster, mModelArguments)) {
+		std::cerr << "bad configuration: " << __FILE__ << __LINE__ << std::endl;
 	}
 }
 
@@ -109,10 +118,10 @@ void dawg::Dawg::addModelArgument(const std::string &name,
     const unsigned int root_segment,
     const bool root_gapoverlap,
 
-    const bool output_markins,
-    const bool output_keepempty,
-    const bool output_lowercase,
-    const bool output_rna) {
+	const bool output_rna,
+	const bool output_lowercase,
+	const bool output_keepempty,
+	const bool output_markins) {
 
 	using namespace std;
 
@@ -144,7 +153,7 @@ void dawg::Dawg::addModelArgument(const std::string &name,
 
 	modelArgument.root_length = root_length;
 	modelArgument.root_seq = root_seq;
-	modelArgument.root_rates = splitIntoVectorDouble(root_rates);
+	// modelArgument.root_rates = splitIntoVectorDouble(root_rates);
 	modelArgument.root_code = root_code;
 	modelArgument.root_segment = root_segment;
 	modelArgument.root_gapoverlap = root_gapoverlap;
@@ -159,9 +168,9 @@ void dawg::Dawg::addModelArgument(const std::string &name,
 
 ///////////////////////////////////////////////////////////
 /// \brief Create the alignments
-///	tell the dawg to run, but then just walk it
+///	tell the dawg to walk, but then just walk it
 ///////////////////////////////////////////////////////////
-void dawg::Dawg::run()
+void dawg::Dawg::walk()
 {
     using namespace std;
 
@@ -176,16 +185,16 @@ void dawg::Dawg::run()
 } // run
 
 ///////////////////////////////////////////////////////////
-/// \brief this would print the aln data out to std::cout or a file
+/// \brief this would print the aln data out to std::cout
+/// or a file depending on how output is defined
 ///////////////////////////////////////////////////////////
-void dawg::Dawg::printAlignments() {
+void dawg::Dawg::write() {
 	using namespace std;
-	dawg::output write_aln;
 
 	dawg::global_options glopts;
 	glopts.read_section(mTrickster.data.front());
 
-	if (!write_aln.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
+	if (!mWriter.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
 		mRepetitions - 1,
 		false, // false
 		false, // false
@@ -196,11 +205,7 @@ void dawg::Dawg::printAlignments() {
 	}
 
 	for (auto a : mAlignments) {
-#if defined(DAWG_DEBUG)
-	printAlignmentInfo(a);
-#endif // defined
-
-		write_aln(a);
+		mWriter(a);
 	}
 }
 
@@ -210,7 +215,7 @@ void dawg::Dawg::printAlignments() {
 /// are commented out. And then we just mash the alignment vector
 ///	together and return it as one giant string
 ///////////////////////////////////////////////////////////
-std::string dawg::Dawg::getEvolvedSequences() const {
+std::string Dawg::getEvolvedSequences() const {
 	using namespace std;
 	string temp; // the string to append to
 	for (const auto &aln : mAlignments) {
@@ -232,8 +237,6 @@ dawg::Dawg::rand(unsigned int a, unsigned int b) {
 
 ///////////////////////////////////////////////////////////
 ///	\brief bark :: Print out segments (model args) to stdout
-///  segment: name, segment: inheritsFrom, ... ,
-///	 segment: subst_model, segment: indel_max_del, ...
 ///////////////////////////////////////////////////////////
 void Dawg::bark() const {
 	using namespace std;
@@ -241,17 +244,6 @@ void Dawg::bark() const {
 	for (auto arg : mModelArguments) {
 		cout << arg << endl;
 	}
-
-	// for (auto &&arg : mModelArguments) {
-	// 	cout << "segment.name: " << arg.name << "\n";
-	// 	cout << "arg.subst_model: " << arg.subst_model << "\n";
-	// 	"arg.subst_params: "; printVectorContents(arg.subst_params);
-	// 	cout << "arg.subst_freqs: "; printVectorContents(arg.subst_freqs);
-	// 	cout << "arg.rate_model: " << arg.subst_rate_model << "\n"
-	// 	<< "arg.subst_rate_params: "; printVectorContents(arg.subst_rate_params);
-	// 	cout << "arg.indel_model_ins: "; printVectorContents(arg.indel_model_ins);
-	// 	cout << "\n";
-	// }
 }
 
 std::vector<std::string> Dawg::splitIntoVectorString(const std::string &s) const {
@@ -276,16 +268,7 @@ std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
 	return string_to_double;
 }
 
-template <typename VectorType>
-void dawg::Dawg::printVectorContents(VectorType &vec) const {
-	using namespace std;
-	for (auto v : vec) {
-		cout << v << ", ";
-	}
-	cout << "\n";
-}
-
-void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
+void Dawg::printAlignment(const dawg::alignment &aln) const {
 	using namespace std;
 	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
 	cout << "max_label_width: " << aln.max_label_width <<
@@ -295,9 +278,16 @@ void dawg::Dawg::printAlignmentInfo(const dawg::alignment &aln) const {
 	}
 }
 
+// Log an info message
+template <typename Line, typename File>
+void Dawg::info(const std::string &msg, Line l, File f) const {
+	using namespace std;
+	cout << msg << ", file: " << f << ", line: " << l << endl;
+}
+
 // Log an error message
 template <typename Line, typename File>
-void dawg::Dawg::error(const std::string &msg, Line l, File f) const {
+void Dawg::error(const std::string &msg, Line l, File f) const {
 	using namespace std;
 	cerr << msg << ", file: " << f << ", line: " << l << endl;
 }

@@ -3,13 +3,13 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 #include <dawg/mutt.h>
 #include <dawg/trick.h>
 #include <dawg/residue.h>
 #include <dawg/matic.h>
 #include <dawg/ma.h>
+#include <dawg/output.h>
 
 namespace dawg {
 
@@ -52,12 +52,13 @@ public:
         const unsigned int root_segment,
         const bool root_gapoverlap,
 
-        const bool output_markins,
-        const bool output_keepempty,
+        const bool output_rna,
         const bool output_lowercase,
-        const bool output_rna);
-    void run();
-    void printAlignments();
+        const bool output_keepempty,
+        const bool output_markins);
+    void configureMatic();
+    void walk();
+    void write();
     std::string getEvolvedSequences() const;
     unsigned int rand(unsigned int a, unsigned int b);
     void bark() const;
@@ -71,14 +72,17 @@ private:
     trick mTrickster;
     dawg::matic mKimura;
     std::vector<dawg::ma> mModelArguments;
+    dawg::output mWriter;
+
+    void parseInput();
 
     std::vector<std::string> splitIntoVectorString(const std::string &s) const;
     std::vector<double> splitIntoVectorDouble(const std::string &s) const;
 
-    template <typename VectorType>
-    void printVectorContents(VectorType &vec) const;
-    void printAlignmentInfo(const dawg::alignment &aln) const;
+    void printAlignment(const dawg::alignment &aln) const;
 
+    template <typename Line, typename File>
+    void info(const std::string &msg, Line l, File f) const;
     template <typename Line, typename File>
     void error(const std::string &msg, Line l, File f) const;
 }; // class Dawg
