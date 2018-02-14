@@ -12,6 +12,7 @@
 #include <dawg/matic.h>
 #include <dawg/trick_parse.h>
 #include <dawg/global.h>
+#include <dawg/log.h>
 
 using namespace dawg;
 
@@ -76,18 +77,22 @@ void Dawg::parseInput() {
 		ret &= mTrickster.parse(mInFile.begin(), mInFile.end());
 
 	if(!ret)
-		error("Failure to parse DAWG file\n", __FILE__, __LINE__);
+		DAWG_ERROR("Failure to parse DAWG file\n");
 
 	// process aliases
 	mTrickster.read_aliases();
 
 	if (!dawg::ma::from_trick(mTrickster, mModelArguments)) {
-		std::cerr << "bad configuration: " << __FILE__ << __LINE__ << std::endl;
+		DAWG_ERROR("bad configuration: ");
 	}
 }
 
 ///////////////////////////////////////////////////////////
 /// \brief addModelArgument
+/// The traditional inheritance model in DAWG copies params
+/// "downward" with respect to a trick file unless a section
+///	specifies "[[secC = secA]]" the direction of inheritance
+/// default params are set on Python side
 ///////////////////////////////////////////////////////////
 void dawg::Dawg::addModelArgument(const std::string &name,
 	const std::string &inherits_from,
@@ -129,6 +134,7 @@ void dawg::Dawg::addModelArgument(const std::string &name,
 
 	// initialize all variables directly unless they might be a list
 	modelArgument.name = name;
+	// dawg::ma doesn't keep track of inheritance
 	// modelArgument.inherits_from = inherits_from;
 
 	modelArgument.subst_model = subst_model;
@@ -142,7 +148,7 @@ void dawg::Dawg::addModelArgument(const std::string &name,
 	modelArgument.indel_rate_ins = splitIntoVectorDouble(indel_rate_ins);
 	modelArgument.indel_max_ins = indel_max_ins;
 	modelArgument.indel_model_del = splitIntoVectorString(indel_model_del);
-	modelArgument.indel_params_del = splitIntoVectorDouble(indel_model_del);
+	modelArgument.indel_params_del = splitIntoVectorDouble(indel_params_del);
 	modelArgument.indel_rate_del = splitIntoVectorDouble(indel_rate_del);
 	modelArgument.indel_max_del = indel_max_del;
 

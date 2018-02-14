@@ -10,8 +10,8 @@ cdef extern from "dawg.hpp" namespace "dawg":
     cdef cppclass Dawg:
         Dawg()
         Dawg(unsigned int seed)
-        # input, output, seed, reps
-        Dawg(string, string, unsigned int, unsigned int)
+        Dawg(string input, string output,
+            unsigned int seed, unsigned int reps)
 
         void addModelArgument(string name,
             string inherits_from,
@@ -58,7 +58,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
 The PyDawg module is the official Python module we can import,
 it acts as an opaque pointer to the Cython cppclass
 The constructor takes in the global options of the simulation
-Validation happens on CPP side
+Validation and string splitting happens on CPP side
 """
 cdef class PyDawg:
 
@@ -78,40 +78,41 @@ cdef class PyDawg:
             del self._thisptr
 
     # encode all strings by default, utf-8
+    # default params are taken from src/include/dawg/ma.h
     cpdef void addModelArgument(self,
-        name='_default_',
-        inherits_from='_initial_',
+        name='_initial_',
+        inherits_from='_default_',
         substitution_model='jc',
-        substitution_params='0.3, 0.2',
+        substitution_params='',
         substitution_freqs='',
-        substitution_rate_model='',
+        substitution_rate_model='const',
         substitution_rate_params='',
 
-        indel_model_insertion='POWER-LAW',
-        indel_params_insertion='0.3, 10.0',
+        indel_model_insertion='user',
+        indel_params_insertion='1',
         indel_rate_insertion='',
-        indel_max_insertion=1,
-        indel_model_deletion='',
-        indel_params_deletion='',
+        indel_max_insertion=100,
+        indel_model_deletion='user',
+        indel_params_deletion='1',
         indel_rate_deletion='',
-        indel_max_deletion=1,
+        indel_max_deletion=100,
 
-        tree='\"((A:0.1, B:0.4)C);\"',
-        tree_model='',
+        tree='',
+        tree_model='user',
         tree_params='',
-        tree_scale=0,
+        tree_scale=1,
 
         root_length=0,
         root_sequence='',
-        root_rates='',
+        root_rates='', # this isn't being used but kept it
         root_code=0,
-        root_segment=0,
-        root_gapoverlap=False,
+        root_segment=1,
+        root_gapoverlap=True,
 
         output_rna=False,
         output_lowercase=False,
-        output_keepempty=False,
-        output_markins=True):
+        output_keepempty=True,
+        output_markins=False):
             self._thisptr.addModelArgument(
             name.encode(),
             inherits_from.encode(),
