@@ -31,14 +31,25 @@ Root.Segment = 2
 
 # Better method that elimates parsing on Dawg's end,
 # we configure the model arguments directly
-goldenRetriever = pd.PyDawg(output='cython_modelargs.fasta',
+# (Note to self, inheritance isn't working at the moment, and
+# default section requires a tree?)
+goldenRetriever = pd.PyDawg(output='pydawg_segments_1111111_10.fasta',
     simulation_seed=1111111, simulation_reps=10)
-goldenRetriever.addModelArgument(name='whatever', inherits_from='LUCA',
-    tree="((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);",
-    substitution_model='HKY',
-    substitution_params='2.0, 1.0',
-    substitution_freqs='0.3, 0.2, 0.2, 0.3',
-    root_length=1000)
+goldenRetriever.addModelArgument(name='whatever',
+    tree="(A:0.2, B:0.3)C;",
+    root_segment=1)
+goldenRetriever.addModelArgument(name='Noncoding', inherits_from='LUCA',
+    tree="(A:0.3)D;",
+    substitution_model='JC',
+    root_length=10)
+goldenRetriever.addModelArgument(name='Coding', inherits_from='Noncoding',
+    root_segment=2,
+    substitution_model='codmg',
+    substitution_params='0.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0',
+    substitution_freqs='0.2, 0.3, 0.3, 0.2',
+    root_length=10)
+goldenRetriever.addModelArgument(name='Noncoding2', inherits_from='Noncoding',
+    root_segment=3)
 # goldenRetriever.bark()
 # And then just run (configure, walk, aln)
 goldenRetriever.configureMatic()
