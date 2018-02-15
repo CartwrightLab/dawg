@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from os import sys
+import time
 import PyDawg as pd
 from Bio import SeqIO
 from Bio.Alphabet import generic_dna, generic_rna, generic_protein
@@ -50,7 +51,23 @@ dog.addModelArgument(name='Noncoding2',
 # And then just run (configure, walk, aln)
 dog.configureMatic()
 dog.walk()
-dog.write()
+# dog.write()
+evolvedSequences = dog.getAlignments().decode('utf-8').split(";")
+print(evolvedSequences)
 
-# We can also try elimating DAWG's output printer
-# and use BioPython multiple-sequence alignment and fasta formatter
+# We can also use BioPython multiple-sequence alignment and fasta formatter
+seqGenerator = (s.split(':') for s in evolvedSequences)
+# print(list(seqGenerator))
+seqRecords = []
+# Item is a 2-tuple group within the generator object in '[label, seq]' format
+for item in seqGenerator:
+    # print(item[1], ', ', item[0])
+    seqRecords.append(SeqRecord(Seq(item[1], generic_dna), id=item[0]))
+# print(seqRecords)
+
+t1 = time.clock()
+alignedSequences = MultipleSeqAlignment(seqRecords)
+AlignIO.write(alignedSequences, "eternal_braids.fasta", "fasta")
+t2 = time.clock()
+
+print(('Took {} Seconds'.format(t2-t1)))

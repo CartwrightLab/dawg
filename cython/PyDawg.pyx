@@ -49,8 +49,7 @@ cdef extern from "dawg.hpp" namespace "dawg":
         void configureMatic()
         void walk()
         void write()
-        # void printAlignments()
-        string getEvolvedSequences()
+        string getAlignments()
         unsigned int rand(unsigned int, unsigned int)
         void bark()
 
@@ -157,11 +156,11 @@ cdef class PyDawg:
     cpdef void write(self):
         self._thisptr.write()
 
-    # cpdef void printAlignments(self):
-        # self._thisptr.printAlignments()
-
-    cpdef string fetchEvolvedSequences(self):
-        return self._thisptr.getEvolvedSequences()
+    # The return alignments are encrypted
+    # example: "label1:seq1;label2:seq2;labelN:seqN"
+    # no semi colon at the end!
+    cpdef string getAlignments(self):
+        return self._thisptr.getAlignments()
 
     cpdef unsigned int rand(self, a, b):
         return self._thisptr.rand(a, b)

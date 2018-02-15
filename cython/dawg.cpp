@@ -291,19 +291,22 @@ void dawg::Dawg::write() {
 }
 
 ///////////////////////////////////////////////////////////
-/// \brief This is hacky and imperfect
+/// \brief This is hacky and imperfect way to
 /// mash the alignment vector
 ///	together and return it as one giant string
 ///////////////////////////////////////////////////////////
 std::string Dawg::getAlignments() const {
 	using namespace std;
-	string temp; // the string to append to
+	string braids;
 	for (const auto &aln : mAlignments) {
 		for (const auto &s : aln) {
-			temp += s.label + s.seq + ":";
+			braids.append(s.label + ":" + s.seq + ";");
 		}
 	}
-	return temp;
+	// remove trailing semicolon
+	braids.resize(braids.size() - 1);
+	braids.shrink_to_fit();
+	return braids;
 }
 
 unsigned int
@@ -348,15 +351,15 @@ std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
 	return string_to_double;
 }
 
-void Dawg::printAlignment(const dawg::alignment &aln) const {
-	using namespace std;
-	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
-	cout << "max_label_width: " << aln.max_label_width <<
-		"\nseq_type: " << aln.seq_type << "\n";
-	for (const auto &v : aln) {
-		cout << "label: " << v.label.c_str() << "\nseq: " << v.seq.c_str() << endl;
-	}
-}
+// void Dawg::printAlignment(const dawg::alignment &aln) const {
+// 	using namespace std;
+// 	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
+// 	cout << "max_label_width: " << aln.max_label_width <<
+// 		"\nseq_type: " << aln.seq_type << "\n";
+// 	for (const auto &v : aln) {
+// 		cout << "label: " << v.label.c_str() << "\nseq: " << v.seq.c_str() << endl;
+// 	}
+// }
 
 // Log an info message
 template <typename Line, typename File>
