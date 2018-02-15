@@ -58,7 +58,9 @@ public:
         const bool output_markins);
     void configureMatic();
     void walk();
-    void align(dawg::alignment &aln);
+    void align(dawg::alignment &aln,
+        const dawg::matic::seq_buffers_type &seqs,
+        const dawg::residue_exchange &rex);
     void write();
     std::string getAlignments() const;
     unsigned int rand(unsigned int a, unsigned int b);

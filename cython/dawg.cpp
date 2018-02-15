@@ -215,7 +215,7 @@ void dawg::Dawg::walk()
 	                mKimura.branch_color += dawg::residue::branch_inc;
 	            }
 	        }
-	        mKimura.align(aln, mKimura.seqs, mKimura.configs[0].rex);
+	        this->align(aln, mKimura.seqs, mKimura.configs[0].rex);
 	    }
 
 	    for(const matic::segment &seg : mKimura.configs) {
@@ -250,7 +250,7 @@ void dawg::Dawg::walk()
 
 	        }
 	        // Align segment
-	        mKimura.align(aln, mKimura.seqs, seg.rex);
+	        this->align(aln, mKimura.seqs, seg.rex);
 	    } // each segment
 
 		mAlignments.emplace_back(aln);
@@ -261,8 +261,73 @@ void dawg::Dawg::walk()
 ///////////////////////////////////////////////////////////
 /// \brief calls the alignment routines
 ///////////////////////////////////////////////////////////
-void Dawg::align(dawg::alignment &aln) {
+void Dawg::align(dawg::alignment &aln,
+	const dawg::matic::seq_buffers_type &seqs,
+	const dawg::residue_exchange &rex) {
+	struct aligner_data {
+	    aligner_data(const dawg::sequence &xseq, std::string &xstr) :
+	        it(xseq.begin()), last(xseq.end()), str(&xstr) {
+	    }
+	    sequence::const_iterator it, last;
+	    std::string *str;
+	};
 
+	assert(aln.size() <= seqs.size());
+
+	//unsigned uFlags = 0; //temporary
+
+	// construct a table to hold alignment information
+	// TODO: Cache this?
+	std::vector<aligner_data> aln_table;
+	for(alignment::size_type u=0;u<aln.size();++u) {
+		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
+	}
+
+	// Alignment rules:
+	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
+	// Deletion & Original Nucleotide : w/ del, original nucl
+
+	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3;
+
+	dawg::residue::data_type uBranch = 0, uBranchN = 0;
+
+	// Go through each column, adding gaps where neccessary
+	for(;;) {
+		unsigned int uState =  uStateQuit; // Set to quit
+		uBranch = 0; // Set to lowest branch
+		// Find column state(s)
+		for(aligner_data &v : aln_table) {
+			if(v.it == v.last)
+				continue; // Sequence is done
+			uBranchN = v.it->branch();
+			if(uBranchN == uBranch) {
+				uState &= ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			} else if(uBranchN > uBranch) {
+				uBranch = uBranchN;
+				uState = uStateQuit & ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			}
+		}
+		switch(uState&3) {
+			case 3:
+			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
+			case 1: // Empty column that we want to ignore
+				for(aligner_data &v : aln_table) {
+					if(v.it != v.last && v.it->branch() == uBranch)
+						++v.it;
+				}
+				break;
+			case 0: // Unempty column
+				for(aligner_data &v : aln_table) {
+					if(v.it == v.last || v.it->branch() != uBranch) {
+						rex.append_ins(*v.str);
+					} else {
+						rex.append_residue(*v.str, *(v.it++));
+					}
+				}
+		};
+	} // for loop
+	ENDFOR:
+	/*noop*/;
 }
 
 ///////////////////////////////////////////////////////////
