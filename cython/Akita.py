@@ -70,6 +70,6 @@ for item in seqGenerator:
 
 # t1 = time.clock()
 alignedSequences = MultipleSeqAlignment(seqRecords)
-AlignIO.write(alignedSequences, "pydawg_akita2_1111111_10.fasta", "fasta")
+AlignIO.write(alignedSequences, "/tmp/akita_pydawg.fasta", "fasta")
 # t2 = time.clock()
 # print(('Took {} Seconds'.format(t2-t1)))
