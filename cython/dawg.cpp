@@ -253,7 +253,7 @@ void dawg::Dawg::walk()
 	        mKimura.align(aln, mKimura.seqs, seg.rex);
 	    } // each segment
 
-		mSequences.emplace_back(aln);
+		mAlignments.emplace_back(aln);
     } // repition loop
 
 } // walk
@@ -285,21 +285,20 @@ void dawg::Dawg::write() {
 		return;
 	}
 
-	for (auto a : mSequences) {
+	for (auto a : mAlignments) {
 		mWriter(a);
 	}
 }
 
 ///////////////////////////////////////////////////////////
 /// \brief This is hacky and imperfect
-/// We assume that the 'align' method in Dawg's evolver methods
-/// are commented out. And then we just mash the alignment vector
+/// mash the alignment vector
 ///	together and return it as one giant string
 ///////////////////////////////////////////////////////////
-std::string Dawg::getEvolvedSequences() const {
+std::string Dawg::getAlignments() const {
 	using namespace std;
 	string temp; // the string to append to
-	for (const auto &aln : mSequences) {
+	for (const auto &aln : mAlignments) {
 		for (const auto &s : aln) {
 			temp += s.label + s.seq + ":";
 		}
@@ -351,7 +350,7 @@ std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
 
 void Dawg::printAlignment(const dawg::alignment &aln) const {
 	using namespace std;
-	// cout << "mSequences.size(): " << mSequences.size() << endl;
+	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
 	cout << "max_label_width: " << aln.max_label_width <<
 		"\nseq_type: " << aln.seq_type << "\n";
 	for (const auto &v : aln) {

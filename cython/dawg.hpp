@@ -60,7 +60,7 @@ public:
     void walk();
     void align(dawg::alignment &aln);
     void write();
-    std::string getEvolvedSequences() const;
+    std::string getAlignments() const;
     unsigned int rand(unsigned int a, unsigned int b);
     void bark() const;
 private:
@@ -68,7 +68,7 @@ private:
     std::string mOutFile;
     unsigned int mSeed;
     std::size_t mRepetitions;
-    std::vector<dawg::alignment> mSequences;
+    std::vector<dawg::alignment> mAlignments;
     mutt mRng;
     trick mTrickster;
     dawg::matic mKimura;
