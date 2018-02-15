@@ -58,6 +58,7 @@ public:
         const bool output_markins);
     void configureMatic();
     void walk();
+    void align(dawg::alignment &aln);
     void write();
     std::string getEvolvedSequences() const;
     unsigned int rand(unsigned int a, unsigned int b);
@@ -67,7 +68,7 @@ private:
     std::string mOutFile;
     unsigned int mSeed;
     std::size_t mRepetitions;
-    std::vector<dawg::alignment> mAlignments;
+    std::vector<dawg::alignment> mSequences;
     mutt mRng;
     trick mTrickster;
     dawg::matic mKimura;

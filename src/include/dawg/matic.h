@@ -161,7 +161,7 @@ public:
 	matic() : branch_color(0)
 	{}
 
-protected:
+public:
 	typedef dawg::details::matic_section section;
 	struct segment : public std::vector<std::unique_ptr<section>> {
 		residue_exchange rex;

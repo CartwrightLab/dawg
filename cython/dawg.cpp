@@ -182,13 +182,88 @@ void dawg::Dawg::walk()
 
 	// prepare sets of aligned sequences;
 	dawg::alignment aln;
+	/// \brief prewalk resizes matic's seq vector and
+	/// \brief sets the seq type for the alignments
 	mKimura.pre_walk(aln);
 	for (auto i = 0; i < mRepetitions; ++i) {
-		mKimura.walk(aln);
-		mAlignments.emplace_back(aln);
-    }
 
-} // run
+		if(mKimura.configs.empty())
+	        return;
+	    // clear alignment
+	    for(alignment::value_type &a : aln) {
+	        a.seq.clear();
+	    }
+
+	    if(mKimura.configs[0][0]->gap_overlap) {
+	        // take first seg and do upstream indels
+	        // root.gapoverlap = false prevents upstream indel creation
+	        mKimura.branch_color = 0;
+	        // clear sequence buffer
+	        for(details::sequence_data &v : mKimura.seqs) {
+	            v.seq.clear();
+	            v.indels.clear();
+	        }
+	        for(const auto &sec : mKimura.configs[0]) {
+	            for(wood::data_type::size_type u=1; u < sec->usertree.data().size();++u) {
+	                const wood::node &n = sec->usertree.data()[u];
+	                const sequence &ranc = mKimura.seqs[sec->metatree[u-n.anc]].seq;
+	                details::sequence_data &sd = mKimura.seqs[sec->metatree[u]];
+	                sec->evolve_upstream(sd.seq, sd.indels, n.length,
+	                    mKimura.branch_color, mKimura.maxx);
+	                sec->evolve(sd.seq, sd.indels, n.length,
+	                    mKimura.branch_color, ranc.begin(), ranc.end(), mKimura.maxx);
+	                mKimura.branch_color += dawg::residue::branch_inc;
+	            }
+	        }
+	        mKimura.align(aln, mKimura.seqs, mKimura.configs[0].rex);
+	    }
+
+	    for(const matic::segment &seg : mKimura.configs) {
+	        if(seg.empty())
+	            continue;
+	        mKimura.branch_color = 0;
+	        // clear the sequence buffers
+	        for(details::sequence_data &v : mKimura.seqs) {
+	            v.seq.clear();
+	        }
+	        { // create root sequence of this
+	            const auto &sec = std::move(seg.at(0));
+	            mKimura.seqs[sec->metatree[0]].indels.clear();
+	            sec->rut_mod(mKimura.seqs[sec->metatree[0]].seq, mKimura.maxx, sec->sub_mod, sec->rat_mod, mKimura.branch_color);
+	            mKimura.branch_color += dawg::residue::branch_inc;
+	            // if gap_overlap is false, clear the upstream buffer of all sequences
+	            if(!sec->gap_overlap) {
+	                for(details::sequence_data &v : mKimura.seqs) {
+	                    v.indels.clear();
+	                }
+	            }
+	        }
+	        for(const auto& sec : seg) {
+	            for(wood::data_type::size_type u=1;u<sec->usertree.data().size();++u) {
+	                const wood::node &n = sec->usertree.data()[u];
+	                const sequence &ranc = mKimura.seqs[sec->metatree[u-n.anc]].seq;
+	                sequence &seq = mKimura.seqs[sec->metatree[u]].seq;
+	                sec->evolve(seq, mKimura.seqs[sec->metatree[u]].indels, n.length,
+	                    mKimura.branch_color, ranc.begin(), ranc.end(), mKimura.maxx);
+	                mKimura.branch_color += dawg::residue::branch_inc;
+	            }
+
+	        }
+	        // Align segment
+	        mKimura.align(aln, mKimura.seqs, seg.rex);
+	    } // each segment
+
+		mSequences.emplace_back(aln);
+    } // repition loop
+
+} // walk
+
+///////////////////////////////////////////////////////////
+/// \brief calls the alignment routines
+///////////////////////////////////////////////////////////
+void Dawg::align(dawg::alignment &aln) {
+
+}
 
 ///////////////////////////////////////////////////////////
 /// \brief this would print the aln data out to std::cout
@@ -210,7 +285,7 @@ void dawg::Dawg::write() {
 		return;
 	}
 
-	for (auto a : mAlignments) {
+	for (auto a : mSequences) {
 		mWriter(a);
 	}
 }
@@ -224,7 +299,7 @@ void dawg::Dawg::write() {
 std::string Dawg::getEvolvedSequences() const {
 	using namespace std;
 	string temp; // the string to append to
-	for (const auto &aln : mAlignments) {
+	for (const auto &aln : mSequences) {
 		for (const auto &s : aln) {
 			temp += s.label + s.seq + ":";
 		}
@@ -276,7 +351,7 @@ std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
 
 void Dawg::printAlignment(const dawg::alignment &aln) const {
 	using namespace std;
-	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
+	// cout << "mSequences.size(): " << mSequences.size() << endl;
 	cout << "max_label_width: " << aln.max_label_width <<
 		"\nseq_type: " << aln.seq_type << "\n";
 	for (const auto &v : aln) {
