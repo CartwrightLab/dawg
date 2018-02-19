@@ -1,6 +1,8 @@
 // Driver example code for dawgjs
 var dawg = require('./dawg.js')
 
+console.log("Hello dawg_walker here");
+
 console.log("getRandomInt(0, 100)", dawg.getRandomInt(0, 100));
 console.log("getRandomInt(0, 100)", dawg.getRandomInt(0, 100));
 console.log("getRandomInt(0, 100)", dawg.getRandomInt(0, 100));
