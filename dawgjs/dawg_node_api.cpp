@@ -1,63 +1,32 @@
-/*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
-    Copyright (c) 2004-2012  Reed A. Cartwright, PhD
+#include <string>
+#include <random>
+#include <sstream>
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-#include "../build/release/version.h" // hack for this branch
-// #include "dawg.h"
-
-#include <boost/preprocessor.hpp>
-// #include <boost/config.hpp>
-
-#include <vector>
-#include <exception>
-
-#include <dawg/matic.h>
-#include <dawg/ma.h>
-#include <dawg/trick.h>
-#include <dawg/global.h>
-#include <dawg/output.h>
 #include <dawg/log.h>
 
-// #include "dawg_app.h"
+#include <emscripten/bind.h>
 
-using namespace std;
-using namespace boost;
-using namespace dawg;
-
-#define VERSION_MSG NEW_PACKAGE_STRING "\n" \
-	"    Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>\n"
-
-std::vector<std::string> splitIntoVectorString(const std::string &s);
-std::vector<double> splitIntoVectorDouble(const std::string &s);
-/// \brief Run the application
-int run();
-
-int main(int argc, char *argv[])
-{
-	int ret = EXIT_FAILURE;
-	try {
-		// dawg_app app(argc, argv);
-		// ret = app.run();
-		run();
-	} catch(std::exception &e) {
-		DAWG_ERROR(e.what());
-	}
-	return ret;
+int getRandomInt(int low, int high) {
+	std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist (low, high);
+	return dist(mt);
 }
 
+float getRandomFloat(float low, float high) {
+	std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<float> dist (low, high);
+	return dist(mt);
+}
+
+std::string getDawgError(const std::string &e) {
+	using namespace std;
+	stringstream ss;
+	ss << DAWG_ERROR(e);
+	return ss.str();
+}
+/*
 std::vector<std::string> splitIntoVectorString(const std::string &s) {
 	using namespace std;
 
@@ -221,3 +190,12 @@ int run() {
 	}
 	return EXIT_SUCCESS;
 } // run
+*/
+
+EMSCRIPTEN_BINDINGS(hello_world_module) {
+	using namespace emscripten;
+	// function("lerp", &lerp);
+	function("getRandomInt", &getRandomInt);
+	function("getRandomFloat", &getRandomFloat);
+	function("getDawgError", &getDawgError);
+}
