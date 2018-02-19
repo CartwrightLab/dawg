@@ -20,4 +20,5 @@ em++ -std=c++11 -Wall -fPIC --minify 0 -O2 --bind \
     -s NO_EXIT_RUNTIME=1 \
     -I ~/code/boost_1_66_0 \
     -I ../src/include \
+    ../src/lib/mutt.cpp \
     dawg_node_api.cpp -o dawg.js
