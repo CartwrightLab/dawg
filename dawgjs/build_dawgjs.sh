@@ -22,4 +22,6 @@ em++ -std=c++11 -Wall -fPIC --minify 0 -O2 --bind --memory-init-file 0 \
     -I ../build/release/src/include \
     -I ../src/include \
     ../src/lib/mutt.cpp \
+    ../src/lib/matic.cpp \
+    ../src/lib/models.cpp \
     dawg_node_api.cpp -o dawg.js
