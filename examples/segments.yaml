@@ -1,0 +1,24 @@
+# Add to _initial_ section
+Sim:
+  Reps: 5
+
+Root:
+  Segment: 1
+
+# New sections
+Noncoding:
+  Tree.tree: "(A:0.3)D;"
+  root.segment: 1
+  root.length: 10
+  subst.model: "JC"
+
+Coding:
+  Root.segment: 2
+  Root.length: 10
+  subst.model: "codmg"
+  subst.params: [0.1, 1, 1, 1, 1, 1, 1]
+  subst.freqs: [0.2, 0.3, 0.3, 0.2]
+
+
+Noncoding2=Noncoding:
+  Root.segment: 3
