@@ -1,0 +1,441 @@
+#include "dawg.hpp"
+
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <vector>
+#include <cstdlib> // atof
+
+#include <boost/algorithm/string.hpp>
+
+#include <dawg/ma.h>
+#include <dawg/matic.h>
+#include <dawg/trick_parse.h>
+#include <dawg/global.h>
+#include <dawg/log.h>
+
+using namespace dawg;
+
+// Example constructor to make sure things work
+Dawg::Dawg() {
+    info("no param constructor", __FILE__, __LINE__);
+}
+
+///////////////////////////////////////////////////////////
+/// \brief constructor for using rng
+///////////////////////////////////////////////////////////
+Dawg::Dawg(const unsigned int seed)
+: mSeed(seed)
+, mRng() {
+    mRng.seed(seed);
+}
+
+///////////////////////////////////////////////////////////
+/// \param input can be optional
+/// For instance, "dawg --seed=111 basic-dna.dawg -o fasta:-"
+/// in the form of { in, out, r, s }
+/// Test input to see if we need to use Dawg's Trick parser
+///////////////////////////////////////////////////////////
+Dawg::Dawg(const std::string& in,
+    const std::string& out,
+    const unsigned int seed,
+    const unsigned int reps)
+: mInFile(in)
+, mOutFile(out)
+, mSeed(seed)
+, mRepetitions(reps)
+, mTrickster()
+, mKimura()
+, mModelArguments()
+, mWriter()
+ {
+	if (!in.empty())
+		parseInput();
+
+	// Create the object that will do all the simulation
+	// work for us.  Configure its sections.
+	// dawg::matic kimura;
+    // if a seed was specified, use it
+	if(mSeed != 0) {
+		mKimura.seed(this->mSeed);
+	}
+}
+
+void Dawg::configureMatic() {
+	if (!mKimura.configure(mModelArguments.begin(), mModelArguments.end())) {
+		DAWG_ERROR("bad configuration");
+	}
+}
+
+void Dawg::parseInput() {
+	// Parse the input file
+	bool ret = true;
+	auto pos = mInFile.rfind(".dawg");
+	if (pos != std::string::npos)
+		ret &= dawg::trick::parse_file(mTrickster, mInFile.c_str());
+	else
+		ret &= mTrickster.parse(mInFile.begin(), mInFile.end());
+
+	if(!ret)
+		DAWG_ERROR("Failure to parse DAWG file\n");
+
+	// process aliases
+	mTrickster.read_aliases();
+
+	if (!dawg::ma::from_trick(mTrickster, mModelArguments)) {
+		DAWG_ERROR("bad configuration: ");
+	}
+}
+
+///////////////////////////////////////////////////////////
+/// \brief addModelArgument
+/// The traditional inheritance model in DAWG copies params
+/// "downward" with respect to a trick file unless a section
+///	specifies "[[secC = secA]]" the direction of inheritance
+/// default params are set on Python side
+///////////////////////////////////////////////////////////
+void dawg::Dawg::addModelArgument(const std::string &name,
+	const std::string &inherits_from,
+	const std::string &subst_model,
+    const std::string &subst_params,
+    const std::string &subst_freqs,
+    const std::string &subst_rate_model,
+    const std::string &subst_rate_params,
+
+    const std::string &indel_model_ins,
+    const std::string &indel_params_ins,
+    const std::string &indel_rate_ins,
+    const unsigned int indel_max_ins,
+    const std::string &indel_model_del,
+    const std::string &indel_params_del,
+    const std::string &indel_rate_del,
+    const unsigned int indel_max_del,
+
+	const std::string &tree,
+    const std::string &tree_model,
+    const std::string &tree_params,
+    const double tree_scale,
+
+    const unsigned int root_length,
+    const std::string &root_seq,
+    const std::string &root_rates,
+    const unsigned int root_code,
+    const unsigned int root_segment,
+    const bool root_gapoverlap,
+
+	const bool output_rna,
+	const bool output_lowercase,
+	const bool output_keepempty,
+	const bool output_markins) {
+
+	using namespace std;
+
+	dawg::ma modelArgument;
+
+	// initialize all variables directly unless they might be a list
+	modelArgument.name = name;
+	// dawg::ma doesn't keep track of inheritance
+	// modelArgument.inherits_from = inherits_from;
+
+	modelArgument.subst_model = subst_model;
+	modelArgument.subst_params = splitIntoVectorDouble(subst_params);
+	modelArgument.subst_freqs = splitIntoVectorDouble(subst_freqs);
+	modelArgument.subst_rate_model = subst_rate_model;
+	modelArgument.subst_rate_params = splitIntoVectorDouble(subst_rate_params);
+
+	modelArgument.indel_model_ins = splitIntoVectorString(indel_model_ins);
+	modelArgument.indel_params_ins = splitIntoVectorDouble(indel_params_ins);
+	modelArgument.indel_rate_ins = splitIntoVectorDouble(indel_rate_ins);
+	modelArgument.indel_max_ins = indel_max_ins;
+	modelArgument.indel_model_del = splitIntoVectorString(indel_model_del);
+	modelArgument.indel_params_del = splitIntoVectorDouble(indel_params_del);
+	modelArgument.indel_rate_del = splitIntoVectorDouble(indel_rate_del);
+	modelArgument.indel_max_del = indel_max_del;
+
+	modelArgument.tree_tree = tree;
+	modelArgument.tree_params = splitIntoVectorDouble(tree_params);
+	modelArgument.tree_model = tree_model;
+	modelArgument.tree_scale = tree_scale;
+
+	modelArgument.root_length = root_length;
+	modelArgument.root_seq = root_seq;
+	// modelArgument.root_rates = splitIntoVectorDouble(root_rates);
+	modelArgument.root_code = root_code;
+	modelArgument.root_segment = root_segment;
+	modelArgument.root_gapoverlap = root_gapoverlap;
+
+	modelArgument.output_rna = output_rna;
+	modelArgument.output_keepempty = output_keepempty;
+	modelArgument.output_markins = output_markins;
+	modelArgument.output_lowercase = output_lowercase;
+
+	mModelArguments.emplace_back(modelArgument);
+}
+
+///////////////////////////////////////////////////////////
+/// \brief Create the alignments
+///	tell the dawg to walk, but then just walk it
+///////////////////////////////////////////////////////////
+void dawg::Dawg::walk()
+{
+    using namespace std;
+
+	// prepare sets of aligned sequences;
+	dawg::alignment aln;
+	/// \brief prewalk resizes matic's seq vector and
+	/// \brief sets the seq type for the alignments
+	mKimura.pre_walk(aln);
+	for (auto i = 0; i < mRepetitions; ++i) {
+
+		if(mKimura.configs.empty())
+	        return;
+	    // clear alignment
+	    for(alignment::value_type &a : aln) {
+	        a.seq.clear();
+	    }
+
+	    if(mKimura.configs[0][0]->gap_overlap) {
+	        // take first seg and do upstream indels
+	        // root.gapoverlap = false prevents upstream indel creation
+	        mKimura.branch_color = 0;
+	        // clear sequence buffer
+	        for(details::sequence_data &v : mKimura.seqs) {
+	            v.seq.clear();
+	            v.indels.clear();
+	        }
+	        for(const auto &sec : mKimura.configs[0]) {
+	            for(wood::data_type::size_type u=1; u < sec->usertree.data().size();++u) {
+	                const wood::node &n = sec->usertree.data()[u];
+	                const sequence &ranc = mKimura.seqs[sec->metatree[u-n.anc]].seq;
+	                details::sequence_data &sd = mKimura.seqs[sec->metatree[u]];
+	                sec->evolve_upstream(sd.seq, sd.indels, n.length,
+	                    mKimura.branch_color, mKimura.maxx);
+	                sec->evolve(sd.seq, sd.indels, n.length,
+	                    mKimura.branch_color, ranc.begin(), ranc.end(), mKimura.maxx);
+	                mKimura.branch_color += dawg::residue::branch_inc;
+	            }
+	        }
+	        this->align(aln, mKimura.seqs, mKimura.configs[0].rex);
+	    }
+
+	    for(const matic::segment &seg : mKimura.configs) {
+	        if(seg.empty())
+	            continue;
+	        mKimura.branch_color = 0;
+	        // clear the sequence buffers
+	        for(details::sequence_data &v : mKimura.seqs) {
+	            v.seq.clear();
+	        }
+	        { // create root sequence of this
+	            const auto &sec = std::move(seg.at(0));
+	            mKimura.seqs[sec->metatree[0]].indels.clear();
+	            sec->rut_mod(mKimura.seqs[sec->metatree[0]].seq, mKimura.maxx, sec->sub_mod, sec->rat_mod, mKimura.branch_color);
+	            mKimura.branch_color += dawg::residue::branch_inc;
+	            // if gap_overlap is false, clear the upstream buffer of all sequences
+	            if(!sec->gap_overlap) {
+	                for(details::sequence_data &v : mKimura.seqs) {
+	                    v.indels.clear();
+	                }
+	            }
+	        }
+	        for(const auto& sec : seg) {
+	            for(wood::data_type::size_type u=1;u<sec->usertree.data().size();++u) {
+	                const wood::node &n = sec->usertree.data()[u];
+	                const sequence &ranc = mKimura.seqs[sec->metatree[u-n.anc]].seq;
+	                sequence &seq = mKimura.seqs[sec->metatree[u]].seq;
+	                sec->evolve(seq, mKimura.seqs[sec->metatree[u]].indels, n.length,
+	                    mKimura.branch_color, ranc.begin(), ranc.end(), mKimura.maxx);
+	                mKimura.branch_color += dawg::residue::branch_inc;
+	            }
+
+	        }
+	        // Align segment
+	        this->align(aln, mKimura.seqs, seg.rex);
+	    } // each segment
+
+		mAlignments.emplace_back(aln);
+    } // repition loop
+
+} // walk
+
+///////////////////////////////////////////////////////////
+/// \brief calls the alignment routines
+///////////////////////////////////////////////////////////
+void Dawg::align(dawg::alignment &aln,
+	const dawg::matic::seq_buffers_type &seqs,
+	const dawg::residue_exchange &rex) {
+	struct aligner_data {
+	    aligner_data(const dawg::sequence &xseq, std::string &xstr) :
+	        it(xseq.begin()), last(xseq.end()), str(&xstr) {
+	    }
+	    sequence::const_iterator it, last;
+	    std::string *str;
+	};
+
+	assert(aln.size() <= seqs.size());
+
+	//unsigned uFlags = 0; //temporary
+
+	// construct a table to hold alignment information
+	// TODO: Cache this?
+	std::vector<aligner_data> aln_table;
+	for(alignment::size_type u=0;u<aln.size();++u) {
+		aln_table.push_back(aligner_data(seqs[u].seq, aln[u].seq));
+	}
+
+	// Alignment rules:
+	// Insertion & Deleted Insertion  : w/ ins, deleted ins, or gap
+	// Deletion & Original Nucleotide : w/ del, original nucl
+
+	unsigned int uStateQuit = rex.is_keep_empty() ? 0x2 : 0x3;
+
+	dawg::residue::data_type uBranch = 0, uBranchN = 0;
+
+	// Go through each column, adding gaps where neccessary
+	for(;;) {
+		unsigned int uState =  uStateQuit; // Set to quit
+		uBranch = 0; // Set to lowest branch
+		// Find column state(s)
+		for(aligner_data &v : aln_table) {
+			if(v.it == v.last)
+				continue; // Sequence is done
+			uBranchN = v.it->branch();
+			if(uBranchN == uBranch) {
+				uState &= ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			} else if(uBranchN > uBranch) {
+				uBranch = uBranchN;
+				uState = uStateQuit & ((v.it->base() == rex.gap_base()) ? 0x1 : 0x0);
+			}
+		}
+		switch(uState&3) {
+			case 3:
+			case 2: goto ENDFOR; // Yes, you shouldn't use goto, except here
+			case 1: // Empty column that we want to ignore
+				for(aligner_data &v : aln_table) {
+					if(v.it != v.last && v.it->branch() == uBranch)
+						++v.it;
+				}
+				break;
+			case 0: // Unempty column
+				for(aligner_data &v : aln_table) {
+					if(v.it == v.last || v.it->branch() != uBranch) {
+						rex.append_ins(*v.str);
+					} else {
+						rex.append_residue(*v.str, *(v.it++));
+					}
+				}
+		};
+	} // for loop
+	ENDFOR:
+	/*noop*/;
+}
+
+///////////////////////////////////////////////////////////
+/// \brief this would print the aln data out to std::cout
+/// or a file depending on how output is defined
+///////////////////////////////////////////////////////////
+void dawg::Dawg::write() {
+	using namespace std;
+
+	dawg::global_options glopts;
+	glopts.read_section(mTrickster.data.front());
+
+	if (!mWriter.open(/*glopts.output_file.c_str()*/ mOutFile.c_str(),
+		mRepetitions - 1,
+		false, // false
+		false, // false
+		false)) // false
+	{
+		DAWG_ERROR("bad configuration");
+		return;
+	}
+
+	for (auto a : mAlignments) {
+		mWriter(a);
+	}
+}
+
+///////////////////////////////////////////////////////////
+/// \brief This is hacky and imperfect way to
+/// mash the alignment vector
+///	together and return it as one giant string
+///////////////////////////////////////////////////////////
+std::string Dawg::getAlignments() const {
+	using namespace std;
+	string braids;
+	for (const auto &aln : mAlignments) {
+		for (const auto &s : aln) {
+			braids.append(s.label + ":" + s.seq + ";");
+		}
+	}
+	// remove trailing semicolon
+	braids.resize(braids.size() - 1);
+	braids.shrink_to_fit();
+	return braids;
+}
+
+unsigned int
+dawg::Dawg::rand(unsigned int a, unsigned int b) {
+    using namespace std;
+    // cout << "Hello rand(" << a << ", " << b << ")\n";
+    auto n = mRng.rand_uint();
+    // cout << "n: " << n << "\n";
+    return n % b + a;
+}
+
+///////////////////////////////////////////////////////////
+///	\brief bark :: Print out segments (model args) to stdout
+///////////////////////////////////////////////////////////
+void Dawg::bark() const {
+	using namespace std;
+
+	for (auto arg : mModelArguments) {
+		cout << arg << endl;
+	}
+}
+
+std::vector<std::string> Dawg::splitIntoVectorString(const std::string &s) const {
+	using namespace std;
+
+	vector<string> string_split;
+	boost::algorithm::split(string_split, s, boost::is_any_of(","));
+
+	return string_split;
+}
+
+std::vector<double> Dawg::splitIntoVectorDouble(const std::string &s) const {
+	using namespace std;
+
+	vector<string> string_split;
+	boost::algorithm::split(string_split, s, boost::is_any_of(","));
+
+	vector<double> string_to_double;
+	for (auto params : string_split) {
+		string_to_double.emplace_back(atof(params.c_str())); // consider strtod
+	}
+	return string_to_double;
+}
+
+// void Dawg::printAlignment(const dawg::alignment &aln) const {
+// 	using namespace std;
+// 	// cout << "mAlignments.size(): " << mAlignments.size() << endl;
+// 	cout << "max_label_width: " << aln.max_label_width <<
+// 		"\nseq_type: " << aln.seq_type << "\n";
+// 	for (const auto &v : aln) {
+// 		cout << "label: " << v.label.c_str() << "\nseq: " << v.seq.c_str() << endl;
+// 	}
+// }
+
+// Log an info message
+template <typename Line, typename File>
+void Dawg::info(const std::string &msg, Line l, File f) const {
+	using namespace std;
+	cout << msg << ", file: " << f << ", line: " << l << endl;
+}
+
+// Log an error message
+template <typename Line, typename File>
+void Dawg::error(const std::string &msg, Line l, File f) const {
+	using namespace std;
+	cerr << msg << ", file: " << f << ", line: " << l << endl;
+}

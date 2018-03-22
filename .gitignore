@@ -50,3 +50,6 @@ src/config.h
 # Ignore the build directory
 build/*
 !build/.gitkeep
+
+# Python
+swig/__pycache__/*

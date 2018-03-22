@@ -21,6 +21,7 @@ SET(RANDOM_GEN "xorshift_64" CACHE STRING "Pseudo-random number generator to use
 MARK_AS_ADVANCED(RANDOM_GEN)
 
 SET(DAWG_BUILD_DOC OFF CACHE BOOL "TRUE to generate Doxygen API docs, FALSE to ignore it")
+SET(DAWG_BUILD_PYTHON OFF CACHE BOOL "TRUE to generate a Python module using Boost Python / Cython / Swig")
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,7 +46,7 @@ ENDIF()
 
 #### RPATH Support #####
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 if("${isSystemDir}" STREQUAL "-1")
@@ -157,9 +158,29 @@ INSTALL(FILES lambda.pl outsplit.pl nexus2fasta.pl varrep.pl DESTINATION ${CMAKE
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
-IF(DAWG_BUILD_DOC) 
+IF(DAWG_BUILD_DOC)
     ADD_SUBDIRECTORY(doc)
 ENDIF(DAWG_BUILD_DOC)
+IF(DAWG_BUILD_PYTHON)
+    # Look for Python packages first
+    FIND_PACKAGE(PythonInterp)
+    FIND_PACKAGE(PythonLibs)
+    if (${PYTHON_VERSION_MAJOR} EQUAL 3)
+        FIND_PACKAGE(Boost COMPONENTS python3)
+    else()
+        FIND_PACKAGE(Boost COMPONENTS python)
+    endif()
+
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIRS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/include")
+    # Deprecated but so convenient, might need to set it to a target?
+    LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_MODULE} ${libdawg2})
+
+    ADD_SUBDIRECTORY(boost.python)
+    ADD_SUBDIRECTORY(cython)
+    #ADD_SUBDIRECTORY(swig)
+ENDIF(DAWG_BUILD_PYTHON)
 ADD_SUBDIRECTORY(tests)
 
 ADD_DEPENDENCIES(new_package dawg)
@@ -172,7 +193,6 @@ CONFIGURE_FILE(
   IMMEDIATE @ONLY)
 
 ADD_CUSTOM_TARGET(uninstall
-  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake") 
+  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 #INCLUDE(InstallRequiredSystemLibraries)
-
