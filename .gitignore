@@ -28,7 +28,6 @@
 *.fai
 
 # misc
-dawg
 *~
 *temp*
 .DS_*
