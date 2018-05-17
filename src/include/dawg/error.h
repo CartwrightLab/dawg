@@ -72,7 +72,7 @@ namespace dawg {
     class dawg_error_category : public std::error_category {
     public:
 	// return short descriptive name for the category
-	virtual const char *name() const noexcept override final {return "Error custom category"; }
+	virtual const char *name() const noexcept override final {return "Dawg error category"; }
 	// return enum description
 	// TODO: add parameter(s) when needed for error message
 	virtual std::string message(int ev) const override final {

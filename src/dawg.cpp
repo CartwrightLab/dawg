@@ -29,6 +29,7 @@
 #include <dawg/trick.h>
 #include <dawg/global.h>
 #include <dawg/output.h>
+#include <dawg/error.h>
 
 #include "dawg_app.h"
 
@@ -45,8 +46,8 @@ int main(int argc, char *argv[])
 	try {
 		dawg_app app(argc, argv);
 		ret = app.run();
-	} catch(std::exception &e) {
-		CERROR(e.what());
+	} catch(std::error_code &e) {
+		std::cout << "ERROR: " <<  e.message() << std::endl;
 	}
 	return ret;
 }
@@ -142,8 +143,8 @@ int dawg_app::run() {
 	bool label  = arg.label || (indeterminate(arg.label) && glopts.output_label);
 
 	if(!write_aln.open(file_name, num_reps-1, split, append, label)) {
-		DAWG_ERROR("bad configuration");
-		return EXIT_FAILURE;
+		std::error_code ec = dawg_error::bad_configuration;
+		throw ec;
 	}
 	write_aln.set_blocks(glopts.output_block_head.c_str(),
 		glopts.output_block_between.c_str(),
@@ -154,8 +155,8 @@ int dawg_app::run() {
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_trick(input, configs)) {
-		DAWG_ERROR("bad configuration");
-		return EXIT_FAILURE;
+		std::error_code ec = dawg_error::bad_configuration;
+		throw ec;
 	}
 
 	// Create the object that will do all the simulation
@@ -168,8 +169,8 @@ int dawg_app::run() {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
 	if(!kimura.configure(configs.begin(), configs.end())) {
-		DAWG_ERROR("bad configuration");
-		return EXIT_FAILURE;
+		std::error_code ec = dawg_error::bad_configuration;
+		throw ec;
 	}
 	// create sets of aligned sequences;
 	dawg::alignment aln;
