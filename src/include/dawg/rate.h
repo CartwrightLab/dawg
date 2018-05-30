@@ -35,8 +35,9 @@ public:
             case 2:
                 return create_zero(first, last);
 		};
-		return DAWG_ERROR("Invalid rate model; no model named '" << rname << "'");		
-		
+		std::error_code ec = dawg_error::model_no_name;
+		DAWG_ERROR_INFO_ = rname + " (invalid rate model).";
+		throw ec;
 	}
 
 	template<typename It>
@@ -50,26 +51,38 @@ public:
 
 	template<typename It>
 	bool create_gamma(It first, It last) {
-		if(first == last)
-			return DAWG_ERROR("Invalid rate model; gamma-invariant requires at least 1 parameter");
+		if(first == last) {
+			std::error_code ec = dawg_error::param_missing;
+			DAWG_ERROR_INFO_ = "gamma-invariant requires at least 1 parameter (invalid rate model).";
+			throw ec;
+		}
 		double alpha = *first++;
-		if(alpha < 0.0)
-			return DAWG_ERROR("Invalid rate model; first gamma-invariant parameter '"
-				<< alpha << "' is not >= 0.");
+		if(alpha < 0.0) {
+			std::error_code ec = dawg_error::invalid_value;
+			DAWG_ERROR_INFO_ = " first gamma-invariant " + std::to_string(alpha) +
+			    "is not >=0 (invalid rate model).";
+			throw ec;
+		}
 		double iota = 0.0;
 		if(first != last) {
 			iota = *first++;
-			if(iota < 0.0 || iota >= 1.0) 
-				return DAWG_ERROR("Invalid rate model; second gamma-invariant parameter '"
-					<< iota << "' is not [0,1).");
+			if(iota < 0.0 || iota >= 1.0) {
+			    std::error_code ec = dawg_error::invalid_value;
+			    DAWG_ERROR_INFO_ = "second gamma-invariant " + std::to_string(iota) +
+				" is not [0,1) (invalid rate model).";
+			    throw ec;
+			}
 		}
 		int sz = DAWG_GAMMA_CONT_SIZE;
 		if(first != last) {
 			sz = static_cast<int>(*first++);
 			// use an upper limit to catch user mistakes.
-			if(sz < 1 || sz > 65535)
-				return DAWG_ERROR("Invalid rate model; third gamma-invariant parameter '"
-					<< sz << "' is not in [1,65535].");
+			if(sz < 1 || sz > 65535) {
+			    std::error_code ec = dawg_error::invalid_value;
+			    DAWG_ERROR_INFO_ = "third gamma-invariant " + std::to_string(iota) +
+				" is not [1,65535) (invalid rate model).";
+			    throw ec;
+			}
 		}
 		bool do_median = false;
 		if(first != last)

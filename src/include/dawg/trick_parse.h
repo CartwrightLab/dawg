@@ -12,6 +12,7 @@
 #include <iterator>
 
 #include <dawg/trick.h>
+#include <dawg/error.h>
  
 #include <boost/spirit/include/version.hpp>
 #if SPIRIT_VERSION < 0x2020
@@ -109,8 +110,10 @@ bool trick::parse(Iterator first, Iterator last) {
 	white_space<Iterator> wasp;
 	trick_grammar<Iterator, dawg::white_space<Iterator> > pyler;
 	bool r = qi::phrase_parse(first, last, pyler, wasp, pyle);
-	if( first != last || !r )
-		return DAWG_ERROR("parsing failed.");
+	if( first != last || !r ) {
+		std::error_code ec = dawg_error::parsing_failed;
+		throw ec;
+	}
 	std::string header("_initial_"), subheader("");
 	int autonum = 1; //TODO: What happens with multiple trick files?
 	section *psec = &data.front();

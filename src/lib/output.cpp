@@ -13,6 +13,7 @@
 
 #include <dawg/details/config.h>
 #include <dawg/log.h>
+#include <dawg/error.h>
 
 #include <dawg/output.h>
 
@@ -44,8 +45,9 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 			format = boost::make_iterator_range(mid+1, (const char*)strchr(mid+1, '\0'));
 		}
 		if(format && !set_format(format)) {
-			return DAWG_ERROR("unknown output format \'"
-						<< std::string(format.begin(), format.end()) << "\'.");
+			std::error_code ec = dawg_error::unknown_output_format;
+			DAWG_ERROR_INFO_ = std::string(format.begin(), format.end());
+			throw ec;
 		}
 	}
 	label_width = 1+static_cast<unsigned int>(log10(1.0*max_rep));
@@ -58,8 +60,11 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 		do_split  = split;
 		// open our omnibus output if desired
 		if(!do_split) {
-			if(!open_file(file_name))
-				return DAWG_ERROR("unable to open output file \'" << file_name << "\'.");
+			if(!open_file(file_name)) {
+				std::error_code ec = dawg_error::open_output_file_fail;
+				DAWG_ERROR_INFO_ = file_name;
+				throw ec;
+			}
 		} else {
 			// setup output_filename
 			if(mid == nullptr) {
@@ -113,8 +118,11 @@ bool dawg::output::open_next() {
 	// replace 
 	split_file_name.replace(split_id_offset, label_width, current_label);
 	
-	if(!open_file(split_file_name.c_str()))
-		return DAWG_ERROR("unable to open output file \'" << split_file_name << "\'.");
+	if(!open_file(split_file_name.c_str())) {
+		std::error_code ec = dawg_error::open_input_file_fail;
+		dawg::DAWG_ERROR_INFO_ = split_file_name;
+		throw ec;
+	}
 	return true;
 }
 

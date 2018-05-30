@@ -26,13 +26,18 @@ bool subst_model::create_gtr(const char *mod_name, unsigned int code, It1 first1
 	double params[6];
 	u = 0;
 	for(;first1 != last1 && u<6;++first1,++u) {
-		if(*first1 < 0)
-			return DAWG_ERROR("Invalid subst model; gtr parameter #" << u
-				<< " '" << *first1 << "' is not >= 0.");
+		if(*first1 < 0) {
+		    std::error_code ec = dawg_error::invalid_value;
+		    DAWG_ERROR_INFO_ = "gtr parameter #" + std::to_string(u) + " '" + std::to_string(*first1) + "' is not >=0 (invalid subst model).";
+		    throw ec;
+		}
 		params[u] = *first1;
 	}
-	if(u != 6)
-		return DAWG_ERROR("Invalid subst model; gtr requires six parameters.");
+	if(u != 6){
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = "gtr requires six parameters (invalid subst model).";
+		throw ec;
+	}
 	
 	// construct substitution matrix
 	double rs[4];
@@ -75,8 +80,11 @@ bool subst_model::create_gtr(const char *mod_name, unsigned int code, It1 first1
 		for(int j=0;j<64;++j)
 			table[i][j] = 1.0/64.0;
 	
-	if(!create_alias_tables())
-		return DAWG_ERROR("unable to create alias tables");
+	if(!create_alias_tables()) {
+		std::error_code ec = dawg_error::creation_fail;
+		DAWG_ERROR_INFO_ = "Aliast tables ";
+		throw ec;
+	}
 	name = mod_name;
 	return true;
 }
@@ -98,8 +106,11 @@ bool subst_model::create_k2p(const char *, unsigned int code, It1 first1, It1 la
 	// equal rates and frequencies
 	static const double ones[4] = {1.0,1.0,1.0,1.0};
 	double p[6], a, b=0.5;  // this default for b means that a=r if b is not specified
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; k2p requires one or two parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = "k2p requires 1 or 2 parameters (invalid subst model).";
+		throw ec;
+	}
 	a = *first1++;
 	if(first1 != last1)
 		b = *first1;
@@ -115,11 +126,17 @@ bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1,
 		return false;
 	fr = f[0]+f[2];
 	fy = f[1]+f[3];
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = std::string(mod_name) + " requires 1 or 3 parameters (invalid subst model).";
+		throw ec;
+	}
 	ay = *first1++;
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = std::string(mod_name) + " requires 2 or 3 parameters (invalid subst model).";
+		throw ec;
+	}
 	ar = *first1++;
 	if(first1 == last1) {
 		// two parameters
@@ -149,11 +166,17 @@ bool subst_model::create_tn_f04(const char *mod_name, unsigned int code, It1 fir
 		return false;
 	fr = f[0]+f[2];
 	fy = f[1]+f[3];
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = std::string(mod_name) + " requires 2 or 3 parameters (invalid subst model).";
+		throw ec;
+	}
 	ay = *first1++;
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires two or three parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = std::string(mod_name) + " requires 2 or 3 parameters (invalid subst model).";
+		throw ec;
+	}
 	ar = *first1++;
 	if(first1 == last1) {
 		// two parameters
@@ -175,8 +198,11 @@ bool subst_model::create_tn_f04(const char *mod_name, unsigned int code, It1 fir
 template<typename It1, typename It2>
 bool subst_model::create_f84(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[3];
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; f84 requires one or two parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = "f84 requires 1 or 2 parameters (invalid subst model).";
+		throw ec;
+	}
 	double a = *first1++;
 	if(first1 == last1) {
 		p[0] = a;
@@ -192,8 +218,11 @@ bool subst_model::create_f84(const char *, unsigned int code, It1 first1, It1 la
 template<typename It1, typename It2>
 bool subst_model::create_hky(const char *, unsigned int code, It1 first1, It1 last1, It2 first2, It2 last2) {
 	double p[3];
-	if(first1 == last1)
-		return DAWG_ERROR("Invalid subst model; hky requires one or two parameters.");
+	if(first1 == last1) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = "hky requires 1 or 2 parameters (invalid subst model).";
+		throw ec;
+	}
 	double a = *first1++;
 	if(first1 == last1) {
 		p[0] = a;

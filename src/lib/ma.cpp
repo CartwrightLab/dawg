@@ -4,6 +4,7 @@
 #include <dawg/ma.h>
 #include <dawg/log.h>
 #include <dawg/wood.h>
+#include <dawg/error.h>
 
 #include <map>
 
@@ -34,14 +35,19 @@ bool dawg::ma::from_trick(const trick &trk, vector<ma> &v) {
 		secit != trk.data.end(); ++secit) {
 		// lookup parent section
 		map_t::const_iterator iit = lookup.find(secit->inherits);
-		if(iit == lookup.end())
-			return DAWG_ERROR("section '" << secit->inherits <<
-				"' not found (inherited by '" << secit->name << "')");
+		if(iit == lookup.end()) {
+			std::error_code ec = dawg_error::section_not_found;
+			DAWG_ERROR_INFO_ = "Section '" + secit->inherits +
+			    "' not found (inherited by '" + secit->name + "').";
+			throw ec;
+		}
 		// lookup section
 		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->name, (dawg::ma*)nullptr));
-		if(!me.second)
-			return DAWG_ERROR("section '" << secit->name << "' specified more than once.");
-
+		if(!me.second) {
+			std::error_code ec = dawg_error::section_already_specified;
+			DAWG_ERROR_INFO_ = secit->name;
+			throw ec;
+		}
 		// read inherited ma
 		v.push_back(*iit->second);
 		// read the section

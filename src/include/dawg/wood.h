@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <dawg/log.h>
+#include <dawg/error.h>
 
 #include <boost/optional.hpp>
 
@@ -89,9 +90,11 @@ public:
 				}
 			}
 			// add label to descendents list
-			if(!desc_names.insert(it->label).second)
-				return DAWG_ERROR("invalid tree; node label '" << it->label
-					              << "' used more than once by Tree.Tree.");
+			if(!desc_names.insert(it->label).second) {
+				std::error_code ec = dawg_error::invalid_tree;
+				DAWG_ERROR_INFO_ = "node label '" + it->label + "' used more than once by Tree.Tree";
+				throw ec;
+			}
 		}
 	
 		// set root name and remove it from the desc set

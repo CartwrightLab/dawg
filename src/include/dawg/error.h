@@ -1,4 +1,4 @@
-/*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
+    /*  Dawg - DNA Assembly with Gaps - Simulating Sequence Evolution
     Copyright (c) 2018 Juan J. Garcia Mesa
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 #ifndef DAWG_ERROR_H
 #define DAWG_ERROR_H
 
+#include <string>
 #include <iostream>
 #include <system_error>
 
@@ -30,36 +31,29 @@ enum class dawg_error {
     parsing_failed = 14,
 
     // indel model
-    indel_maximum_size_out_range = 20,
-    indel_model_no_type = 21,
-
-    // rate model
-    rate_no_model = 30,				//std::string&
-    rate_gamma_empty_invariant = 31,
-    rate_heterogeneous_creation_fail = 32,
-
-    // subst model
-    subst_model_gtr_negative_param = 40,	//int, It1
-    subst_model_gtr_insufficient_params = 41,
-    subst_model_aagtr_negative_param = 42,
-    subst_model_aagtr_number_requirement = 43,
-    subst_model_codgtr_negative_param = 44,	//int, It1
-    subst_model_negative_frequency = 45,	//const char*, It1
-    subst_model_no_name = 46,			//const char*
-    subst_model_creation_fail = 47,
+    indel_model_no_type = 20,
 
     // configuration
-    bad_configuration = 50,
-    configuration_section_fail = 51,		//first->name (?)
+    bad_configuration = 30,
+    configuration_section_fail = 31,		//first->name (?)
 
     // section
-    section_not_found = 60,			//std::string, std::string
-    section_already_specified = 61,		//std::string
+    section_not_found = 40,			//std::string, std::string
+    section_already_specified = 41,		//std::string
+    section_sequence_type_invalid = 42,
 
     // miscellaneous
-    invalid_genetic_code = 71,
-    invalid_sequence_type = 72,
-    tree_node_already_used = 73,		//it->label (?)
+    invalid_genetic_code = 51,
+    invalid_sequence_type = 52,
+    creation_fail = 53,
+    invalid_value = 54,
+    model_no_name = 55,
+    segment_extra_root = 56,
+    no_sequence = 57,
+    invalid_tree = 58,
+    unexpected = 59,
+    param_missing = 60,
+    invalid_user_sequence = 61,
 };
 
 namespace std {
@@ -69,64 +63,61 @@ namespace std {
 
 namespace dawg {
 
+    extern std::string DAWG_ERROR_INFO_;
+
     class dawg_error_category : public std::error_category {
     public:
+
 	// return short descriptive name for the category
 	virtual const char *name() const noexcept override final {return "Dawg error category"; }
 	// return enum description
 	// TODO: add parameter(s) when needed for error message
 	virtual std::string message(int ev) const override final {
 	    switch (static_cast<dawg_error>(ev)) {
-		case dawg_error::open_input_file_fail:
-		    return "Unable to open input file __.";
+		case dawg_error::open_input_file_fail:	// i/o
+		    return "Unable to open input file " + DAWG_ERROR_INFO_ + ".";
 		case dawg_error::open_output_file_fail:
-		    return "Unable to open output file __.";
+		    return "Unable to open output file " + DAWG_ERROR_INFO_ + ".";
 		case dawg_error::unknown_output_format:
-		    return "Unknown output format __.";
+		    return "Unknown output format " + DAWG_ERROR_INFO_ + ".";
 		case dawg_error::parse_input_file_fail:
-		    return "Unable to parse input __.";
+		    return "Unable to parse input " + DAWG_ERROR_INFO_ + ".";
 		case dawg_error::parsing_failed:
 		    return "Parsing failed.";
-		case dawg_error::indel_maximum_size_out_range:
-		    return "Maximum indel size is out of range.";
 		case dawg_error::indel_model_no_type:
 		    return "Invalid indel model; no model type specified.";
-		case dawg_error::rate_no_model:
-		    return "Invalid rate model; no model named __.";
-		case dawg_error::rate_gamma_empty_invariant:
-		    return "Invalid rate model; gamma-invariant requires at least 1 parameter.";
-		case dawg_error::rate_heterogeneous_creation_fail:
-		    return "Heterogeneous rate model could not be created.";
-		case dawg_error::subst_model_gtr_negative_param:
-		    return "Invalid subst model; gtr parameter __ is not >= 0.";
-		case dawg_error::subst_model_gtr_insufficient_params:
-		    return "Invalid subst model; gtr requires six parameters.";
-		case dawg_error::subst_model_aagtr_negative_param:
-		    return "Invalid subst model; aagtr parameter __ is not >= 0.";
-		case dawg_error::subst_model_aagtr_number_requirement:
-		    return "Invalid subst model; aagtr requires 190 parameters.";
-		case dawg_error::subst_model_codgtr_negative_param:
-		    return "Invalid subst model; codgtr parameter __ is not >= 0.";
-		case dawg_error::subst_model_negative_frequency:
-		    return "Invalid subst model; __ frequency __ is not >= 0.";
-		case dawg_error::subst_model_no_name:
-		    return "Invalid subst model; no model named __.";
-		case dawg_error::subst_model_creation_fail:
-		    return "Substitution model could not be created.";
-		case dawg_error::bad_configuration:
+		case dawg_error::param_missing:
+		    return "Param is missing; " + DAWG_ERROR_INFO_;
+		case dawg_error::bad_configuration: // configuration
 		    return "Bad configuration.";
 		case dawg_error::configuration_section_fail:
-		    return "Configuration section __ failed to process.";
-		case dawg_error::section_not_found:
-		    return "Section __ not found (inherited by __.)";
+		    return "Configuration section " + DAWG_ERROR_INFO_ +" failed to process.";
+		case dawg_error::section_not_found: // section
+		    return DAWG_ERROR_INFO_;
 		case dawg_error::section_already_specified:
-		    return "Section __ specified more than once.";
-		case dawg_error::invalid_genetic_code:
+		    return "Section " + DAWG_ERROR_INFO_ + " specified more than once.";
+		case dawg_error::section_sequence_type_invalid:
+		    return "The sequence type or format options of a section is different that its segment.";
+		case dawg_error::invalid_genetic_code:	// miscellaneous
 		    return "Invalid genetic code.";
 		case dawg_error::invalid_sequence_type:
 		    return "Invalid sequence type.";
-		case dawg_error::tree_node_already_used:
-		    return "Invalid tree; node label __ used more than once by Tree.Tree.";
+		case dawg_error::creation_fail:
+		    return DAWG_ERROR_INFO_ + " could not be created.";
+		case dawg_error::invalid_value:
+		    return "Invalid parameter value; " + DAWG_ERROR_INFO_;
+		case dawg_error::model_no_name:
+		    return "No model named " + DAWG_ERROR_INFO_;
+		case dawg_error::segment_extra_root:
+		    return "Extra root; " + DAWG_ERROR_INFO_;
+		case dawg_error::no_sequence:
+		    return "No sequences to align.";
+		case dawg_error::invalid_tree:
+		    return "Invalid tree; " + DAWG_ERROR_INFO_;
+		case dawg_error::unexpected:
+		    return "Unexpected error.";
+		case dawg_error::invalid_user_sequence:
+		    return "Invalid user sequence; " + DAWG_ERROR_INFO_ + ".";
 		default:
 		    return "Unrecognized error.";
 	    }

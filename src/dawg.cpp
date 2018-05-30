@@ -40,6 +40,8 @@ using namespace dawg;
 #define VERSION_MSG NEW_PACKAGE_STRING "\n" \
 	"    Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>\n"
 
+std::string dawg::DAWG_ERROR_INFO_;
+
 int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
@@ -48,6 +50,8 @@ int main(int argc, char *argv[])
 		ret = app.run();
 	} catch(std::error_code &e) {
 		std::cout << "ERROR: " <<  e.message() << std::endl;
+	} catch(std::exception &e) {
+		CERROR(e.what());
 	}
 	return ret;
 }
@@ -74,9 +78,10 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 			} else {
 				std::ifstream ifs(arg.arg_file.c_str());
 				if(!ifs.is_open()) {
-					string sse = "unable to open argument file ";
-					sse += arg.arg_file;
-					throw std::runtime_error(sse);
+					std::error_code ec = dawg_error::open_input_file_fail;
+					DAWG_ERROR_INFO_ = "unable to open argument file " +
+					    arg.arg_file + ".";
+					throw ec;
 				}
 				po::store(po::parse_config_file(ifs, desc), vm);
 			}
@@ -112,7 +117,7 @@ int dawg_app::run() {
 		cerr << desc << endl;
 		return EXIT_SUCCESS;
 	}
-	
+
 	//if(arg.quiet)
 	//	cerr.clear(ios::failbit);
 	trick input;

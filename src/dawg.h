@@ -25,6 +25,8 @@
 #include <ostream>
 #include <iterator>
 
+#include <dawg/error.h>
+
 // Error Reporting
 bool DawgError(const char* csErr, ...);  //always returns false
 bool DawgWarn(const char* csErr, ...);  //always returns false

@@ -26,13 +26,20 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	double params[190];
 	u = 0;
 	for(;first1 != last1 && u<190;++first1,++u) {
-		if(*first1 < 0)
-			return DAWG_ERROR("Invalid subst model; aagtr parameter #" << u
-				<< " '" << *first1 << "' is not >= 0.");
+		if(*first1 < 0) {
+			std::error_code ec = dawg_error::invalid_value;
+			DAWG_ERROR_INFO_ = "aagtr parameter #" + std::to_string(u) + " '" +
+			    std::to_string(*first1) + "' is not >=0 (invalid subst model).";
+			throw ec;
+		}
 		params[u] = *first1;
 	}
-	if(u != 190)
-		return DAWG_ERROR("Invalid subst model; aagtr requires 190 parameters.");
+	if(u != 190) {
+		std::error_code ec = dawg_error::param_missing;
+		DAWG_ERROR_INFO_ = "aagtr requires 190 parameters (invalid subst model).";
+		throw ec;
+
+	}
 	
 	// construct substitution matrix
 	double rs[20];
@@ -75,8 +82,11 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 		for(int j=0;j<64;++j)
 			table[i][j] = 1.0/64.0;
 	
-	if(!create_alias_tables())
-		return DAWG_ERROR("unable to create alias tables");
+	if(!create_alias_tables()) {
+		std::error_code ec = dawg_error::creation_fail;
+		DAWG_ERROR_INFO_ = "Alias tables";
+		throw ec;
+	}
 	name = mod_name;	
 	return true;
 }

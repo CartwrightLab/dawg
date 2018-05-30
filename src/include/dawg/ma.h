@@ -11,6 +11,7 @@
 
 #include <dawg/trick.h>
 #include <dawg/utils/vecio.h>
+#include <dawg/error.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 

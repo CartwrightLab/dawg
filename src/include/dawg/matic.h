@@ -13,6 +13,7 @@
 #include <dawg/root.h>
 #include <dawg/residue.h>
 #include <dawg/ma.h>
+#include <dawg/error.h>
 
 #include <vector>
 #include <set>
@@ -136,9 +137,12 @@ public:
 	inline bool configure(It first, It last) {
 		clear_configuration();
 		for(;first != last; ++first)
-			if(!add_config_section(*first))
-				return DAWG_ERROR("Configuration section '"
-					<< first->name << "' failed to process.");
+			if(!add_config_section(*first)) {
+				std::error_code ec = dawg_error::configuration_section_fail;
+				DAWG_ERROR_INFO_ = std::string(first->name);
+				throw ec;
+
+			}
 		return finalize_configuration();
 	}
 

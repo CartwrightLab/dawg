@@ -13,6 +13,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <dawg/residue.h>
+#include <dawg/error.h>
 
 namespace dawg {
 

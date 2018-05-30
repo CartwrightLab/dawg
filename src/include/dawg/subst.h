@@ -13,6 +13,7 @@
 #include <dawg/log.h>
 #include <dawg/residue.h>
 #include <dawg/utils/aliastable.h>
+#include <dawg/error.h>
 
 namespace dawg {
  
@@ -177,8 +178,12 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 		&subst_model::create_codgy, &subst_model::create_codgy_equ
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
-	if(pos == (std::size_t)-1)
-		return DAWG_ERROR("Invalid subst model; no model named '" << mod_name << "'");
+	if(pos == (std::size_t)-1) {
+		std::error_code ec = dawg_error::model_no_name;
+		std::string str(mod_name);
+		DAWG_ERROR_INFO_ = str + " (invalid subst model)";
+		throw ec;
+	}
 	return (this->*create_ops[pos])(name_keys[pos], code, first1, last1, first2, last2);
 }
 
@@ -188,9 +193,13 @@ bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 
 	unsigned int u=0,n=0;
 	double d=0.0;
 	for(;first1 != last1 && result != last2;++first1,++u) {
-		if(*first1 < 0)
-			return DAWG_ERROR("Invalid subst model; " << mod_name << "frequency #" << u
-				<< " '" << *first1 << "' is not >= 0.");
+		if(*first1 < 0) {
+			std::error_code ec = dawg_error::invalid_value;
+			std::string str(mod_name);
+			DAWG_ERROR_INFO_ = str + "frequency#" + std::to_string(*first1) + \
+			    "' is not >= 0 (invalid subst model)";
+			throw ec;
+		}
 		d += *first1;
 		*(result++) = *first1;
 		if(++n == ncol) {
@@ -202,9 +211,13 @@ bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 
 	}
 	for(;alpha != result;++alpha)
 		*alpha /= d;
-	if(result != last2)
-		return DAWG_ERROR("Invalid subst model; " << mod_name << " requires "
-			<< std::distance(first2, last2) << " frequencies.");
+	if(result != last2) {
+		std::error_code ec = dawg_error::param_missing;
+		std::string str(mod_name);
+		DAWG_ERROR_INFO_ = str + " requires " + \
+		    std::to_string(std::distance(first2, last2)) + " frequencies (invalid subst model)";
+		throw ec;
+	}
 	return true;
 }
 
