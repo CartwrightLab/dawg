@@ -27,17 +27,15 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 	u = 0;
 	for(;first1 != last1 && u<190;++first1,++u) {
 		if(*first1 < 0) {
-			std::error_code ec = dawg_error::invalid_value;
-			DAWG_ERROR_INFO_ = "aagtr parameter #" + std::to_string(u) + " '" +
-			    std::to_string(*first1) + "' is not >=0 (invalid subst model).";
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("aagtr\
+			    parameter #" + std::to_string(u) + " '" + std::to_string(*first1) +\
+			    "' is not >=0 (invalid subst model)."));
 		}
 		params[u] = *first1;
 	}
 	if(u != 190) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "aagtr requires 190 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("aagtr requires\
+		    190 parameters (invalid subst model)."));
 
 	}
 	
@@ -83,9 +81,7 @@ bool subst_model::create_aagtr(const char *mod_name, unsigned int code, It1 firs
 			table[i][j] = 1.0/64.0;
 	
 	if(!create_alias_tables()) {
-		std::error_code ec = dawg_error::creation_fail;
-		DAWG_ERROR_INFO_ = "Alias tables";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Alias tables"));
 	}
 	name = mod_name;	
 	return true;

@@ -111,8 +111,7 @@ bool trick::parse(Iterator first, Iterator last) {
 	trick_grammar<Iterator, dawg::white_space<Iterator> > pyler;
 	bool r = qi::phrase_parse(first, last, pyler, wasp, pyle);
 	if( first != last || !r ) {
-		std::error_code ec = dawg_error::parsing_failed;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::parsing_failed);
 	}
 	std::string header("_initial_"), subheader("");
 	int autonum = 1; //TODO: What happens with multiple trick files?

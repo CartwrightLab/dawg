@@ -138,9 +138,8 @@ public:
 		clear_configuration();
 		for(;first != last; ++first)
 			if(!add_config_section(*first)) {
-				std::error_code ec = dawg_error::configuration_section_fail;
-				DAWG_ERROR_INFO_ = std::string(first->name);
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::configuration_section_fail, \
+				    std::string(first->name));
 
 			}
 		return finalize_configuration();

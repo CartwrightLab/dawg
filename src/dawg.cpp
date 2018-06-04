@@ -40,8 +40,6 @@ using namespace dawg;
 #define VERSION_MSG NEW_PACKAGE_STRING "\n" \
 	"    Copyright (C) 2004-2013  Reed A. Cartwright, PhD <cartwright@asu.edu>\n"
 
-std::string dawg::DAWG_ERROR_INFO_;
-
 int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
@@ -50,6 +48,8 @@ int main(int argc, char *argv[])
 		ret = app.run();
 	} catch(std::error_code &e) {
 		std::cout << "ERROR: " <<  e.message() << std::endl;
+	} catch(dawg::dawg_error_t &de) {
+		std::cout << "ERROR: " << de.ecode.message() << de.getInformation() << std::endl;
 	} catch(std::exception &e) {
 		CERROR(e.what());
 	}
@@ -78,15 +78,16 @@ dawg_app::dawg_app(int argc, char* argv[]) : desc("Allowed Options") {
 			} else {
 				std::ifstream ifs(arg.arg_file.c_str());
 				if(!ifs.is_open()) {
-					std::error_code ec = dawg_error::open_input_file_fail;
-					DAWG_ERROR_INFO_ = "unable to open argument file " +
-					    arg.arg_file + ".";
-					throw ec;
+					throw dawg::dawg_error_t(dawg_error::open_input_file_fail, \
+					    std::string("unable to open argument file " +\
+					    arg.arg_file + "."));
 				}
 				po::store(po::parse_config_file(ifs, desc), vm);
 			}
 			po::notify(vm);
 		}
+	} catch (dawg::dawg_error_t &de) {
+		std::cout << "ERROR: " << de.ecode.message() << de.getInformation() << std::endl;
 	} catch (std::exception &e) {
 		CERROR(e.what());
 		throw std::runtime_error("unable to process command line");
@@ -148,8 +149,7 @@ int dawg_app::run() {
 	bool label  = arg.label || (indeterminate(arg.label) && glopts.output_label);
 
 	if(!write_aln.open(file_name, num_reps-1, split, append, label)) {
-		std::error_code ec = dawg_error::bad_configuration;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::bad_configuration);
 	}
 	write_aln.set_blocks(glopts.output_block_head.c_str(),
 		glopts.output_block_between.c_str(),
@@ -160,8 +160,7 @@ int dawg_app::run() {
 
 	vector<dawg::ma> configs;
 	if(!dawg::ma::from_trick(input, configs)) {
-		std::error_code ec = dawg_error::bad_configuration;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::bad_configuration);
 	}
 
 	// Create the object that will do all the simulation
@@ -174,8 +173,7 @@ int dawg_app::run() {
 		kimura.seed(glopts.sim_seed.begin(), glopts.sim_seed.end());
 	}
 	if(!kimura.configure(configs.begin(), configs.end())) {
-		std::error_code ec = dawg_error::bad_configuration;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::bad_configuration);
 	}
 	// create sets of aligned sequences;
 	dawg::alignment aln;

@@ -20,8 +20,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 
 	unsigned int gcode = code%100;
 	if(gcode >= 24) {
-		std::error_code ec = dawg_error::invalid_genetic_code;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::invalid_genetic_code);
 	}
 	// do freqs first
 	if(!create_freqs("codgtr", first2, last2, &freqs[0], &freqs[64]))
@@ -32,17 +31,15 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	u = 0;
 	for(;first1 != last1 && u<2016;++first1,++u) {
 		if(*first1 < 0) {
-		    std::error_code ec = dawg_error::invalid_value;
-		    DAWG_ERROR_INFO_ = "codgtr parameter #" + std::to_string(u) + " '" +
-			std::to_string(*first1) + " is not >= 0 (invalid subst model).";
-		    throw ec;
+		    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("codgtr \
+			parameter #" + std::to_string(u) + " '" + std::to_string(*first1) +\
+			" is not >= 0 (invalid subst model)."));
 		}
 		params[u] = *first1;
 	}
 	if(u != 2016) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codgtr requires 2016 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("codgtr requires\
+		    2016 parameters (invalid subst model)."));
 	}
 	
 	// construct substitution matrix
@@ -85,9 +82,7 @@ bool subst_model::create_codgtr(const char *mod_name, unsigned int code, It1 fir
 	}
 
 	if(!create_alias_tables()) {
-		std::error_code ec = dawg_error::creation_fail;
-		DAWG_ERROR_INFO_ = "Alias tables";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::creation_fail,std::string("Alias tables."));
 	}
 	
 	uni_scale *= 3; // adjust for codon mutations
@@ -140,15 +135,13 @@ bool subst_model::create_codgy(const char *mod_name, unsigned int code, It1 firs
 	
 	double omega, kappa;
 	if(first1 == last1) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = mod_namex + "requires two parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing,std::string(mod_namex +\
+		    "requires two parameters (invalid subst model)."));
 	}
 	omega = *first1++;
 	if(first1 == last1) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = mod_namex + "requires two parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string(mod_namex +\
+		    "requires two parameters (invalid subst model)."));
 	}
 	kappa = *first1++;
 	
@@ -214,16 +207,14 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	
 	omega = *first1++;
 	if(first1 == last1) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg-cp requires 71 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing,std::string("codmg-cp requires\
+		    71 parameters (invalid subst model)."));
 	}
 	for(u=0;first1 != last1 && u < 6;++first1)
 		ds[u++] = *first1;
 	if(u != 6) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg-cp requires 71 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing,std::string("codmg-cp requires\
+		    71 parameters (invalid subst model)."));
 	}
 	// create substitution table (T,C,A,G)
 	// TC, TA, TG, CA, CG, AG		
@@ -232,9 +223,8 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 	for(u=0;first1 != last1 && u < 64;++first1)
 		dp[u++] = *first1;
 	if(u != 64) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg-cp requires 71 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("codmg-cp requires\
+		    71 parameters (invalid subst model)."));
 	}
 		
 	// Stationary frequencies
@@ -266,8 +256,7 @@ bool subst_model::create_codmg_cp(const char *mod_name, unsigned int code, It1 f
 				f *= df[(j/16)%4]*df[(j/4)%4+4];
 				break;
 			default:
-				std::error_code ec = dawg_error::unexpected;
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::unexpected);
 			}
 			if(f > 0.0)
 				s[u] = ds[(d%8)]/f;
@@ -294,9 +283,8 @@ bool subst_model::create_codmg(const char *mod_name, unsigned int code, It1 firs
 	for(u=0;first1 != last1 && u < 7;++u,++first1)
 		s[u] = *first1;
 	if(u != 7) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg requires 7 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("codmg requires\
+		    7 parameters (invalid subst model)."));
 	}
 	return create_codmg_cp("codmg", code, s.begin(), s.end(), first2, last2);	
 }
@@ -309,18 +297,16 @@ bool subst_model::create_codmg_aap(const char *mod_name, unsigned int code, It1 
 	for(u=0;first1 != last1 && u<7; ++u,++first1)
 		s[u] = *first1;
 	if(u != 7) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg-aap requires 27 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("codmg-aap requires\
+		    27 parameters (invalid subst model)."));
 	}
 		
 	double dp[20];
 	for(u=0;first1 != last1 && u<20; ++u,++first1)
 		dp[u] = *first1;
 	if(u != 20) {
-		std::error_code ec = dawg_error::param_missing;
-		DAWG_ERROR_INFO_ = "codmg-aap requires 27 parameters (invalid subst model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string("codmg-aap requires\
+		    27 parameters (invalid subst model)."));
 	}
 
 	const char *cs_code = residue_exchange::get_protein_code(code);

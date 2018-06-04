@@ -35,9 +35,8 @@ public:
             case 2:
                 return create_zero(first, last);
 		};
-		std::error_code ec = dawg_error::model_no_name;
-		DAWG_ERROR_INFO_ = rname + " (invalid rate model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::model_no_name, std::string(rname +\
+		    " (invalid rate model)."));
 	}
 
 	template<typename It>
@@ -52,25 +51,22 @@ public:
 	template<typename It>
 	bool create_gamma(It first, It last) {
 		if(first == last) {
-			std::error_code ec = dawg_error::param_missing;
-			DAWG_ERROR_INFO_ = "gamma-invariant requires at least 1 parameter (invalid rate model).";
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::param_missing, std::string("gamma-\
+			    invariant requires at least 1 parameter (invalid rate model)."));
 		}
 		double alpha = *first++;
 		if(alpha < 0.0) {
-			std::error_code ec = dawg_error::invalid_value;
-			DAWG_ERROR_INFO_ = " first gamma-invariant " + std::to_string(alpha) +
-			    "is not >=0 (invalid rate model).";
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("first\
+			    gamma-invariant " + std::to_string(alpha) + "is not >=0 (invalid\
+			    rate model)."));
 		}
 		double iota = 0.0;
 		if(first != last) {
 			iota = *first++;
 			if(iota < 0.0 || iota >= 1.0) {
-			    std::error_code ec = dawg_error::invalid_value;
-			    DAWG_ERROR_INFO_ = "second gamma-invariant " + std::to_string(iota) +
-				" is not [0,1) (invalid rate model).";
-			    throw ec;
+			    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("second\
+				gamma-invariant " + std::to_string(iota) + "is not [0,1) (invalid\
+				rate model)."));
 			}
 		}
 		int sz = DAWG_GAMMA_CONT_SIZE;
@@ -78,10 +74,9 @@ public:
 			sz = static_cast<int>(*first++);
 			// use an upper limit to catch user mistakes.
 			if(sz < 1 || sz > 65535) {
-			    std::error_code ec = dawg_error::invalid_value;
-			    DAWG_ERROR_INFO_ = "third gamma-invariant " + std::to_string(iota) +
-				" is not [1,65535) (invalid rate model).";
-			    throw ec;
+			    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("third\
+				gamma-invariant " + std::to_string(iota) + "is not [1,65535 (invalid\
+				rate model)."));
 			}
 		}
 		bool do_median = false;

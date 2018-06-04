@@ -45,9 +45,8 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 			format = boost::make_iterator_range(mid+1, (const char*)strchr(mid+1, '\0'));
 		}
 		if(format && !set_format(format)) {
-			std::error_code ec = dawg_error::unknown_output_format;
-			DAWG_ERROR_INFO_ = std::string(format.begin(), format.end());
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::unknown_output_format, \
+			    std::string(format.begin(), format.end()));
 		}
 	}
 	label_width = 1+static_cast<unsigned int>(log10(1.0*max_rep));
@@ -61,9 +60,8 @@ bool dawg::output::open(const char *file_name, unsigned int max_rep,
 		// open our omnibus output if desired
 		if(!do_split) {
 			if(!open_file(file_name)) {
-				std::error_code ec = dawg_error::open_output_file_fail;
-				DAWG_ERROR_INFO_ = file_name;
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::open_output_file_fail, \
+				    std::string(file_name));
 			}
 		} else {
 			// setup output_filename
@@ -119,9 +117,7 @@ bool dawg::output::open_next() {
 	split_file_name.replace(split_id_offset, label_width, current_label);
 	
 	if(!open_file(split_file_name.c_str())) {
-		std::error_code ec = dawg_error::open_input_file_fail;
-		dawg::DAWG_ERROR_INFO_ = split_file_name;
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::open_input_file_fail, std::string(split_file_name));
 	}
 	return true;
 }

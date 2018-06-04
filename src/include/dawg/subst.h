@@ -179,10 +179,8 @@ bool subst_model::create(const char *mod_name, unsigned int code, It1 first1, It
 	};
 	std::size_t pos = key_switch(mod_name, name_keys);
 	if(pos == (std::size_t)-1) {
-		std::error_code ec = dawg_error::model_no_name;
-		std::string str(mod_name);
-		DAWG_ERROR_INFO_ = str + " (invalid subst model)";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::model_no_name, std::string(std::string(mod_name) + \
+		    " (invalid subst model)."));
 	}
 	return (this->*create_ops[pos])(name_keys[pos], code, first1, last1, first2, last2);
 }
@@ -194,11 +192,9 @@ bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 
 	double d=0.0;
 	for(;first1 != last1 && result != last2;++first1,++u) {
 		if(*first1 < 0) {
-			std::error_code ec = dawg_error::invalid_value;
-			std::string str(mod_name);
-			DAWG_ERROR_INFO_ = str + "frequency#" + std::to_string(*first1) + \
-			    "' is not >= 0 (invalid subst model)";
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::invalid_value, \
+			    std::string(std::string(mod_name) + "frequency#" +\
+			    std::to_string(*first1) + "' is not >= 0 (invalid subst model)"));
 		}
 		d += *first1;
 		*(result++) = *first1;
@@ -212,11 +208,9 @@ bool subst_model::create_freqs(const char *mod_name, It1 first1, It1 last1, It2 
 	for(;alpha != result;++alpha)
 		*alpha /= d;
 	if(result != last2) {
-		std::error_code ec = dawg_error::param_missing;
-		std::string str(mod_name);
-		DAWG_ERROR_INFO_ = str + " requires " + \
-		    std::to_string(std::distance(first2, last2)) + " frequencies (invalid subst model)";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::param_missing, std::string(std::string(mod_name) +\
+		    " requires " + std::to_string(std::distance(first2, last2)) +\
+		    " frequencies (invalid subst model)."));
 	}
 	return true;
 }

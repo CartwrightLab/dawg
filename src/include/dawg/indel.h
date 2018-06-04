@@ -47,22 +47,19 @@ public:
         };
 
         if(max_size > std::numeric_limits<boost::uint32_t>::max()) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "maximum indel size is out of range.";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("maximum indel\
+		size is out of range."));
         }
         if(first_n == last_n) {
-	    std::error_code ec = dawg_error::indel_model_no_type;
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::indel_model_no_type);
         }
 
         total_rate = 0.0;
 
         for(It2 it=first_r;it!=last_r;++it) {
             if(*it < 0.0) {
-		std::error_code ec = dawg_error::invalid_value;
-		DAWG_ERROR_INFO_ = "invalid indel model; rate" + boost::lexical_cast<std::string>(*it) + " must be positive.";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("invalid indel\
+		    model; rate" + boost::lexical_cast<std::string>(*it) + " must be positive."));
 	    }
             total_rate += *it;
         }
@@ -101,14 +98,11 @@ public:
                 okay = create_lavalette(fraction, first_p, last_p, max_size, mix_dist);
                 break;
             default:
-		std::error_code ec = dawg_error::model_no_name;
-		DAWG_ERROR_INFO_ = std::string(itn->c_str()) + " (invalid indel model).";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::model_no_name, \
+		    std::string(std::string(itn->c_str()) + " (invalid indel model)."));
             };
             if(!okay) {
-		std::error_code ec = dawg_error::creation_fail;
-		DAWG_ERROR_INFO_ = "Indel model";
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("indel model."));
 	    }
             // cycle "name" as needed
             if(++itn == last_n)
@@ -146,17 +140,15 @@ private:
     inline bool create_geo(double f, It &first, It last, unsigned int max_size,
                            std::vector<double> &mix_dist) {
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "geo requires 1 paramenter (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("geo requires\
+		1 parameter (invalid indel model)."));
 	}
         double p = *first++;
         if(p >= 1.0)
             p = 1.0/p;
         if(p <= 0.0) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "geo parameter " + std::to_string(p) + " must be positive (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("geo parameter " +\
+		std::to_string(p) + "must be positive (invalid indel model)."));
 	}
         double d = p;
         for(boost::uint32_t n=1; n <= max_size; ++n) {
@@ -170,15 +162,13 @@ private:
     inline bool create_zeta(double f, It &first, It last, unsigned int max_size,
                            std::vector<double> &mix_dist) {
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "zeta requires 1 parameter (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("zeta requires\
+		1 parameter (invalid indel model)."));
 	}
         double z = *first++;
         if(z <= 1.0) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "zeta parameter " + std::to_string(z) + " must be > 1 (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("zeta parameter" +\
+		std::to_string(z) + " must be >1 (invalid indel model)."));
 	}
         double zz = zeta(z);
         for(boost::uint32_t n=1; n <= max_size; ++n) {
@@ -191,15 +181,13 @@ private:
     inline bool create_yule(double f, It &first, It last, unsigned int max_size,
                            std::vector<double> &mix_dist) {
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "yule requires 1 parameter (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("yule requires\
+		1 parameter (invalid indel model)."));
 	}
         double z = *first++;
         if(z <= 1.0) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "yule parameter " + std::to_string(z) + " must be > 1 (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("yule parameter" +\
+		std::to_string(z) + " must be >1 (invalid indel model)."));
 	}
         for(boost::uint32_t n=1; n <= max_size; ++n) {
             mix_dist[n] += f*(z-1.0)*beta(n,z);
@@ -211,26 +199,22 @@ private:
     inline bool create_lavalette(double f, It &first, It last, unsigned int max_size,
                            std::vector<double> &mix_dist) {
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "lavalette requires 2 parameters (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("lavalette requires\
+		2 parameters (invalid indel model)."));
 	}
         double z = *first++;
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "lavalette requires 2 parameters (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("lavalette requires\
+		2 parameters (invalid indel model)."));
 	}
         double dm = *first++; 
         if(z <= 1.0) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "lavalette slope " + std::to_string(z) + " must be > 1 (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("lavalette slope" +\
+		std::to_string(z) + " must be >1 (invalid indel model)."));
 	}
         if(dm <= 1.0) {
-	    std::error_code ec = dawg_error::invalid_value;
-	    DAWG_ERROR_INFO_ = "lavalette max " + std::to_string(dm) + " must be > 1 (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_value, std::string("lavalette max" +\
+		std::to_string(dm) + " must be >1 (invalid indel model)."));
 	}
         boost::uint32_t m = static_cast<boost::uint32_t>(dm);
         // find normalization curve
@@ -252,9 +236,8 @@ private:
         double d = 0.0;
         It it = first;
         if(first == last) {
-	    std::error_code ec = dawg_error::param_missing;
-	    DAWG_ERROR_INFO_ = "no parameteres for user model (invalid indel model).";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::param_missing, std::string("no parameters\
+		for user model (invalid indel model)."));
 	}
         // sum up parameters
         for(;it != last && *it >= 0.0;++it)

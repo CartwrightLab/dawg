@@ -187,8 +187,7 @@ public:
 		code_ = code;
 
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!') {
-			std::error_code ec = dawg_error::invalid_genetic_code;
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::invalid_genetic_code);
 		}
 
 		switch(type_) {
@@ -202,8 +201,7 @@ public:
 				cs_decode_ = &mods[(MODCOD+code_)*64];
 				break;
 			default:
-				std::error_code ec = dawg_error::invalid_sequence_type;
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::invalid_sequence_type);
 		}
 		cs_encode_ = &rmods[type_*80];
 		cs_ins_ = &sIns[(markins_ ? 1 : 0)];
@@ -252,25 +250,22 @@ public:
 			for (size_t i = 0; i != root_seq.size(); ++i) {
 				auto base = encode(root_seq.at(i));
 				if (base == static_cast<decltype(base)>(-1)) {
-					std::error_code ec = dawg_error::invalid_user_sequence;
-					throw ec;
+					throw dawg::dawg_error_t(dawg_error::invalid_user_sequence);
 					return {};
 				}
 				residues.emplace_back(base, 0, 0);
 			}
 		} else {
 			if (root_seq.size() % 3 != 0) {
-				std::error_code ec = dawg_error::invalid_user_sequence;
-				DAWG_ERROR_INFO_ = "sequence does not fit codon";
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::invalid_user_sequence, \
+				    std::string("sequence does not fit codon"));
 				return {};
 			}
 			for (size_t i = 0; i + 2 < root_seq.size(); i += 3) {
 				residues.emplace_back(triplet_to_codon(
 					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
 				if (residues.back().data() == -1) {
-					std::error_code ec = dawg_error::invalid_user_sequence;
-					throw ec;
+					throw dawg::dawg_error_t(dawg_error::invalid_user_sequence);
 					return {};
 				}
 			}

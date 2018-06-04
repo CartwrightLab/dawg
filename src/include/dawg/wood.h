@@ -91,9 +91,7 @@ public:
 			}
 			// add label to descendents list
 			if(!desc_names.insert(it->label).second) {
-				std::error_code ec = dawg_error::invalid_tree;
-				DAWG_ERROR_INFO_ = "node label '" + it->label + "' used more than once by Tree.Tree";
-				throw ec;
+				throw dawg::dawg_error_t(dawg_error::invalid_tree, std::string("node label"));
 			}
 		}
 	

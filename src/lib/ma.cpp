@@ -36,17 +36,14 @@ bool dawg::ma::from_trick(const trick &trk, vector<ma> &v) {
 		// lookup parent section
 		map_t::const_iterator iit = lookup.find(secit->inherits);
 		if(iit == lookup.end()) {
-			std::error_code ec = dawg_error::section_not_found;
-			DAWG_ERROR_INFO_ = "Section '" + secit->inherits +
-			    "' not found (inherited by '" + secit->name + "').";
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::section_not_found, \
+			    std::string("Section '" + secit->inherits + "' not found (inheritd by \
+			    '" + secit->name + "')."));
 		}
 		// lookup section
 		pair<map_t::iterator, bool> me = lookup.insert(make_pair(secit->name, (dawg::ma*)nullptr));
 		if(!me.second) {
-			std::error_code ec = dawg_error::section_already_specified;
-			DAWG_ERROR_INFO_ = secit->name;
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::section_already_specified, secit->name);
 		}
 		// read inherited ma
 		v.push_back(*iit->second);

@@ -37,65 +37,49 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
     // construct models
     if(!info->rat_mod.create(ma.subst_rate_model, ma.subst_rate_params.begin(),
         ma.subst_rate_params.end())) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Heterogeneous rate model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Heterogeneous rate model."));
     }
 
     if(!info->sub_mod.create(ma.subst_model.c_str(), ma.root_code,
         ma.subst_params.begin(), ma.subst_params.end(),
         ma.subst_freqs.begin(), ma.subst_freqs.end())) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Substitution model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Substitution model."));
     }
 
     // TODO: do we really want to allow only one residue exchange per segment?
     if(seg.empty()) { // new segment
         if(!seg.rex.model(info->sub_mod.seq_type(), info->sub_mod.seq_code(),
             ma.output_rna, ma.output_lowercase, ma.output_markins, ma.output_keepempty)) {
-	    std::error_code ec = dawg_error::creation_fail;
-	    DAWG_ERROR_INFO_ = "Sequence type or format object";
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Sequence type or \
+	    format object."));
 	}
     } else if(!seg.rex.is_same_model(info->sub_mod.seq_type(), info->sub_mod.seq_code(), ma.output_rna,
 	    ma.output_lowercase, ma.output_markins, ma.output_keepempty)) {
-	    std::error_code ec = dawg_error::section_sequence_type_invalid;
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::section_sequence_type_invalid);
     }
     info->gap_base = seg.rex.gap_base();
 
     if(!info->ins_mod.create(ma.indel_model_ins.begin(), ma.indel_model_ins.end(),
         ma.indel_rate_ins.begin(), ma.indel_rate_ins.end(),
         ma.indel_params_ins.begin(), ma.indel_params_ins.end(), ma.indel_max_ins)) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Insertion model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Insertion model."));
     }
     if(!info->del_mod.create(ma.indel_model_del.begin(), ma.indel_model_del.end(),
         ma.indel_rate_del.begin(), ma.indel_rate_del.end(),
         ma.indel_params_del.begin(), ma.indel_params_del.end(), ma.indel_max_del)) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Deletion model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Deletion model."));
     }
     auto encodedRootSequence = seg.rex.encode(ma.root_seq);
     if(ma.root_seq.empty() != encodedRootSequence.empty()) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Root model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Root model."));
     }
     if(!info->rut_mod.create(ma.root_length, encodedRootSequence)) {
-	std::error_code ec = dawg_error::creation_fail;
-	DAWG_ERROR_INFO_ = "Root model";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::creation_fail, std::string("Root model."));
     }
 
     // parse tree and find all named descendant nodes
     if(!info->usertree.parse(ma.tree_tree.begin(), ma.tree_tree.end())) {
-	std::error_code ec = dawg_error::invalid_tree;
-	DAWG_ERROR_INFO_ = "it failed to parse";
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::invalid_tree, std::string("it failed to parse."));
     }
 
     // test whether descendents already exist in this segment
@@ -104,10 +88,8 @@ bool dawg::matic::add_config_section(const dawg::ma &ma) {
             sec->usertree.desc_labels().begin(), sec->usertree.desc_labels().end(),
             info->usertree.desc_labels().begin(), info->usertree.desc_labels().end());
         if(it != info->usertree.desc_labels().end()) {
-	    std::error_code ec = dawg_error::invalid_tree;
-	    DAWG_ERROR_INFO_ = "descendent '" + std::string(*it) + "'already exists in segment #" +
-		std::to_string(ma.root_segment);
-	    throw ec;
+	    throw dawg::dawg_error_t(dawg_error::invalid_tree, std::string("descendent" +\
+		std::string(*it) + "' already exists in segment #"+std::to_string(ma.root_segment)+"."));
 	}
     }
 
@@ -148,9 +130,9 @@ bool dawg::matic::finalize_configuration() {
             // if this root hasn't been seen before in this segment, mark it
             if(it->second < u) {
                 if(has_root) {
-		    std::error_code ec = dawg_error::segment_extra_root;
-		    DAWG_ERROR_INFO_ = sec->usertree.root_label() + "segment(" + std::to_string(u-1) + ").";
-		    throw ec;
+		    throw dawg::dawg_error_t(dawg_error::segment_extra_root, \
+			std::string(sec->usertree.root_label() + "segment(" + std::to_string(u-1) +\
+			")."));
 		}
                 has_root = true;
             }
@@ -173,8 +155,7 @@ bool dawg::matic::finalize_configuration() {
             aln_size = u;
     }
     if(aln_size == 0) {
-	std::error_code ec = dawg_error::no_sequence;
-	throw ec;
+	throw dawg::dawg_error_t(dawg_error::no_sequence);
     }
     // copy the id's to the meta information for a tree
     for(auto &seg : configs) {

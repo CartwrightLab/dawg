@@ -22,16 +22,12 @@ bool trick::parse_file(trick& p, const char *cs) {
 	} else {
 		std::ifstream is(cs);
 		if(!is.is_open()) {
-			std::error_code ec = dawg_error::open_input_file_fail;
-			DAWG_ERROR_INFO_ = std::string(cs);
-			throw ec;
+			throw dawg::dawg_error_t(dawg_error::open_input_file_fail, std::string(cs));
 		}
 		ret = p.parse_stream(is);
 	}
 	if(!ret) {
-		std::error_code ec = dawg_error::parse_input_file_fail;
-		DAWG_ERROR_INFO_ = std::string(cs);
-		throw ec;
+		throw dawg::dawg_error_t(dawg_error::open_input_file_fail, std::string(cs));
 	}
 	return true;
 }

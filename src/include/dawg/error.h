@@ -23,11 +23,11 @@
 
 // custom error code enum
 enum class dawg_error {
-    // i/o					//object needed to display error message
-    open_input_file_fail = 10,			//const char*
+    // i/o
+    open_input_file_fail = 10,
     open_output_file_fail = 11,
-    unknown_output_format = 12,			//std::string
-    parse_input_file_fail = 13,			//const char*
+    unknown_output_format = 12,
+    parse_input_file_fail = 13,
     parsing_failed = 14,
 
     // indel model
@@ -35,11 +35,11 @@ enum class dawg_error {
 
     // configuration
     bad_configuration = 30,
-    configuration_section_fail = 31,		//first->name (?)
+    configuration_section_fail = 31,
 
     // section
-    section_not_found = 40,			//std::string, std::string
-    section_already_specified = 41,		//std::string
+    section_not_found = 40,
+    section_already_specified = 41,
     section_sequence_type_invalid = 42,
 
     // miscellaneous
@@ -63,61 +63,79 @@ namespace std {
 
 namespace dawg {
 
-    extern std::string DAWG_ERROR_INFO_;
+    // declare dawg_error_t struct
+    struct dawg_error_t : std::exception{
+	std::error_code ecode;
+	std::string information;
+
+	dawg_error_t(dawg_error e) {
+	    ecode = e;
+	    information = "";
+	}
+	dawg_error_t(dawg_error e, std::string str) {
+	    ecode = e;
+	    information = str;
+	}
+	std::string getInformation() {
+	    return information;
+	}
+
+    };
 
     class dawg_error_category : public std::error_category {
     public:
 
 	// return short descriptive name for the category
 	virtual const char *name() const noexcept override final {return "Dawg error category"; }
+
 	// return enum description
-	// TODO: add parameter(s) when needed for error message
 	virtual std::string message(int ev) const override final {
 	    switch (static_cast<dawg_error>(ev)) {
 		case dawg_error::open_input_file_fail:	// i/o
-		    return "Unable to open input file " + DAWG_ERROR_INFO_ + ".";
+		    return "Unable to open input file ";
 		case dawg_error::open_output_file_fail:
-		    return "Unable to open output file " + DAWG_ERROR_INFO_ + ".";
+		    return "Unable to open output file ";
 		case dawg_error::unknown_output_format:
-		    return "Unknown output format " + DAWG_ERROR_INFO_ + ".";
+		    return "Unknown output format ";
 		case dawg_error::parse_input_file_fail:
-		    return "Unable to parse input " + DAWG_ERROR_INFO_ + ".";
+		    return "Unable to parse input ";
 		case dawg_error::parsing_failed:
 		    return "Parsing failed.";
 		case dawg_error::indel_model_no_type:
 		    return "Invalid indel model; no model type specified.";
 		case dawg_error::param_missing:
-		    return "Param is missing; " + DAWG_ERROR_INFO_;
+		    return "Param is missing; ";
 		case dawg_error::bad_configuration: // configuration
 		    return "Bad configuration.";
 		case dawg_error::configuration_section_fail:
-		    return "Configuration section " + DAWG_ERROR_INFO_ +" failed to process.";
+		    return "Configuration section failed to process ";
 		case dawg_error::section_not_found: // section
-		    return DAWG_ERROR_INFO_;
+		    return "Section not found ";
 		case dawg_error::section_already_specified:
-		    return "Section " + DAWG_ERROR_INFO_ + " specified more than once.";
+		    return "Section specified more than once ";
 		case dawg_error::section_sequence_type_invalid:
-		    return "The sequence type or format options of a section is different that its segment.";
+		    return "The sequence type or format options of a section is\
+			different that its segment.";
 		case dawg_error::invalid_genetic_code:	// miscellaneous
 		    return "Invalid genetic code.";
 		case dawg_error::invalid_sequence_type:
 		    return "Invalid sequence type.";
 		case dawg_error::creation_fail:
-		    return DAWG_ERROR_INFO_ + " could not be created.";
+		    return "Could not be created: ";
 		case dawg_error::invalid_value:
-		    return "Invalid parameter value; " + DAWG_ERROR_INFO_;
+		    return "Invalid parameter value; ";
 		case dawg_error::model_no_name:
-		    return "No model named " + DAWG_ERROR_INFO_;
+		    return "No model named ";
 		case dawg_error::segment_extra_root:
-		    return "Extra root; " + DAWG_ERROR_INFO_;
+		    return "Extra root; ";
 		case dawg_error::no_sequence:
 		    return "No sequences to align.";
 		case dawg_error::invalid_tree:
-		    return "Invalid tree; " + DAWG_ERROR_INFO_;
+		    return "Invalid tree; ";
 		case dawg_error::unexpected:
 		    return "Unexpected error.";
 		case dawg_error::invalid_user_sequence:
-		    return "Invalid user sequence; " + DAWG_ERROR_INFO_ + ".";
+		    return "Invalid user sequence; ";
 		default:
 		    return "Unrecognized error.";
 	    }
@@ -125,12 +143,12 @@ namespace dawg {
     }; // end of dawg_error_category class
 } // end of namespace dawg
 
-    #define THIS_MODULE_API_DECL extern inline
-    THIS_MODULE_API_DECL const dawg::dawg_error_category &dawg_error_category() {
+    inline const dawg::dawg_error_category &dawg_error_category() {
 	static dawg::dawg_error_category c;
 	return c;
     }
 
+    //inline std::error_code make_error_code(dawg_error e) {
     inline std::error_code make_error_code(dawg_error e) {
 	return {static_cast<int>(e), dawg_error_category()};
     }
