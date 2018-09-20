@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <string>
 #include <unordered_map>
 
 #include <boost/cstdint.hpp>
@@ -119,7 +120,92 @@ public:
 
 	typedef boost::sub_range< const char [64] > str_type;
 
-	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
+	explicit residue_exchange(int m=DNA) { 
+		model(m,0,0,false,false,false); 
+
+		codon_table_.emplace("ATT", triplet_to_codon(getCodonNumber('A', 'T', 'T')));
+		codon_table_.emplace("ATC", triplet_to_codon(getCodonNumber('A', 'T', 'C')));
+		codon_table_.emplace("ATA", triplet_to_codon(getCodonNumber('A', 'T', 'A'))); // isoleucine
+		codon_table_.emplace("CTT", triplet_to_codon(getCodonNumber('C', 'T', 'T')));
+		codon_table_.emplace("CTC", triplet_to_codon(getCodonNumber('C', 'T', 'C')));
+		codon_table_.emplace("CTA", triplet_to_codon(getCodonNumber('C', 'T', 'A')));
+		codon_table_.emplace("CTG", triplet_to_codon(getCodonNumber('C', 'T', 'G')));
+		codon_table_.emplace("TTA", triplet_to_codon(getCodonNumber('T', 'T', 'A')));
+		codon_table_.emplace("TTG", triplet_to_codon(getCodonNumber('T', 'T', 'G'))); // leucine
+
+		codon_table_.emplace("GTT", triplet_to_codon(getCodonNumber('G', 'T', 'T')));
+		codon_table_.emplace("GTC", triplet_to_codon(getCodonNumber('G', 'T', 'C')));
+		codon_table_.emplace("GTA", triplet_to_codon(getCodonNumber('G', 'T', 'A')));
+		codon_table_.emplace("GTG", triplet_to_codon(getCodonNumber('G', 'T', 'G'))); // valine
+
+		codon_table_.emplace("TTT", triplet_to_codon(getCodonNumber('T', 'T', 'T')));
+		codon_table_.emplace("TTC", triplet_to_codon(getCodonNumber('T', 'T', 'C'))); // phenylalanine
+
+		codon_table_.emplace("ATG", triplet_to_codon(getCodonNumber('A', 'T', 'G'))); // methionine
+
+		codon_table_.emplace("TGT", triplet_to_codon(getCodonNumber('T', 'G', 'T')));
+		codon_table_.emplace("TGC", triplet_to_codon(getCodonNumber('T', 'G', 'C'))); // cysteine
+
+		codon_table_.emplace("GCT", triplet_to_codon(getCodonNumber('G', 'C', 'T')));
+		codon_table_.emplace("GCC", triplet_to_codon(getCodonNumber('G', 'C', 'C')));
+		codon_table_.emplace("GCA", triplet_to_codon(getCodonNumber('G', 'C', 'A')));
+		codon_table_.emplace("GCG", triplet_to_codon(getCodonNumber('G', 'C', 'G'))); // alanine
+
+		codon_table_.emplace("GGT", triplet_to_codon(getCodonNumber('G', 'G', 'T')));
+		codon_table_.emplace("GGC", triplet_to_codon(getCodonNumber('G', 'G', 'C')));
+		codon_table_.emplace("GGA", triplet_to_codon(getCodonNumber('G', 'G', 'A')));
+		codon_table_.emplace("GGG", triplet_to_codon(getCodonNumber('G', 'G', 'G'))); // glycine
+
+		codon_table_.emplace("CCT", triplet_to_codon(getCodonNumber('C', 'C', 'T')));
+		codon_table_.emplace("CCC", triplet_to_codon(getCodonNumber('C', 'C', 'C')));
+		codon_table_.emplace("CCA", triplet_to_codon(getCodonNumber('C', 'C', 'A')));
+		codon_table_.emplace("CCC", triplet_to_codon(getCodonNumber('C', 'C', 'C'))); // proline
+
+		codon_table_.emplace("ACT", triplet_to_codon(getCodonNumber('A', 'C', 'T')));
+		codon_table_.emplace("ACC", triplet_to_codon(getCodonNumber('A', 'C', 'C')));
+		codon_table_.emplace("ACA", triplet_to_codon(getCodonNumber('A', 'C', 'A')));
+		codon_table_.emplace("ACG", triplet_to_codon(getCodonNumber('A', 'C', 'G'))); // threonine
+
+		codon_table_.emplace("TCT", triplet_to_codon(getCodonNumber('T', 'C', 'T')));
+		codon_table_.emplace("TCC", triplet_to_codon(getCodonNumber('T', 'C', 'C')));
+		codon_table_.emplace("TCA", triplet_to_codon(getCodonNumber('T', 'C', 'A')));
+		codon_table_.emplace("AGT", triplet_to_codon(getCodonNumber('A', 'G', 'T')));
+		codon_table_.emplace("AGC", triplet_to_codon(getCodonNumber('A', 'G', 'C'))); // serine
+
+		codon_table_.emplace("TAT", triplet_to_codon(getCodonNumber('T', 'A', 'T')));
+		codon_table_.emplace("TAC", triplet_to_codon(getCodonNumber('T', 'A', 'C'))); // tyrosine
+
+		codon_table_.emplace("TGG", triplet_to_codon(getCodonNumber('T', 'G', 'G'))); // tryptophan
+
+		codon_table_.emplace("CAA", triplet_to_codon(getCodonNumber('C', 'A', 'A')));
+		codon_table_.emplace("CAG", triplet_to_codon(getCodonNumber('C', 'A', 'G'))); // glutamine
+
+		codon_table_.emplace("AAT", triplet_to_codon(getCodonNumber('A', 'A', 'T')));
+		codon_table_.emplace("AAC", triplet_to_codon(getCodonNumber('A', 'A', 'C'))); // asparagine
+
+		codon_table_.emplace("CAT", triplet_to_codon(getCodonNumber('C', 'A', 'T')));
+		codon_table_.emplace("CAC", triplet_to_codon(getCodonNumber('C', 'A', 'C'))); // histidine
+
+		codon_table_.emplace("GAA", triplet_to_codon(getCodonNumber('G', 'A', 'A')));
+		codon_table_.emplace("GAG", triplet_to_codon(getCodonNumber('G', 'A', 'G'))); // glutamine acid
+
+		codon_table_.emplace("GAT", triplet_to_codon(getCodonNumber('G', 'A', 'T')));
+		codon_table_.emplace("GAC", triplet_to_codon(getCodonNumber('G', 'A', 'C'))); // aspartic acid
+
+		codon_table_.emplace("AAA", triplet_to_codon(getCodonNumber('A', 'A', 'A')));
+		codon_table_.emplace("AAG", triplet_to_codon(getCodonNumber('A', 'A', 'G'))); // lysine
+
+		codon_table_.emplace("CGT", triplet_to_codon(getCodonNumber('C', 'G', 'T')));
+		codon_table_.emplace("CGC", triplet_to_codon(getCodonNumber('C', 'G', 'C')));
+		codon_table_.emplace("CGG", triplet_to_codon(getCodonNumber('C', 'G', 'G')));
+		codon_table_.emplace("CGA", triplet_to_codon(getCodonNumber('C', 'G', 'A')));
+		codon_table_.emplace("AGA", triplet_to_codon(getCodonNumber('A', 'G', 'A')));
+		codon_table_.emplace("AGG", triplet_to_codon(getCodonNumber('A', 'G', 'G'))); // arginine
+
+		codon_table_.emplace("TAA", triplet_to_codon(getCodonNumber('T', 'A', 'A')));
+		codon_table_.emplace("TAG", triplet_to_codon(getCodonNumber('T', 'A', 'G')));
+		codon_table_.emplace("TGA", triplet_to_codon(getCodonNumber('T', 'G', 'A'))); // stop
+	} // model
 
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
@@ -234,15 +320,22 @@ public:
 		return static_cast<residue::data_type>(ret);
 	}
 
+	unsigned int getCodonNumber(const char a, const char b, const char c) const {
+		return a | (b << 8) | (c << 16);
+	}
+
 	///////////////////////////////////////////////////////////
 	/// \brief encode
 	/// \param root_seq The root sequence to encode
+	/// The codon table uses 'at' since it is initialized in constructor
+	/// and yeah
 	///////////////////////////////////////////////////////////
 	inline sequence encode(const std::string &root_seq) const {
-		static const auto getCodonNumber = []
-			(const char a, const char b, const char c)->unsigned int {
-				return a | (b << 8) | (c << 16);
-			};
+		// static const auto getCodonNumber = []
+		// 	(const char a, const char b, const char c)->unsigned int {
+		// 		return a | (b << 8) | (c << 16);
+		// 	};
+
 		sequence residues;
 		if (type_ != CODON) {
 			for (size_t i = 0; i != root_seq.size(); ++i) {
@@ -259,8 +352,7 @@ public:
 				return {};
 			}
 			for (size_t i = 0; i + 2 < root_seq.size(); i += 3) {
-				residues.emplace_back(triplet_to_codon(
-					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
+				residues.emplace_back(codon_table_.at(root_seq.substr(i, 2)), 0, 0);
 				if (residues.back().data() == -1) {
 					DAWG_ERROR("Invalid user sequence");
 					return {};
@@ -394,7 +486,9 @@ protected:
 	unsigned int type_, code_, nuc_, gap_;
 	bool rna_, markins_, keepempty_, lowercase_;
 	const char *cs_decode_, *cs_ins_, *cs_encode_;
-};
+
+	std::unordered_map<std::string, int> codon_table_;
+}; // residue_exchange
 
 } // namespace dawg
 #endif
