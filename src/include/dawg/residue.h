@@ -2,7 +2,7 @@
 #ifndef DAWG_RESIDUE_H
 #define DAWG_RESIDUE_H
 /****************************************************************************
- *  Copyright (C) 2009-2010 Reed A. Cartwright, PhD <reed@scit.us>          *
+ *  Copyright (C) 2009-2018 Reed A. Cartwright, PhD <reed@scit.us>          *
  ****************************************************************************/
 
 #ifndef __STDC_CONSTANT_MACROS
@@ -12,11 +12,14 @@
 #	define __STDC_LIMIT_MACROS 1
 #endif
 
+#include <dawg/log.h>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <unordered_map>
 
 #include <boost/cstdint.hpp>
 #include <boost/bind.hpp>
@@ -24,11 +27,40 @@
 
 namespace dawg {
 
+namespace details {
+
+///////////////////////////////////////////////////////////
+/// \brief Aligned Sequence
+///////////////////////////////////////////////////////////
+struct aligned_sequence {
+	std::string label;
+	std::string seq;
+};
+
+} // details
+
+class residue;
+typedef std::vector<residue> sequence;
+
+struct alignment : public std::vector<details::aligned_sequence> {
+	std::string::size_type max_label_width;
+	int seq_type;
+};
+
+///////////////////////////////////////////////////////////
+/// \brief Residue model
+///	\brief Create function
+/// \brief Sequence type
+/// \brief Creating a root
+/// \brief Random residues
+/// \brief Evolve residues
+/// \brief Constant or variable residue widths
+/// \brief Indel widths as well?
+///////////////////////////////////////////////////////////
 class residue {
 public:
 	typedef boost::uint64_t data_type;
 
-	
 	static constexpr data_type base_mask      =  UINT64_C(0x00000000000000FF);
 	static constexpr data_type branch_mask    =  UINT64_C(0x0000FFFFFFFFFF00);
 	static constexpr data_type rate_mask	  =  UINT64_C(0xFFFF000000000000);
@@ -66,28 +98,36 @@ protected:
 	data_type data_;
 };
 
-template<class CharType, class CharTrait>
-std::basic_ostream<CharType, CharTrait>&
-operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
-	if(!o.good()) return o;
-	o << v.base();
-	return o;
-}
+// template<class CharType, class CharTrait>
+// std::basic_ostream<CharType, CharTrait>&
+// operator<<(std::basic_ostream<CharType, CharTrait>& o, const dawg::residue &v) {
+// 	if(!o.good()) return o;
+// 	o << v.base();
+// 	return o;
+// }
 
+///////////////////////////////////////////////////////////
+/// \brief Residue Exchange
+/// Defines the model and coding functions for the residue
+///////////////////////////////////////////////////////////
 class residue_exchange {
 public:
 	enum { MODDNA = 0, MODRNA=2, MODAA=4, MODCOD=6, MODEND=30};
 	enum { DNA = 0, AA = 1, CODON = 2};
-	
+
 	typedef residue_exchange self_type;
-	
+
 	typedef boost::sub_range< const char [64] > str_type;
+
+	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
 
 	inline bool model(unsigned int type, unsigned int code, bool rna,
 			bool lowercase, bool markins, bool keepempty) {
+
 		static constexpr char sIns[] = "-+";
 		// table for going from base->char
 		// TODO: Allow codons to be translated into aa
+		// table is 64 wide and 30 down
 		static constexpr char mods[] =
 			"ACGT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // DNA
 			"acgt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-" // dna
@@ -141,13 +181,13 @@ public:
 		keepempty_ = keepempty;
 		lowercase_ = lowercase;
 		rna_ = rna;
-
-		type_ = type; // set sequence type NA, AA, or CODON
+		type_ = type; // set sequence type DNA, AA, or CODON
 		nuc_ = ((rna) ? MODRNA : MODDNA) | ((lowercase) ? 1 : 0);
 		code_ = code;
+
 		if(MODCOD+code_ >= MODEND || mods[(MODCOD+code_)*64] == '!')
 			return DAWG_ERROR("invalid genetic code.");
-		
+
 		switch(type_) {
 			case DNA:
 				cs_decode_ = &mods[nuc_*64];
@@ -163,16 +203,16 @@ public:
 		}
 		cs_encode_ = &rmods[type_*80];
 		cs_ins_ = &sIns[(markins_ ? 1 : 0)];
-		
+
 		gap_ = static_cast<unsigned int>(strchr(cs_decode_, '-')-cs_decode_);
-		
+
 		do_op_append =  (type_ == CODON) ?
 			&residue_exchange::do_op_append_cod :
 			&residue_exchange::do_op_append_res ;
-		do_op_appendi = (type_ == CODON) ? 
+		do_op_appendi = (type_ == CODON) ?
 			&residue_exchange::do_op_appendi_cod :
 			&residue_exchange::do_op_appendi_res ;
-		
+
 		return true;
 	};
 	inline bool is_same_type(unsigned int type, bool markins, bool keepempty) const {
@@ -190,29 +230,65 @@ public:
 	inline residue::data_type gap_base() const { return gap_; }
 
 	inline residue::data_type encode(char ch) const {
-		char ret = (ch >= '0') ? (cs_encode_[ch - '0']) : -1;	
+		char ret = (ch >= '0') ? (cs_encode_[ch - '0']) : -1;
 		return static_cast<residue::data_type>(ret);
 	}
-	
+
+	///////////////////////////////////////////////////////////
+	/// \brief encode
+	/// \param root_seq The root sequence to encode
+	///////////////////////////////////////////////////////////
+	inline sequence encode(const std::string &root_seq) const {
+		static const auto getCodonNumber = []
+			(const char a, const char b, const char c)->unsigned int {
+				return a | (b << 8) | (c << 16);
+			};
+		sequence residues;
+		if (type_ != CODON) {
+			for (size_t i = 0; i != root_seq.size(); ++i) {
+				auto base = encode(root_seq.at(i));
+				if (base == static_cast<decltype(base)>(-1)) {
+					DAWG_ERROR("Invalid user sequence");
+					return {};
+				}
+				residues.emplace_back(base, 0, 0);
+			}
+		} else {
+			if (root_seq.size() % 3 != 0) {
+				DAWG_ERROR("Invalid user sequence, sequence does not fit codon.");
+				return {};
+			}
+			for (size_t i = 0; i + 2 < root_seq.size(); i += 3) {
+				residues.emplace_back(triplet_to_codon(
+					getCodonNumber(root_seq.at(i), root_seq.at(i + 1), root_seq.at(i + 2))), 0, 0);
+				if (residues.back().data() == -1) {
+					DAWG_ERROR("Invalid user sequence");
+					return {};
+				}
+			}
+		}
+		return residues;
+	}
+
 	inline char decode(residue::data_type r) const {
 		return cs_decode_[r & 63];
 	}
-	
+
 	inline char decode(const residue &r) const {
 		return decode(r.base());
 	}
-	
+
 	inline char decode_ins() const {
 		return cs_ins_[0];
 	}
-	
-	// codon number -> cod64
+
+	/// \brief codon number -> cod64
 	static inline char codon_to_cod64(unsigned int p) {
 		const char s[] = "ABCDEFGHIJ@=KLOMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		return s[p&63];
 	}
 
-	// cod64 -> codon number
+	/// \brief cod64 -> codon number
 	static inline unsigned int cod64_to_codon(char c) {
 		static constexpr char a[] = {
 			// cod64 -> codon number
@@ -224,7 +300,7 @@ public:
 		return (c >= '0') ? a[c-'0'] : -1;
 	}
 
-	// codon number -> triplet
+	/// \brief codon number -> triplet
 	static inline unsigned int codon_to_triplet(unsigned int p, int type=0) {
 		const char ss[] = "TCAGtcagUCAGucag";
 		const char *s = &ss[(type&3)*4];
@@ -234,7 +310,7 @@ public:
 		return u;
 	}
 
-	// triplet -> codon number
+	/// \brief triplet -> codon number
 	static inline unsigned int triplet_to_codon(unsigned int p) {
 		// randomly cryptic code:
 		// In ncbi descriptions of genetic code,
@@ -257,8 +333,7 @@ public:
 		return (this->*do_op_appendi)(ss);
 	}
 
-	explicit residue_exchange(int m=DNA) { model(m,0,0,false,false,false); }
-	
+	/// \brief get the protein code from a genetic code
 	inline static const char* get_protein_code(unsigned int code) {
 		static constexpr char s[] =
 			"FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
@@ -292,7 +367,7 @@ public:
 protected:
 	void (residue_exchange::*do_op_append)(std::string &ss, const residue &r) const;
 	void (residue_exchange::*do_op_appendi)(std::string &ss) const;
-	
+
 	void do_op_append_res(std::string &ss, const residue &r) const {
 		ss.append(1, decode(r));
 	}
@@ -321,6 +396,5 @@ protected:
 	const char *cs_decode_, *cs_ins_, *cs_encode_;
 };
 
-}
+} // namespace dawg
 #endif
-

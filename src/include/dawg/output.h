@@ -12,7 +12,7 @@
 #include <dawg/utils.h>
 #include <boost/algorithm/string.hpp>
 
-#include <dawg/sequence.h>
+#include <dawg/residue.h>
 
 namespace dawg {
 
@@ -45,19 +45,19 @@ public:
 
 	template<class T>
 	bool set_format(T format);
-	
+
 	inline void set_ostream(std::ostream &os) {
 		p_out = &os;
 	}
 	inline void set_ostream(std::ostream *os) {
 		p_out = os;
 	}
-	
+
 	inline void set_blocks(const char *h, const char *w,
 		const char *t, const char *b, const char *a) {
 		block_head.assign(h);
 		block_between.assign(w);
-		block_tail.assign(t);		
+		block_tail.assign(t);
 		block_before.assign(b);
 		block_after.assign(a);
 	}
@@ -82,7 +82,7 @@ protected:
 	bool do_append, do_split, do_label;
 	std::string current_label, split_file_name;
 	std::string::size_type split_id_offset;
-	
+
 	std::string block_head;
 	std::string block_between;
 	std::string block_tail;
@@ -111,6 +111,6 @@ bool output::set_format(T format) {
 	return true;
 }
 
-} // namespace dawg 
+} // namespace dawg
 
 #endif // DAWG_OUTPUT_H
