@@ -328,14 +328,8 @@ public:
 	/// \brief encode
 	/// \param root_seq The root sequence to encode
 	/// The codon table uses 'at' since it is initialized in constructor
-	/// and yeah
 	///////////////////////////////////////////////////////////
-	inline sequence encode(const std::string &root_seq) const {
-		// static const auto getCodonNumber = []
-		// 	(const char a, const char b, const char c)->unsigned int {
-		// 		return a | (b << 8) | (c << 16);
-		// 	};
-
+	inline sequence encode(const std::string &root_seq) const noexcept {
 		sequence residues;
 		if (type_ != CODON) {
 			for (size_t i = 0; i != root_seq.size(); ++i) {
@@ -353,7 +347,7 @@ public:
 			}
 			for (size_t i = 0; i + 2 < root_seq.size(); i += 3) {
 				residues.emplace_back(codon_table_.at(root_seq.substr(i, 2)), 0, 0);
-				if (residues.back().data() == -1) {
+				if (residues.back().data() == -1LU) {
 					DAWG_ERROR("Invalid user sequence");
 					return {};
 				}
