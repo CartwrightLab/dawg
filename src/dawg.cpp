@@ -137,9 +137,9 @@ int dawg_app::run() {
 	//bool split  = (!vm["split"].defaulted()) ? arg.split : glopts.output_split;
 	//bool append = (!vm["append"].defaulted()) ? arg.append : glopts.output_append;
 
-	bool split  = arg.split || (indeterminate(arg.split) && glopts.output_split);
-	bool append = arg.append || (indeterminate(arg.append) && glopts.output_append);
-	bool label  = arg.label || (indeterminate(arg.label) && glopts.output_label);
+	bool split  = (bool) arg.split || (indeterminate(arg.split) && glopts.output_split);
+	bool append = (bool) arg.append || (indeterminate(arg.append) && glopts.output_append);
+	bool label  = (bool) arg.label || (indeterminate(arg.label) && glopts.output_label);
 
 	if(!write_aln.open(file_name, num_reps-1, split, append, label)) {
 		DAWG_ERROR("bad configuration");
