@@ -129,7 +129,7 @@ bool subst_model::create_tn(const char *mod_name, unsigned int code, It1 first1,
 		ar = rho*ay;
 		b = 0.5/(fr*fy*(1.0+R));
 		ar = ar/fr+b;
-		ay = ar/fy+b;
+		ay = ay/fy+b;
 		
 	} else {
 		// three parameters
