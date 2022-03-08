@@ -17,7 +17,7 @@
 namespace dawg {
 
 struct wood_node {
-	typedef unsigned short id_t;
+	typedef uint32_t id_t;
 	std::string label;
 	float length;
 	id_t anc;
