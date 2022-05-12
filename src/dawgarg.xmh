@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  ****************************************************************************/
 
-#include <dawg/details/xm.h>
+#include "dawg/details/xm.h"
 
 /***************************************************************************
  *    X-Macro List                                                         *
@@ -52,6 +52,6 @@ XM((arg)(file),    ,   "read arguments from file", std::string, std::string(""))
 /***************************************************************************
  *    cleanup                                                              *
  ***************************************************************************/
-#include <dawg/details/xm.h>
+#include "dawg/details/xm.h"
 
 

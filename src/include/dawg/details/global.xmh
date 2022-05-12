@@ -2,7 +2,7 @@
  *  Copyright (C) 2010 Reed A. Cartwright, PhD <reed@scit.us>               *
  ****************************************************************************/
 
-#include <dawg/details/xm.h>
+#include "dawg/details/xm.h"
 
 /***************************************************************************
  *    X-Macro List                                                         *
@@ -41,4 +41,4 @@ XM( (sim)(seed),  std::vector<unsigned int>, ,
 /***************************************************************************
  *    cleanup                                                              *
  ***************************************************************************/
-#include <dawg/details/xm.h>
+#include "dawg/details/xm.h"
