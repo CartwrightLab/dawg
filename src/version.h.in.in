@@ -1,0 +1,12 @@
+#pragma once
+#ifndef DAWG_VERSION_H
+#define DAWG_VERSION_H
+
+#define DAWG_VERSION_STRING		"@version_vcs@"
+#define DAWG_PACKAGE_STRING		"@package_string@"
+#define DAWG_VERSION_INTEGER	@version_int@
+#define DAWG_VERSION_MAJOR		@version_major@
+#define DAWG_VERSION_MINOR		@version_minor@
+#define DAWG_VERSION_PATCH		@version_patch@
+
+#endif  // DAWG_VERSION_H
