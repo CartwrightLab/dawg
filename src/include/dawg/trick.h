@@ -7,7 +7,10 @@
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <filesystem>
+#include <iostream>
 #include <map>
+#include <rapidyaml.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -49,7 +52,7 @@ struct trick {
     template <typename Iterator>
     bool parse(Iterator first, Iterator last);
     template <typename Char, typename Traits>
-    inline bool parse_stream(std::basic_istream<Char, Traits>& is);
+    bool parse_yaml(std::basic_istream<Char, Traits> &is);
 
     trick() {
         data.push_back(section());

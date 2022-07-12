@@ -17,12 +17,12 @@ using namespace dawg;
 bool trick::parse_file(trick &p, const char *cs) {
     bool ret;
     if(cs == nullptr || strcmp(cs, "") == 0 || strcmp(cs, "-") == 0) {
-        ret = p.parse_stream(std::cin);
+        ret = p.parse_yaml(std::cin);
     } else {
         std::ifstream is(cs);
         if(!is.is_open())
             return DAWG_ERROR("unable to open input file '" << cs << "'");
-        ret = p.parse_stream(is);
+        ret = p.parse_yaml(is);
     }
     if(!ret) return DAWG_ERROR("unable to parse input '" << cs << "'");
     return true;
