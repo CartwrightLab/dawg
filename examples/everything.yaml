@@ -1,0 +1,84 @@
+# Example: Showcasing all parameters available in DAWG. 
+#          DO NOT RUN!
+#          run `dawg --help-trick` for a detailed description on each parameter.
+
+# simulation parameters
+sim:
+  reps: 2
+  seed: [1, 2, 3]
+
+# output parameters
+output:
+  block:
+    head: text at beginning of output
+    tail: text at end of output
+    before: text before every replicate
+    after: text after every replicate
+    between: text between replicates
+  file: output_file.fasta
+  split: true
+  append: existing_file.fasta
+  label: true
+  markins: true
+  keepempty: true
+  lowercase: true
+  rna: true
+
+# tree parameters
+tree:
+  tree_name1:
+    tree: (A:0.3)D;
+    scale: 0.2
+
+# parts - define parts to be associated to region(s)
+parts:
+  part_name1:
+    length: 10
+    seq: ACGT
+    code: 1 #https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+    gapoverlap: true
+  part_name2:
+    seq: CCGTC
+
+
+# rules - parameters for substitution and indel models
+rules:
+  rule_name1:
+    subst:
+      model: GTR
+      params: [2.0, 1.0, 3.0, 1.0, 1.0, 1.0]
+      freqs: [0.2, 0.3, 0.3, 0.2]
+      rate:
+        model: GAMMA
+      rate.params: 8.0 # alternative syntax to avoid extra indentation
+    indel:
+      model: 
+        ins: POWER-LAW
+        del: POWER-LAW
+      params:
+        ins: 1.01, 50
+        del: 1.01, 50
+      rate:
+        ins: 0.01
+        del: 0.01
+      max:
+        ins: 50.0
+        del: 50.0
+
+# regions - tying parts and rules creating as many regions as needed
+#         - implicit inherits from previous section.
+regions:
+  region_name1:
+    tree: tree_name1
+    rule: rule_name1
+    part: part_name1
+    seg: 1
+  region_name2:
+    tree: tree_name1
+    rule: rule_name1
+    part: part_name2
+    seg: 2
+  region_name3:
+    inherits: region_name1
+    seg: 3
+
