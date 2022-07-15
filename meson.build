@@ -13,3 +13,12 @@ subdir('contrib')
 subdir('src')
 subdir('doc')
 # subdir('tests')
+
+configure_file(input : 'dawg.sublime-project.in',
+  output : 'dawg.sublime-project',
+  configuration : {
+    'source_dir' : meson.project_source_root(),
+    'project_name' : meson.project_name(),
+    'build_dir' : meson.project_build_root()
+  }
+)
