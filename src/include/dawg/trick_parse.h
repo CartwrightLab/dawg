@@ -35,7 +35,7 @@ inline std::string slurp(std::basic_istream<Char, Traits> &is) {
 }
 
 inline std::string to_string(ryml::csubstr substr) {
-    return std::string(substr.str, substr.len);
+    return {substr.str, substr.len};
 }
 
 inline std::pair<std::string, trick::section::value_type> get_values(
