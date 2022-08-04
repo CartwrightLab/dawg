@@ -19,7 +19,6 @@ inc = include_directories(['.', 'include'])
 
 boost_dep = dependency('boost',
   version : '>=1.47.0',
-  modules : ['program_options'],
   required : true
 )
 
