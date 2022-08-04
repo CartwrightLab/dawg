@@ -17,7 +17,6 @@
 */
 #include "dawg.h"
 
-// #include <boost/config.hpp>
 #include <CLI11.hpp>
 #include <boost/preprocessor.hpp>
 #include <exception>
@@ -29,10 +28,6 @@
 #include "dawg/output.h"
 #include "dawg/trick.h"
 #include "dawg_app.h"
-
-// using namespace std;
-// using namespace boost;
-// using namespace dawg;
 
 #define VERSION_MSG                                         \
     DAWG_PACKAGE_STRING                                     \
@@ -52,17 +47,16 @@ int main(int argc, char *argv[]) {
 }
 
 dawg_app::dawg_app(int argc, char *argv[]) : runname(argv[0]) {
-    // runname = argv[0];
-
     // set_cli_options
     this->cli_app.add_option("input", arg.input, "input files");
 #define XM(lname, sname, desc, type, def)                            \
-    this->cli_app.add_option(                                                  \
+    this->cli_app.add_option(                                        \
         IFD(sname, "-" BOOST_PP_STRINGIZE sname ",") "--" XS(lname), \
         arg.XV(lname), desc, def);
-#define XF(lname, sname, desc, type, def)                                     \
-    this->cli_app.add_flag(IFD(sname, "-" BOOST_PP_STRINGIZE sname ",") "--" XS(lname), \
-                 arg.XV(lname), desc);
+#define XF(lname, sname, desc, type, def)                            \
+    this->cli_app.add_flag(                                          \
+        IFD(sname, "-" BOOST_PP_STRINGIZE sname ",") "--" XS(lname), \
+        arg.XV(lname), desc);
 #include "dawgarg.xmh"
 #undef XM
 #undef XF
