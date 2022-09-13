@@ -70,6 +70,7 @@ rules:
 regions:
   region_name1:
     tree: tree_name1
+    scale: 0.25 # overrides scale in tree section
     rule: rule_name1
     part: part_name1
     seg: 1

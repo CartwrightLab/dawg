@@ -133,6 +133,12 @@ inline void add_region(trick::section *sec, ryml::Tree &tree,
     if(region.has_child("part")) {
         add_param(sec, tree["parts"], region["part"].val());
     }
+
+    // tree scale: set or override
+    if(region.has_child("scale")) {
+        trick::section::value_type scale{dawg::to_string(region["scale"].val())};
+        sec->db.insert_or_assign("tree.scale", scale);
+    }
 }
 
 template <typename Char, typename Traits>
