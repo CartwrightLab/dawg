@@ -4843,8 +4843,8 @@ class App {
         set_help_flag("-h,--help", "Print this help message and exit");
     }
 
-    App(const App &) = default;
-    App &operator=(const App &) = default;
+    App(const App &) = delete;
+    App &operator=(const App &) = delete;
 
     /// virtual destructor
     virtual ~App() = default;

@@ -28,12 +28,12 @@
 
 class dawg_app {
    public:
-    dawg_app(int argc, char *argv[]);
-    dawg_app(const dawg_app&) = default;        // copy constructor
-    dawg_app& operator=(const dawg_app&);       // copy assignment operator
-    dawg_app(dawg_app&&) = default;             // move constructor
-    dawg_app& operator=(dawg_app&&) = default;  // move assignment operator
-    virtual ~dawg_app() = default;              // destructor
+    dawg_app(int argc, char* argv[]);
+    dawg_app(const dawg_app&) = delete;             // copy constructor
+    dawg_app& operator=(const dawg_app&) = delete;  // copy assignment operator
+    dawg_app(dawg_app&&) = delete;                  // move constructor
+    dawg_app& operator=(dawg_app&&) = delete;       // move assignment operator
+    virtual ~dawg_app() = default;                  // destructor
 
     virtual int run();
 
