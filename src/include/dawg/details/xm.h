@@ -33,30 +33,32 @@
 
 #define JS_OP(s, data, elem) BOOST_PP_CAT(data, elem)
 
-#define JS(sep, seq) BOOST_PP_IF( BOOST_PP_EQUAL(BOOST_PP_SEQ_SIZE(seq),1), \
-	JS_1, JS_2)(sep,seq)
+#define JS(sep, seq) \
+    BOOST_PP_IF(BOOST_PP_EQUAL(BOOST_PP_SEQ_SIZE(seq), 1), JS_1, JS_2)(sep, seq)
 
 #define JS_1(sep, seq) BOOST_PP_SEQ_HEAD(seq)
 
-#define JS_2(sep, seq) BOOST_PP_SEQ_CAT(( BOOST_PP_SEQ_HEAD(seq) ) \
-	BOOST_PP_SEQ_TRANSFORM(JS_OP, sep, BOOST_PP_SEQ_TAIL(seq)) \
-)
+#define JS_2(sep, seq)                                               \
+    BOOST_PP_SEQ_CAT((BOOST_PP_SEQ_HEAD(seq))BOOST_PP_SEQ_TRANSFORM( \
+        JS_OP, sep, BOOST_PP_SEQ_TAIL(seq)))
 
 // The SS macro is similiar to _JS except that it stringizes everything
 
 #define SS_OP(r, data, elem) data BOOST_PP_STRINGIZE(elem)
 
-#define SS(sep, seq) BOOST_PP_STRINGIZE(BOOST_PP_SEQ_HEAD(seq)) \
-	BOOST_PP_SEQ_FOR_EACH(SS_OP, sep, BOOST_PP_SEQ_TAIL(seq))
+#define SS(sep, seq)                           \
+    BOOST_PP_STRINGIZE(BOOST_PP_SEQ_HEAD(seq)) \
+    BOOST_PP_SEQ_FOR_EACH(SS_OP, sep, BOOST_PP_SEQ_TAIL(seq))
 
 // Output result if seq is defined
 
-#define IFD(seq,res) BOOST_PP_EXPR_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE((_)seq),1), res)
+#define IFD(seq, res) \
+    BOOST_PP_EXPR_IF(BOOST_PP_GREATER(BOOST_PP_SEQ_SIZE((_)seq), 1), res)
 
 #define XV(lname) JS(_, lname)
 #define XS(lname) SS("-", lname)
 #define XP(lname) SS(".", lname)
-#define DL(a,b) a,b
+#define DL(a, b) a, b
 
 #else
 
@@ -72,7 +74,6 @@
 #undef XV
 #undef XS
 #undef XP
-#undef XL
+#undef DL
 
 #endif
-

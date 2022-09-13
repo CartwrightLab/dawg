@@ -20,38 +20,37 @@
 /***************************************************************************
  *    X-Macro List                                                         *
  *                                                                         *
- *    XCMD(lname, sname, desc, type, def)                                  *
+ *    XM(lname, sname, desc, type, def) (option)                           *
+ *    XF(lname, sname, desc, type, def) (flag)                             *
  ***************************************************************************/
 
-XM((version),        , "display version information", bool, DL(false, "off"))
-XM((help)(trick),    , "display description of common control variables", bool, DL(false, "off"))
-XM((help),           , "display help message", bool, DL(false, "off"))
+XF((version), , "display version information", bool, false)
+XF((help)(trick), , "display description of common control variables", bool,
+   false)
 
-XM((output),    (o),  "output to this file", std::string, std::string())
-XM((seed),         ,  "PRNG seed", unsigned int, 0)
-XM((reps),         ,  "the number of alignments to generate", unsigned int, 0)
-XM((split),        ,  "split output into separate files", boost::optional<bool>, DL(boost::none, "not defined"))
-XM((append),       ,  "append output to file", boost::optional<bool>, DL(boost::none, "not defined"))
-XM((label),        ,  "label each simulation with a unique id", boost::optional<bool>, DL(boost::none, "not defined"))
+XM((output), (o), "output to this file", std::string, "")
+XM((seed), , "PRNG seed", unsigned int, 0)
+XM((reps), , "the number of alignments to generate", unsigned int, 0)
+XF((split), , "split output into separate files", bool, false)
+XF((append), , "append output to file", bool, false)
+XF((label), , "label each simulation with a unique id", bool, false)
 
-XM((arg)(file),    ,   "read arguments from file", std::string, std::string(""))
+XM((arg)(file), , "read arguments from file", std::string, "")
 
-//XCMD((serial),  (s), "Process input files serially", bool, true)
-//XCMD((combined),(c), "process input files together", bool, false)
-//XCMD((buffer),  (b), "buffer output", bool, true)
-//XCMD((unbuffer),  (u), "unbuffered output", bool, false)
+// XCMD((serial),  (s), "Process input files serially", bool, true)
+// XCMD((combined),(c), "process input files together", bool, false)
+// XCMD((buffer),  (b), "buffer output", bool, true)
+// XCMD((unbuffer),  (u), "unbuffered output", bool, false)
 
 // Standard options
-//XM((quiet),       (q), "disable all warnings and error messages", bool, DL(false, "off"))
-//XM((warn),        (w), "dsable warnings", bool, DL(false, "off"))
-//XM((error),       (e), "disable error messages", bool, DL(false, "off"))
-//XM((input),          , "input files", std::vector< std::string >, DL(std::vector< std::string >(1, std::string("-")), "-") )
-//XM((input),          , "input files", std::vector< std::string >, DL(std::vector< std::string >(), "") )
-
+// XM((quiet),       (q), "disable all warnings and error messages", bool,
+// false) XM((warn),        (w), "dsable warnings", bool, false) XM((error),
+// (e), "disable error messages", bool, false) XM((input),          , "input
+// files", std::vector< std::string >, DL(std::vector< std::string >(1,
+// std::string("-")), "-") ) XM((input),          , "input files", std::vector<
+// std::string >, DL(std::vector< std::string >(), "") )
 
 /***************************************************************************
  *    cleanup                                                              *
  ***************************************************************************/
 #include "dawg/details/xm.h"
-
-

@@ -17,7 +17,7 @@
 */
 #include "dawg.h"
 
-#include <boost/config.hpp>
+#include <CLI11.hpp>
 #include <boost/preprocessor.hpp>
 #include <exception>
 
@@ -28,10 +28,6 @@
 #include "dawg/output.h"
 #include "dawg/trick.h"
 #include "dawg_app.h"
-
-using namespace std;
-using namespace boost;
-using namespace dawg;
 
 #define VERSION_MSG                                         \
     DAWG_PACKAGE_STRING                                     \
@@ -50,43 +46,25 @@ int main(int argc, char *argv[]) {
     return ret;
 }
 
-dawg_app::dawg_app(int argc, char *argv[]) : desc("Allowed Options") {
-    runname = argv[0];
-    try {
-        desc.add_options()
-#define XM(lname, sname, desc, type, def)                \
-    (XS(lname) IFD(sname, "," BOOST_PP_STRINGIZE sname), \
-     po::value<type>(&arg.XV(lname))->default_value(def), desc)
+dawg_app::dawg_app(int argc, char *argv[]) : runname(argv[0]) {
+    // set_cli_options
+    this->cli_app.add_option("input", arg.input, "input files");
+#define XM(lname, sname, desc, type, def)                            \
+    this->cli_app.add_option(                                        \
+        IFD(sname, "-" BOOST_PP_STRINGIZE sname ",") "--" XS(lname), \
+        arg.XV(lname), desc, def);
+#define XF(lname, sname, desc, type, def)                            \
+    this->cli_app.add_flag(                                          \
+        IFD(sname, "-" BOOST_PP_STRINGIZE sname ",") "--" XS(lname), \
+        arg.XV(lname), desc);
 #include "dawgarg.xmh"
 #undef XM
-            ;
-        indesc.add_options()("input", po::value<vector<string> >(&arg.input),
-                             "input files");
-        indesc.add(desc);
-        pdesc.add("input", -1);
-        po::store(po::command_line_parser(argc, argv)
-                      .options(indesc)
-                      .positional(pdesc)
-                      .run(),
-                  vm);
-        po::notify(vm);
-        if(!arg.arg_file.empty()) {
-            if(arg.arg_file == "-") {
-                po::store(po::parse_config_file(cin, desc), vm);
-            } else {
-                std::ifstream ifs(arg.arg_file.c_str());
-                if(!ifs.is_open()) {
-                    string sse = "unable to open argument file ";
-                    sse += arg.arg_file;
-                    throw std::runtime_error(sse);
-                }
-                po::store(po::parse_config_file(ifs, desc), vm);
-            }
-            po::notify(vm);
-        }
-    } catch(std::exception &e) {
-        CERROR(e.what());
-        throw std::runtime_error("unable to process command line");
+#undef XF
+
+    try {
+        this->cli_app.parse(argc, argv);
+    } catch(const CLI::CallForHelp &e) {
+        exit(this->cli_app.exit(e));
     }
 }
 
@@ -97,37 +75,34 @@ int dawg_app::run() {
     // | format_all); cout << _out << endl << endl;
 
     if(arg.version) {
-        cerr << endl << VERSION_MSG << endl << endl;
+        std::cerr << std::endl << VERSION_MSG << std::endl << std::endl;
         return EXIT_SUCCESS;
     }
     if(arg.help_trick) {
-        cerr << endl << VERSION_MSG << endl << endl;
-        ma::help(cerr);
+        std::cerr << std::endl << VERSION_MSG << std::endl << std::endl;
+        dawg::ma::help(std::cerr);
         return EXIT_SUCCESS;
     }
-    if(arg.help || arg.input.empty()) {
-        cerr << endl << VERSION_MSG << endl << endl;
-        cerr << "Usage:\n  " << runname
-             << " [options] trick-1.dawg trick-2.dawg ..." << endl
-             << endl;
-        cerr << desc << endl;
+    if(arg.input.empty()) {
+        std::cerr << std::endl << VERSION_MSG << std::endl << std::endl;
+        std::cerr << std::endl << this->cli_app.help() << std::endl;
         return EXIT_SUCCESS;
     }
 
     // if(arg.quiet)
     //	cerr.clear(ios::failbit);
-    trick input;
+    dawg::trick input;
 
     bool ret = true;
-    for(string &ss : arg.input) {
-        ret &= trick::parse_file(input, ss.c_str());
+    for(std::string &ss : arg.input) {
+        ret &= dawg::trick::parse_file(input, ss.c_str());
     }
 
     if(!ret) return EXIT_FAILURE;
     // process aliases
     input.read_aliases();
 
-    global_options glopts;
+    dawg::global_options glopts;
     glopts.read_section(input.data.front());
 
     unsigned int num_reps = (arg.reps > 0) ? arg.reps : glopts.sim_reps;
@@ -135,15 +110,9 @@ int dawg_app::run() {
     dawg::output write_aln;
     const char *file_name =
         arg.output.empty() ? glopts.output_file.c_str() : arg.output.c_str();
-    // bool split  = (!vm["split"].defaulted()) ? arg.split :
-    // glopts.output_split; bool append = (!vm["append"].defaulted()) ?
-    // arg.append : glopts.output_append;
 
-    bool split = arg.split.get_value_or(glopts.output_split);
-    bool append = arg.append.get_value_or(glopts.output_append);
-    bool label = arg.label.get_value_or(glopts.output_label);
-
-    if(!write_aln.open(file_name, num_reps - 1, split, append, label)) {
+    if(!write_aln.open(file_name, num_reps - 1, arg.split, arg.append,
+                       arg.label)) {
         DAWG_ERROR("bad configuration");
         return EXIT_FAILURE;
     }
@@ -152,7 +121,7 @@ int dawg_app::run() {
         glopts.output_block_tail.c_str(), glopts.output_block_before.c_str(),
         glopts.output_block_after.c_str());
 
-    vector<dawg::ma> configs;
+    std::vector<dawg::ma> configs;
     if(!dawg::ma::from_trick(input, configs)) {
         DAWG_ERROR("bad configuration");
         return EXIT_FAILURE;
