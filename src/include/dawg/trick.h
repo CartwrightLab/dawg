@@ -7,7 +7,10 @@
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <filesystem>
+#include <iostream>
 #include <map>
+#include <rapidyaml.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,8 +21,8 @@ namespace dawg {
 
 struct trick {
     struct section {
-        typedef std::vector<std::string> value_type;
-        typedef std::map<std::string, value_type> db_type;
+        using value_type = std::vector<std::string>;
+        using db_type = std::map<std::string, value_type>;
         std::string name;
         std::string inherits;
         db_type db;
@@ -42,14 +45,14 @@ struct trick {
 
         inline void read_alias(const std::string& a, const std::string& b);
     };
-    typedef std::vector<section> data_type;
+    using data_type = std::vector<section>;
     data_type data;
 
     static bool parse_file(trick& p, const char* cs);
     template <typename Iterator>
     bool parse(Iterator first, Iterator last);
     template <typename Char, typename Traits>
-    inline bool parse_stream(std::basic_istream<Char, Traits>& is);
+    bool parse_yaml(std::basic_istream<Char, Traits>& is);
 
     trick() {
         data.push_back(section());
@@ -89,7 +92,7 @@ inline void trick::section::get(const std::string& k, trick::section& r) const {
     r.name = k;
     r.inherits = "_nothing_";
     r.db.clear();
-    db_type::const_iterator first = db.lower_bound(k);
+    auto first = db.lower_bound(k);
     db_type::const_iterator last;
     for(last = first; last != db.end() && starts_with(last->first, k); ++last) {
         r.db.insert(r.db.end(),
@@ -112,7 +115,7 @@ inline void trick::section::conv(const std::string& ss, unsigned int& r) {
 }
 
 inline void trick::section::conv(const std::string& ss, int& r) {
-    r = strtol(ss.c_str(), nullptr, 0);
+    r = std::stoi(ss.c_str(), nullptr, 0);
 }
 
 // A value is false if it is equal to 0, f, false, off, no, or blank

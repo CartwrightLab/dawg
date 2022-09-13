@@ -1,0 +1,145 @@
+# Test aa evaluationary models
+
+sim:
+  reps: 10
+  seed: 420
+
+tree:
+  initial:
+    scale: 0.666
+  abc:
+    tree: (A:0.3, B:0.2)C;
+  dec:
+    tree: (D:0.3, E:0.2)C;
+  fgc:
+    tree: (F:0.3, G:0.2)C;
+  hic:
+    tree: (H:0.3, I:0.2)C;
+  jkc:
+    tree: (J:0.3, K:0.2)C;
+  lmc:
+    tree: (L:0.3, M:0.2)C;
+  noc:
+    tree: (N:0.3, O:0.2)C;
+  pqc:
+    tree: (P:0.3, Q:0.2)C;
+
+parts:
+  initial:
+    length: 10000
+    seq: AATGCTTTTTTTTTTGGCCAAAATTTTGGGGAAATTGGCCCCCCACACACACATTTTTATATATGG
+    code: 2
+
+rules:
+  initial:
+    indel:
+      model:
+        ins: GEO
+        del: POWER-LAW
+      params:
+        ins: 1.039000, 50
+        del: 1.039000, 50
+      rate:
+        ins: 0.01
+        del: 0.01
+      max:
+        ins: 50.0
+        del: 50.0
+  aagtr:
+    subst:
+      model: aagtr
+      freqs: [0.443, 0.3113, 0.3, 0.2, 0.888, 0.6520, 0.9112, 0.3323, 0.2998,
+              0.7171, 0.443, 0.3113, 0.3003, 0.211, 0.5588, 0.43520, 0.487112,
+              0.76323, 0.1998, 0.44171]
+      params: [100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323,
+              48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520,
+              49.9112, 22.3323, 48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2,
+              40.888, 3.6520, 49.9112, 22.3323, 48.2998, 33.7171, 100.443,
+              49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323, 48.2998,
+              33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112,
+              22.3323, 48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888,
+              3.6520, 49.9112, 22.3323, 48.2998, 33.7171, 100.443, 49.3113,
+              66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323, 48.2998, 33.7171,
+              100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323,
+              48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520,
+              49.9112, 22.3323, 48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2,
+              40.888, 3.6520, 49.9112, 22.3323, 48.2998, 33.7171, 100.443,
+              49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323, 48.2998,
+              33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112,
+              22.3323, 48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888,
+              3.6520, 49.9112, 22.3323, 48.2998, 33.7171, 100.443, 49.3113,
+              66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323, 48.2998, 33.7171,
+              100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323,
+              48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520,
+              49.9112, 22.3323, 48.2998, 33.7171, 100.443, 49.3113, 66.3, 10.2,
+              40.888, 3.6520, 49.9112, 22.3323, 48.2998, 33.7171, 100.443,
+              49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112, 22.3323, 48.2998,
+              33.7171, 100.443, 49.3113, 66.3, 10.2, 40.888, 3.6520, 49.9112,
+              22.3323, 48.2998, 33.7171]
+      rate.model: ZERO
+  eq:
+    subst:
+      model: equ
+      rate.model: CONST
+  lg:
+    subst:
+      model: lg
+      rate.model: ZERO
+  wag:
+    subst:
+      model: wag
+      rate:
+        model: GAMMA
+        params: 8.0
+  wagstar:
+    subst:
+      model: wagstar
+      rate.model: CONST
+  jttdcmut:
+    subst:
+      model: jtt-dcmut
+      rate.model: ZERO
+  dayhoff:
+    subst:
+      model: dayhoff-dcmut
+      rate.model: ZERO
+  molphy:
+    subst:
+      model: molphy
+      rate.model: GAMMA
+
+regions:
+  initial:
+    tree: initial
+    part: initial
+    rule: initial
+    segment: 0
+  aagtr:
+    tree: abc
+    rule: aagtr
+  equ:
+    tree: dec
+    rule: eq
+    segment: 1
+  lg:
+    tree: fgc
+    rule: lg
+    segment: 2
+  wag:
+    tree: hic
+    rule: wag
+    segment: 1
+  wagstar:
+    tree: jkc
+    rule: wagstar
+  jtt:
+    tree: lmc
+    rule: jttdcmut
+    segment: 1
+  dayhoff:
+    tree: noc
+    rule: dayhoff
+    segment: 0
+  molphy:
+    tree: pqc
+    rule: molphy

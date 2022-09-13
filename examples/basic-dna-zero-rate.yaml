@@ -1,0 +1,33 @@
+# Example: Simulate DNA evolution along a tree
+# See readme.txt for an explanation on the structure of an input file.
+# Simulation results are sent to stdout.
+
+sim:
+  reps: 10  # Simulate 10 alignments
+
+# Use a constant tree.
+tree:
+  man_mon_daw:
+    tree: ((Man:0.1,Monkey:0.1):0.2,Dawg:0.25);
+
+parts:
+  part1:
+    length: 1000  # Simulate a sequence that is 1000 nt long
+
+# Use an HKY substitution model with a transition of 2.0 and a transversion rate
+# of 1.0. Allele frequencies are 0.3 A, 0.2 C, 0.2 G, and 0.3 T.
+
+rules:
+  rule1:
+    subst:
+      model: HKY
+      params: [2.0, 1.0]
+      freqs: [0.3, 0.2, 0.2, 0.3]
+      rate:
+        model: ZERO
+
+regions:
+  region1:
+    tree: man_mon_daw
+    rule: rule1
+    part: part1

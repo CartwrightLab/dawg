@@ -73,7 +73,7 @@
 // resulting in <stdarg.h> missing in arm-none-eabi-g++
 // https://github.com/biojppm/rapidyaml/issues/193
 #include <stdarg.h>
-
+#include <charconv>
 
 
 
