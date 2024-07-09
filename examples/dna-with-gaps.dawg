@@ -1,0 +1,18 @@
+# Test DNA evolutionary model
+
+Tree.Tree = "((A:0.3, B:0.2)C:0.1, (D:0.3, E:0.2)F:0.1)R;"
+
+Root.Length = 100
+
+Subst.Model = "GTR"
+Subst.Freqs  = 0.2, 0.3, 0.3, 0.2
+Subst.Params = 2.0, 1.0, 3.0, 1.0, 1.0, 1.0
+
+
+Indel.Model = "GEO"
+Indel.Rate = 0.1
+Indel.Max = 20
+Indel.Params = 0.9
+
+Sim.Seed = 20240708
+Sim.Reps = 10
