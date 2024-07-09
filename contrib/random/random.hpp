@@ -319,7 +319,9 @@ inline float Random::f23() { return details::random_f23(bits()); }
 inline float Random::f24() { return details::random_f24(bits()); }
 
 // exponential random value with specified mean. mean=1.0/rate
-inline double Random::exp(double mean) { return details::random_exp_zig(*this) * mean; }
+// inline double Random::exp(double mean) { return details::random_exp_zig(*this) * mean; }
+inline double Random::exp(double rate) { return details::random_exp_zig(*this) / rate; }
+
 
 // Think about using https://gist.github.com/imneme/540829265469e673d045
 // https://www.pcg-random.org/posts/simple-portable-cpp-seed-entropy.html
