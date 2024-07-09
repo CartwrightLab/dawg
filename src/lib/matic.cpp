@@ -338,7 +338,7 @@ dawg::sequence::const_iterator dawg::details::matic_section::evolve_indels(
                 // Determine where the next event occurs
                 boost::uint32_t x = next_indel(m.exp(t * T), f, true);
                 if(x <= 2 * u) {
-                    // the next event occured between these two
+                    // the next event occurred between these two
                     // how may sites are deleted
                     u = x / 2;
                     // adjust stacks
