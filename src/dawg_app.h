@@ -39,8 +39,8 @@ class dawg_app {
 
     struct args {
         // use X-Macros to specify argument variables
-#define XM(lname, sname, desc, type, def) type XV(lname);
-#define XF(lname, sname, desc, type, def) type XV(lname);
+#define XM(lname, sname, desc, type, def) type XV(lname){def};
+#define XF(lname, sname, desc, type, def) type XV(lname){def};
 #include "dawgarg.xmh"
 #undef XM
 #undef XF
