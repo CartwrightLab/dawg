@@ -1,0 +1,32 @@
+# Example: Specifying a recombination event
+
+tree:
+  tree1:
+    tree: ((A:0.02,B:0.02):0.2,(C:0.02):0.2);
+  tree2:
+    tree: ((A:0.02):0.2,(B:0.02,C:0.02):0.2);
+
+parts:
+  part1:
+    length: 60
+  part2:
+    length: 60
+    code: 1
+
+rules:
+  rule1:
+    subst:
+      model: jc
+
+regions:
+  region1:
+    tree: tree1
+    part: part1
+    rule: rule1
+    segment: 1
+  region2:
+    tree: tree2
+    part: part2
+    segment: 0
+  region3:
+    segment: 2

@@ -1,0 +1,45 @@
+# Example: How to simulate using multiple models on a tree.
+
+# Our phylogeny is ((Man:0.02,Monkey:0.02):0.1,(Katt:0.02,Dawg:0.02):0.1).
+# And we want the primate branch to contain a signal of selection.
+# We will thus partititon the simulation into multiple sections (tasks).
+#
+# Node names that begin with ~ are not printed in the alignment.
+
+tree:
+  tree1:
+    tree: (~PrimateA:0.01,(Katt:0.02,Dawg:0.02):0.1)~Root;
+  tree2:
+    tree: (~PrimateB:0.08)~PrimateA;
+  tree3:
+    tree: ((Man:0.02,Monkey:0.02):0.01)~PrimateB;
+
+parts:
+  initial:
+    length: 100
+
+rules:
+  ancestor:
+    subst:
+      model: codmg
+      freqs: [0.2, 0.3, 0.3, 0.2]
+      params: [0.1, 1, 1, 1, 1, 1, 1]
+  adaptation:
+    subst:
+      params: [1.1, 1, 1, 1, 1, 1, 1]
+  primates:
+    subst:
+      params: [0.1, 1, 1, 1, 1, 1, 1]
+
+regions:
+  ancestor:
+    tree: tree1
+    part: initial
+    rule: ancestor
+  adaptation:
+    tree: tree2
+    rule: adaptation
+  primates:
+    tree: tree3
+    rule: primates
+

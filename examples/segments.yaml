@@ -1,0 +1,38 @@
+# Example: Using sections simulate both coding and noncoding sequences
+
+sim:
+  reps: 5
+
+parts:
+  noncoding:
+    length: 10
+  coding:
+    length: 10
+
+tree:
+  ad:
+    tree: (A:0.3)D;
+
+rules:
+  jukescantor:
+    subst:
+      model: JC
+  codonmg:
+    subst:
+      model: codmg
+      params: [0.1, 1, 1, 1, 1, 1, 1]
+      freqs: [0.2, 0.3, 0.3, 0.2]
+
+regions:
+  intron_1:
+    tree: ad
+    rule: jukescantor
+    part: noncoding
+    segment: 1
+  exon:
+    rule: codonmg
+    part: coding
+    segment: 2
+  intron_2:
+    inherits: intron_1
+    segment: 3

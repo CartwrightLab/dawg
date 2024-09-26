@@ -1,0 +1,106 @@
+# Test dna evaluationary models
+
+sim:
+  reps: 10
+  seed: 42
+
+tree:
+  initial:
+    scale: 0.99999
+  dec:
+    tree: (D:0.3, E:0.2)C;
+  abc:
+    tree: (A:0.3, B:0.2)C;
+  fgc:
+    tree: (F:0.3, G:0.2)C;
+  hic:
+    tree: (H:0.3, I:0.2)C;
+  jkc:
+    tree: (J:0.3, K:0.2)C;
+  lmc:
+    tree: (L:0.3, M:0.2)C;
+  noc:
+    tree: (N:0.3, O:0.2)C;
+  pqc:
+    tree: (P:0.3, Q:0.2)C;
+
+parts:
+  initial:
+    length: 100
+    seq: AATGCTTTTTTTTTTGGCCAA
+    code: 1
+
+rules:
+  gtr:
+    subst:
+      model: gtr
+      freqs: [0.2, 0.3, 0.3, 0.2]
+      params: [2.0, 1.0, 3.0, 1.0, 1.0, 1.0]
+      rate.model: ZERO
+  jc:
+    subst:
+      model: jc
+      rate.model: CONST
+  k2p:
+    subst:
+      model: k2p
+      rate.model: ZERO
+  hky:
+    subst:
+      model: hky
+      rate.model: ZERO
+  f84:
+    subst:
+      model: f84
+      rate.model: ZERO
+  f81:
+    subst:
+      model: f81
+      rate.model: ZERO
+  tn:
+    subst:
+      model: tn
+      rate.model: ZERO
+  tnf04:
+    subst:
+      model: tn-f04
+      rate.model: ZERO
+
+regions:
+  reg0:
+    tree: initial
+    part: initial
+    segment: 0
+  reg1:
+    tree: dec
+    rule: gtr
+    part: initial
+    segment: 1
+  reg2:
+    tree: abc
+    rule: jc
+    segment: 1
+  reg3:
+    tree: fgc
+    rule: k2p
+    segment: 3
+  reg4:
+    tree: hic
+    rule: hky
+    segment: 2
+  reg5:
+    tree: jkc
+    rule: f84
+    segment: 5
+  reg6:
+    tree: lmc
+    rule: f81
+    segment: 6
+  reg7:
+    tree: noc
+    rule: tn
+    segment: 7
+  reg8:
+    tree: pqc
+    rule: tnf04
+    segment: 8
